@@ -1,0 +1,10 @@
+Enchantments:
+- Added animations to history items
+- History items now scale themselves according to other items in view
+- Streamline usage permission request
+
+Bugfixes:
+- Fixed a crash that would happen whenever used in a non-standard time zone such as +05:30 in India or +05:45 in Nepal.
+
+Translations:
+- New language: Chinese

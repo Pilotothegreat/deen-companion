@@ -1,0 +1,16 @@
+History:
+- Added filtering:
+	- By network type
+	- By traffic direction (Up/Down)
+	- By app
+- Added hourly view for more in-depth analysis
+- Added ability to launch apps and their settings
+- Improved numbers' accuracy
+- Major UI improvements
+
+Bug fixes:
+- Fix crash if plan length set to 0
+
+Translations:
+- New Language: Italian
+- Updated translations

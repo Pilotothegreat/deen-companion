@@ -1,0 +1,10 @@
+Enchantments:
+- Significantly reduce power usage
+    - Now up to 7.5x more efficient than Internet Speed Meter
+- Simplified prompt for disabling background service optimization
+
+Bugfixes:
+- Fixed "Update when screen is off" setting not working
+
+Other:
+- Dependency updates

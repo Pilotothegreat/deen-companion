@@ -1,0 +1,79 @@
+package com.leekleak.trafficlight.util
+
+import android.annotation.SuppressLint
+import android.content.Context
+import android.location.Location
+import android.location.LocationManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
+import java.util.TimeZone
+
+object LocationHelper {
+
+    data class LocationData(
+        val latitude: Double,
+        val longitude: Double,
+        val cityName: String,
+        val timezoneId: String
+    )
+
+    @SuppressLint("MissingPermission")
+    suspend fun getDeviceLocation(context: Context): LocationData? = withContext(Dispatchers.IO) {
+        val hasGpsPerm = context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        val hasCoarsePerm = context.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
+        if (hasGpsPerm || hasCoarsePerm) {
+            val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            val providers = locationManager.getProviders(true)
+            var bestLocation: Location? = null
+
+            for (provider in providers) {
+                val l = locationManager.getLastKnownLocation(provider) ?: continue
+                if (bestLocation == null || l.accuracy < bestLocation.accuracy) {
+                    bestLocation = l
+                }
+            }
+
+            if (bestLocation != null) {
+                // Formatting coordinates as default city name
+                val city = "GPS: ${"%.2f".format(bestLocation.latitude)}, ${"%.2f".format(bestLocation.longitude)}"
+                return@withContext LocationData(
+                    latitude = bestLocation.latitude,
+                    longitude = bestLocation.longitude,
+                    cityName = city,
+                    timezoneId = TimeZone.getDefault().id
+                )
+            }
+        }
+        return@withContext null
+    }
+
+    suspend fun fetchIpLocation(): LocationData? = withContext(Dispatchers.IO) {
+        try {
+            val url = URL("https://ipapi.co/json/")
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "GET"
+            connection.connectTimeout = 5000
+            connection.readTimeout = 5000
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
+
+            if (connection.responseCode == 200) {
+                val responseText = connection.inputStream.bufferedReader().use { it.readText() }
+                val json = JSONObject(responseText)
+                val lat = json.getDouble("latitude")
+                val lon = json.getDouble("longitude")
+                val city = json.optString("city", "Unknown City")
+                val country = json.optString("country_name", "")
+                val dispName = if (country.isNotEmpty()) "$city, $country" else city
+                val tz = json.optString("timezone", TimeZone.getDefault().id)
+                return@withContext LocationData(lat, lon, dispName, tz)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return@withContext null
+    }
+}
