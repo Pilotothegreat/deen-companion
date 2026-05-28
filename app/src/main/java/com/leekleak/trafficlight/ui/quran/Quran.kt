@@ -138,7 +138,7 @@ fun Quran(paddingValues: PaddingValues) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                navigator.goTo(QuranReaderKey(surah.id, surah.transliteration))
+                                navigator.goTo(QuranReaderKey(surah.id, surah.transliteration, scrollToVerse = verse.id))
                             },
                         colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainerLow)
                     ) {
@@ -287,7 +287,7 @@ fun JuzList(navigator: Navigator, bottomPadding: androidx.compose.ui.unit.Dp) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable { navigator.goTo(QuranReaderKey(surah.id, surah.transliteration)) }
+                                    .clickable { navigator.goTo(QuranReaderKey(surah.id, surah.transliteration, scrollToVerse = verse.id)) }
                                     .padding(vertical = 6.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
@@ -336,7 +336,7 @@ fun BookmarksList(bookmarks: List<BookmarkedVerse>, navigator: Navigator, bottom
                     modifier = Modifier
                         .fillMaxWidth()
                         .card()
-                        .clickable { navigator.goTo(QuranReaderKey(bookmark.surahNumber, bookmark.surahName)) }
+                        .clickable { navigator.goTo(QuranReaderKey(bookmark.surahNumber, bookmark.surahName, scrollToVerse = bookmark.ayahNumber)) }
                         .padding(16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically

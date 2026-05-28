@@ -192,6 +192,17 @@ fun Settings(paddingValues: PaddingValues) {
             )
         }
 
+        // --- Quran Font Size settings ---
+        categoryTitleSmall { "Quran Customization" }
+        item {
+            val quranFontSize by viewModel.quranArabicFontSize.collectAsState()
+            FontSizeAdjustmentRow(
+                title = "Arabic Text Size",
+                value = quranFontSize,
+                onValueChange = { viewModel.setQuranArabicFontSize(it) }
+            )
+        }
+
         // --- UI / Theme settings ---
         categoryTitleSmall { "App Theme" }
         item {
@@ -295,6 +306,51 @@ fun OffsetAdjustmentRow(
             )
             IconButton(
                 onClick = { if (value < 60) onValueChange(value + 5) },
+                colors = IconButtonDefaults.filledTonalIconButtonColors()
+            ) {
+                Text("+", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+@Composable
+fun FontSizeAdjustmentRow(
+    title: String,
+    value: Int,
+    onValueChange: (Int) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .card()
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(text = title, style = MaterialTheme.typography.titleMedium)
+            Text(text = "Arabic text size in sp", style = MaterialTheme.typography.bodyMedium, color = colorScheme.secondary)
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            IconButton(
+                onClick = { if (value > 16) onValueChange(value - 2) },
+                colors = IconButtonDefaults.filledTonalIconButtonColors()
+            ) {
+                Text("-", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            }
+            Text(
+                text = String.format(Locale.US, "%d sp", value),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                modifier = Modifier.width(60.dp),
+                textAlign = TextAlign.Center
+            )
+            IconButton(
+                onClick = { if (value < 48) onValueChange(value + 2) },
                 colors = IconButtonDefaults.filledTonalIconButtonColors()
             ) {
                 Text("+", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)

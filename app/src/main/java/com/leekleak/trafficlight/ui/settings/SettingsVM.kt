@@ -45,6 +45,9 @@ class SettingsVM(
     val ishaIqamaOffset: StateFlow<Int> = appPreferenceRepo.ishaIqamaOffset
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 15)
 
+    val quranArabicFontSize: StateFlow<Int> = appPreferenceRepo.quranArabicFontSize
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 24)
+
     fun setTheme(value: Theme) {
         viewModelScope.launch {
             appPreferenceRepo.setTheme(value)
@@ -96,6 +99,12 @@ class SettingsVM(
     fun setIshaIqamaOffset(value: Int) {
         viewModelScope.launch {
             appPreferenceRepo.setIshaIqamaOffset(value)
+        }
+    }
+
+    fun setQuranArabicFontSize(value: Int) {
+        viewModelScope.launch {
+            appPreferenceRepo.setQuranArabicFontSize(value)
         }
     }
 

@@ -67,6 +67,10 @@ class AppPreferenceRepo (
     val notification: Flow<Boolean> = data.map { it[NOTIFICATION_ENABLED] ?: true }.distinctUntilChanged()
     suspend fun setNotification(value: Boolean) = dataStore.edit { it[NOTIFICATION_ENABLED] = value }
 
+    // Quran Arabic Font Size
+    val quranArabicFontSize: Flow<Int> = data.map { it[QURAN_ARABIC_FONT_SIZE] ?: 24 }.distinctUntilChanged()
+    suspend fun setQuranArabicFontSize(value: Int) = dataStore.edit { it[QURAN_ARABIC_FONT_SIZE] = value }
+
     // Theme Settings
     val theme: Flow<Theme> = data.map { prefs ->
         prefs[THEME]?.let { valueOfOrNull<Theme>(it) } ?: Theme.AutoMaterial
@@ -100,5 +104,6 @@ class AppPreferenceRepo (
         private val NOTIFICATION_ENABLED = booleanPreferencesKey("notification_enabled")
         private val THEME = stringPreferencesKey("theme")
         private val FAVORITED_HADITHS = stringSetPreferencesKey("favorited_hadiths")
+        private val QURAN_ARABIC_FONT_SIZE = intPreferencesKey("quran_arabic_font_size")
     }
 }

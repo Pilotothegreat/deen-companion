@@ -124,7 +124,7 @@ fun NavigationManager() {
                 entry<QuranKey> { Quran(paddingValues) }
                 entry<HadithKey> { Hadith(paddingValues) }
                 entry<SettingsKey> { Settings(paddingValues) }
-                entry<QuranReaderKey> { QuranReader(it.surahNumber, it.surahName) }
+                entry<QuranReaderKey> { QuranReader(it.surahNumber, it.surahName, it.scrollToVerse) }
             },
             transitionSpec = {
                 if (backStack.size == 1) fadeIn(tween()) togetherWith fadeOut(tween())

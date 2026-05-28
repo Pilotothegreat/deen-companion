@@ -128,7 +128,26 @@ object QuranHelper {
             }
         }
 
-        // Limit to first/last verses per surah for browsing (keep it manageable)
-        return result.take(100)
+        return result
+    }
+
+    fun isSajdahVerse(surahId: Int, verseId: Int): Boolean {
+        return when (surahId) {
+            7 -> verseId == 206
+            13 -> verseId == 15
+            16 -> verseId == 49
+            17 -> verseId == 109
+            19 -> verseId == 58
+            22 -> verseId == 18 || verseId == 77
+            25 -> verseId == 60
+            27 -> verseId == 26
+            32 -> verseId == 15
+            38 -> verseId == 24
+            41 -> verseId == 38
+            53 -> verseId == 62
+            84 -> verseId == 21
+            96 -> verseId == 19
+            else -> false
+        }
     }
 }
