@@ -513,8 +513,8 @@ private fun RowScope.CalculationsCard(viewModel: OverviewVM) {
 
 @Composable
 private fun RowScope.QiblaCard(viewModel: OverviewVM) {
-    val lat by viewModel.latitude.collectAsState(initial = 25.2048)
-    val lon by viewModel.longitude.collectAsState(initial = 55.2708)
+    val lat by viewModel.latitude.collectAsState(initial = 21.3891)
+    val lon by viewModel.longitude.collectAsState(initial = 39.8579)
     val angle = remember(lat, lon) { calculateQiblaDirection(lat, lon) }
     val scheme = colorScheme
     MiniCard(
@@ -633,8 +633,8 @@ fun OverviewItems(viewModel: OverviewVM) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    Text("Tasbih count", style = MaterialTheme.typography.titleMedium)
-                    Text("Tap card to count dhikr", style = MaterialTheme.typography.labelSmall, color = colorScheme.secondary)
+                    Text(stringResource(R.string.tasbih_count_label), style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.tasbih_tap_hint), style = MaterialTheme.typography.labelSmall, color = colorScheme.secondary)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text(
@@ -677,7 +677,7 @@ fun PrayerRow(name: String, time: LocalTime, context: Context, iqamaOffset: Int?
             if (iqamaOffset != null) {
                 val iqamaTime = time.plusMinutes(iqamaOffset.toLong())
                 Text(
-                    text = "Iqama: ${iqamaTime.toLocaleHourString(context)}",
+                    text = stringResource(R.string.iqama_time, iqamaTime.toLocaleHourString(context)),
                     style = MaterialTheme.typography.labelSmall,
                     color = colorScheme.secondary
                 )

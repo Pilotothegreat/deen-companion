@@ -241,12 +241,18 @@ fun Settings(paddingValues: PaddingValues) {
                 SingleChoiceSegmentedButtonRow {
                     SegmentedButton(
                         selected = lang == "en",
-                        onClick = { viewModel.setAppLanguage("en") },
+                        onClick = {
+                            viewModel.setAppLanguage("en")
+                            (context as? android.app.Activity)?.recreate()
+                        },
                         shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
                     ) { Text("EN") }
                     SegmentedButton(
                         selected = lang == "ar",
-                        onClick = { viewModel.setAppLanguage("ar") },
+                        onClick = {
+                            viewModel.setAppLanguage("ar")
+                            (context as? android.app.Activity)?.recreate()
+                        },
                         shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
                     ) { Text("AR") }
                 }

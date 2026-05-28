@@ -32,4 +32,7 @@
     <string name="next_at">Next at %s</string>
     <string name="iqama">Iqama</string>
     <string name="qibla_direction">Qibla Direction</string>
+    <string name="tasbih_count_label">Tasbih count</string>
+    <string name="tasbih_tap_hint">Tap card to count dhikr</string>
+    <string name="iqama_time">Iqama: %s</string>
 </resources>

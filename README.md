@@ -1,50 +1,45 @@
-<img width="100%" src="https://raw.githubusercontent.com/leekleak/traffic-light/refs/heads/main/fastlane/metadata/android/en-US/images/featureGraphic.png" alt="Logo">
+# Deen Companion
 
-# Traffic Light
-Traffic Light is an open-source tool for tracking your network usage while ensuring total privacy. Inspired by Internet Speed Meter and GlassWire.
+Deen Companion is a modern, comprehensive, and privacy-first Islamic companion application designed using Material Design 3 and Jetpack Compose. 
+
+It provides daily inspiration, offline Quranic reading, Hadith references, prayer times, Iqama offsets, a Qibla compass, and a Tasbih counter in a beautifully crafted user interface.
 
 ## Features
-- Data plan tracking (including multiple SIMs)
-- Beautiful widgets
-- Status bar network indicator
-- In-depth historical data tracking
-- At a glance usage analytics
-- Uses [less battery](https://github.com/leekleak/traffic-light/wiki/Battery-Usage) than alternatives
-- Fast and modern with a stunning design
 
-## Downloads
+- **Daily Inspiration**: Curated bilingual Quranic verses and Hadiths that automatically adapt to your chosen application language.
+- **Offline Quran Reader**:
+  - Combined authentic Arabic Hafs text with Saheeh International English translation.
+  - Custom traditional *Scheherazade New* font packaging for high legibility.
+  - Right-to-Left (RTL) layout support.
+  - Interactive font size settings with live preview.
+  - Sajdah at-Tilawah (prostration) verse badges.
+  - Quick scroll navigation directly to verse search results.
+- **Hadith Library**:
+  - Selected authentic Hadiths categorized by compilers (Bukhari, Muslim, etc.).
+  - Dynamic grade badge classifications (Sahih, Hasan, Da'if, Mawdu') mapped to themed status colors.
+  - Expandable card interactions presenting previews first to avoid walls of text.
+  - Favorite bookmarks saved locally.
+- **Prayer Times & Iqama**:
+  - High-precision calculation methods (MWL, Umm al-Qura, Karachi, Jafari, etc.).
+  - Offline fallback geolocation (via IP) if GPS is unavailable.
+  - Customizable Iqama reminder notification offset alarms.
+- **Qibla Direction**: Shows the angle direction directly towards Makkah.
+- **Tasbih Counter**: Tap-to-count Dhikr companion with haptic feedback.
+- **Bilingual Interface**: Full, dynamic English and Arabic toggling.
 
-| Method | [<img alt='Get it on GitHub' height="80" src='branding/badge_github.png'>](https://github.com/leekleak/traffic-light/releases) | [<img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="80">](https://f-droid.org/en/packages/com.leekleak.trafficlight/) | [<img alt='Get it on Play Store' height="80" src='branding/badge_playstore.png'>](https://play.google.com/store/apps/details?id=com.leekleak.trafficlight) |
-|--------|-------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|
-| Delay | No delay | Delay depends on F-Droid maintainers | Delay until stable release |
+## Build Setup
 
-## Screenshots
+To build and compile the application locally:
 
-<p align="left">
-  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot01.png" width="180" />
-  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot02.png" width="180" />
-  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot03.png" width="180" />
-  <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/screenshot04.png" width="180" />
-</p>
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Pilotothegreat/deen-companion.git
+   ```
+2. Open in Android Studio or build via command line using Gradle:
+   ```bash
+   ./gradlew assembleDebug
+   ```
 
-## Feedback
+## Attribution & Credits
 
-Make sure to follow the __issue template__ when reporting bugs or suggesting features! Reports not following the general outline will be closed without further consideration.
-
-## Contributions
-
-### Code
-Contributors are welcome, however please create an issue first. When asking/adding features please elaborate why that feature is useful to you.
-
-### Translations
-[<img src="https://hosted.weblate.org/widget/traffic-light/multi-auto.svg" alt="Translation status" />](https://hosted.weblate.org/engage/traffic-light/)
-
-Translation can be done on [Weblate](https://hosted.weblate.org/engage/traffic-light/)
-
-## FAQ
-Check out the [wiki](https://github.com/leekleak/traffic-light/wiki) as the info you're looking may be there.
-Popular pages:
-- [Troubleshooting](https://github.com/leekleak/traffic-light/wiki/Troubleshooting)
-- [Setting up Shizuku for multi-SIM tracking](https://github.com/leekleak/traffic-light/wiki/Setting-up-Shizuku-for-multi%E2%80%90SIM-tracking)
-- [Hiding status bar icon when disconnected](https://github.com/leekleak/traffic-light/wiki/Hide-status-bar-icon-when-disconnected)
-
+Deen Companion is an open-source project based on the UI/UX structures and preferences engine of the privacy-centric network usage tracker [Traffic Light](https://github.com/leekleak/traffic-light) by [leekleak](https://github.com/leekleak). For licensing and credits details, please refer to [ATTRIBUTION.md](ATTRIBUTION.md).

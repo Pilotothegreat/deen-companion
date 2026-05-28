@@ -31,4 +31,7 @@
     <string name="next_at">التالية في %s</string>
     <string name="iqama">الإقامة</string>
     <string name="qibla_direction">اتجاه القبلة</string>
+    <string name="tasbih_count_label">عدد التسبيح</string>
+    <string name="tasbih_tap_hint">اضغط للعدّ</string>
+    <string name="iqama_time">الإقامة: %s</string>
 </resources>

@@ -21,7 +21,7 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.leekleak.trafficlight"
+        applicationId = "com.pilotothegreat.deencompanion"
         minSdk = 26
         targetSdk = 37
         versionCode = 100

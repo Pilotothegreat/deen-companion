@@ -65,9 +65,9 @@ class OverviewVM(
         SharingStarted.WhileSubscribed(5000),
         PrayerTimeCalculator.calculate(
             LocalDate.now(),
-            25.2048,
-            55.2708,
-            4.0,
+            21.3891,
+            39.8579,
+            3.0,
             PrayerTimeCalculator.CalculationMethod.MWL,
             PrayerTimeCalculator.AsrSchool.STANDARD
         )
