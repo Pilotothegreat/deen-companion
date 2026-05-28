@@ -27,6 +27,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.leekleak.trafficlight.R
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import com.leekleak.trafficlight.database.AppPreferenceRepo
 import com.leekleak.trafficlight.ui.theme.card
 import com.leekleak.trafficlight.util.PageTitle
@@ -35,6 +39,9 @@ import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+
+fun hadithFavKey(collectionName: String, hadithNumber: Int): String =
+    "${collectionName.trim().lowercase().replace(" ", "_")}:$hadithNumber"
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -89,7 +96,7 @@ fun Hadith(paddingValues: PaddingValues) {
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(searchResults) { (collectionName, hadith) ->
-                    val favKey = "${collectionName}:${hadith.number}"
+                    val favKey = hadithFavKey(collectionName, hadith.number)
                     val isFav = favoritedHadiths.contains(favKey)
 
                     HadithCard(
@@ -136,7 +143,7 @@ fun Hadith(paddingValues: PaddingValues) {
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(currentCollection.hadiths) { hadith ->
-                    val favKey = "${currentCollection.name}:${hadith.number}"
+                    val favKey = hadithFavKey(currentCollection.name, hadith.number)
                     val isFav = favoritedHadiths.contains(favKey)
 
                     HadithCard(
@@ -245,7 +252,7 @@ fun FavoritesTab(
         val result = mutableListOf<Pair<String, HadithHelper.Hadith>>()
         for (col in collections) {
             for (hadith in col.hadiths) {
-                val key = "${col.name}:${hadith.number}"
+                val key = hadithFavKey(col.name, hadith.number)
                 if (favorites.contains(key)) {
                     result.add(Pair(col.name, hadith))
                 }
@@ -273,7 +280,7 @@ fun FavoritesTab(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(favList) { (collectionName, hadith) ->
-                val favKey = "${collectionName}:${hadith.number}"
+                val favKey = hadithFavKey(collectionName, hadith.number)
                 HadithCard(
                     collectionName = collectionName,
                     hadith = hadith,
@@ -296,8 +303,13 @@ fun HadithCard(
     isFavorite: Boolean,
     onFavoriteToggle: () -> Unit
 ) {
+    var expanded by remember { mutableStateOf(false) }
+    val arabicFontFamily = remember { FontFamily(Font(R.font.scheherazade_new)) }
+
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { expanded = !expanded },
         colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainerLow)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -324,15 +336,24 @@ fun HadithCard(
                     // Grade Badge
                     val isSahih = hadith.grade.contains("Sahih", ignoreCase = true)
                     val isHasan = hadith.grade.contains("Hasan", ignoreCase = true)
+                    val isDaif = hadith.grade.contains("Da'if", ignoreCase = true) ||
+                                 hadith.grade.contains("Daif", ignoreCase = true)
+                    val isMawdu = hadith.grade.contains("Mawdu", ignoreCase = true) ||
+                                  hadith.grade.contains("Fabricated", ignoreCase = true)
+
                     val badgeColor = when {
-                        isSahih -> colorScheme.primaryContainer
-                        isHasan -> colorScheme.tertiaryContainer
-                        else -> colorScheme.errorContainer
+                        isSahih  -> colorScheme.primaryContainer
+                        isHasan  -> colorScheme.tertiaryContainer
+                        isDaif   -> colorScheme.secondaryContainer   // yellow/muted warning
+                        isMawdu  -> colorScheme.errorContainer       // red — fabricated
+                        else     -> colorScheme.surfaceVariant       // unknown — neutral grey
                     }
                     val badgeTextColor = when {
-                        isSahih -> colorScheme.onPrimaryContainer
-                        isHasan -> colorScheme.onTertiaryContainer
-                        else -> colorScheme.onErrorContainer
+                        isSahih  -> colorScheme.onPrimaryContainer
+                        isHasan  -> colorScheme.onTertiaryContainer
+                        isDaif   -> colorScheme.onSecondaryContainer
+                        isMawdu  -> colorScheme.onErrorContainer
+                        else     -> colorScheme.onSurfaceVariant
                     }
 
                     Surface(
@@ -370,27 +391,43 @@ fun HadithCard(
 
             Spacer(Modifier.height(12.dp))
 
-            // Arabic Text
-            Text(
-                text = hadith.arabic,
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    fontSize = 20.sp,
-                    lineHeight = 28.sp,
-                    fontWeight = FontWeight.Medium
-                ),
-                textAlign = TextAlign.End,
-                modifier = Modifier.fillMaxWidth(),
-                color = colorScheme.onSurface
-            )
+            if (!expanded) {
+                val previewText = if (hadith.english.length > 120) {
+                    hadith.english.take(120) + "…"
+                } else {
+                    hadith.english
+                }
+                Text(
+                    text = previewText,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colorScheme.onSurfaceVariant
+                )
+            } else {
+                // Arabic Text
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                    Text(
+                        text = hadith.arabic,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontSize = 20.sp,
+                            lineHeight = 32.sp,         // increased for Arabic readability
+                            fontWeight = FontWeight.Medium,
+                            fontFamily = arabicFontFamily
+                        ),
+                        textAlign = TextAlign.Start,    // Start = Right in RTL context
+                        modifier = Modifier.fillMaxWidth(),
+                        color = colorScheme.onSurface
+                    )
+                }
 
-            Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(12.dp))
 
-            // English Text
-            Text(
-                text = hadith.english,
-                style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 20.sp),
-                color = colorScheme.onSurfaceVariant
-            )
+                // English Text
+                Text(
+                    text = hadith.english,
+                    style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 20.sp),
+                    color = colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }

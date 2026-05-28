@@ -48,6 +48,9 @@ class SettingsVM(
     val quranArabicFontSize: StateFlow<Int> = appPreferenceRepo.quranArabicFontSize
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 24)
 
+    val appLanguage: StateFlow<String> = appPreferenceRepo.appLanguage
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "en")
+
     fun setTheme(value: Theme) {
         viewModelScope.launch {
             appPreferenceRepo.setTheme(value)
@@ -105,6 +108,12 @@ class SettingsVM(
     fun setQuranArabicFontSize(value: Int) {
         viewModelScope.launch {
             appPreferenceRepo.setQuranArabicFontSize(value)
+        }
+    }
+
+    fun setAppLanguage(value: String) {
+        viewModelScope.launch {
+            appPreferenceRepo.setAppLanguage(value)
         }
     }
 

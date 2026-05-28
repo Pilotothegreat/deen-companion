@@ -20,6 +20,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -202,6 +204,54 @@ fun Settings(paddingValues: PaddingValues) {
                 onValueChange = { viewModel.setQuranArabicFontSize(it) }
             )
         }
+        item {
+            val quranFontSize by viewModel.quranArabicFontSize.collectAsState()
+            val arabicFontFamily = remember { FontFamily(Font(R.font.scheherazade_new)) }
+            Text(
+                text = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+                fontSize = quranFontSize.sp,
+                lineHeight = (quranFontSize * 1.6f).sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                    .card()
+                    .padding(12.dp),
+                fontFamily = arabicFontFamily
+            )
+        }
+
+        // --- Language settings ---
+        categoryTitleSmall { "Language / اللغة" }
+        item {
+            val lang by viewModel.appLanguage.collectAsState()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+                    .card()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text("App Language", style = MaterialTheme.typography.titleMedium)
+                    Text("لغة التطبيق", style = MaterialTheme.typography.bodySmall, color = colorScheme.secondary)
+                }
+                SingleChoiceSegmentedButtonRow {
+                    SegmentedButton(
+                        selected = lang == "en",
+                        onClick = { viewModel.setAppLanguage("en") },
+                        shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
+                    ) { Text("EN") }
+                    SegmentedButton(
+                        selected = lang == "ar",
+                        onClick = { viewModel.setAppLanguage("ar") },
+                        shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
+                    ) { Text("AR") }
+                }
+            }
+        }
 
         // --- UI / Theme settings ---
         categoryTitleSmall { "App Theme" }
@@ -237,24 +287,35 @@ fun Settings(paddingValues: PaddingValues) {
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "Deen",
+                        text = "Deen Companion",
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                         color = colorScheme.primary
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "Your Comprehensive Islamic Companion platform.",
+                        text = "An open-source Islamic companion app for Muslims.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = colorScheme.onSurfaceVariant
                     )
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        text = "Features offline Quran recitation, curated Hadith library, location-based prayer time calculations, and custom Iqama notifications.",
+                        text = "Based on the UI/UX of Traffic Light by leekleak. Built with Material Design 3 and Jetpack Compose.",
                         style = MaterialTheme.typography.bodySmall,
                         color = colorScheme.secondary
                     )
                 }
             }
+        }
+        item {
+            NavigatePreference(
+                title = "Source App",
+                summary = "Based on github.com/leekleak/traffic-light",
+                icon = painterResource(R.drawable.version),
+                onClick = { 
+                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://github.com/leekleak/traffic-light"))
+                    context.startActivity(intent)
+                }
+            )
         }
         item {
             NavigatePreference(

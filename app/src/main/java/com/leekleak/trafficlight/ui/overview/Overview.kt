@@ -71,6 +71,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.LayoutDirection
@@ -78,6 +80,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.leekleak.trafficlight.R
+import com.leekleak.trafficlight.database.AppPreferenceRepo
 import com.leekleak.trafficlight.ui.navigation.Navigator
 import com.leekleak.trafficlight.ui.navigation.SettingsKey
 import com.leekleak.trafficlight.ui.theme.card
@@ -131,18 +134,19 @@ fun calculateQiblaDirection(latitude: Double, longitude: Double): Double {
     return qiblaAngle
 }
 
+data class Inspiration(val en: String, val ar: String, val ref: String)
+
 private val inspirations = listOf(
-    Pair("So verily, with hardship, there is ease.", "Quran 94:5"),
-    Pair("Indeed, Allah is with the patient.", "Quran 2:153"),
-    Pair("And He found you lost and guided you.", "Quran 93:7"),
-    Pair("Call upon Me; I will answer you.", "Quran 40:60"),
-    Pair("My mercy encompasses all things.", "Quran 7:156"),
-    Pair("Remember Me; I will remember you.", "Quran 2:152"),
-    Pair("Allah does not burden a soul beyond that it can bear.", "Quran 2:286"),
-    Pair("Indeed, actions are but by intentions.", "Bukhari & Muslim"),
-    Pair("The best of you are those who learn the Quran and teach it.", "Bukhari"),
-    Pair("A good word is charity.", "Bukhari & Muslim"),
-    Pair("He who believes in Allah and the Last Day should be kind to his neighbor.", "Bukhari")
+    Inspiration("So verily, with hardship, there is ease.", "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا", "Quran 94:5"),
+    Inspiration("Indeed, Allah is with the patient.", "إِنَّ اللَّهَ مَعَ الصَّابِرِينَ", "Quran 2:153"),
+    Inspiration("And He found you lost and guided you.", "وَوَجَدَكَ ضَالًّا فَهَدَىٰ", "Quran 93:7"),
+    Inspiration("Call upon Me; I will answer you.", "ادْعُونِي أَسْتَجِبْ لَكُمْ", "Quran 40:60"),
+    Inspiration("My mercy encompasses all things.", "وَرَحْمَتِي وَسِعَتْ كُلَّ شَيْءٍ", "Quran 7:156"),
+    Inspiration("Remember Me; I will remember you.", "فَاذْكُرُونِي أَذْكُرْكُمْ", "Quran 2:152"),
+    Inspiration("Allah does not burden a soul beyond that it can bear.", "لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا", "Quran 2:286"),
+    Inspiration("Indeed, actions are but by intentions.", "إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ", "Bukhari & Muslim"),
+    Inspiration("The best of you are those who learn the Quran and teach it.", "خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ", "Bukhari"),
+    Inspiration("A good word is charity.", "الْكَلِمَةُ الطَّيِّبَةُ صَدَقَةٌ", "Bukhari & Muslim")
 )
 
 fun calculateNextPrayer(
@@ -404,6 +408,18 @@ private fun OverviewHero(scrollState: ScrollState, viewModel: OverviewVM) {
                     translate(b, a) { drawPath(shape2Transformed, scheme.surface.copy(alpha = 0.5f)) }
                 }
         )
+        val localizedPrayerName = when (nextPrayer.name) {
+            "Fajr" -> stringResource(R.string.fajr)
+            "Sunrise" -> stringResource(R.string.sunrise)
+            "Dhuhr" -> stringResource(R.string.dhuhr)
+            "Asr" -> stringResource(R.string.asr)
+            "Maghrib" -> stringResource(R.string.maghrib)
+            "Isha" -> stringResource(R.string.isha)
+            else -> nextPrayer.name
+        }
+        val nextPrayerText = stringResource(R.string.next_prayer, localizedPrayerName)
+        val nextAtText = stringResource(R.string.next_at, nextPrayer.timeStr)
+
         Column(modifier = Modifier.align(Alignment.Center)) {
             val width by animateFloatAsState(
                 targetValue = if (pressed) 60f else 30f,
@@ -429,10 +445,10 @@ private fun OverviewHero(scrollState: ScrollState, viewModel: OverviewVM) {
                     }
                     withStyle(style = SpanStyle(fontFamily = fontFamily1, fontSize = 24.sp)) {
                         appendLine()
-                        append("until ${nextPrayer.name}")
+                        append(nextPrayerText)
                     }
                     withStyle(style = SpanStyle(fontFamily = fontFamily2, fontSize = 16.sp)) {
-                        append("Next at ${nextPrayer.timeStr}")
+                        append(nextAtText)
                     }
                 }
             )
@@ -504,7 +520,7 @@ private fun RowScope.QiblaCard(viewModel: OverviewVM) {
     MiniCard(
         state = MiniCardState.NEUTRAL,
         icon = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.CompassCalibration),
-        title = "Qibla Direction"
+        title = stringResource(R.string.qibla_direction)
     ) { fontFamily ->
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -536,6 +552,8 @@ private fun RowScope.QiblaCard(viewModel: OverviewVM) {
 fun OverviewItems(viewModel: OverviewVM) {
     val times by viewModel.prayerTimes.collectAsState()
     val context = LocalContext.current
+    val appPreferenceRepo: AppPreferenceRepo = koinInject()
+    val lang by appPreferenceRepo.appLanguage.collectAsState(initial = "en")
 
     val fajrOffset by viewModel.fajrIqamaOffset.collectAsState(initial = 15)
     val dhuhrOffset by viewModel.dhuhrIqamaOffset.collectAsState(initial = 15)
@@ -544,26 +562,29 @@ fun OverviewItems(viewModel: OverviewVM) {
     val ishaOffset by viewModel.ishaIqamaOffset.collectAsState(initial = 15)
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        CategoryTitleText("Prayer Times")
+        CategoryTitleText(stringResource(R.string.prayer_times))
         Box(
             modifier = Modifier
                 .card()
                 .padding(12.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                PrayerRow("Fajr", times.fajr, context, fajrOffset)
-                PrayerRow("Sunrise", times.sunrise, context, null)
-                PrayerRow("Dhuhr", times.dhuhr, context, dhuhrOffset)
-                PrayerRow("Asr", times.asr, context, asrOffset)
-                PrayerRow("Maghrib", times.maghrib, context, maghribOffset)
-                PrayerRow("Isha", times.isha, context, ishaOffset)
+                PrayerRow(stringResource(R.string.fajr), times.fajr, context, fajrOffset)
+                PrayerRow(stringResource(R.string.sunrise), times.sunrise, context, null)
+                PrayerRow(stringResource(R.string.dhuhr), times.dhuhr, context, dhuhrOffset)
+                PrayerRow(stringResource(R.string.asr), times.asr, context, asrOffset)
+                PrayerRow(stringResource(R.string.maghrib), times.maghrib, context, maghribOffset)
+                PrayerRow(stringResource(R.string.isha), times.isha, context, ishaOffset)
             }
         }
 
         // Daily Verse Card
         val inspirationIndex = remember { LocalDate.now().dayOfYear % inspirations.size }
         val currentInspiration = inspirations[inspirationIndex]
-        CategoryTitleText("Daily Inspiration")
+        CategoryTitleText(stringResource(R.string.daily_inspiration))
+        
+        val quote = if (lang == "ar") currentInspiration.ar else currentInspiration.en
+        val arabicFontFamily = remember { FontFamily(Font(R.font.scheherazade_new)) }
         Box(
             modifier = Modifier
                 .card()
@@ -572,15 +593,22 @@ fun OverviewItems(viewModel: OverviewVM) {
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    text = "\"${currentInspiration.first}\"",
-                    style = MaterialTheme.typography.bodyLarge.copy(fontStyle = androidx.compose.ui.text.font.FontStyle.Italic),
-                    color = colorScheme.onSurface
+                    text = "\"$quote\"",
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontStyle = if (lang == "ar") androidx.compose.ui.text.font.FontStyle.Normal else androidx.compose.ui.text.font.FontStyle.Italic,
+                        fontFamily = if (lang == "ar") arabicFontFamily else null,
+                        fontSize = if (lang == "ar") 22.sp else 16.sp,
+                        lineHeight = if (lang == "ar") 32.sp else 20.sp
+                    ),
+                    color = colorScheme.onSurface,
+                    textAlign = if (lang == "ar") TextAlign.Right else TextAlign.Left,
+                    modifier = Modifier.fillMaxWidth()
                 )
                 Text(
-                    text = "— ${currentInspiration.second}",
+                    text = "— ${currentInspiration.ref}",
                     style = MaterialTheme.typography.labelSmall,
                     color = colorScheme.secondary,
-                    modifier = Modifier.align(Alignment.End)
+                    modifier = Modifier.align(if (lang == "ar") Alignment.Start else Alignment.End)
                 )
             }
         }
@@ -588,7 +616,7 @@ fun OverviewItems(viewModel: OverviewVM) {
         // Tasbih Card
         val count by viewModel.tasbihCount.collectAsState(initial = 0)
         val haptic = LocalHapticFeedback.current
-        CategoryTitleText("Tasbih Counter")
+        CategoryTitleText(stringResource(R.string.tasbih_counter))
         Box(
             modifier = Modifier
                 .card()

@@ -20,16 +20,16 @@ class AppPreferenceRepo (
     private val data get() = dataStore.data
 
     // Location Settings
-    val latitude: Flow<Double> = data.map { it[LATITUDE] ?: 25.2048 }.distinctUntilChanged() // Default Dubai lat
+    val latitude: Flow<Double> = data.map { it[LATITUDE] ?: 21.3891 }.distinctUntilChanged() // Default Makkah lat
     suspend fun setLatitude(value: Double) = dataStore.edit { it[LATITUDE] = value }
 
-    val longitude: Flow<Double> = data.map { it[LONGITUDE] ?: 55.2708 }.distinctUntilChanged() // Default Dubai lon
+    val longitude: Flow<Double> = data.map { it[LONGITUDE] ?: 39.8579 }.distinctUntilChanged() // Default Makkah lon
     suspend fun setLongitude(value: Double) = dataStore.edit { it[LONGITUDE] = value }
 
-    val cityName: Flow<String> = data.map { it[CITY_NAME] ?: "Dubai, United Arab Emirates" }.distinctUntilChanged()
+    val cityName: Flow<String> = data.map { it[CITY_NAME] ?: "Makkah, Saudi Arabia" }.distinctUntilChanged()
     suspend fun setCityName(value: String) = dataStore.edit { it[CITY_NAME] = value }
 
-    val timezoneId: Flow<String> = data.map { it[TIMEZONE_ID] ?: "Asia/Dubai" }.distinctUntilChanged()
+    val timezoneId: Flow<String> = data.map { it[TIMEZONE_ID] ?: "Asia/Riyadh" }.distinctUntilChanged()
     suspend fun setTimezoneId(value: String) = dataStore.edit { it[TIMEZONE_ID] = value }
 
     // Prayer Time Settings
@@ -88,6 +88,10 @@ class AppPreferenceRepo (
         }
     }
 
+    // App Language ("en" or "ar")
+    val appLanguage: Flow<String> = data.map { it[APP_LANGUAGE] ?: "en" }.distinctUntilChanged()
+    suspend fun setAppLanguage(value: String) = dataStore.edit { it[APP_LANGUAGE] = value }
+
     private companion object {
         private val LATITUDE = doublePreferencesKey("latitude")
         private val LONGITUDE = doublePreferencesKey("longitude")
@@ -105,5 +109,6 @@ class AppPreferenceRepo (
         private val THEME = stringPreferencesKey("theme")
         private val FAVORITED_HADITHS = stringSetPreferencesKey("favorited_hadiths")
         private val QURAN_ARABIC_FONT_SIZE = intPreferencesKey("quran_arabic_font_size")
+        private val APP_LANGUAGE = stringPreferencesKey("app_language")
     }
 }

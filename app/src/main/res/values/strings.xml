@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Deen: Islamic Companion</string>
+    <string name="app_name">Deen Companion</string>
     <string name="app_name_short">Deen</string>
     <string name="today">Today</string>
     <string name="settings">Settings</string>
@@ -15,4 +15,21 @@
     <string name="version">Version %1$s</string>
     <string name="go_back">Go back</string>
     <string name="close">Close</string>
+
+    <string name="prayer_times">Prayer Times</string>
+    <string name="fajr">Fajr</string>
+    <string name="sunrise">Sunrise</string>
+    <string name="dhuhr">Dhuhr</string>
+    <string name="asr">Asr</string>
+    <string name="maghrib">Maghrib</string>
+    <string name="isha">Isha</string>
+    <string name="quran_browser">Quran Browser</string>
+    <string name="hadith_library">Hadith Library</string>
+    <string name="daily_inspiration">Daily Inspiration</string>
+    <string name="tasbih_counter">Tasbih Counter</string>
+    <string name="bookmarks">Bookmarks</string>
+    <string name="next_prayer">until %s</string>
+    <string name="next_at">Next at %s</string>
+    <string name="iqama">Iqama</string>
+    <string name="qibla_direction">Qibla Direction</string>
 </resources>
