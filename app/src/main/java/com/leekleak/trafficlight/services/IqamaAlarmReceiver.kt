@@ -14,38 +14,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.core.context.GlobalContext
 
+import androidx.core.app.NotificationManagerCompat
+import com.leekleak.trafficlight.R
+
 class IqamaAlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val prayerName = intent.getStringExtra("PRAYER_NAME") ?: "Prayer"
 
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val channelId = "iqama_notifications"
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                channelId,
-                "Iqama Notifications",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = "Notifies when it is time for Iqama"
-                enableVibration(true)
-            }
-            notificationManager.createNotificationChannel(channel)
-        }
-
-        val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-        val notification = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setContentTitle("Iqama Time")
-            .setContentText("It is time for the $prayerName Iqama prayer.")
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setSound(soundUri)
-            .setAutoCancel(true)
-            .setVibrate(longArrayOf(0, 500, 200, 500))
-            .build()
-
-        notificationManager.notify(2002, notification)
+        showPrayerNotification(context, prayerName, isIqama = true)
 
         // Reschedule next alarm
         val scope = CoroutineScope(Dispatchers.Default)
@@ -56,6 +33,27 @@ class IqamaAlarmReceiver : BroadcastReceiver() {
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+        }
+    }
+
+    private fun showPrayerNotification(context: Context, prayerName: String, isIqama: Boolean) {
+        val title = if (isIqama) "Iqama — $prayerName" else "Prayer Time — $prayerName"
+        val body  = if (isIqama) "Iqama for $prayerName has begun" else "Time for $prayerName prayer"
+
+        val notification = NotificationCompat.Builder(context, "prayer_times")
+            .setSmallIcon(R.drawable.notification)
+            .setContentTitle(title)
+            .setContentText(body)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setAutoCancel(true)
+            .build()
+
+        try {
+            NotificationManagerCompat.from(context)
+                .notify(prayerName.hashCode(), notification)
+        } catch (e: SecurityException) {
+            e.printStackTrace()
         }
     }
 }

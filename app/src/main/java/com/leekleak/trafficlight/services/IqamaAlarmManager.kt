@@ -12,7 +12,34 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 
+import android.media.AudioAttributes
+import android.media.RingtoneManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
+
 object IqamaAlarmManager {
+
+    fun createNotificationChannel(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "prayer_times",
+                "Prayer Times",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Adhan and Iqama time notifications"
+                enableVibration(true)
+                setSound(
+                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build()
+                )
+            }
+            context.getSystemService(NotificationManager::class.java)
+                .createNotificationChannel(channel)
+        }
+    }
 
     suspend fun scheduleNextIqamaAlarm(context: Context, appPreferenceRepo: AppPreferenceRepo) {
         val lat = appPreferenceRepo.latitude.first()

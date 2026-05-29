@@ -12,12 +12,14 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext.startKoin
 import timber.log.Timber
 
+import com.leekleak.trafficlight.services.IqamaAlarmManager
+
 class TrafficLightApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
 
-        createNotificationChannels()
+        IqamaAlarmManager.createNotificationChannel(this)
         if (BuildConfig.DEBUG && Timber.forest().isEmpty()) {
             Timber.plant(Timber.DebugTree())
         }
@@ -31,19 +33,5 @@ class TrafficLightApplication : Application() {
                 navigationModule
             )
         }
-    }
-
-    private fun createNotificationChannels() {
-        val iqamaChannel = NotificationChannel(
-            "iqama_notifications",
-            "Iqama Notifications",
-            IMPORTANCE_HIGH
-        ).apply {
-            description = "Notifies when it is time for Iqama prayer"
-            enableVibration(true)
-            setShowBadge(true)
-        }
-        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.createNotificationChannel(iqamaChannel)
     }
 }

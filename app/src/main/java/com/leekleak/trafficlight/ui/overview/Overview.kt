@@ -46,6 +46,9 @@ import androidx.compose.material3.MaterialShapes.Companion.Cookie12Sided
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.toPath
 import androidx.compose.runtime.Composable
@@ -78,6 +81,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.draw.clip
+import androidx.compose.material3.HorizontalDivider
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.leekleak.trafficlight.R
 import com.leekleak.trafficlight.database.AppPreferenceRepo
@@ -220,6 +225,17 @@ fun Overview(
         onPauseOrDispose {}
     }
 
+    val times by viewModel.prayerTimes.collectAsState(initial = viewModel.prayerTimes.value)
+    val tz by viewModel.timezoneId.collectAsState(initial = "Asia/Riyadh")
+    var nextPrayer by remember { mutableStateOf(NextPrayer("Fajr", "--", "--", 0L)) }
+    LaunchedEffect(times, tz) {
+        while(true) {
+            nextPrayer = calculateNextPrayer(times, tz, context)
+            val delayMs = if (nextPrayer.durationSeconds < 3600) 1000L else 10000L
+            kotlinx.coroutines.delay(delayMs)
+        }
+    }
+
     val paddingSide = paddingValues.calculateLeftPadding(LayoutDirection.Ltr)
     val paddingTop = paddingValues.calculateTopPadding()
     val paddingBottom = paddingValues.calculateBottomPadding()
@@ -266,6 +282,16 @@ fun Overview(
                     color = colorScheme.primary
                 )
             }
+            // ADD city inline here ↓
+            val city by viewModel.cityName.collectAsState(initial = "")
+            if (city.isNotEmpty()) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.LocationOn, contentDescription = null,
+                        modifier = Modifier.size(12.dp), tint = colorScheme.secondary)
+                    Spacer(Modifier.width(4.dp))
+                    Text(city, style = MaterialTheme.typography.labelSmall, color = colorScheme.secondary)
+                }
+            }
         }
 
         if (windowSizeClass.isWidthAtLeastBreakpoint(400)) {
@@ -273,19 +299,19 @@ fun Overview(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 first = {
                     Column (Modifier.weight(1f).fillMaxHeight(), verticalArrangement = Arrangement.SpaceBetween) {
-                        HeroItems(scrollState, viewModel)
+                        HeroItems(scrollState, viewModel, nextPrayer)
                     }
                 },
                 second = {
                     Column (Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OverviewItems(viewModel)
+                        OverviewItems(viewModel, nextPrayer.name)
                     }
                 },
                 spacing = 16.dp
             )
         } else {
-            HeroItems(scrollState, viewModel)
-            OverviewItems(viewModel)
+            HeroItems(scrollState, viewModel, nextPrayer)
+            OverviewItems(viewModel, nextPrayer.name)
         }
         Box(Modifier.height(paddingBottom - 8.dp))
     }
@@ -303,27 +329,13 @@ fun Overview(
 }
 
 @Composable
-private fun HeroItems(scrollState: ScrollState, viewModel: OverviewVM) {
-    OverviewHero(scrollState, viewModel)
-    Row(
-        modifier = Modifier.height(IntrinsicSize.Min),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        LocationCard(viewModel)
-        CalculationsCard(viewModel)
-    }
-    Spacer(Modifier.height(8.dp))
-    Row(
-        modifier = Modifier.height(IntrinsicSize.Min),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        QiblaCard(viewModel)
-    }
+private fun HeroItems(scrollState: ScrollState, viewModel: OverviewVM, nextPrayer: NextPrayer) {
+    OverviewHero(scrollState, viewModel, nextPrayer)
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun OverviewHero(scrollState: ScrollState, viewModel: OverviewVM) {
+private fun OverviewHero(scrollState: ScrollState, viewModel: OverviewVM, nextPrayer: NextPrayer) {
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
     val interactionSource = remember { MutableInteractionSource() }
@@ -368,19 +380,6 @@ private fun OverviewHero(scrollState: ScrollState, viewModel: OverviewVM) {
         }
         path.asAndroidPath().transform(matrix)
         path
-    }
-
-    val times by viewModel.prayerTimes.collectAsState(initial = viewModel.prayerTimes.value)
-    val tz by viewModel.timezoneId.collectAsState(initial = "Asia/Dubai")
-
-    var nextPrayer by remember { mutableStateOf(NextPrayer("Fajr", "--", "--", 0L)) }
-    // Timer to update countdown dynamically (every second if close)
-    LaunchedEffect(times, tz) {
-        while(true) {
-            nextPrayer = calculateNextPrayer(times, tz, context)
-            val delayMs = if (nextPrayer.durationSeconds < 3600) 1000L else 10000L
-            kotlinx.coroutines.delay(delayMs)
-        }
     }
 
     Box(
@@ -457,99 +456,7 @@ private fun OverviewHero(scrollState: ScrollState, viewModel: OverviewVM) {
 }
 
 @Composable
-private fun RowScope.LocationCard(viewModel: OverviewVM) {
-    val city by viewModel.cityName.collectAsState(initial = "Dubai, UAE")
-    val refreshing by viewModel.isRefreshingLocation.collectAsState(initial = false)
-    val context = LocalContext.current
-
-    MiniCard(
-        state = MiniCardState.NEUTRAL,
-        icon = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.LocationOn),
-        title = "Location"
-    ) { fontFamily ->
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                modifier = Modifier.weight(1f),
-                fontFamily = fontFamily,
-                text = city,
-                fontSize = 16.sp,
-                maxLines = 1
-            )
-            if (refreshing) {
-                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
-            } else {
-                Icon(
-                    imageVector = Icons.Default.Refresh,
-                    contentDescription = "Refresh",
-                    modifier = Modifier
-                        .size(20.dp)
-                        .clickable { viewModel.refreshLocation(context) }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun RowScope.CalculationsCard(viewModel: OverviewVM) {
-    val method by viewModel.calcMethod.collectAsState(initial = PrayerTimeCalculator.CalculationMethod.MWL)
-    MiniCard(
-        state = MiniCardState.NEUTRAL,
-        icon = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.Schedule),
-        title = "Method"
-    ) { fontFamily ->
-        Text(
-            modifier = Modifier.fillMaxWidth(),
-            fontFamily = fontFamily,
-            text = method.name,
-            fontSize = 16.sp
-        )
-    }
-}
-
-@Composable
-private fun RowScope.QiblaCard(viewModel: OverviewVM) {
-    val lat by viewModel.latitude.collectAsState(initial = 21.3891)
-    val lon by viewModel.longitude.collectAsState(initial = 39.8579)
-    val angle = remember(lat, lon) { calculateQiblaDirection(lat, lon) }
-    val scheme = colorScheme
-    MiniCard(
-        state = MiniCardState.NEUTRAL,
-        icon = androidx.compose.ui.graphics.vector.rememberVectorPainter(Icons.Default.CompassCalibration),
-        title = stringResource(R.string.qibla_direction)
-    ) { fontFamily ->
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                modifier = Modifier.weight(1f),
-                fontFamily = fontFamily,
-                text = String.format(Locale.US, "%.1f° from North", angle),
-                fontSize = 16.sp
-            )
-            Canvas(modifier = Modifier.size(24.dp)) {
-                rotate(angle.toFloat()) {
-                    val path = Path().apply {
-                        moveTo(size.width / 2, 0f)
-                        lineTo(size.width / 2 + 4.dp.toPx(), size.height)
-                        lineTo(size.width / 2 - 4.dp.toPx(), size.height)
-                        close()
-                    }
-                    drawPath(path, color = scheme.primary)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun OverviewItems(viewModel: OverviewVM) {
+fun OverviewItems(viewModel: OverviewVM, nextPrayerName: String) {
     val times by viewModel.prayerTimes.collectAsState()
     val context = LocalContext.current
     val appPreferenceRepo: AppPreferenceRepo = koinInject()
@@ -563,20 +470,76 @@ fun OverviewItems(viewModel: OverviewVM) {
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         CategoryTitleText(stringResource(R.string.prayer_times))
-        Box(
-            modifier = Modifier
-                .card()
-                .padding(12.dp)
+
+        val localizedPrayerName = when (nextPrayerName) {
+            "Fajr" -> stringResource(R.string.fajr)
+            "Sunrise" -> stringResource(R.string.sunrise)
+            "Dhuhr" -> stringResource(R.string.dhuhr)
+            "Asr" -> stringResource(R.string.asr)
+            "Maghrib" -> stringResource(R.string.maghrib)
+            "Isha" -> stringResource(R.string.isha)
+            else -> nextPrayerName
+        }
+
+        val prayers = listOf(
+            Triple(stringResource(R.string.fajr),   times.fajr,    fajrOffset),
+            Triple(stringResource(R.string.sunrise), times.sunrise, null),
+            Triple(stringResource(R.string.dhuhr),  times.dhuhr,   dhuhrOffset),
+            Triple(stringResource(R.string.asr),    times.asr,     asrOffset),
+            Triple(stringResource(R.string.maghrib),times.maghrib, maghribOffset),
+            Triple(stringResource(R.string.isha),   times.isha,    ishaOffset)
+        )
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainerLow),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                PrayerRow(stringResource(R.string.fajr), times.fajr, context, fajrOffset)
-                PrayerRow(stringResource(R.string.sunrise), times.sunrise, context, null)
-                PrayerRow(stringResource(R.string.dhuhr), times.dhuhr, context, dhuhrOffset)
-                PrayerRow(stringResource(R.string.asr), times.asr, context, asrOffset)
-                PrayerRow(stringResource(R.string.maghrib), times.maghrib, context, maghribOffset)
-                PrayerRow(stringResource(R.string.isha), times.isha, context, ishaOffset)
+            Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                for (prayer in prayers) {
+                    val (name, time, offset) = prayer
+                    val isNext = name == localizedPrayerName  // highlight next prayer
+                    val bg = if (isNext) colorScheme.primaryContainer else Color.Transparent
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(MaterialTheme.shapes.medium)
+                            .background(bg)
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = name,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = if (isNext) colorScheme.onPrimaryContainer else colorScheme.onSurface,
+                            fontWeight = if (isNext) FontWeight.Bold else FontWeight.Normal
+                        )
+                        Column(horizontalAlignment = Alignment.End) {
+                            Text(
+                                text = time.toLocaleHourString(context),
+                                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                                color = if (isNext) colorScheme.onPrimaryContainer else colorScheme.primary
+                            )
+                            if (offset != null) {
+                                val iqamaTime = time.plusMinutes(offset.toLong())
+                                Text(
+                                    text = stringResource(R.string.iqama_time, iqamaTime.toLocaleHourString(context)),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = if (isNext) colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                                            else colorScheme.secondary
+                                )
+                            }
+                        }
+                    }
+                    if (name != stringResource(R.string.isha)) {
+                        HorizontalDivider(thickness = 0.5.dp, color = colorScheme.outlineVariant.copy(alpha = 0.4f))
+                    }
+                }
             }
         }
+
+        QiblaCompactCard(viewModel)
 
         // Daily Verse Card
         val inspirationIndex = remember { LocalDate.now().dayOfYear % inspirations.size }
@@ -655,33 +618,43 @@ fun OverviewItems(viewModel: OverviewVM) {
 }
 
 @Composable
-fun PrayerRow(name: String, time: LocalTime, context: Context, iqamaOffset: Int?) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+fun QiblaCompactCard(viewModel: OverviewVM) {
+    val lat by viewModel.latitude.collectAsState(initial = 21.3891)
+    val lon by viewModel.longitude.collectAsState(initial = 39.8579)
+    val angle = remember(lat, lon) { calculateQiblaDirection(lat, lon) }
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainerLow)
     ) {
-        Text(
-            text = name,
-            style = MaterialTheme.typography.titleMedium,
-            color = colorScheme.onSurface
-        )
-        Column(horizontalAlignment = Alignment.End) {
-            Text(
-                text = time.toLocaleHourString(context),
-                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                color = colorScheme.primary
-            )
-            if (iqamaOffset != null) {
-                val iqamaTime = time.plusMinutes(iqamaOffset.toLong())
+        Row(
+            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Icon(Icons.Default.CompassCalibration, contentDescription = null, tint = colorScheme.primary)
+                Text(stringResource(R.string.qibla_direction), style = MaterialTheme.typography.titleMedium)
+            }
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    text = stringResource(R.string.iqama_time, iqamaTime.toLocaleHourString(context)),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = colorScheme.secondary
+                    String.format(Locale.US, "%.1f° N", angle),
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                    color = colorScheme.primary
                 )
+                val primaryColor = colorScheme.primary
+                Canvas(Modifier.size(24.dp)) {
+                    val arrowWidth = 4.dp.toPx()
+                    rotate(angle.toFloat()) {
+                        drawPath(Path().apply {
+                            moveTo(size.width/2, 0f)
+                            lineTo(size.width/2+arrowWidth, size.height)
+                            lineTo(size.width/2-arrowWidth, size.height)
+                            close()
+                        }, color = primaryColor)
+                    }
+                }
             }
         }
     }
 }
+

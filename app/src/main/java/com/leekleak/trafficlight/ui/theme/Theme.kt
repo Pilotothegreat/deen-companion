@@ -44,7 +44,10 @@ fun Theme(
         }
     }
 
-    MaterialTheme (theme.getColors()) { content() }
+    MaterialTheme(
+        colorScheme = theme.getColors(),
+        typography = AppTypography
+    ) { content() }
 }
 
 enum class Theme {

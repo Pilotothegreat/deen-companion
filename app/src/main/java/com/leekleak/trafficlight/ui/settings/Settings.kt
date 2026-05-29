@@ -7,6 +7,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -41,6 +42,15 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import java.util.Locale
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.ContentCopy
+import android.content.ClipboardManager
+import android.content.ClipData
+import android.widget.Toast
 
 @Composable
 fun Settings(paddingValues: PaddingValues) {
@@ -127,44 +137,40 @@ fun Settings(paddingValues: PaddingValues) {
         // --- Iqama Offset settings ---
         categoryTitleSmall { "Iqama Offsets" }
         item {
-            val fajrOffset by viewModel.fajrIqamaOffset.collectAsState()
-            OffsetAdjustmentRow(
-                title = "Fajr Iqama",
-                value = fajrOffset,
-                onValueChange = { viewModel.setFajrIqamaOffset(it) }
-            )
-        }
-        item {
-            val dhuhrOffset by viewModel.dhuhrIqamaOffset.collectAsState()
-            OffsetAdjustmentRow(
-                title = "Dhuhr Iqama",
-                value = dhuhrOffset,
-                onValueChange = { viewModel.setDhuhrIqamaOffset(it) }
-            )
-        }
-        item {
-            val asrOffset by viewModel.asrIqamaOffset.collectAsState()
-            OffsetAdjustmentRow(
-                title = "Asr Iqama",
-                value = asrOffset,
-                onValueChange = { viewModel.setAsrIqamaOffset(it) }
-            )
-        }
-        item {
-            val maghribOffset by viewModel.maghribIqamaOffset.collectAsState()
-            OffsetAdjustmentRow(
-                title = "Maghrib Iqama",
-                value = maghribOffset,
-                onValueChange = { viewModel.setMaghribIqamaOffset(it) }
-            )
-        }
-        item {
-            val ishaOffset by viewModel.ishaIqamaOffset.collectAsState()
-            OffsetAdjustmentRow(
-                title = "Isha Iqama",
-                value = ishaOffset,
-                onValueChange = { viewModel.setIshaIqamaOffset(it) }
-            )
+            var offsetsExpanded by remember { mutableStateOf(false) }
+            Column(modifier = Modifier.fillMaxWidth().card()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().clickable { offsetsExpanded = !offsetsExpanded }.padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Icon(painterResource(R.drawable.clock), contentDescription = null, tint = colorScheme.primary)
+                        Column {
+                            Text("Iqama Offsets", style = MaterialTheme.typography.titleMedium)
+                            Text("Minutes after Adhan per prayer", style = MaterialTheme.typography.bodySmall, color = colorScheme.secondary)
+                        }
+                    }
+                    Icon(
+                        if (offsetsExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = null
+                    )
+                }
+                AnimatedVisibility(visible = offsetsExpanded) {
+                    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                        val fajrOffset by viewModel.fajrIqamaOffset.collectAsState()
+                        val dhuhrOffset by viewModel.dhuhrIqamaOffset.collectAsState()
+                        val asrOffset by viewModel.asrIqamaOffset.collectAsState()
+                        val maghribOffset by viewModel.maghribIqamaOffset.collectAsState()
+                        val ishaOffset by viewModel.ishaIqamaOffset.collectAsState()
+                        OffsetAdjustmentRow("Fajr", fajrOffset) { viewModel.setFajrIqamaOffset(it) }
+                        OffsetAdjustmentRow("Dhuhr", dhuhrOffset) { viewModel.setDhuhrIqamaOffset(it) }
+                        OffsetAdjustmentRow("Asr", asrOffset) { viewModel.setAsrIqamaOffset(it) }
+                        OffsetAdjustmentRow("Maghrib", maghribOffset) { viewModel.setMaghribIqamaOffset(it) }
+                        OffsetAdjustmentRow("Isha", ishaOffset) { viewModel.setIshaIqamaOffset(it) }
+                    }
+                }
+            }
         }
 
         // --- Notifications settings ---
@@ -312,6 +318,56 @@ fun Settings(paddingValues: PaddingValues) {
                 }
             }
         }
+        categoryTitleSmall { "Support the Developer" }
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = colorScheme.tertiaryContainer)
+            ) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Icon(Icons.Default.Favorite, contentDescription = null, tint = colorScheme.onTertiaryContainer)
+                        Text("Support Deen Companion",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                            color = colorScheme.onTertiaryContainer)
+                    }
+                    Text(
+                        text = "If this app benefits you, consider supporting its development.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colorScheme.onTertiaryContainer
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    // Phone number for Omani banking apps (BankMuscat, OmanNet, etc.)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(colorScheme.tertiary.copy(alpha = 0.15f), MaterialTheme.shapes.medium)
+                            .clickable {
+                                // Copy to clipboard
+                                val clipboard = context.getSystemService(ClipboardManager::class.java)
+                                clipboard.setPrimaryClip(ClipData.newPlainText("Phone", "91904926"))
+                                Toast.makeText(context, "Phone number copied!", Toast.LENGTH_SHORT).show()
+                            }
+                            .padding(12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text("Bank Transfer / Phone Pay",
+                                style = MaterialTheme.typography.labelMedium, color = colorScheme.onTertiaryContainer)
+                            Text("91904926",
+                                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                                color = colorScheme.onTertiaryContainer)
+                            Text("Tap to copy • Works with BankMuscat, OmanNet & others",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = colorScheme.onTertiaryContainer.copy(alpha = 0.7f))
+                        }
+                        Icon(Icons.Default.ContentCopy, contentDescription = "Copy",
+                            tint = colorScheme.onTertiaryContainer)
+                    }
+                }
+            }
+        }
         item {
             NavigatePreference(
                 title = "Source App",
@@ -345,9 +401,7 @@ fun OffsetAdjustmentRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .card()
-            .padding(16.dp),
+            .padding(vertical = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {

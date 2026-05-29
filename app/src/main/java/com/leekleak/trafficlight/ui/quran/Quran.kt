@@ -20,9 +20,12 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
+import androidx.compose.ui.graphics.Color
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -67,18 +70,14 @@ import org.koin.compose.koinInject
 fun Quran(paddingValues: PaddingValues) {
     val context = LocalContext.current
     val navigator: Navigator = koinInject()
-    val bookmarkDao: BookmarkedVerseDao = koinInject()
-
     val hazeState = rememberHazeState()
     val scope = rememberCoroutineScope()
-
     val searchState = rememberTextFieldState("")
     val searchQuery by remember { derivedStateOf { searchState.text.toString().trim() } }
 
     val surahs = remember { QuranHelper.getSurahs(context) }
-    val bookmarks by bookmarkDao.getAllFlow().collectAsState(initial = emptyList())
 
-    val tabs = listOf("Surahs", "Juz'", "Bookmarks", "Guidelines")
+    val tabs = listOf("Surahs", "Juz'")
     val pagerState = rememberPagerState(pageCount = { tabs.size })
 
     val paddingSide = paddingValues.calculateLeftPadding(LayoutDirection.Ltr)
@@ -188,9 +187,7 @@ fun Quran(paddingValues: PaddingValues) {
             ) { page ->
                 when (page) {
                     0 -> SurahsList(surahs, navigator, paddingBottom)
-                    1 -> JuzList(navigator, paddingBottom)
-                    2 -> BookmarksList(bookmarks, navigator, paddingBottom)
-                    3 -> GuidelinesView(paddingBottom)
+                    1 -> JuzList(surahs, navigator, paddingBottom)
                 }
             }
         }
@@ -244,154 +241,62 @@ fun SurahsList(surahs: List<QuranHelper.Surah>, navigator: Navigator, bottomPadd
     }
 }
 
-@Composable
-fun JuzList(navigator: Navigator, bottomPadding: androidx.compose.ui.unit.Dp) {
-    val context = LocalContext.current
-    var expandedJuz by remember { mutableStateOf<Int?>(null) }
+val juzStartSurah = mapOf(
+    1 to listOf(1,2), 2 to listOf(2), 3 to listOf(2,3), 4 to listOf(3,4),
+    5 to listOf(4), 6 to listOf(4,5), 7 to listOf(5,6), 8 to listOf(6,7),
+    9 to listOf(7,8), 10 to listOf(8,9), 11 to listOf(9,10,11),
+    12 to listOf(11,12), 13 to listOf(12,13,14), 14 to listOf(15,16),
+    15 to listOf(17,18), 16 to listOf(18,19,20), 17 to listOf(21,22),
+    18 to listOf(23,24,25), 19 to listOf(25,26,27), 20 to listOf(27,28,29),
+    21 to listOf(29,30,31,32,33), 22 to listOf(33,34,35,36),
+    23 to listOf(36,37,38,39), 24 to listOf(39,40,41),
+    25 to listOf(41,42,43,44,45), 26 to listOf(46,47,48,49,50,51),
+    27 to listOf(51,52,53,54,55,56,57), 28 to listOf(58,59,60,61,62,63,64,65,66),
+    29 to listOf(67,68,69,70,71,72,73,74,75,76,77),
+    30 to listOf(78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114)
+)
 
+@Composable
+fun JuzList(surahs: List<QuranHelper.Surah>, navigator: Navigator, bottomPadding: androidx.compose.ui.unit.Dp) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(bottom = bottomPadding + 16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items((1..30).toList()) { juzNum ->
-            val isExpanded = expandedJuz == juzNum
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .card()
-            ) {
+            val surahIds = juzStartSurah[juzNum] ?: emptyList()
+            val juzSurahs = surahs.filter { it.id in surahIds }
+            var expanded by remember { mutableStateOf(false) }
+            Column(modifier = Modifier.fillMaxWidth().card()) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { expandedJuz = if (isExpanded) null else juzNum }
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Juz $juzNum",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                    )
-                    Text(
-                        text = if (isExpanded) "Hide" else "Show Verses",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = colorScheme.primary
-                    )
-                }
-
-                if (isExpanded) {
-                    val verses = remember(juzNum) { QuranHelper.getVersesForJuz(context, juzNum) }
-                    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-                        verses.forEach { (surah, verse) ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { navigator.goTo(QuranReaderKey(surah.id, surah.transliteration, scrollToVerse = verse.id)) }
-                                    .padding(vertical = 6.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(
-                                    text = "${surah.transliteration} (${verse.id})",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = colorScheme.secondary,
-                                    modifier = Modifier.weight(0.4f)
-                                )
-                                Text(
-                                    text = verse.text,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    textAlign = TextAlign.End,
-                                    modifier = Modifier.weight(0.6f)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun BookmarksList(bookmarks: List<BookmarkedVerse>, navigator: Navigator, bottomPadding: androidx.compose.ui.unit.Dp) {
-    if (bookmarks.isEmpty()) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "No bookmarked verses yet.\nBookmark verses during reading to view them here.",
-                textAlign = TextAlign.Center,
-                color = colorScheme.secondary
-            )
-        }
-    } else {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = bottomPadding + 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(bookmarks) { bookmark ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .card()
-                        .clickable { navigator.goTo(QuranReaderKey(bookmark.surahNumber, bookmark.surahName, scrollToVerse = bookmark.ayahNumber)) }
-                        .padding(16.dp),
+                    modifier = Modifier.fillMaxWidth().clickable { expanded = !expanded }.padding(16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text(
-                            text = "${bookmark.surahName} (Ayah ${bookmark.ayahNumber})",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                        )
-                        Text(
-                            text = "Tap to read",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = colorScheme.primary
-                        )
+                        Text("الجزء $juzNum · Juz $juzNum",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
+                        Text("${juzSurahs.size} Surahs",
+                            style = MaterialTheme.typography.labelSmall, color = colorScheme.secondary)
                     }
-                    Icon(
-                        imageVector = Icons.Default.Bookmark,
-                        contentDescription = null,
-                        tint = colorScheme.primary
-                    )
+                    Icon(if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = null, tint = colorScheme.primary)
                 }
-            }
-        }
-    }
-}
-
-@Composable
-fun GuidelinesView(bottomPadding: androidx.compose.ui.unit.Dp) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(bottom = bottomPadding + 16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        item {
-            Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainerLow)) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Recitation Etiquettes (Adab)", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = colorScheme.primary)
-                    Spacer(Modifier.height(8.dp))
-                    Text("1. Cleanliness: It is highly recommended to perform Wudu (ablution) before reciting.", style = MaterialTheme.typography.bodyMedium)
-                    Text("2. Focus: Sit in a clean, quiet place facing the Qiblah (direction of prayer) if possible.", style = MaterialTheme.typography.bodyMedium)
-                    Text("3. Attentiveness: Recite slowly (Tarteel) and contemplate the meanings.", style = MaterialTheme.typography.bodyMedium)
-                    Text("4. Silence: When the Quran is recited, listen to it attentively and be silent so you may receive mercy.", style = MaterialTheme.typography.bodyMedium)
-                }
-            }
-        }
-        item {
-            Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainerLow)) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Tajweed Basics", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), color = colorScheme.primary)
-                    Spacer(Modifier.height(8.dp))
-                    Text("Tajweed refers to the rules governing pronunciation during recitation. It ensures that letters are pronounced from their correct articulation points with proper characteristics.", style = MaterialTheme.typography.bodyMedium)
-                    Spacer(Modifier.height(6.dp))
-                    Text("• Ghunnah: A nasal sound produced from the nose, applied to letters Meem (م) and Noon (ن) when they have a Shaddah.", style = MaterialTheme.typography.bodyMedium)
-                    Text("• Qalqalah: An echoing or bouncing sound made when pronouncing certain consonants (ق, ط, ب, ج, د) when they carry a Sukoon.", style = MaterialTheme.typography.bodyMedium)
-                    Text("• Madd: Prolongation of vowel sounds when followed by letters of elongation (Alif, Waw, Ya).", style = MaterialTheme.typography.bodyMedium)
+                AnimatedVisibility(visible = expanded) {
+                    Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)) {
+                        juzSurahs.forEach { surah ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth()
+                                    .clickable { navigator.goTo(QuranReaderKey(surah.id, surah.transliteration)) }
+                                    .padding(vertical = 8.dp, horizontal = 4.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(surah.transliteration, style = MaterialTheme.typography.bodyMedium)
+                                Text(surah.name, style = MaterialTheme.typography.titleMedium, color = colorScheme.primary)
+                            }
+                        }
+                    }
                 }
             }
         }

@@ -17,20 +17,31 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneId
 
+import android.app.Application
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+
 class OverviewVM(
+    private val application: Application,
     private val appPreferenceRepo: AppPreferenceRepo
 ) : ViewModel() {
 
     private val _isRefreshingLocation = MutableStateFlow(false)
     val isRefreshingLocation = _isRefreshingLocation.asStateFlow()
 
-    val calcMethod = appPreferenceRepo.calcMethod
-    val asrSchool = appPreferenceRepo.asrSchool
+    val calcMethod = appPreferenceRepo.calcMethod.stateIn(
+        viewModelScope, SharingStarted.Eagerly, PrayerTimeCalculator.CalculationMethod.MWL
+    )
+    val asrSchool = appPreferenceRepo.asrSchool.stateIn(
+        viewModelScope, SharingStarted.Eagerly, PrayerTimeCalculator.AsrSchool.STANDARD
+    )
+    val timezoneId = appPreferenceRepo.timezoneId.stateIn(
+        viewModelScope, SharingStarted.Eagerly, "Asia/Riyadh"
+    )
 
     val cityName = appPreferenceRepo.cityName
     val latitude = appPreferenceRepo.latitude
     val longitude = appPreferenceRepo.longitude
-    val timezoneId = appPreferenceRepo.timezoneId
 
     val tasbihCount = appPreferenceRepo.tasbihCount
 
@@ -40,29 +51,7 @@ class OverviewVM(
     val maghribIqamaOffset = appPreferenceRepo.maghribIqamaOffset
     val ishaIqamaOffset = appPreferenceRepo.ishaIqamaOffset
 
-    val prayerTimes = combine(
-        latitude,
-        longitude,
-        timezoneId,
-        calcMethod,
-        asrSchool
-    ) { lat, lon, tz, method, school ->
-        val zoneId = try { ZoneId.of(tz) } catch (e: Exception) { ZoneId.systemDefault() }
-        val date = LocalDate.now(zoneId)
-        val zonedDateTime = date.atStartOfDay(zoneId)
-        val offsetHours = zonedDateTime.offset.totalSeconds / 3600.0
-
-        PrayerTimeCalculator.calculate(
-            date = date,
-            latitude = lat,
-            longitude = lon,
-            timezoneOffsetHours = offsetHours,
-            method = method,
-            asrSchool = school
-        )
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000),
+    private val _prayerTimes = MutableStateFlow(
         PrayerTimeCalculator.calculate(
             LocalDate.now(),
             21.3891,
@@ -71,6 +60,56 @@ class OverviewVM(
             PrayerTimeCalculator.CalculationMethod.MWL,
             PrayerTimeCalculator.AsrSchool.STANDARD
         )
+    )
+    val prayerTimes = _prayerTimes.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            combine(
+                latitude,
+                longitude,
+                timezoneId,
+                calcMethod,
+                asrSchool
+            ) { lat, lon, tz, method, school ->
+                CombinedState(lat, lon, tz, method, school)
+            }
+            .distinctUntilChanged()
+            .collect { state ->
+                recalculatePrayerTimes(state.lat, state.lon)
+            }
+        }
+    }
+
+    private fun recalculatePrayerTimes(lat: Double, lon: Double) {
+        val tz = timezoneId.value
+        val zoneId = try { ZoneId.of(tz) } catch (e: Exception) { ZoneId.systemDefault() }
+        val date = LocalDate.now(zoneId)
+        val zonedDateTime = date.atStartOfDay(zoneId)
+        val offsetHours = zonedDateTime.offset.totalSeconds / 3600.0
+
+        val times = PrayerTimeCalculator.calculate(
+            date = date,
+            latitude = lat,
+            longitude = lon,
+            timezoneOffsetHours = offsetHours,
+            method = calcMethod.value,
+            asrSchool = asrSchool.value
+        )
+        _prayerTimes.value = times
+
+        // Reschedule alarms for new location/methods
+        viewModelScope.launch {
+            IqamaAlarmManager.scheduleNextIqamaAlarm(application, appPreferenceRepo)
+        }
+    }
+
+    private data class CombinedState(
+        val lat: Double,
+        val lon: Double,
+        val tz: String,
+        val method: PrayerTimeCalculator.CalculationMethod,
+        val school: PrayerTimeCalculator.AsrSchool
     )
 
     fun refreshLocation(context: Context) {
