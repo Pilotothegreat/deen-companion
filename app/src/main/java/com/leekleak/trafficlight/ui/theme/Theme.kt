@@ -39,8 +39,18 @@ fun Theme(
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
-            val window = (view.context as android.app.Activity).window
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !isDark
+            var context = view.context
+            var activity: android.app.Activity? = null
+            while (context is android.content.ContextWrapper) {
+                if (context is android.app.Activity) {
+                    activity = context
+                    break
+                }
+                context = context.baseContext
+            }
+            activity?.window?.let { window ->
+                WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !isDark
+            }
         }
     }
 
