@@ -43,7 +43,6 @@ fun QuranAudioPlayer(surah: QuranHelper.Surah, modifier: Modifier = Modifier) {
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build()
     }
-    DisposableEffect(Unit) { onDispose { exoPlayer.release() } }
 
     fun playAyah(ayahNum: Int) {
         val surahStr = surah.id.toString().padStart(3, '0')
@@ -69,6 +68,7 @@ fun QuranAudioPlayer(surah: QuranHelper.Surah, modifier: Modifier = Modifier) {
         exoPlayer.addListener(listener)
         onDispose {
             exoPlayer.removeListener(listener)
+            exoPlayer.release()
         }
     }
 

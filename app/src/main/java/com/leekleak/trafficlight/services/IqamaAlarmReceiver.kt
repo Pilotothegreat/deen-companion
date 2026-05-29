@@ -24,21 +24,25 @@ class IqamaAlarmReceiver : BroadcastReceiver(), KoinComponent {
     private val repo: AppPreferenceRepo by inject()
 
     override fun onReceive(context: Context, intent: Intent) {
-        val prayerName = intent.getStringExtra("PRAYER_NAME") ?: "Prayer"
+        try {
+            val prayerName = intent.getStringExtra("PRAYER_NAME") ?: "Prayer"
 
-        showPrayerNotification(context, prayerName, isIqama = true)
+            showPrayerNotification(context, prayerName, isIqama = true)
 
-        // Reschedule next alarm
-        val pendingResult = goAsync()
-        val scope = CoroutineScope(Dispatchers.Default)
-        scope.launch {
-            try {
-                IqamaAlarmManager.scheduleNextIqamaAlarm(context, repo)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            } finally {
-                pendingResult.finish()
+            // Reschedule next alarm
+            val pendingResult = goAsync()
+            val scope = CoroutineScope(Dispatchers.Default)
+            scope.launch {
+                try {
+                    IqamaAlarmManager.scheduleNextIqamaAlarm(context, repo)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                } finally {
+                    pendingResult.finish()
+                }
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
