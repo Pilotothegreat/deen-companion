@@ -16,8 +16,12 @@ import org.koin.core.context.GlobalContext
 
 import androidx.core.app.NotificationManagerCompat
 import com.leekleak.trafficlight.R
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-class IqamaAlarmReceiver : BroadcastReceiver() {
+class IqamaAlarmReceiver : BroadcastReceiver(), KoinComponent {
+
+    private val repo: AppPreferenceRepo by inject()
 
     override fun onReceive(context: Context, intent: Intent) {
         val prayerName = intent.getStringExtra("PRAYER_NAME") ?: "Prayer"
@@ -25,13 +29,15 @@ class IqamaAlarmReceiver : BroadcastReceiver() {
         showPrayerNotification(context, prayerName, isIqama = true)
 
         // Reschedule next alarm
+        val pendingResult = goAsync()
         val scope = CoroutineScope(Dispatchers.Default)
         scope.launch {
             try {
-                val repo: AppPreferenceRepo = GlobalContext.get().get()
                 IqamaAlarmManager.scheduleNextIqamaAlarm(context, repo)
             } catch (e: Exception) {
                 e.printStackTrace()
+            } finally {
+                pendingResult.finish()
             }
         }
     }

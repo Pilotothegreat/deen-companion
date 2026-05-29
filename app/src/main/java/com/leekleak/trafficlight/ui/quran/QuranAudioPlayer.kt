@@ -58,14 +58,18 @@ fun QuranAudioPlayer(surah: QuranHelper.Surah, modifier: Modifier = Modifier) {
     // Auto-advance to next ayah using a separate state trigger to prevent unsafe Compose state mutation inside listener
     val playbackEnded = remember { mutableStateOf(false) }
 
-    LaunchedEffect(exoPlayer) {
-        exoPlayer.addListener(object : Player.Listener {
+    DisposableEffect(exoPlayer) {
+        val listener = object : Player.Listener {
             override fun onPlaybackStateChanged(state: Int) {
                 if (state == Player.STATE_ENDED) {
                     playbackEnded.value = true
                 }
             }
-        })
+        }
+        exoPlayer.addListener(listener)
+        onDispose {
+            exoPlayer.removeListener(listener)
+        }
     }
 
     LaunchedEffect(playbackEnded.value) {
