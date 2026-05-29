@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
-private val Context.appPreferences: DataStore<Preferences> by preferencesDataStore(name = "settings")
+val Context.appPreferences: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
 class AppPreferenceRepo (
     private val context: Context,

@@ -27,11 +27,9 @@ import android.content.res.Configuration
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-
-private val Context.appPreferences: DataStore<Preferences> by preferencesDataStore(name = "settings")
+import com.leekleak.trafficlight.database.appPreferences
 private val APP_LANGUAGE = stringPreferencesKey("app_language")
 
 class MainActivity : ComponentActivity() {
