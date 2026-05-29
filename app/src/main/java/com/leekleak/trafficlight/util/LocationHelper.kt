@@ -26,7 +26,7 @@ object LocationHelper {
         val hasCoarsePerm = context.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED
 
         if (hasGpsPerm || hasCoarsePerm) {
-            val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager ?: return@withContext null
             val providers = locationManager.getProviders(true)
             var bestLocation: Location? = null
 

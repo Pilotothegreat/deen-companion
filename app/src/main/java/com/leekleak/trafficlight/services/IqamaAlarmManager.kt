@@ -99,7 +99,7 @@ object IqamaAlarmManager {
 
         if (alarmDateTime != null) {
             try {
-                val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
                 val intent = Intent(context, IqamaAlarmReceiver::class.java).apply {
                     putExtra("PRAYER_NAME", nextPrayerName)
                 }

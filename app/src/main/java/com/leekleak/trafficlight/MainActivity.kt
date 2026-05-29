@@ -125,9 +125,13 @@ class MainActivity : ComponentActivity() {
                 var showExactAlarmRationale by remember { mutableStateOf(false) }
                 LaunchedEffect(Unit) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-                        if (!alarmManager.canScheduleExactAlarms()) {
-                            showExactAlarmRationale = true
+                        try {
+                            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
+                            if (alarmManager != null && !alarmManager.canScheduleExactAlarms()) {
+                                showExactAlarmRationale = true
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
                         }
                     }
                 }

@@ -22,7 +22,7 @@ import android.app.Application
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 class OverviewVM(
-    private val application: Application,
+    private val context: Context,
     private val appPreferenceRepo: AppPreferenceRepo
 ) : ViewModel() {
 
@@ -112,7 +112,7 @@ class OverviewVM(
         viewModelScope.launch {
             try {
                 appPreferenceRepo.setLastPrayerTimeUpdate(System.currentTimeMillis())
-                IqamaAlarmManager.scheduleNextIqamaAlarm(application, appPreferenceRepo)
+                IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
