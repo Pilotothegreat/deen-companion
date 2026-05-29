@@ -1,3 +1,4 @@
+// FIXED: Add Amiri Google Font, local amiri fallback fonts, and globally exposed arabicFontFamily
 package com.leekleak.trafficlight.ui.theme
 
 import androidx.compose.material3.Typography
@@ -16,6 +17,15 @@ private val provider = GoogleFont.Provider(
 )
 
 val nunitoFont = GoogleFont("Nunito")
+val amiriFont = GoogleFont("Amiri")
+
+val arabicFontFamily = FontFamily(
+    Font(googleFont = amiriFont, fontProvider = provider, weight = FontWeight.Normal),
+    Font(googleFont = amiriFont, fontProvider = provider, weight = FontWeight.Bold),
+    androidx.compose.ui.text.font.Font(R.font.amiri_regular, weight = FontWeight.Normal),
+    androidx.compose.ui.text.font.Font(R.font.amiri_bold, weight = FontWeight.Bold),
+)
+
 val nunitoFontFamily = FontFamily(
     Font(googleFont = nunitoFont, fontProvider = provider, weight = FontWeight.Normal),
     Font(googleFont = nunitoFont, fontProvider = provider, weight = FontWeight.Medium),
@@ -26,6 +36,11 @@ val nunitoFontFamily = FontFamily(
     androidx.compose.ui.text.font.Font(R.font.nunito_medium, weight = FontWeight.Medium),
     androidx.compose.ui.text.font.Font(R.font.nunito_semibold, weight = FontWeight.SemiBold),
     androidx.compose.ui.text.font.Font(R.font.nunito_bold, weight = FontWeight.Bold),
+    // Arabic fallbacks:
+    Font(googleFont = amiriFont, fontProvider = provider, weight = FontWeight.Normal),
+    Font(googleFont = amiriFont, fontProvider = provider, weight = FontWeight.Bold),
+    androidx.compose.ui.text.font.Font(R.font.amiri_regular, weight = FontWeight.Normal),
+    androidx.compose.ui.text.font.Font(R.font.amiri_bold, weight = FontWeight.Bold),
 )
 
 val AppTypography = Typography(

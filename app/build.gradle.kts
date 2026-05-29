@@ -24,8 +24,8 @@ android {
         applicationId = "com.pilotothegreat.deencompanion"
         minSdk = 26
         targetSdk = 37
-        versionCode = 104
-        versionName = "1.0.4"
+        versionCode = 105
+        versionName = "1.0.5"
         base.archivesName = "deen-$versionName"
     }
     buildTypes {

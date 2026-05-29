@@ -1,3 +1,4 @@
+// FIXED: Play custom volume sound via MediaPlayer using notificationVolume setting
 package com.leekleak.trafficlight.services
 
 import android.app.NotificationChannel
@@ -11,9 +12,10 @@ import androidx.core.app.NotificationCompat
 import com.leekleak.trafficlight.database.AppPreferenceRepo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.koin.core.context.GlobalContext
-
 import androidx.core.app.NotificationManagerCompat
 import com.leekleak.trafficlight.R
 import org.koin.core.component.KoinComponent
@@ -29,11 +31,32 @@ class IqamaAlarmReceiver : BroadcastReceiver(), KoinComponent {
 
             showPrayerNotification(context, prayerName, isIqama = true)
 
-            // Reschedule next alarm
+            // Play notification sound with custom volume and reschedule next alarm
             val pendingResult = goAsync()
             val scope = CoroutineScope(Dispatchers.Default)
             scope.launch {
                 try {
+                    val volume = repo.notificationVolume.first()
+                    if (volume > 0) {
+                        try {
+                            val ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+                            val mediaPlayer = android.media.MediaPlayer().apply {
+                                setDataSource(context, ringtoneUri)
+                                setAudioAttributes(
+                                    android.media.AudioAttributes.Builder()
+                                        .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION)
+                                        .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                                        .build()
+                                )
+                                val vol = volume / 100.0f
+                                setVolume(vol, vol)
+                                prepare()
+                                start()
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
                     IqamaAlarmManager.scheduleNextIqamaAlarm(context, repo)
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -50,12 +73,14 @@ class IqamaAlarmReceiver : BroadcastReceiver(), KoinComponent {
         val title = if (isIqama) "Iqama — $prayerName" else "Prayer Time — $prayerName"
         val body  = if (isIqama) "Iqama for $prayerName has begun" else "Time for $prayerName prayer"
 
+        // Build notification without default sound so that our MediaPlayer sound plays cleanly at the customized volume
         val notification = NotificationCompat.Builder(context, "prayer_times")
             .setSmallIcon(R.drawable.notification)
             .setContentTitle(title)
             .setContentText(body)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setSound(null) // Silent notification builder sound to avoid double play
             .setAutoCancel(true)
             .build()
 

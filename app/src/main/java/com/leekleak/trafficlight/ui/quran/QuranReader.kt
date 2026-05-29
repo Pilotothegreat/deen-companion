@@ -51,7 +51,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 @Composable
-fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null) {
+fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null, autoPlay: Boolean = false) {
     val context = LocalContext.current
     val appPreferenceRepo: AppPreferenceRepo = koinInject()
     val scope = rememberCoroutineScope()
@@ -156,7 +156,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null)
                 }
             }
 
-            QuranAudioPlayer(surah, modifier = Modifier.align(Alignment.BottomCenter))
+            QuranAudioPlayer(surah, autoPlay = autoPlay, modifier = Modifier.align(Alignment.BottomCenter))
         }
 
         PageTitle(backButton = true, hazeState = hazeState, text = surahName)

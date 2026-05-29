@@ -1,3 +1,4 @@
+// FIXED: Auto-play next Surah when current Surah ends
 package com.leekleak.trafficlight.ui.quran
 
 import androidx.compose.foundation.layout.Arrangement
@@ -32,11 +33,15 @@ import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import org.koin.compose.koinInject
+import com.leekleak.trafficlight.ui.navigation.Navigator
 
 @Composable
-fun QuranAudioPlayer(surah: QuranHelper.Surah, modifier: Modifier = Modifier) {
+fun QuranAudioPlayer(surah: QuranHelper.Surah, autoPlay: Boolean = false, modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    var isPlaying by remember { mutableStateOf(false) }
+    val navigator: Navigator = koinInject()
+    val allSurahs = remember(context) { QuranHelper.getSurahs(context) }
+    var isPlaying by remember { mutableStateOf(autoPlay) }
     var currentAyah by remember { mutableStateOf(1) }
     val totalAyahs = surah.totalVerses
 
@@ -52,6 +57,13 @@ fun QuranAudioPlayer(surah: QuranHelper.Surah, modifier: Modifier = Modifier) {
         exoPlayer.prepare()
         exoPlayer.play()
         isPlaying = true
+    }
+
+    // Auto-play on launch if specified
+    LaunchedEffect(Unit) {
+        if (autoPlay) {
+            playAyah(1)
+        }
     }
 
     // Auto-advance to next ayah using a separate state trigger to prevent unsafe Compose state mutation inside listener
@@ -79,7 +91,18 @@ fun QuranAudioPlayer(surah: QuranHelper.Surah, modifier: Modifier = Modifier) {
                 currentAyah++
                 playAyah(currentAyah)
             } else {
-                isPlaying = false
+                val nextSurahId = if (surah.id == 114) 1 else surah.id + 1
+                val nextSurah = allSurahs.firstOrNull { it.id == nextSurahId }
+                if (nextSurah != null) {
+                    if (navigator.backStack.isNotEmpty()) {
+                        navigator.backStack[navigator.backStack.lastIndex] =
+                            com.leekleak.trafficlight.ui.navigation.QuranReaderKey(nextSurahId, nextSurah.transliteration, autoPlay = true)
+                    } else {
+                        navigator.goTo(com.leekleak.trafficlight.ui.navigation.QuranReaderKey(nextSurahId, nextSurah.transliteration, autoPlay = true))
+                    }
+                } else {
+                    isPlaying = false
+                }
             }
         }
     }

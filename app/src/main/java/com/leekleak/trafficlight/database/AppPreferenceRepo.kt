@@ -1,3 +1,4 @@
+// FIXED: Add hijriCalendarMethod, notificationVolume, and lastPrayerTimeUpdate preferences
 package com.leekleak.trafficlight.database
 
 import android.content.Context
@@ -10,6 +11,10 @@ import com.leekleak.trafficlight.util.valueOfOrNull
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+
+enum class HijriMethod {
+    REGIONAL, UMM_AL_QURA
+}
 
 val Context.appPreferences: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
@@ -92,6 +97,20 @@ class AppPreferenceRepo (
     val appLanguage: Flow<String> = data.map { it[APP_LANGUAGE] ?: "en" }.distinctUntilChanged()
     suspend fun setAppLanguage(value: String) = dataStore.edit { it[APP_LANGUAGE] = value }
 
+    // Hijri Calendar Method
+    val hijriCalendarMethod: Flow<HijriMethod> = data.map { prefs ->
+        prefs[HIJRI_METHOD]?.let { valueOfOrNull<HijriMethod>(it) } ?: HijriMethod.UMM_AL_QURA
+    }.distinctUntilChanged()
+    suspend fun setHijriCalendarMethod(value: HijriMethod) = dataStore.edit { it[HIJRI_METHOD] = value.name }
+
+    // Notification Volume (0-100)
+    val notificationVolume: Flow<Int> = data.map { it[NOTIFICATION_VOLUME] ?: 80 }.distinctUntilChanged()
+    suspend fun setNotificationVolume(value: Int) = dataStore.edit { it[NOTIFICATION_VOLUME] = value }
+
+    // Last Prayer Time Update (epoch millis)
+    val lastPrayerTimeUpdate: Flow<Long> = data.map { it[LAST_PRAYER_TIME_UPDATE] ?: 0L }.distinctUntilChanged()
+    suspend fun setLastPrayerTimeUpdate(value: Long) = dataStore.edit { it[LAST_PRAYER_TIME_UPDATE] = value }
+
     private companion object {
         private val LATITUDE = doublePreferencesKey("latitude")
         private val LONGITUDE = doublePreferencesKey("longitude")
@@ -110,5 +129,8 @@ class AppPreferenceRepo (
         private val FAVORITED_HADITHS = stringSetPreferencesKey("favorited_hadiths")
         private val QURAN_ARABIC_FONT_SIZE = intPreferencesKey("quran_arabic_font_size")
         private val APP_LANGUAGE = stringPreferencesKey("app_language")
+        private val HIJRI_METHOD = stringPreferencesKey("hijri_method")
+        private val NOTIFICATION_VOLUME = intPreferencesKey("notification_volume")
+        private val LAST_PRAYER_TIME_UPDATE = longPreferencesKey("last_prayer_time_update")
     }
 }

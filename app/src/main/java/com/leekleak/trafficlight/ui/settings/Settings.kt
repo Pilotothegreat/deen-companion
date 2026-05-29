@@ -1,3 +1,4 @@
+// FIXED: Remove recreate() on language change, add Hijri calendar method switch, and add custom volume slider preference
 package com.leekleak.trafficlight.ui.settings
 
 import android.Manifest
@@ -200,6 +201,41 @@ fun Settings(paddingValues: PaddingValues) {
             )
         }
 
+        // --- Notifications > Sound ---
+        categoryTitleSmall { "Notifications > Sound" }
+        item {
+            val volume by appPreferenceRepo.notificationVolume.collectAsState(initial = 80)
+            VolumeAdjustmentRow(
+                title = "Notification Volume",
+                value = volume,
+                onValueChange = { newVal ->
+                    scope.launch {
+                        appPreferenceRepo.setNotificationVolume(newVal)
+                    }
+                }
+            )
+        }
+
+        // --- Hijri Calendar settings ---
+        categoryTitleSmall { "Hijri Calendar" }
+        item {
+            val hijriMethod by appPreferenceRepo.hijriCalendarMethod.collectAsState(initial = com.leekleak.trafficlight.database.HijriMethod.UMM_AL_QURA)
+            SwitchPreference(
+                title = "Regional Moon Sighting",
+                summary = "Follow local moon sighting instead of Umm al-Qura",
+                icon = painterResource(R.drawable.calendar_month),
+                value = hijriMethod == com.leekleak.trafficlight.database.HijriMethod.REGIONAL,
+                onValueChanged = { isChecked ->
+                    scope.launch {
+                        appPreferenceRepo.setHijriCalendarMethod(
+                            if (isChecked) com.leekleak.trafficlight.database.HijriMethod.REGIONAL
+                            else com.leekleak.trafficlight.database.HijriMethod.UMM_AL_QURA
+                        )
+                    }
+                }
+            )
+        }
+
         // --- Quran Font Size settings ---
         categoryTitleSmall { "Quran Customization" }
         item {
@@ -212,7 +248,7 @@ fun Settings(paddingValues: PaddingValues) {
         }
         item {
             val quranFontSize by viewModel.quranArabicFontSize.collectAsState()
-            val arabicFontFamily = remember { FontFamily(Font(R.font.scheherazade_new)) }
+            val arabicFontFamily = com.leekleak.trafficlight.ui.theme.arabicFontFamily
             Text(
                 text = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
                 fontSize = quranFontSize.sp,
@@ -249,7 +285,6 @@ fun Settings(paddingValues: PaddingValues) {
                         selected = lang == "en",
                         onClick = {
                             viewModel.setAppLanguage("en")
-                            (context as? android.app.Activity)?.recreate()
                         },
                         shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
                     ) { Text("EN") }
@@ -257,7 +292,6 @@ fun Settings(paddingValues: PaddingValues) {
                         selected = lang == "ar",
                         onClick = {
                             viewModel.setAppLanguage("ar")
-                            (context as? android.app.Activity)?.recreate()
                         },
                         shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
                     ) { Text("AR") }
@@ -476,6 +510,35 @@ fun FontSizeAdjustmentRow(
             ) {
                 Text("+", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             }
+        }
+    }
+}
+
+@Composable
+fun VolumeAdjustmentRow(
+    title: String,
+    value: Int,
+    onValueChange: (Int) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .card()
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(text = title, style = MaterialTheme.typography.titleMedium)
+            Text(text = "Volume: $value%", style = MaterialTheme.typography.bodyMedium, color = colorScheme.secondary)
+            Spacer(Modifier.height(8.dp))
+            Slider(
+                value = value.toFloat(),
+                onValueChange = { onValueChange(it.toInt()) },
+                valueRange = 0f..100f,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }

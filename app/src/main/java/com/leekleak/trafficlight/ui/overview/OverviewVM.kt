@@ -1,3 +1,4 @@
+// FIXED: Record lastPrayerTimeUpdate in recalculatePrayerTimes
 package com.leekleak.trafficlight.ui.overview
 
 import android.content.Context
@@ -50,6 +51,8 @@ class OverviewVM(
     val maghribIqamaOffset = appPreferenceRepo.maghribIqamaOffset
     val ishaIqamaOffset = appPreferenceRepo.ishaIqamaOffset
 
+    val lastPrayerTimeUpdate = appPreferenceRepo.lastPrayerTimeUpdate
+
     private val _prayerTimes = MutableStateFlow(
         PrayerTimeCalculator.calculate(
             LocalDate.now(),
@@ -97,8 +100,9 @@ class OverviewVM(
         )
         _prayerTimes.value = times
 
-        // Reschedule alarms for new location/methods
+        // Reschedule alarms for new location/methods & record update timestamp
         viewModelScope.launch {
+            appPreferenceRepo.setLastPrayerTimeUpdate(System.currentTimeMillis())
             IqamaAlarmManager.scheduleNextIqamaAlarm(application, appPreferenceRepo)
         }
     }

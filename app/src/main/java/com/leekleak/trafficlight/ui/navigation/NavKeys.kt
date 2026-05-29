@@ -23,6 +23,6 @@ data object SettingsKey : NavKey
  * Details
  */
 @Serializable
-data class QuranReaderKey(val surahNumber: Int, val surahName: String, val scrollToVerse: Int? = null) : NavKey
+data class QuranReaderKey(val surahNumber: Int, val surahName: String, val scrollToVerse: Int? = null, val autoPlay: Boolean = false) : NavKey
 
 val mainScreens = listOf(OverviewKey, QuranKey, HadithKey)

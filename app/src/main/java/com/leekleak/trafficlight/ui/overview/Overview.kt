@@ -1,3 +1,4 @@
+// FIXED: Real-time countdown counter loop, location detection warning card, Qibla card subtitle, arabic font support, and last updated timestamp
 package com.leekleak.trafficlight.ui.overview
 
 import android.content.Context
@@ -57,6 +58,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -213,24 +215,33 @@ fun Overview(
 ) {
     val viewModel: OverviewVM = koinViewModel()
     val navigator: Navigator = koinInject()
+    val appPreferenceRepo: AppPreferenceRepo = koinInject()
     val context = LocalContext.current
+    val lang by appPreferenceRepo.appLanguage.collectAsState(initial = "en")
 
     val windowSizeClass = currentWindowAdaptiveInfoV2().windowSizeClass
     val hazeState = rememberHazeState()
     val scrollState = rememberScrollState()
 
     LifecycleResumeEffect(Unit) {
-        // Automatically check/refresh location on start
         viewModel.refreshLocation(context)
         onPauseOrDispose {}
     }
 
     val times by viewModel.prayerTimes.collectAsState(initial = viewModel.prayerTimes.value)
     val tz by viewModel.timezoneId.collectAsState(initial = "Asia/Riyadh")
+    val city by viewModel.cityName.collectAsState(initial = "")
+    val lat by viewModel.latitude.collectAsState(initial = 21.3891)
+    val lon by viewModel.longitude.collectAsState(initial = 39.8579)
     var nextPrayer by remember { mutableStateOf(NextPrayer("Fajr", "--", "--", 0L)) }
-    LaunchedEffect(times, tz) {
+    
+    val currentTimes by rememberUpdatedState(times)
+    val currentTz by rememberUpdatedState(tz)
+    val currentContext by rememberUpdatedState(context)
+    
+    LaunchedEffect(lang) {
         while(true) {
-            nextPrayer = calculateNextPrayer(times, tz, context)
+            nextPrayer = calculateNextPrayer(currentTimes, currentTz, currentContext)
             val delayMs = if (nextPrayer.durationSeconds < 3600) 1000L else 10000L
             kotlinx.coroutines.delay(delayMs)
         }
@@ -252,12 +263,17 @@ fun Overview(
         Box(Modifier.height(paddingTop - 8.dp))
 
         // Date Header
-        val gregFormatter = remember { java.time.format.DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", Locale.getDefault()) }
-        val hijriFormatter = remember { java.time.format.DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.getDefault()) }
-        val gregDateStr = remember { LocalDate.now().format(gregFormatter) }
-        val hijriDateStr = remember { 
+        val locale = remember(lang) { Locale(lang) }
+        val gregFormatter = remember(locale) { java.time.format.DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", locale) }
+        val hijriFormatter = remember(locale) { java.time.format.DateTimeFormatter.ofPattern("d MMMM yyyy", locale) }
+        val gregDateStr = remember(locale) { LocalDate.now().format(gregFormatter) }
+        val hijriMethod by appPreferenceRepo.hijriCalendarMethod.collectAsState(initial = com.leekleak.trafficlight.database.HijriMethod.UMM_AL_QURA)
+        val hijriDateStr = remember(locale, hijriMethod) { 
             try {
-                val hijri = HijrahDate.now()
+                var hijri = HijrahDate.now()
+                if (hijriMethod == com.leekleak.trafficlight.database.HijriMethod.REGIONAL) {
+                    hijri = HijrahDate.from(LocalDate.now().plusDays(1))
+                }
                 hijri.format(hijriFormatter) + " AH"
             } catch (e: Exception) {
                 ""
@@ -282,14 +298,65 @@ fun Overview(
                     color = colorScheme.primary
                 )
             }
-            // ADD city inline here ↓
-            val city by viewModel.cityName.collectAsState(initial = "")
             if (city.isNotEmpty()) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.LocationOn, contentDescription = null,
                         modifier = Modifier.size(12.dp), tint = colorScheme.secondary)
                     Spacer(Modifier.width(4.dp))
                     Text(city, style = MaterialTheme.typography.labelSmall, color = colorScheme.secondary)
+                }
+            }
+        }
+
+        // Location Not Detected Warning Card
+        val hasLocationPermission = remember(context) {
+            androidx.core.content.ContextCompat.checkSelfPermission(
+                context,
+                android.Manifest.permission.ACCESS_FINE_LOCATION
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED ||
+            androidx.core.content.ContextCompat.checkSelfPermission(
+                context,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        }
+
+        var warningDismissed by remember { mutableStateOf(false) }
+        val showWarning = !warningDismissed && (city.isEmpty() || (lat == 21.3891 && lon == 39.8579) || !hasLocationPermission)
+
+        if (showWarning) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                    .clickable {
+                        viewModel.refreshLocation(context)
+                        warningDismissed = true
+                    },
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = "Warning",
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Column {
+                        Text(
+                            text = "Location Not Detected",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Text(
+                            text = "Prayer times are using default Makkah location. Tap to refresh.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
                 }
             }
         }
@@ -539,6 +606,23 @@ fun OverviewItems(viewModel: OverviewVM, nextPrayerName: String) {
             }
         }
 
+        // Add "Last Updated" timestamp here
+        val lastUpdated by appPreferenceRepo.lastPrayerTimeUpdate.collectAsState(initial = 0L)
+        val lastUpdatedStr = remember(lastUpdated) {
+            if (lastUpdated == 0L) "--"
+            else {
+                val instant = java.time.Instant.ofEpochMilli(lastUpdated)
+                val ldt = java.time.LocalDateTime.ofInstant(instant, java.time.ZoneId.systemDefault())
+                ldt.toLocalTime().toLocaleHourString(context)
+            }
+        }
+        Text(
+            text = "Updated: $lastUpdatedStr",
+            style = MaterialTheme.typography.labelSmall,
+            color = colorScheme.secondary,
+            modifier = Modifier.padding(horizontal = 12.dp)
+        )
+
         QiblaCompactCard(viewModel)
 
         // Daily Verse Card
@@ -547,7 +631,7 @@ fun OverviewItems(viewModel: OverviewVM, nextPrayerName: String) {
         CategoryTitleText(stringResource(R.string.daily_inspiration))
         
         val quote = if (lang == "ar") currentInspiration.ar else currentInspiration.en
-        val arabicFontFamily = remember { FontFamily(Font(R.font.scheherazade_new)) }
+        val arabicFontFamily = com.leekleak.trafficlight.ui.theme.arabicFontFamily
         Box(
             modifier = Modifier
                 .card()
@@ -643,7 +727,7 @@ fun QiblaCompactCard(viewModel: OverviewVM) {
                         color = colorScheme.primary
                     )
                     Text(
-                        "from North",
+                        "Clockwise from True North",
                         style = MaterialTheme.typography.labelSmall,
                         color = colorScheme.secondary
                     )
@@ -664,4 +748,3 @@ fun QiblaCompactCard(viewModel: OverviewVM) {
         }
     }
 }
-
