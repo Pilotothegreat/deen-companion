@@ -44,9 +44,8 @@ class MainActivity : ComponentActivity() {
     private val appPreferenceRepo: AppPreferenceRepo by inject()
 
     override fun attachBaseContext(base: Context) {
-        val lang = runBlocking {
-            base.appPreferences.data.first()[APP_LANGUAGE] ?: "en"
-        }
+        val sharedPrefs = base.getSharedPreferences("settings", Context.MODE_PRIVATE)
+        val lang = sharedPrefs.getString("app_language", "en") ?: "en"
         val locale = Locale(lang)
         Locale.setDefault(locale)
         val config = Configuration(base.resources.configuration)

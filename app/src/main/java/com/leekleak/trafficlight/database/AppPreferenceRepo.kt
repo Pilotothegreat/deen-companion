@@ -95,7 +95,13 @@ class AppPreferenceRepo (
 
     // App Language ("en" or "ar")
     val appLanguage: Flow<String> = data.map { it[APP_LANGUAGE] ?: "en" }.distinctUntilChanged()
-    suspend fun setAppLanguage(value: String) = dataStore.edit { it[APP_LANGUAGE] = value }
+    suspend fun setAppLanguage(value: String) {
+        context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+            .edit()
+            .putString("app_language", value)
+            .apply()
+        dataStore.edit { it[APP_LANGUAGE] = value }
+    }
 
     // Hijri Calendar Method
     val hijriCalendarMethod: Flow<HijriMethod> = data.map { prefs ->
