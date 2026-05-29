@@ -30,14 +30,6 @@ import org.koin.compose.koinInject
 import java.util.Locale
 import android.content.res.Configuration
 import androidx.compose.material3.Text
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.stringPreferencesKey
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
-import com.leekleak.trafficlight.database.appPreferences
-
-private val APP_LANGUAGE = stringPreferencesKey("app_language")
 
 class MainActivity : ComponentActivity() {
 

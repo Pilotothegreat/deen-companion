@@ -112,40 +112,48 @@ class PrayerWidgetProvider : AppWidgetProvider(), KoinComponent {
     }
 
     private fun scheduleNextUpdate(context: Context) {
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(context, PrayerWidgetProvider::class.java).apply {
-            action = ACTION_UPDATE_WIDGET
-        }
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            2002,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+        try {
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
+            val intent = Intent(context, PrayerWidgetProvider::class.java).apply {
+                action = ACTION_UPDATE_WIDGET
+            }
+            val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                2002,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
 
-        // 10 minutes interval (600,000 ms)
-        val triggerTime = SystemClock.elapsedRealtime() + 10 * 60 * 1000L
-        alarmManager.setAndAllowWhileIdle(
-            AlarmManager.ELAPSED_REALTIME_WAKEUP,
-            triggerTime,
-            pendingIntent
-        )
+            // 10 minutes interval (600,000 ms)
+            val triggerTime = SystemClock.elapsedRealtime() + 10 * 60 * 1000L
+            alarmManager.setAndAllowWhileIdle(
+                AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                triggerTime,
+                pendingIntent
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     private fun cancelUpdateAlarm(context: Context) {
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(context, PrayerWidgetProvider::class.java).apply {
-            action = ACTION_UPDATE_WIDGET
-        }
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            2002,
-            intent,
-            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
-        )
-        if (pendingIntent != null) {
-            alarmManager.cancel(pendingIntent)
-            pendingIntent.cancel()
+        try {
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
+            val intent = Intent(context, PrayerWidgetProvider::class.java).apply {
+                action = ACTION_UPDATE_WIDGET
+            }
+            val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                2002,
+                intent,
+                PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+            )
+            if (pendingIntent != null) {
+                alarmManager.cancel(pendingIntent)
+                pendingIntent.cancel()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }

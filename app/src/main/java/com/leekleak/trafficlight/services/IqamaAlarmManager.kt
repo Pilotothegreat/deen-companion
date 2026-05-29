@@ -97,31 +97,37 @@ object IqamaAlarmManager {
         }
 
         if (alarmDateTime != null) {
-            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            val intent = Intent(context, IqamaAlarmReceiver::class.java).apply {
-                putExtra("PRAYER_NAME", nextPrayerName)
-            }
-            val pendingIntent = PendingIntent.getBroadcast(
-                context,
-                1001,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-
-            val epochMillis = alarmDateTime.atZone(zoneId).toInstant().toEpochMilli()
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && alarmManager.canScheduleExactAlarms()) {
-                alarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    epochMillis,
-                    pendingIntent
+            try {
+                val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                val intent = Intent(context, IqamaAlarmReceiver::class.java).apply {
+                    putExtra("PRAYER_NAME", nextPrayerName)
+                }
+                val pendingIntent = PendingIntent.getBroadcast(
+                    context,
+                    1001,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
-            } else {
-                alarmManager.setAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    epochMillis,
-                    pendingIntent
-                )
+
+                val epochMillis = alarmDateTime.atZone(zoneId).toInstant().toEpochMilli()
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && alarmManager.canScheduleExactAlarms()) {
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        epochMillis,
+                        pendingIntent
+                    )
+                } else {
+                    alarmManager.setAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        epochMillis,
+                        pendingIntent
+                    )
+                }
+            } catch (e: SecurityException) {
+                e.printStackTrace()
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }

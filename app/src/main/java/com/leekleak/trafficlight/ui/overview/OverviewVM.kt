@@ -67,18 +67,26 @@ class OverviewVM(
 
     init {
         viewModelScope.launch {
-            combine(
-                latitude,
-                longitude,
-                timezoneId,
-                calcMethod,
-                asrSchool
-            ) { lat, lon, tz, method, school ->
-                CombinedState(lat, lon, tz, method, school)
-            }
-            .distinctUntilChanged()
-            .collect { state ->
-                recalculatePrayerTimes(state.lat, state.lon)
+            try {
+                combine(
+                    latitude,
+                    longitude,
+                    timezoneId,
+                    calcMethod,
+                    asrSchool
+                ) { lat, lon, tz, method, school ->
+                    CombinedState(lat, lon, tz, method, school)
+                }
+                .distinctUntilChanged()
+                .collect { state ->
+                    try {
+                        recalculatePrayerTimes(state.lat, state.lon)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
@@ -102,8 +110,12 @@ class OverviewVM(
 
         // Reschedule alarms for new location/methods & record update timestamp
         viewModelScope.launch {
-            appPreferenceRepo.setLastPrayerTimeUpdate(System.currentTimeMillis())
-            IqamaAlarmManager.scheduleNextIqamaAlarm(application, appPreferenceRepo)
+            try {
+                appPreferenceRepo.setLastPrayerTimeUpdate(System.currentTimeMillis())
+                IqamaAlarmManager.scheduleNextIqamaAlarm(application, appPreferenceRepo)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
