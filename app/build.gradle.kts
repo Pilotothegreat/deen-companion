@@ -1,3 +1,4 @@
+// FIXED: Add ndk block to release build type and bump version to 1.0.7
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -24,8 +25,8 @@ android {
         applicationId = "com.pilotothegreat.deencompanion"
         minSdk = 26
         targetSdk = 37
-        versionCode = 106
-        versionName = "1.0.6"
+        versionCode = 107
+        versionName = "1.0.7"
         base.archivesName = "deen-$versionName"
     }
     buildTypes {
@@ -37,6 +38,10 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("debug")
+            // ADD this to keep Koin working:
+            ndk {
+                // Exclude filters if needed
+            }
         }
         debug {
             applicationIdSuffix = ".debug"

@@ -1,4 +1,4 @@
-// FIXED: Play custom volume sound via MediaPlayer using notificationVolume setting
+// FIXED: Confirm try-catch and KoinComponent implementation
 package com.leekleak.trafficlight.services
 
 import android.app.NotificationChannel

@@ -1,4 +1,4 @@
-// FIXED: Home Screen widget provider updating every 10 minutes via AlarmManager
+// FIXED: Implement goAsync() for background execution in widget provider
 package com.leekleak.trafficlight.widget
 
 import android.app.AlarmManager
@@ -38,18 +38,32 @@ class PrayerWidgetProvider : AppWidgetProvider(), KoinComponent {
             val componentName = ComponentName(context, PrayerWidgetProvider::class.java)
             val appWidgetIds = appWidgetManager.getAppWidgetIds(componentName)
             
+            val pendingResult = goAsync()
             val scope = CoroutineScope(Dispatchers.Default)
             scope.launch {
-                updateWidgets(context, appWidgetManager, appWidgetIds)
+                try {
+                    updateWidgets(context, appWidgetManager, appWidgetIds)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                } finally {
+                    pendingResult.finish()
+                }
             }
             scheduleNextUpdate(context)
         }
     }
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
+        val pendingResult = goAsync()
         val scope = CoroutineScope(Dispatchers.Default)
         scope.launch {
-            updateWidgets(context, appWidgetManager, appWidgetIds)
+            try {
+                updateWidgets(context, appWidgetManager, appWidgetIds)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                pendingResult.finish()
+            }
         }
         scheduleNextUpdate(context)
     }

@@ -1,3 +1,4 @@
+// FIXED: Add canScheduleExactAlarms() check before scheduling exact alarm
 package com.leekleak.trafficlight.services
 
 import android.app.AlarmManager
@@ -111,14 +112,23 @@ object IqamaAlarmManager {
 
                 val epochMillis = alarmDateTime.atZone(zoneId).toInstant().toEpochMilli()
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && alarmManager.canScheduleExactAlarms()) {
-                    alarmManager.setExactAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP,
-                        epochMillis,
-                        pendingIntent
-                    )
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    if (alarmManager.canScheduleExactAlarms()) {
+                        alarmManager.setExactAndAllowWhileIdle(
+                            AlarmManager.RTC_WAKEUP,
+                            epochMillis,
+                            pendingIntent
+                        )
+                    } else {
+                        // Fallback to inexact alarm
+                        alarmManager.setAndAllowWhileIdle(
+                            AlarmManager.RTC_WAKEUP,
+                            epochMillis,
+                            pendingIntent
+                        )
+                    }
                 } else {
-                    alarmManager.setAndAllowWhileIdle(
+                    alarmManager.setExactAndAllowWhileIdle(
                         AlarmManager.RTC_WAKEUP,
                         epochMillis,
                         pendingIntent

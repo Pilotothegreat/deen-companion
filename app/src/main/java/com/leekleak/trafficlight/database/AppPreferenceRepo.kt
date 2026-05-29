@@ -1,10 +1,9 @@
-// FIXED: Add hijriCalendarMethod, notificationVolume, and lastPrayerTimeUpdate preferences
+// FIXED: Make DataStore a singleton via companion object to prevent duplicate instance crash
 package com.leekleak.trafficlight.database
 
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
-import androidx.datastore.preferences.preferencesDataStore
 import com.leekleak.trafficlight.ui.theme.Theme
 import com.leekleak.trafficlight.util.PrayerTimeCalculator
 import com.leekleak.trafficlight.util.valueOfOrNull
@@ -16,12 +15,44 @@ enum class HijriMethod {
     REGIONAL, UMM_AL_QURA
 }
 
-val Context.appPreferences: DataStore<Preferences> by preferencesDataStore(name = "settings")
-
-class AppPreferenceRepo (
+class AppPreferenceRepo(
     private val context: Context,
 ) {
-    private val dataStore get() = context.appPreferences
+    companion object {
+        @Volatile
+        private var instance: DataStore<Preferences>? = null
+
+        private fun getDataStore(context: Context): DataStore<Preferences> {
+            return instance ?: synchronized(this) {
+                instance ?: PreferenceDataStoreFactory.create(
+                    produceFile = { context.filesDir.resolve("settings.preferences_pb") }
+                ).also { instance = it }
+            }
+        }
+
+        private val LATITUDE = doublePreferencesKey("latitude")
+        private val LONGITUDE = doublePreferencesKey("longitude")
+        private val CITY_NAME = stringPreferencesKey("city_name")
+        private val TIMEZONE_ID = stringPreferencesKey("timezone_id")
+        private val CALC_METHOD = stringPreferencesKey("calc_method")
+        private val ASR_SCHOOL = stringPreferencesKey("asr_school")
+        private val FAJR_IQAMA = intPreferencesKey("fajr_iqama")
+        private val DHUHR_IQAMA = intPreferencesKey("dhuhr_iqama")
+        private val ASR_IQAMA = intPreferencesKey("asr_iqama")
+        private val MAGHRIB_IQAMA = intPreferencesKey("maghrib_iqama")
+        private val ISHA_IQAMA = intPreferencesKey("isha_iqama")
+        private val TASBIH_COUNT = intPreferencesKey("tasbih_count")
+        private val NOTIFICATION_ENABLED = booleanPreferencesKey("notification_enabled")
+        private val THEME = stringPreferencesKey("theme")
+        private val FAVORITED_HADITHS = stringSetPreferencesKey("favorited_hadiths")
+        private val QURAN_ARABIC_FONT_SIZE = intPreferencesKey("quran_arabic_font_size")
+        private val APP_LANGUAGE = stringPreferencesKey("app_language")
+        private val HIJRI_METHOD = stringPreferencesKey("hijri_method")
+        private val NOTIFICATION_VOLUME = intPreferencesKey("notification_volume")
+        private val LAST_PRAYER_TIME_UPDATE = longPreferencesKey("last_prayer_time_update")
+    }
+
+    private val dataStore = getDataStore(context)
     private val data get() = dataStore.data
 
     // Location Settings
@@ -116,27 +147,4 @@ class AppPreferenceRepo (
     // Last Prayer Time Update (epoch millis)
     val lastPrayerTimeUpdate: Flow<Long> = data.map { it[LAST_PRAYER_TIME_UPDATE] ?: 0L }.distinctUntilChanged()
     suspend fun setLastPrayerTimeUpdate(value: Long) = dataStore.edit { it[LAST_PRAYER_TIME_UPDATE] = value }
-
-    private companion object {
-        private val LATITUDE = doublePreferencesKey("latitude")
-        private val LONGITUDE = doublePreferencesKey("longitude")
-        private val CITY_NAME = stringPreferencesKey("city_name")
-        private val TIMEZONE_ID = stringPreferencesKey("timezone_id")
-        private val CALC_METHOD = stringPreferencesKey("calc_method")
-        private val ASR_SCHOOL = stringPreferencesKey("asr_school")
-        private val FAJR_IQAMA = intPreferencesKey("fajr_iqama")
-        private val DHUHR_IQAMA = intPreferencesKey("dhuhr_iqama")
-        private val ASR_IQAMA = intPreferencesKey("asr_iqama")
-        private val MAGHRIB_IQAMA = intPreferencesKey("maghrib_iqama")
-        private val ISHA_IQAMA = intPreferencesKey("isha_iqama")
-        private val TASBIH_COUNT = intPreferencesKey("tasbih_count")
-        private val NOTIFICATION_ENABLED = booleanPreferencesKey("notification_enabled")
-        private val THEME = stringPreferencesKey("theme")
-        private val FAVORITED_HADITHS = stringSetPreferencesKey("favorited_hadiths")
-        private val QURAN_ARABIC_FONT_SIZE = intPreferencesKey("quran_arabic_font_size")
-        private val APP_LANGUAGE = stringPreferencesKey("app_language")
-        private val HIJRI_METHOD = stringPreferencesKey("hijri_method")
-        private val NOTIFICATION_VOLUME = intPreferencesKey("notification_volume")
-        private val LAST_PRAYER_TIME_UPDATE = longPreferencesKey("last_prayer_time_update")
-    }
 }
