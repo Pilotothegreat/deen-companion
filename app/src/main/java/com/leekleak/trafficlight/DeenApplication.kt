@@ -1,4 +1,4 @@
-// FIXED: Rename TrafficLightApplication to DeenApplication
+// FIXED: Add UncaughtExceptionHandler to log crash details before application exit
 package com.leekleak.trafficlight
 
 import android.app.Application
@@ -15,6 +15,12 @@ class DeenApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        // ADD crash logging
+        Thread.setDefaultUncaughtExceptionHandler { thread, exception ->
+            Timber.e(exception, "UNCAUGHT EXCEPTION on thread: $thread")
+            android.util.Log.e("CRASH", "Thread: ${thread.name}", exception)
+        }
 
         IqamaAlarmManager.createNotificationChannel(this)
         if (BuildConfig.DEBUG && Timber.forest().isEmpty()) {

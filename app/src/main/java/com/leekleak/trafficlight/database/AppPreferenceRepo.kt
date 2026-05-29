@@ -1,4 +1,4 @@
-// FIXED: Make DataStore a singleton via companion object to prevent duplicate instance crash
+// FIXED: Make DataStore a singleton via companion object with corruption handler and backup logic
 package com.leekleak.trafficlight.database
 
 import android.content.Context
@@ -10,6 +10,7 @@ import com.leekleak.trafficlight.util.valueOfOrNull
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import timber.log.Timber
 
 enum class HijriMethod {
     REGIONAL, UMM_AL_QURA
@@ -23,9 +24,24 @@ class AppPreferenceRepo(
         private var instance: DataStore<Preferences>? = null
 
         private fun getDataStore(context: Context): DataStore<Preferences> {
+            val file = context.filesDir.resolve("settings.preferences_pb")
+            
+            // Delete / backup large corrupted files
+            if (file.exists() && file.length() > 10000) {
+                try {
+                    file.renameTo(context.filesDir.resolve("settings.preferences_pb.backup"))
+                } catch (e: Exception) {
+                    Timber.e(e, "Failed to backup settings file")
+                }
+            }
+
             return instance ?: synchronized(this) {
                 instance ?: PreferenceDataStoreFactory.create(
-                    produceFile = { context.filesDir.resolve("settings.preferences_pb") }
+                    corruptionHandler = androidx.datastore.core.handlers.ReplaceFileCorruptionHandler { exception ->
+                        Timber.e(exception, "DataStore corrupted, resetting to empty preferences")
+                        emptyPreferences()
+                    },
+                    produceFile = { file }
                 ).also { instance = it }
             }
         }

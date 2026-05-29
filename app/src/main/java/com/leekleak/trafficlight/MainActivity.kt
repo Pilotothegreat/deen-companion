@@ -1,4 +1,4 @@
-// FIXED: Request SCHEDULE_EXACT_ALARM permission on first launch if Android 12+
+// FIXED: Request SCHEDULE_EXACT_ALARM permission on first launch if Android 12+ and add try-catch wrappers
 package com.leekleak.trafficlight
 
 import android.content.Context
@@ -21,6 +21,7 @@ import com.leekleak.trafficlight.ui.app.App
 import com.leekleak.trafficlight.ui.theme.Theme
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
+import timber.log.Timber
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -62,116 +63,121 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        enableEdgeToEdge()
+        try {
+            enableEdgeToEdge()
 
-        // Schedule iqama alarms on app launch
-        lifecycleScope.launch {
-            try {
-                IqamaAlarmManager.scheduleNextIqamaAlarm(this@MainActivity, appPreferenceRepo)
-            } catch (e: Exception) {
-                e.printStackTrace()
+            // Schedule iqama alarms on app launch
+            lifecycleScope.launch {
+                try {
+                    IqamaAlarmManager.scheduleNextIqamaAlarm(this@MainActivity, appPreferenceRepo)
+                } catch (e: Exception) {
+                    Timber.e(e, "Failed to schedule iqama alarms on launch")
+                }
             }
-        }
 
-        setContent {
-            AppWithLocale {
-                // Request location/notification permissions on first launch
-                val showRationale = remember { mutableStateOf(false) }
-                val permissionsLauncher = rememberLauncherForActivityResult(
-                    ActivityResultContracts.RequestMultiplePermissions()
-                ) { }
+            setContent {
+                AppWithLocale {
+                    // Request location/notification permissions on first launch
+                    val showRationale = remember { mutableStateOf(false) }
+                    val permissionsLauncher = rememberLauncherForActivityResult(
+                        ActivityResultContracts.RequestMultiplePermissions()
+                    ) { }
 
-                val permissionsToRequest = remember {
-                    mutableListOf(
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                    ).apply {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            add(Manifest.permission.POST_NOTIFICATIONS)
-                        }
-                    }.toTypedArray()
-                }
-
-                val context = LocalContext.current
-                LaunchedEffect(Unit) {
-                    val sharedPrefs = context.getSharedPreferences("deen_prefs", Context.MODE_PRIVATE)
-                    val isFirstLaunch = sharedPrefs.getBoolean("first_launch", true)
-                    if (isFirstLaunch) {
-                        sharedPrefs.edit().putBoolean("first_launch", false).apply()
-                        showRationale.value = true
+                    val permissionsToRequest = remember {
+                        mutableListOf(
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        ).apply {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                add(Manifest.permission.POST_NOTIFICATIONS)
+                            }
+                        }.toTypedArray()
                     }
-                }
 
-                if (showRationale.value) {
-                    androidx.compose.material3.AlertDialog(
-                        onDismissRequest = {
-                            showRationale.value = false
-                            permissionsLauncher.launch(permissionsToRequest)
-                        },
-                        title = { Text("Permissions Required") },
-                        text = { Text("This app needs location for accurate prayer times and notifications for Iqama reminders.") },
-                        confirmButton = {
-                            androidx.compose.material3.TextButton(onClick = {
+                    val context = LocalContext.current
+                    LaunchedEffect(Unit) {
+                        val sharedPrefs = context.getSharedPreferences("deen_prefs", Context.MODE_PRIVATE)
+                        val isFirstLaunch = sharedPrefs.getBoolean("first_launch", true)
+                        if (isFirstLaunch) {
+                            sharedPrefs.edit().putBoolean("first_launch", false).apply()
+                            showRationale.value = true
+                        }
+                    }
+
+                    if (showRationale.value) {
+                        androidx.compose.material3.AlertDialog(
+                            onDismissRequest = {
                                 showRationale.value = false
                                 permissionsLauncher.launch(permissionsToRequest)
-                            }) {
-                                Text("OK")
+                            },
+                            title = { Text("Permissions Required") },
+                            text = { Text("This app needs location for accurate prayer times and notifications for Iqama reminders.") },
+                            confirmButton = {
+                                androidx.compose.material3.TextButton(onClick = {
+                                    showRationale.value = false
+                                    permissionsLauncher.launch(permissionsToRequest)
+                                }) {
+                                    Text("OK")
+                                }
                             }
-                        }
-                    )
-                }
+                        )
+                    }
 
-                // Android 12+ (API 31+) Exact Alarm Permission Request
-                var showExactAlarmRationale by remember { mutableStateOf(false) }
-                LaunchedEffect(Unit) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        try {
-                            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
-                            if (alarmManager != null && !alarmManager.canScheduleExactAlarms()) {
-                                showExactAlarmRationale = true
+                    // Android 12+ (API 31+) Exact Alarm Permission Request
+                    var showExactAlarmRationale by remember { mutableStateOf(false) }
+                    LaunchedEffect(Unit) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            try {
+                                val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
+                                if (alarmManager != null && !alarmManager.canScheduleExactAlarms()) {
+                                    showExactAlarmRationale = true
+                                }
+                            } catch (e: Exception) {
+                                Timber.e(e, "Error checking exact alarm permission")
                             }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
                         }
                     }
-                }
 
-                if (showExactAlarmRationale) {
-                    androidx.compose.material3.AlertDialog(
-                        onDismissRequest = { showExactAlarmRationale = false },
-                        title = { Text("Exact Alarm Permission Required") },
-                        text = { Text("This app needs exact alarm permission for accurate Iqama reminders.") },
-                        confirmButton = {
-                            androidx.compose.material3.TextButton(onClick = {
-                                showExactAlarmRationale = false
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                    try {
-                                        val intent = Intent(
-                                            Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
-                                            Uri.parse("package:${context.packageName}")
-                                        )
-                                        context.startActivity(intent)
-                                    } catch (e: Exception) {
-                                        // Fallback in case Uri parse or launch throws
-                                        exactAlarmPermissionLauncher.launch(Manifest.permission.SCHEDULE_EXACT_ALARM)
+                    if (showExactAlarmRationale) {
+                        androidx.compose.material3.AlertDialog(
+                            onDismissRequest = { showExactAlarmRationale = false },
+                            title = { Text("Exact Alarm Permission Required") },
+                            text = { Text("This app needs exact alarm permission for accurate Iqama reminders.") },
+                            confirmButton = {
+                                androidx.compose.material3.TextButton(onClick = {
+                                    showExactAlarmRationale = false
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                        try {
+                                            val intent = Intent(
+                                                Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
+                                                Uri.parse("package:${context.packageName}")
+                                            )
+                                            context.startActivity(intent)
+                                        } catch (e: Exception) {
+                                            // Fallback in case Uri parse or launch throws
+                                            exactAlarmPermissionLauncher.launch(Manifest.permission.SCHEDULE_EXACT_ALARM)
+                                        }
                                     }
+                                }) {
+                                    Text("Grant")
                                 }
-                            }) {
-                                Text("Grant")
+                            },
+                            dismissButton = {
+                                androidx.compose.material3.TextButton(onClick = { showExactAlarmRationale = false }) {
+                                    Text("Cancel")
+                                }
                             }
-                        },
-                        dismissButton = {
-                            androidx.compose.material3.TextButton(onClick = { showExactAlarmRationale = false }) {
-                                Text("Cancel")
-                            }
-                        }
-                    )
-                }
+                        )
+                    }
 
-                Theme {
-                    App()
+                    Theme {
+                        App()
+                    }
                 }
             }
+        } catch (e: Exception) {
+            Timber.e(e, "MainActivity onCreate error")
+            throw e
         }
     }
 }

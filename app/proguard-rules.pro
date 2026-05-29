@@ -20,18 +20,25 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
-# FIXED: Proguard/R8 rules to prevent stripping of Koin, DataStore, and Coroutines in release builds
+# FIXED: Verify Proguard rules are actually being applied
 
-# Koin DI - Prevent stripping
+# Koin - MUST keep these
 -keep class org.koin.** { *; }
--keepclassmembers class **$KoinComponent { *; }
--keep class * implements org.koin.core.component.KoinComponent
--keepattributes Signature, InnerClasses, KotlinMetadata
+-keepclassmembers class * implements org.koin.core.component.KoinComponent { *; }
+-keepclassmembers class * extends org.koin.core.component.KoinComponent { *; }
 
-# DataStore - Prevent stripping
+# Koin Android
+-keep class org.koin.android.** { *; }
+-keep class org.koin.androidx.** { *; }
+
+# DataStore
 -keep class androidx.datastore.** { *; }
--keep class * implements androidx.datastore.core.DataStore
--keepclassmembers class **$ProtoSink { *; }
+-keep class * extends androidx.datastore.core.DataStore { *; }
+-keepclassmembers class * implements androidx.datastore.core.DataStore { *; }
+
+# Preferences
+-keep class androidx.datastore.preferences.** { *; }
+-keepclassmembers class androidx.datastore.preferences.core.Preferences$Key { *; }
 
 # Coroutines
 -keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
@@ -39,3 +46,9 @@
 -keepclassmembernames class kotlinx.** {
     volatile <fields>;
 }
+
+# Timber
+-keep class timber.log.** { *; }
+
+# Debug BuildConfig
+-dontwarn com.leekleak.trafficlight.BuildConfig

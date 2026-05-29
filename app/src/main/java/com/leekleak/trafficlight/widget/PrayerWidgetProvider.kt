@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.SystemClock
 import android.widget.RemoteViews
+import com.leekleak.trafficlight.MainActivity
 import com.leekleak.trafficlight.R
 import com.leekleak.trafficlight.database.AppPreferenceRepo
 import com.leekleak.trafficlight.ui.overview.calculateNextPrayer
@@ -112,7 +113,7 @@ class PrayerWidgetProvider : AppWidgetProvider(), KoinComponent {
                 views.setTextViewText(R.id.widget_prayer_time, next.timeStr)
 
                 // Set click intent to open main application
-                val mainIntent = Intent(context, Class.forName("com.leekleak.trafficlight.MainActivity"))
+                val mainIntent = Intent(context, MainActivity::class.java)
                 val pendingIntent = PendingIntent.getActivity(
                     context, 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
