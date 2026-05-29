@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import com.leekleak.trafficlight.database.AppPreferenceRepo
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -12,12 +13,11 @@ import timber.log.Timber
 
 class AutoStarter : BroadcastReceiver(), KoinComponent {
     private val appPreferenceRepo: AppPreferenceRepo by inject()
-    private val applicationScope: CoroutineScope by inject()
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
             val pendingResult = goAsync()
-            applicationScope.launch {
+            CoroutineScope(Dispatchers.Default).launch {
                 try {
                     IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
                 } catch (e: Exception) {

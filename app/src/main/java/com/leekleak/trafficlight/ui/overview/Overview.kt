@@ -636,11 +636,18 @@ fun QiblaCompactCard(viewModel: OverviewVM) {
                 Text(stringResource(R.string.qibla_direction), style = MaterialTheme.typography.titleMedium)
             }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    String.format(Locale.US, "%.1f° N", angle),
-                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                    color = colorScheme.primary
-                )
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        String.format(Locale.US, "%.1f°", angle),
+                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                        color = colorScheme.primary
+                    )
+                    Text(
+                        "from North",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colorScheme.secondary
+                    )
+                }
                 val primaryColor = colorScheme.primary
                 Canvas(Modifier.size(24.dp)) {
                     val arrowWidth = 4.dp.toPx()

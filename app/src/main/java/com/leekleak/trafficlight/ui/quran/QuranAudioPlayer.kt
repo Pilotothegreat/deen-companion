@@ -55,18 +55,29 @@ fun QuranAudioPlayer(surah: QuranHelper.Surah, modifier: Modifier = Modifier) {
         isPlaying = true
     }
 
-    // Auto-advance to next ayah
+    // Auto-advance to next ayah using a separate state trigger to prevent unsafe Compose state mutation inside listener
+    val playbackEnded = remember { mutableStateOf(false) }
+
     LaunchedEffect(exoPlayer) {
         exoPlayer.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(state: Int) {
-                if (state == Player.STATE_ENDED && currentAyah < totalAyahs) {
-                    currentAyah++
-                    playAyah(currentAyah)
-                } else if (state == Player.STATE_ENDED) {
-                    isPlaying = false
+                if (state == Player.STATE_ENDED) {
+                    playbackEnded.value = true
                 }
             }
         })
+    }
+
+    LaunchedEffect(playbackEnded.value) {
+        if (playbackEnded.value) {
+            playbackEnded.value = false
+            if (currentAyah < totalAyahs) {
+                currentAyah++
+                playAyah(currentAyah)
+            } else {
+                isPlaying = false
+            }
+        }
     }
 
     // M3 Bottom Player Card

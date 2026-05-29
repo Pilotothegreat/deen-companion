@@ -21,6 +21,11 @@ val nunitoFontFamily = FontFamily(
     Font(googleFont = nunitoFont, fontProvider = provider, weight = FontWeight.Medium),
     Font(googleFont = nunitoFont, fontProvider = provider, weight = FontWeight.SemiBold),
     Font(googleFont = nunitoFont, fontProvider = provider, weight = FontWeight.Bold),
+    // Local fallbacks for offline:
+    androidx.compose.ui.text.font.Font(R.font.nunito_regular, weight = FontWeight.Normal),
+    androidx.compose.ui.text.font.Font(R.font.nunito_medium, weight = FontWeight.Medium),
+    androidx.compose.ui.text.font.Font(R.font.nunito_semibold, weight = FontWeight.SemiBold),
+    androidx.compose.ui.text.font.Font(R.font.nunito_bold, weight = FontWeight.Bold),
 )
 
 val AppTypography = Typography(
