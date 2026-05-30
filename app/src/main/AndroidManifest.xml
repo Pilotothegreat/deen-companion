@@ -13,6 +13,16 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 
+    <queries>
+        <package android:name="om.com.bankmuscat.mobilebanking" />
+        <package android:name="om.nbo.nbo" />
+        <package android:name="com.bankdhofar.mobilebanking" />
+        <package android:name="com.soharinternational.mobilebanking" />
+        <package android:name="com.oab.mobile" />
+        <package android:name="com.ahlibank" />
+        <package android:name="om.com.omantel.wallet" />
+    </queries>
+
     <application
         android:name=".DeenApplication"
         android:allowBackup="false"
@@ -48,7 +58,7 @@
             android:exported="false">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.leekleak.trafficlight.widget.ACTION_UPDATE_WIDGET" />
+                <action android:name="com.pilotothegreat.deencompanion.widget.ACTION_UPDATE_WIDGET" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"

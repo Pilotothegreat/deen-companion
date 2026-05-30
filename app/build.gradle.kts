@@ -18,7 +18,7 @@ kotlin {
 }
 
 android {
-    namespace = "com.leekleak.trafficlight"
+    namespace = "com.pilotothegreat.deencompanion"
     compileSdk = 37
 
     defaultConfig {
@@ -64,6 +64,11 @@ android {
     }
     lint {
         abortOnError = false
+    }
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
     }
 }
 
@@ -115,3 +120,4 @@ dependencies {
     testImplementation(libs.turbine)
     testImplementation(libs.robolectric)
 }
+

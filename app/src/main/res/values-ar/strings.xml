@@ -34,4 +34,59 @@
     <string name="tasbih_count_label">عدد التسبيح</string>
     <string name="tasbih_tap_hint">اضغط للعدّ</string>
     <string name="iqama_time">الإقامة: %s</string>
+
+    <!-- Settings -->
+    <string name="prayer_calculations">حسابات الصلاة</string>
+    <string name="calculation_method">طريقة الحساب</string>
+    <string name="asr_juristic_method">المذهب في صلاة العصر</string>
+    <string name="iqama_offsets">فترات الإقامة</string>
+    <string name="minutes_after_adhan">الدقائق بعد الأذان لكل صلاة</string>
+    <string name="iqama_reminders">تنبيهات الإقامة</string>
+    <string name="iqama_reminders_summary">إرسال تنبيهات عند بدء وقت الإقامة</string>
+    <string name="notification_volume">صوت التنبيهات</string>
+    <string name="hijri_calendar">التقويم الهجري</string>
+    <string name="regional_moon_sighting">رؤية الهلال المحلية</string>
+    <string name="regional_moon_sighting_summary">اتبع رؤية الهلال المحلية بدلاً من أم القرى</string>
+    <string name="quran_customization">تخصيص المصحف</string>
+    <string name="arabic_text_size">حجم النص العربي</string>
+    <string name="app_language_title">لغة التطبيق</string>
+    <string name="app_theme">مظهر التطبيق</string>
+    <string name="support_developer">دعم المطور</string>
+    <string name="support_deen_companion">دعم تطبيق دين</string>
+    <string name="support_deen_summary">إذا كان هذا التطبيق يفيدك، يرجى التفكير في دعم تطويره.</string>
+    <string name="bank_transfer_phone_pay">التحويل البنكي / الدفع بالهاتف</string>
+    <string name="payment_tap_hint">اضغط للنسخ • يعمل مع بنك مسقط، عمان نت وغيرها</string>
+    <string name="source_app">التطبيق المصدر</string>
+    <string name="source_app_summary">مبني على github.com/leekleak/traffic-light</string>
+    <string name="application_settings">إعدادات التطبيق</string>
+    <string name="minutes_after_adhan_detail">دقيقة بعد الأذان</string>
+    <string name="arabic_text_size_sp">حجم الخط العربي بالنقاط (sp)</string>
+    <string name="volume_percent">مستوى الصوت: %1$d%%</string>
+    <string name="notifications">التنبيهات</string>
+    <string name="notifications_sound">التنبيهات &gt; الصوت</string>
+    <string name="about_desc">تطبيق إسلامي مفتوح المصدر للمسلمين.</string>
+    <string name="about_credits">مبني على تصميم وواجهة تطبيق Traffic Light بواسطة leekleak. تم تطويره باستخدام Material Design 3 و Jetpack Compose.</string>
+    <string name="last_updated">تم التحديث: %1$s</string>
+    <string name="calc_mwl">رابطة العالم الإسلامي</string>
+    <string name="calc_isna">الجمعية الإسلامية لأمريكا الشمالية</string>
+    <string name="calc_egypt">الهيئة المصرية العامة للمساحة</string>
+    <string name="calc_makkah">جامعة أم القرى، مكة</string>
+    <string name="calc_karachi">جامعة العلوم الإسلامية، كراتشي</string>
+    <string name="calc_jafari">شيعة إثنا عشرية (جعفري)</string>
+    <string name="calc_tehran">مؤسسة الجيوفيزياء، جامعة طهران</string>
+    <string name="asr_standard">الجمهور (الشافعي، المالكي، الحنبلي)</string>
+    <string name="asr_hanafi">المذهب الحنفي</string>
+
+    <!-- Overview -->
+    <string name="location_not_detected">لم يتم تحديد الموقع</string>
+    <string name="location_makkah_fallback">مواقيت الصلاة تستخدم موقع مكة الافتراضي. اضغط للتحديث.</string>
+    <string name="clockwise_from_true_north">مع اتجاه عقارب الساعة من الشمال الحقيقي</string>
+    <string name="reset_count">إعادة ضبط العداد</string>
+
+    <!-- Payment Bottom Sheet -->
+    <string name="payment_sheet_title">الدفع برقم الهاتف</string>
+    <string name="payment_sheet_desc">تم نسخ رقم الهاتف إلى الحافظة. اختر تطبيق البنك الخاص بك لفتحه ولصق الرقم:</string>
+    <string name="open_bank_app">فتح %1$s</string>
+    <string name="bank_not_installed">%1$s غير مثبت. يمكنك فتح تطبيق البنك الخاص بك يدويًا لإتمام التحويل.</string>
+    <string name="copied_to_clipboard">تم النسخ إلى الحافظة!</string>
 </resources>

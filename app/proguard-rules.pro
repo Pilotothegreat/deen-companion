@@ -51,4 +51,4 @@
 -keep class timber.log.** { *; }
 
 # Debug BuildConfig
--dontwarn com.leekleak.trafficlight.BuildConfig
+-dontwarn com.pilotothegreat.deencompanion.BuildConfig

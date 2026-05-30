@@ -35,4 +35,59 @@
     <string name="tasbih_count_label">Tasbih count</string>
     <string name="tasbih_tap_hint">Tap card to count dhikr</string>
     <string name="iqama_time">Iqama: %s</string>
+
+    <!-- Settings -->
+    <string name="prayer_calculations">Prayer Calculations</string>
+    <string name="calculation_method">Calculation Method</string>
+    <string name="asr_juristic_method">Asr Juristic Method</string>
+    <string name="iqama_offsets">Iqama Offsets</string>
+    <string name="minutes_after_adhan">Minutes after Adhan per prayer</string>
+    <string name="iqama_reminders">Iqama Reminders</string>
+    <string name="iqama_reminders_summary">Send alarm notifications when Iqama time begins</string>
+    <string name="notification_volume">Notification Volume</string>
+    <string name="hijri_calendar">Hijri Calendar</string>
+    <string name="regional_moon_sighting">Regional Moon Sighting</string>
+    <string name="regional_moon_sighting_summary">Follow local moon sighting instead of Umm al-Qura</string>
+    <string name="quran_customization">Quran Customization</string>
+    <string name="arabic_text_size">Arabic Text Size</string>
+    <string name="app_language_title">App Language</string>
+    <string name="app_theme">App Theme</string>
+    <string name="support_developer">Support the Developer</string>
+    <string name="support_deen_companion">Support Deen Companion</string>
+    <string name="support_deen_summary">If this app benefits you, consider supporting its development.</string>
+    <string name="bank_transfer_phone_pay">Bank Transfer / Phone Pay</string>
+    <string name="payment_tap_hint">Tap to copy • Works with BankMuscat, OmanNet &amp; others</string>
+    <string name="source_app">Source App</string>
+    <string name="source_app_summary">Based on github.com/leekleak/traffic-light</string>
+    <string name="application_settings">Application Settings</string>
+    <string name="minutes_after_adhan_detail">Minutes after Adhan</string>
+    <string name="arabic_text_size_sp">Arabic text size in sp</string>
+    <string name="volume_percent">Volume: %1$d%%</string>
+    <string name="notifications">Notifications</string>
+    <string name="notifications_sound">Notifications &gt; Sound</string>
+    <string name="about_desc">An open-source Islamic companion app for Muslims.</string>
+    <string name="about_credits">Based on the UI/UX of Traffic Light by leekleak. Built with Material Design 3 and Jetpack Compose.</string>
+    <string name="last_updated">Updated: %1$s</string>
+    <string name="calc_mwl">Muslim World League</string>
+    <string name="calc_isna">Islamic Society of North America</string>
+    <string name="calc_egypt">Egyptian General Authority of Survey</string>
+    <string name="calc_makkah">Umm al-Qura University, Makkah</string>
+    <string name="calc_karachi">University of Islamic Sciences, Karachi</string>
+    <string name="calc_jafari">Shia Ithna Ashari (Ja\'fari)</string>
+    <string name="calc_tehran">Institute of Geophysics, University of Tehran</string>
+    <string name="asr_standard">Standard (Shafi\'i, Maliki, Hanbali)</string>
+    <string name="asr_hanafi">Hanafi School</string>
+
+    <!-- Overview -->
+    <string name="location_not_detected">Location Not Detected</string>
+    <string name="location_makkah_fallback">Prayer times are using default Makkah location. Tap to refresh.</string>
+    <string name="clockwise_from_true_north">Clockwise from True North</string>
+    <string name="reset_count">Reset Count</string>
+
+    <!-- Payment Bottom Sheet -->
+    <string name="payment_sheet_title">Pay by Mobile Number</string>
+    <string name="payment_sheet_desc">We\'ve copied the phone number to your clipboard. Select your bank app below to open it and paste the number:</string>
+    <string name="open_bank_app">Open %1$s</string>
+    <string name="bank_not_installed">%1$s is not installed. You can open your banking app manually to complete the transfer.</string>
+    <string name="copied_to_clipboard">Copied to clipboard!</string>
 </resources>
