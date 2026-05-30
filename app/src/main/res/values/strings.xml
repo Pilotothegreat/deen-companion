@@ -94,4 +94,7 @@
     <string name="reciter_mishary">Mishary Alafasy</string>
     <string name="reciter_husary">Al-Husary</string>
     <string name="reciter_abdul_basit">Abdul Basit</string>
+    <string name="ramadan_approaching">Ramadan is approaching</string>
+    <string name="days_until_ramadan">%1$d days until Ramadan</string>
+    <string name="ramadan_hilal_sighting_subtitle">Official moon sighting announcement will be released by Oman Ministry of Awqaf &amp; Religious Affairs.</string>
 </resources>

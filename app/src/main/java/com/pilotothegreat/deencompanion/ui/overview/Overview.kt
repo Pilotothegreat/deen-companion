@@ -431,13 +431,13 @@ fun Overview(
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = if (lang == "ar") "اقترب شهر رمضان المبارك" else "Ramadan is approaching",
+                                    text = stringResource(R.string.ramadan_approaching),
                                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                     color = Color(0xFFC5A059) // Warm gold primary
                                 )
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
-                                    text = if (lang == "ar") "متبقي $daysUntilRamadan يوم على شهر رمضان" else "$daysUntilRamadan days until Ramadan",
+                                    text = stringResource(R.string.days_until_ramadan, daysUntilRamadan),
                                     style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
                                     color = Color.White
                                 )
@@ -459,9 +459,7 @@ fun Overview(
                         }
                         
                         Text(
-                            text = if (lang == "ar") 
-                                "ترقبوا إعلان رؤية الهلال من وزارة الأوقاف والشؤون الدينية بسلطنة عُمان." 
-                                else "Official moon sighting announcement will be released by Oman Ministry of Awqaf & Religious Affairs.",
+                            text = stringResource(R.string.ramadan_hilal_sighting_subtitle),
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.White.copy(alpha = 0.85f)
                         )
@@ -517,7 +515,7 @@ fun Overview(
         }
         Box(Modifier.height(paddingBottom - 8.dp))
     }
-    PageTitle(false, hazeState, "Deen") {
+    PageTitle(false, hazeState, stringResource(R.string.app_name)) {
         IconButton(
             modifier = Modifier.align(Alignment.CenterEnd),
             onClick = { navigator.goTo(SettingsKey) }

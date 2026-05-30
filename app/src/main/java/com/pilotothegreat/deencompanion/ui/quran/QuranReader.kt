@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import com.pilotothegreat.deencompanion.R
 import androidx.compose.material3.MaterialTheme
@@ -102,6 +103,29 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
         juzData.filter { it.surahNumber == surahNumber }
     }
 
+    val verseGroups = remember(surah, juzBoundariesForSurah) {
+        if (surah == null) return@remember emptyList<Pair<JuzBoundary?, List<QuranHelper.Verse>>>()
+        val groups = mutableListOf<Pair<JuzBoundary?, List<QuranHelper.Verse>>>()
+        var currentGroup = mutableListOf<QuranHelper.Verse>()
+        var currentBoundary: JuzBoundary? = null
+
+        surah.verses.forEach { verse ->
+            val boundary = juzBoundariesForSurah.firstOrNull { it.verseNumber == verse.id }
+            if (boundary != null) {
+                if (currentGroup.isNotEmpty()) {
+                    groups.add(Pair(currentBoundary, currentGroup))
+                    currentGroup = mutableListOf()
+                }
+                currentBoundary = boundary
+            }
+            currentGroup.add(verse)
+        }
+        if (currentGroup.isNotEmpty()) {
+            groups.add(Pair(currentBoundary, currentGroup))
+        }
+        groups
+    }
+
     LaunchedEffect(scrollToVerse, surah) {
         if (scrollToVerse != null) {
             currentAyah = scrollToVerse
@@ -150,15 +174,17 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                     }
                 }
 
-                surah.verses.forEach { verse ->
-                    val boundary = juzBoundariesForSurah.firstOrNull { it.verseNumber == verse.id }
+                verseGroups.forEach { (boundary, verses) ->
                     if (boundary != null) {
                         stickyHeader(key = "juz_${boundary.juzNumber}") {
                             JuzHeader(juzNumber = boundary.juzNumber)
                         }
                     }
 
-                    item(key = "verse_${verse.id}") {
+                    items(
+                        items = verses,
+                        key = { "verse_${it.id}" }
+                    ) { verse ->
                         val isHighlighted = verse.id == currentAyah
                         Column(
                             modifier = Modifier

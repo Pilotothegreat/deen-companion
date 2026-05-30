@@ -29,12 +29,12 @@
         android:label="@string/app_name"
         android:icon="@mipmap/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@style/Theme.TrafficLight"
+        android:theme="@style/Theme.DeenCompanion"
         >
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.TrafficLight"
+            android:theme="@style/Theme.DeenCompanion"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

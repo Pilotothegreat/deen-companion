@@ -93,4 +93,7 @@
     <string name="reciter_mishary">مشاري العفاسي</string>
     <string name="reciter_husary">الحصري</string>
     <string name="reciter_abdul_basit">عبد الباسط عبد الصمد</string>
+    <string name="ramadan_approaching">اقترب شهر رمضان المبارك</string>
+    <string name="days_until_ramadan">متبقي %1$d يوم على شهر رمضان</string>
+    <string name="ramadan_hilal_sighting_subtitle">ترقبوا إعلان رؤية الهلال من وزارة الأوقاف والشؤون الدينية بسلطنة عُمان.</string>
 </resources>
