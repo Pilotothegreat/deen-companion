@@ -56,6 +56,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.pilotothegreat.deencompanion.ui.hadith.Hadith
 import com.pilotothegreat.deencompanion.ui.overview.Overview
+import com.pilotothegreat.deencompanion.ui.qibla.Qibla
 import com.pilotothegreat.deencompanion.ui.quran.Quran
 import com.pilotothegreat.deencompanion.ui.quran.QuranReader
 import com.pilotothegreat.deencompanion.ui.settings.Settings
@@ -129,6 +130,7 @@ fun NavigationManager() {
                 entry<HadithKey> { Hadith(paddingValues) }
                 entry<SettingsKey> { Settings(paddingValues) }
                 entry<QuranReaderKey> { QuranReader(it.surahNumber, it.surahName, it.scrollToVerse, it.autoPlay) }
+                entry<QiblaKey> { Qibla() }
             },
             transitionSpec = {
                 if (backStack.size == 1) fadeIn(spring(dampingRatio = Spring.DampingRatioMediumBouncy)) togetherWith fadeOut(spring(dampingRatio = Spring.DampingRatioMediumBouncy))

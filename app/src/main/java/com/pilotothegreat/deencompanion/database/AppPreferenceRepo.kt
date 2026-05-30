@@ -58,6 +58,14 @@ class AppPreferenceRepo(
         private val NOTIFICATION_VOLUME = intPreferencesKey("notification_volume")
         private val LAST_PRAYER_TIME_UPDATE = longPreferencesKey("last_prayer_time_update")
         private val DISMISSED_RAMADAN_HILAL_YEAR = intPreferencesKey("dismissed_ramadan_hilal_year")
+        private val APP_LAUNCH_COUNT = intPreferencesKey("app_launch_count")
+        private val DONATION_PROMPT_DISMISSED = booleanPreferencesKey("donation_prompt_dismissed")
+        private val LAST_DONATION_PROMPT_SHOW_TIME = longPreferencesKey("last_donation_prompt_show_time")
+        private val GITHUB_CHECK_TIMESTAMP = longPreferencesKey("github_check_timestamp")
+        private val GITHUB_CHECK_LATEST_VERSION = stringPreferencesKey("github_check_latest_version")
+        private val TASBIH_DHIKR = stringPreferencesKey("tasbih_dhikr")
+        private val TASBIH_TARGET = intPreferencesKey("tasbih_target")
+        private val TASBIH_HISTORY = stringSetPreferencesKey("tasbih_history")
     }
 
     private val dataStore = getDataStore(context)
@@ -159,4 +167,37 @@ class AppPreferenceRepo(
     // Dismissed Ramadan Hilal card year
     val dismissedRamadanHilalYear: Flow<Int> = data.map { it[DISMISSED_RAMADAN_HILAL_YEAR] ?: 0 }.distinctUntilChanged()
     suspend fun setDismissedRamadanHilalYear(value: Int) = dataStore.edit { it[DISMISSED_RAMADAN_HILAL_YEAR] = value }
+
+    // App Launch Count
+    val appLaunchCount: Flow<Int> = data.map { it[APP_LAUNCH_COUNT] ?: 0 }.distinctUntilChanged()
+    suspend fun setAppLaunchCount(value: Int) = dataStore.edit { it[APP_LAUNCH_COUNT] = value }
+
+    // Donation prompt dismissed
+    val donationPromptDismissed: Flow<Boolean> = data.map { it[DONATION_PROMPT_DISMISSED] ?: false }.distinctUntilChanged()
+    suspend fun setDonationPromptDismissed(value: Boolean) = dataStore.edit { it[DONATION_PROMPT_DISMISSED] = value }
+
+    // Last time donation prompt was shown
+    val lastDonationPromptShowTime: Flow<Long> = data.map { it[LAST_DONATION_PROMPT_SHOW_TIME] ?: 0L }.distinctUntilChanged()
+    suspend fun setLastDonationPromptShowTime(value: Long) = dataStore.edit { it[LAST_DONATION_PROMPT_SHOW_TIME] = value }
+
+    // GitHub update cache
+    val githubCheckTimestamp: Flow<Long> = data.map { it[GITHUB_CHECK_TIMESTAMP] ?: 0L }.distinctUntilChanged()
+    suspend fun setGithubCheckTimestamp(value: Long) = dataStore.edit { it[GITHUB_CHECK_TIMESTAMP] = value }
+
+    val githubCheckLatestVersion: Flow<String> = data.map { it[GITHUB_CHECK_LATEST_VERSION] ?: "" }.distinctUntilChanged()
+    suspend fun setGithubCheckLatestVersion(value: String) = dataStore.edit { it[GITHUB_CHECK_LATEST_VERSION] = value }
+
+    // Tasbih Settings
+    val tasbihDhikr: Flow<String> = data.map { it[TASBIH_DHIKR] ?: "سبحان الله" }.distinctUntilChanged()
+    suspend fun setTasbihDhikr(value: String) = dataStore.edit { it[TASBIH_DHIKR] = value }
+
+    val tasbihTarget: Flow<Int> = data.map { it[TASBIH_TARGET] ?: 33 }.distinctUntilChanged()
+    suspend fun setTasbihTarget(value: Int) = dataStore.edit { it[TASBIH_TARGET] = value }
+
+    val tasbihHistory: Flow<Set<String>> = data.map { it[TASBIH_HISTORY] ?: emptySet() }.distinctUntilChanged()
+    suspend fun addTasbihHistoryItem(item: String) = dataStore.edit { prefs ->
+        val current = prefs[TASBIH_HISTORY] ?: emptySet()
+        prefs[TASBIH_HISTORY] = current + item
+    }
+    suspend fun clearTasbihHistory() = dataStore.edit { it[TASBIH_HISTORY] = emptySet() }
 }

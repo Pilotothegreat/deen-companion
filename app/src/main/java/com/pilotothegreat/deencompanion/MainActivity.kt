@@ -19,6 +19,7 @@ import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
 import com.pilotothegreat.deencompanion.services.IqamaAlarmManager
 import com.pilotothegreat.deencompanion.ui.app.App
 import com.pilotothegreat.deencompanion.ui.theme.Theme
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import timber.log.Timber
@@ -82,6 +83,12 @@ class MainActivity : ComponentActivity() {
                     IqamaAlarmManager.scheduleNextIqamaAlarm(this@MainActivity, appPreferenceRepo)
                 } catch (e: Exception) {
                     Timber.e(e, "Failed to schedule iqama alarms on launch")
+                }
+                try {
+                    val count = appPreferenceRepo.appLaunchCount.first()
+                    appPreferenceRepo.setAppLaunchCount(count + 1)
+                } catch (e: Exception) {
+                    Timber.e(e, "Failed to increment launch count")
                 }
             }
 

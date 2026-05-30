@@ -39,5 +39,23 @@ val databaseModule = module {
             throw e
         }
     }
+
+    single {
+        try {
+            get<AppDatabase>().hadithDao()
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to get hadithDao")
+            throw e
+        }
+    }
+
+    single {
+        try {
+            HadithRepository(androidContext(), get())
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to create HadithRepository")
+            throw e
+        }
+    }
 }
 

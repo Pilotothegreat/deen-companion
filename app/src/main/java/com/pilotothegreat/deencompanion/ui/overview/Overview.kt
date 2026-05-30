@@ -2,6 +2,11 @@
 package com.pilotothegreat.deencompanion.ui.overview
 
 import android.content.Context
+import android.os.Vibrator
+import android.os.Build
+import android.os.VibrationEffect
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.Spacer
 import kotlinx.coroutines.launch
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
@@ -42,7 +47,12 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.animation.core.Spring
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -54,6 +64,13 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.AlertDialog
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.toPath
@@ -98,6 +115,7 @@ import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
 import com.pilotothegreat.deencompanion.ui.navigation.Navigator
 import com.pilotothegreat.deencompanion.ui.navigation.SettingsKey
+import com.pilotothegreat.deencompanion.ui.navigation.QiblaKey
 import com.pilotothegreat.deencompanion.ui.theme.card
 import com.pilotothegreat.deencompanion.ui.theme.googleSans
 import com.pilotothegreat.deencompanion.util.CategoryTitleText
@@ -217,6 +235,7 @@ fun calculateNextPrayer(
     return NextPrayer(nextName, remainingStr, timeStr, totalSeconds)
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Overview(
     paddingValues: PaddingValues,
@@ -226,6 +245,7 @@ fun Overview(
     val appPreferenceRepo: AppPreferenceRepo = koinInject()
     val context = LocalContext.current
     val lang by appPreferenceRepo.appLanguage.collectAsState(initial = "en")
+    val coroutineScope = rememberCoroutineScope()
 
     val windowSizeClass = currentWindowAdaptiveInfoV2().windowSizeClass
     val hazeState = rememberHazeState()
@@ -242,6 +262,22 @@ fun Overview(
     val lat by viewModel.latitude.collectAsState(initial = 21.3891)
     val lon by viewModel.longitude.collectAsState(initial = 39.8579)
     var nextPrayer by remember { mutableStateOf(NextPrayer("Fajr", "--", "--", 0L)) }
+    var showTasbihSheet by remember { mutableStateOf(false) }
+
+    val launchCount by appPreferenceRepo.appLaunchCount.collectAsState(initial = 0)
+    val donationDismissed by appPreferenceRepo.donationPromptDismissed.collectAsState(initial = false)
+    val lastPromptTime by appPreferenceRepo.lastDonationPromptShowTime.collectAsState(initial = 0L)
+    
+    var showDonationDialog by remember { mutableStateOf(false) }
+    var showDonationBottomSheet by remember { mutableStateOf(false) }
+
+    LaunchedEffect(launchCount, donationDismissed, lastPromptTime) {
+        val now = System.currentTimeMillis()
+        val daysSinceLastPrompt = (now - lastPromptTime) / (1000L * 60 * 60 * 24)
+        if (launchCount >= 3 && !donationDismissed && daysSinceLastPrompt >= 3) {
+            showDonationDialog = true
+        }
+    }
     
     val currentTimes by rememberUpdatedState(times)
     val currentTz by rememberUpdatedState(tz)
@@ -380,7 +416,6 @@ fun Overview(
         }
 
         // Ramadan Hilal Card
-        val coroutineScope = rememberCoroutineScope()
         val dismissedYear by appPreferenceRepo.dismissedRamadanHilalYear.collectAsState(initial = 0)
         val currentHijri = remember(hijriMethod) {
             try {
@@ -504,14 +539,14 @@ fun Overview(
                 },
                 second = {
                     Column (Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OverviewItems(viewModel, nextPrayer.name)
+                        OverviewItems(viewModel, nextPrayer.name, navigator, onTasbihClick = { showTasbihSheet = true })
                     }
                 },
                 spacing = 16.dp
             )
         } else {
             HeroItems(scrollState, viewModel, nextPrayer)
-            OverviewItems(viewModel, nextPrayer.name)
+            OverviewItems(viewModel, nextPrayer.name, navigator, onTasbihClick = { showTasbihSheet = true })
         }
         Box(Modifier.height(paddingBottom - 8.dp))
     }
@@ -523,6 +558,97 @@ fun Overview(
             Icon(
                 painterResource(R.drawable.settings),
                 contentDescription = stringResource(R.string.settings)
+            )
+        }
+    }
+
+    if (showTasbihSheet) {
+        TasbihBottomSheet(viewModel = viewModel, onDismiss = { showTasbihSheet = false })
+    }
+
+    if (showDonationDialog) {
+        AlertDialog(
+            onDismissRequest = { 
+                showDonationDialog = false
+                coroutineScope.launch {
+                    appPreferenceRepo.setLastDonationPromptShowTime(System.currentTimeMillis())
+                }
+            },
+            title = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Favorite,
+                        contentDescription = null,
+                        tint = Color(0xFFC8102E)
+                    )
+                    Text(
+                        text = stringResource(R.string.donation_dialog_title),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(text = stringResource(R.string.donation_dialog_desc))
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0xFF556B2F).copy(alpha = 0.12f)
+                        )
+                    ) {
+                        Text(
+                            text = stringResource(R.string.palestine_cause_support),
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(12.dp),
+                            color = Color(0xFF556B2F),
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF556B2F)
+                    ),
+                    onClick = {
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                        val clip = android.content.ClipData.newPlainText("Phone", "91904926")
+                        clipboard.setPrimaryClip(clip)
+                        android.widget.Toast.makeText(context, context.getString(R.string.copied_to_clipboard), android.widget.Toast.LENGTH_SHORT).show()
+                        
+                        showDonationDialog = false
+                        showDonationBottomSheet = true
+                    }
+                ) {
+                    Text(stringResource(R.string.donate_now), color = Color.White)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDonationDialog = false
+                        coroutineScope.launch {
+                            appPreferenceRepo.setDonationPromptDismissed(true)
+                        }
+                    }
+                ) {
+                    Text(stringResource(R.string.dismiss))
+                }
+            }
+        )
+    }
+
+    if (showDonationBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showDonationBottomSheet = false },
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        ) {
+            com.pilotothegreat.deencompanion.ui.settings.PaymentBottomSheetContent(
+                context = context,
+                onDismiss = { showDonationBottomSheet = false }
             )
         }
     }
@@ -656,7 +782,7 @@ private fun OverviewHero(scrollState: ScrollState, viewModel: OverviewVM, nextPr
 }
 
 @Composable
-fun OverviewItems(viewModel: OverviewVM, nextPrayerName: String) {
+fun OverviewItems(viewModel: OverviewVM, nextPrayerName: String, navigator: Navigator, onTasbihClick: () -> Unit) {
     val times by viewModel.prayerTimes.collectAsState()
     val context = LocalContext.current
     val appPreferenceRepo: AppPreferenceRepo = koinInject()
@@ -756,7 +882,7 @@ fun OverviewItems(viewModel: OverviewVM, nextPrayerName: String) {
             modifier = Modifier.padding(horizontal = 12.dp)
         )
 
-        QiblaCompactCard(viewModel)
+        QiblaCompactCard(viewModel, navigator)
 
         // Daily Verse Card
         val inspirationIndex = remember { LocalDate.now().dayOfYear % inspirations.size }
@@ -811,6 +937,8 @@ fun OverviewItems(viewModel: OverviewVM, nextPrayerName: String) {
         }
         
         CategoryTitleText(stringResource(R.string.tasbih_counter))
+        val dhikr by viewModel.tasbihDhikr.collectAsState(initial = "سبحان الله")
+        val target by viewModel.tasbihTarget.collectAsState(initial = 33)
         Box(
             modifier = Modifier
                 .graphicsLayer {
@@ -819,8 +947,7 @@ fun OverviewItems(viewModel: OverviewVM, nextPrayerName: String) {
                 }
                 .card()
                 .clickable {
-                    haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                    viewModel.incrementTasbih()
+                    onTasbihClick()
                 }
                 .padding(16.dp)
                 .fillMaxWidth()
@@ -831,21 +958,21 @@ fun OverviewItems(viewModel: OverviewVM, nextPrayerName: String) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    Text(stringResource(R.string.tasbih_count_label), style = MaterialTheme.typography.titleMedium)
-                    Text(stringResource(R.string.tasbih_tap_hint), style = MaterialTheme.typography.labelSmall, color = colorScheme.secondary)
+                    Text(dhikr, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
+                    Text(stringResource(R.string.tasbih_target, target), style = MaterialTheme.typography.labelSmall, color = colorScheme.secondary)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text(
-                        text = count.toString(),
+                        text = "$count / $target",
                         style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
                         color = colorScheme.primary
                     )
-                    IconButton(onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        viewModel.resetTasbih()
-                    }) {
-                        Icon(Icons.Default.Restore, contentDescription = stringResource(R.string.reset_count))
-                    }
+                    Icon(
+                        imageVector = Icons.Default.Launch,
+                        contentDescription = "Open Tasbih",
+                        tint = colorScheme.secondary,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
             }
         }
@@ -853,12 +980,12 @@ fun OverviewItems(viewModel: OverviewVM, nextPrayerName: String) {
 }
 
 @Composable
-fun QiblaCompactCard(viewModel: OverviewVM) {
+fun QiblaCompactCard(viewModel: OverviewVM, navigator: Navigator) {
     val lat by viewModel.latitude.collectAsState(initial = 21.3891)
     val lon by viewModel.longitude.collectAsState(initial = 39.8579)
     val angle = remember(lat, lon) { calculateQiblaDirection(lat, lon) }
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().clickable { navigator.goTo(QiblaKey) },
         colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainerLow)
     ) {
         Row(
@@ -896,6 +1023,252 @@ fun QiblaCompactCard(viewModel: OverviewVM) {
                     }
                 }
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TasbihBottomSheet(
+    viewModel: OverviewVM,
+    onDismiss: () -> Unit
+) {
+    val count by viewModel.tasbihCount.collectAsState(initial = 0)
+    val dhikr by viewModel.tasbihDhikr.collectAsState(initial = "سبحان الله")
+    val target by viewModel.tasbihTarget.collectAsState(initial = 33)
+    val history by viewModel.tasbihHistory.collectAsState(initial = emptySet())
+    val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
+    val scope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    val vibrator = remember(context) { context.getSystemService(Vibrator::class.java) }
+    val tapScale = remember { Animatable(1f) }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surfaceContainer
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = 24.dp, vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.tasbih_counter),
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            // Select Dhikr
+            Text(
+                text = stringResource(R.string.tasbih_select_dhikr),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.align(Alignment.Start)
+            )
+
+            val dhikrPresets = listOf("سبحان الله", "الحمد لله", "لا إله إلا الله", "الله أكبر")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                dhikrPresets.forEach { preset ->
+                    FilterChip(
+                        selected = dhikr == preset,
+                        onClick = { viewModel.setTasbihDhikr(preset) },
+                        label = { Text(preset, fontSize = 12.sp) }
+                    )
+                }
+            }
+
+            // Target presets
+            Text(
+                text = stringResource(R.string.tasbih_target, target),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.align(Alignment.Start)
+            )
+
+            val targetPresets = listOf(33, 99, 100)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                targetPresets.forEach { preset ->
+                    FilterChip(
+                        selected = target == preset,
+                        onClick = { viewModel.setTasbihTarget(preset) },
+                        label = { Text(preset.toString()) }
+                    )
+                }
+                // Custom target option
+                var showCustomTargetDialog by remember { mutableStateOf(false) }
+                FilterChip(
+                    selected = !targetPresets.contains(target),
+                    onClick = { showCustomTargetDialog = true },
+                    label = { Text(stringResource(R.string.tasbih_custom)) }
+                )
+
+                if (showCustomTargetDialog) {
+                    var inputVal by remember { mutableStateOf(target.toString()) }
+                    AlertDialog(
+                        onDismissRequest = { showCustomTargetDialog = false },
+                        title = { Text(stringResource(R.string.tasbih_custom)) },
+                        text = {
+                            OutlinedTextField(
+                                value = inputVal,
+                                onValueChange = { inputVal = it.filter { char -> char.isDigit() } },
+                                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                                    keyboardType = androidx.compose.ui.text.input.KeyboardType.Number
+                                )
+                            )
+                        },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                val newTarget = inputVal.toIntOrNull() ?: 33
+                                viewModel.setTasbihTarget(newTarget)
+                                showCustomTargetDialog = false
+                            }) {
+                                Text("OK")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showCustomTargetDialog = false }) {
+                                Text("Cancel")
+                            }
+                        }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Huge tap button with progress indicator
+            Box(
+                modifier = Modifier
+                    .size(200.dp)
+                    .graphicsLayer {
+                        scaleX = tapScale.value
+                        scaleY = tapScale.value
+                    }
+                    .background(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = MaterialTheme.shapes.extraLarge
+                    )
+                    .clickable {
+                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                        
+                        // Spring animation
+                        scope.launch {
+                            tapScale.animateTo(0.92f, spring(stiffness = Spring.StiffnessHigh))
+                            tapScale.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
+                        }
+
+                        val nextCount = count + 1
+                        if (nextCount >= target) {
+                            // Milestone reached!
+                            try {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                    val timings = longArrayOf(0, 100, 50, 100, 50, 100)
+                                    val amplitudes = intArrayOf(0, 255, 0, 255, 0, 255)
+                                    vibrator?.vibrate(VibrationEffect.createWaveform(timings, amplitudes, -1))
+                                } else {
+                                    @Suppress("DEPRECATION")
+                                    vibrator?.vibrate(longArrayOf(0, 100, 50, 100, 50, 100), -1)
+                                }
+                            } catch (e: Exception) {}
+                            
+                            val timestamp = java.time.LocalDateTime.now()
+                                .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.US))
+                            viewModel.addTasbihHistoryItem("${target}x $dhikr • $timestamp")
+                            viewModel.resetTasbih()
+                        } else {
+                            viewModel.incrementTasbih()
+                        }
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                // Circular progress ring on the edge
+                CircularProgressIndicator(
+                    progress = { count.toFloat() / target.toFloat() },
+                    modifier = Modifier.fillMaxSize().padding(8.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    strokeWidth = 6.dp,
+                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                )
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = dhikr,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = count.toString(),
+                        style = MaterialTheme.typography.headlineLarge.copy(
+                            fontSize = 48.sp,
+                            fontWeight = FontWeight.ExtraBold
+                        ),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "/ $target",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // History section
+            if (history.isNotEmpty()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.tasbih_history),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    TextButton(onClick = { viewModel.clearTasbihHistory() }) {
+                        Text(stringResource(R.string.reset_count), color = MaterialTheme.colorScheme.error)
+                    }
+                }
+                
+                // Show last 3 items from history
+                val historyList = history.toList().sortedDescending().take(3)
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    historyList.forEach { historyItem ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+                        ) {
+                            Text(
+                                text = historyItem,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

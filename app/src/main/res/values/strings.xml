@@ -97,4 +97,61 @@
     <string name="ramadan_approaching">Ramadan is approaching</string>
     <string name="days_until_ramadan">%1$d days until Ramadan</string>
     <string name="ramadan_hilal_sighting_subtitle">Official moon sighting announcement will be released by Oman Ministry of Awqaf &amp; Religious Affairs.</string>
+
+    <!-- Hadith Library -->
+    <string name="collections_tab">Collections</string>
+    <string name="favorites_tab">Favorites</string>
+    <string name="search_results_count">Search Results (%1$d)</string>
+    <string name="search_empty_state">No results found</string>
+    <string name="compiled_by_prefix">Compiled by: %1$s</string>
+    <string name="hadiths_count_suffix">%1$d Selected Hadiths</string>
+    <string name="favorites_empty_state">No favorite hadiths yet.\nTap the heart icon on any hadith to save it here.</string>
+    <string name="hadith_number_prefix">Hadith #%1$d</string>
+    <string name="narrated_by_prefix">Narrated by: %1$s</string>
+    <string name="hadith_library_title">Hadith Library</string>
+
+    <!-- Quran Reader & Player -->
+    <string name="surah_not_found">Surah not found</string>
+    <string name="timer_off">Off</string>
+    <string name="timer_10m">10 Minutes</string>
+    <string name="timer_15m">15 Minutes</string>
+    <string name="timer_30m">30 Minutes</string>
+    <string name="timer_45m">45 Minutes</string>
+    <string name="timer_60m">60 Minutes</string>
+    <string name="player_ayah_progress">Ayah %1$d of %2$d</string>
+
+    <!-- Qibla Compass -->
+    <string name="qibla_compass">Qibla Compass</string>
+    <string name="compass_calibration_title">Calibration Required</string>
+    <string name="compass_calibration_desc">Hold the device flat and wave it in a figure-8 pattern to calibrate sensors.</string>
+    <string name="qibla_aligned">Aligned with Qibla!</string>
+    <string name="device_heading">Heading</string>
+    <string name="qibla_bearing">Qibla Bearing</string>
+    <string name="degrees_symbol">%1$.0f°</string>
+
+    <!-- Update Checker -->
+    <string name="check_for_updates">Check for Updates</string>
+    <string name="checking_updates">Checking for updates...</string>
+    <string name="up_to_date">App is up to date</string>
+    <string name="update_check_failed">Failed to check for updates</string>
+    <string name="last_checked">Last checked: %s</string>
+
+    <!-- Tasbih -->
+    <string name="tasbih_target">Goal: %1$d</string>
+    <string name="tasbih_dhikr_subhanallah">Subhan Allah (سبحان الله)</string>
+    <string name="tasbih_dhikr_alhamdulillah">Alhamdulillah (الحمد لله)</string>
+    <string name="tasbih_dhikr_lailahaillallah">La ilaha illa Allah (لا إله إلا الله)</string>
+    <string name="tasbih_dhikr_allahuakbar">Allahu Akbar (الله أكبر)</string>
+    <string name="tasbih_custom">Custom Goal</string>
+    <string name="tasbih_history">Session History</string>
+    <string name="tasbih_milestone">Masha\'Allah! Goal reached!</string>
+    <string name="tasbih_select_dhikr">Select Dhikr</string>
+
+    <!-- Donation -->
+    <string name="donation_dialog_title">Support Deen Companion</string>
+    <string name="donation_dialog_desc">Support our continuous development! Please note that a portion of all donations is dedicated to supporting the Palestinian cause.</string>
+    <string name="palestine_cause_support">A portion of donations directly supports the Palestinian humanitarian cause.</string>
+    <string name="palestine_badge">Supporting Palestine</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="donate_now">Donate Now</string>
 </resources>

@@ -44,6 +44,9 @@ class OverviewVM(
     val longitude = appPreferenceRepo.longitude
 
     val tasbihCount = appPreferenceRepo.tasbihCount
+    val tasbihDhikr = appPreferenceRepo.tasbihDhikr
+    val tasbihTarget = appPreferenceRepo.tasbihTarget
+    val tasbihHistory = appPreferenceRepo.tasbihHistory
 
     val fajrIqamaOffset = appPreferenceRepo.fajrIqamaOffset
     val dhuhrIqamaOffset = appPreferenceRepo.dhuhrIqamaOffset
@@ -162,6 +165,30 @@ class OverviewVM(
     fun resetTasbih() {
         viewModelScope.launch {
             appPreferenceRepo.setTasbihCount(0)
+        }
+    }
+
+    fun setTasbihDhikr(value: String) {
+        viewModelScope.launch {
+            appPreferenceRepo.setTasbihDhikr(value)
+        }
+    }
+
+    fun setTasbihTarget(value: Int) {
+        viewModelScope.launch {
+            appPreferenceRepo.setTasbihTarget(value)
+        }
+    }
+
+    fun addTasbihHistoryItem(item: String) {
+        viewModelScope.launch {
+            appPreferenceRepo.addTasbihHistoryItem(item)
+        }
+    }
+
+    fun clearTasbihHistory() {
+        viewModelScope.launch {
+            appPreferenceRepo.clearTasbihHistory()
         }
     }
 }

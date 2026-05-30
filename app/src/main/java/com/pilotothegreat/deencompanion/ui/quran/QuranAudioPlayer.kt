@@ -1,177 +1,73 @@
 package com.pilotothegreat.deencompanion.ui.quran
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.SkipNext
-import androidx.compose.material.icons.filled.SkipPrevious
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.snapshotFlow
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
-import androidx.media3.exoplayer.ExoPlayer
-import org.koin.compose.koinInject
 import com.pilotothegreat.deencompanion.R
-import com.pilotothegreat.deencompanion.ui.navigation.Navigator
-import kotlin.math.roundToInt
-
-enum class Reciter(val labelRes: Int, val folder: String) {
-    MISHARY(R.string.reciter_mishary, "Alafasy_128kbps"),
-    HUSARY(R.string.reciter_husary, "Husary_128kbps"),
-    ABDUL_BASIT(R.string.reciter_abdul_basit, "Abdul_Basit_Mujawwad_128kbps")
-}
+import com.pilotothegreat.deencompanion.services.QuranPlaybackManager
+import org.koin.compose.koinInject
 
 @Composable
 fun QuranAudioPlayer(
     surah: QuranHelper.Surah,
-    currentAyah: Int,
-    onAyahChanged: (Int) -> Unit,
-    autoPlay: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-    val navigator: Navigator = koinInject()
-    val allSurahs = remember(context) { QuranHelper.getSurahs(context) }
-    var isPlaying by remember { mutableStateOf(autoPlay) }
-    var lastPlayedAyah by remember { mutableStateOf(currentAyah) }
-    val totalAyahs = surah.totalVerses
+    val playbackManager: QuranPlaybackManager = koinInject()
+    val isPlaying by playbackManager.isPlaying.collectAsState()
+    val currentSurahId by playbackManager.currentSurahId.collectAsState()
+    val currentAyahId by playbackManager.currentAyahId.collectAsState()
+    val selectedReciter by playbackManager.selectedReciter.collectAsState()
+    val playbackSpeed by playbackManager.playbackSpeed.collectAsState()
+    val sleepTimerRemaining by playbackManager.sleepTimerRemaining.collectAsState()
+    val repeatMode by playbackManager.repeatMode.collectAsState()
+    val isBuffering by playbackManager.isBuffering.collectAsState()
 
     var showReciterMenu by remember { mutableStateOf(false) }
-    var selectedReciter by remember { mutableStateOf(Reciter.MISHARY) }
+    var showSpeedMenu by remember { mutableStateOf(false) }
+    var showTimerMenu by remember { mutableStateOf(false) }
 
-    val exoPlayer = remember {
-        ExoPlayer.Builder(context).build()
-    }
+    val playScale by animateFloatAsState(if (isPlaying) 1.05f else 1f)
 
-    fun playAyah(ayahNum: Int) {
-        lastPlayedAyah = ayahNum
-        onAyahChanged(ayahNum)
-        val surahStr = surah.id.toString().padStart(3, '0')
-        val ayahStr = ayahNum.toString().padStart(3, '0')
-        val url = "https://everyayah.com/data/${selectedReciter.folder}/$surahStr$ayahStr.mp3"
-        exoPlayer.setMediaItem(MediaItem.fromUri(url))
-        exoPlayer.prepare()
-        exoPlayer.play()
-        isPlaying = true
-    }
-
-    // Auto-play on launch if specified
-    LaunchedEffect(Unit) {
-        if (autoPlay) {
-            playAyah(1)
-        }
-    }
-
-    // Play ayah if parent changes selection (e.g. user clicked on a verse)
-    LaunchedEffect(currentAyah) {
-        if (currentAyah != lastPlayedAyah) {
-            playAyah(currentAyah)
-        }
-    }
-
-    // Auto-advance to next ayah using a separate state trigger
-    val playbackEnded = remember { mutableStateOf(false) }
-
-    DisposableEffect(exoPlayer) {
-        val listener = object : Player.Listener {
-            override fun onPlaybackStateChanged(state: Int) {
-                if (state == Player.STATE_ENDED) {
-                    playbackEnded.value = true
-                }
-            }
-        }
-        exoPlayer.addListener(listener)
-        onDispose {
-            exoPlayer.removeListener(listener)
-            exoPlayer.release()
-        }
-    }
-
-    LaunchedEffect(playbackEnded) {
-        snapshotFlow { playbackEnded.value }.collect { ended ->
-            if (ended) {
-                playbackEnded.value = false
-                if (currentAyah < totalAyahs) {
-                    playAyah(currentAyah + 1)
-                } else {
-                    val nextSurahId = if (surah.id == 114) 1 else surah.id + 1
-                    val nextSurah = allSurahs.firstOrNull { it.id == nextSurahId }
-                    if (nextSurah != null) {
-                        if (navigator.backStack.isNotEmpty()) {
-                            navigator.backStack[navigator.backStack.lastIndex] =
-                                com.pilotothegreat.deencompanion.ui.navigation.QuranReaderKey(nextSurahId, nextSurah.transliteration, autoPlay = true)
-                        } else {
-                            navigator.goTo(com.pilotothegreat.deencompanion.ui.navigation.QuranReaderKey(nextSurahId, nextSurah.transliteration, autoPlay = true))
-                        }
-                    } else {
-                        isPlaying = false
-                    }
-                }
-            }
-        }
-    }
-
-    // M3 Bottom Player Card
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(12.dp),
+            .padding(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-        shape = MaterialTheme.shapes.extraLarge
+        shape = MaterialTheme.shapes.large
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 12.dp, horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Row 1: Surah Title, Reciter Dropdown, Playback controls
+            // Row 1: Surah Title, Reciter Selector, Speed, Timer Icons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(modifier = Modifier.weight(1f)) {
+                Column {
                     Text(
                         text = surah.transliteration,
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                     )
                     
-                    // Reciter selector dropdown button
+                    // Reciter Trigger
                     Box {
                         Text(
                             text = stringResource(selectedReciter.labelRes),
@@ -185,112 +81,207 @@ fun QuranAudioPlayer(
                             expanded = showReciterMenu,
                             onDismissRequest = { showReciterMenu = false }
                         ) {
-                            Reciter.values().forEach { reciter ->
+                            Reciter.entries.forEach { reciter ->
                                 DropdownMenuItem(
                                     text = { Text(stringResource(reciter.labelRes)) },
                                     onClick = {
-                                        selectedReciter = reciter
+                                        playbackManager.setReciter(reciter, surah)
                                         showReciterMenu = false
-                                        // Replay current ayah with the new reciter if it was already playing
-                                        if (isPlaying) {
-                                            playAyah(currentAyah)
-                                        }
                                     }
                                 )
                             }
                         }
                     }
                 }
-                
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    // Previous
-                    FilledTonalIconButton(
-                        onClick = {
-                            if (currentAyah > 1) {
-                                val prev = currentAyah - 1
-                                if (isPlaying) {
-                                    playAyah(prev)
-                                } else {
-                                    lastPlayedAyah = prev
-                                    onAyahChanged(prev)
+
+                // Controls: Speed, Sleep Timer, Repeat
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Playback Speed
+                    Box {
+                        IconButton(onClick = { showSpeedMenu = true }) {
+                            Icon(
+                                imageVector = Icons.Default.Speed,
+                                contentDescription = "Playback Speed",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = showSpeedMenu,
+                            onDismissRequest = { showSpeedMenu = false }
+                        ) {
+                            listOf(0.75f, 1.0f, 1.25f, 1.5f, 2.0f).forEach { speed ->
+                                DropdownMenuItem(
+                                    text = { Text("${speed}x") },
+                                    onClick = {
+                                        playbackManager.setSpeed(speed)
+                                        showSpeedMenu = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    // Sleep Timer
+                    Box {
+                        IconButton(onClick = { showTimerMenu = true }) {
+                            BadgedBox(
+                                badge = {
+                                    if (sleepTimerRemaining > 0) {
+                                        Badge {
+                                            Text("${sleepTimerRemaining / 60}m")
+                                        }
+                                    }
                                 }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Snooze,
+                                    contentDescription = "Sleep Timer",
+                                    tint = if (sleepTimerRemaining > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                         }
-                    ) { Icon(Icons.Default.SkipPrevious, contentDescription = "Prev Ayah") }
-                    
-                    // Play/Pause
-                    FilledIconButton(
-                        onClick = {
-                            if (isPlaying) {
-                                exoPlayer.pause()
-                                isPlaying = false
-                            } else {
-                                playAyah(currentAyah)
+                        DropdownMenu(
+                            expanded = showTimerMenu,
+                            onDismissRequest = { showTimerMenu = false }
+                        ) {
+                            listOf(
+                                0 to stringResource(R.string.timer_off),
+                                10 to stringResource(R.string.timer_10m),
+                                15 to stringResource(R.string.timer_15m),
+                                30 to stringResource(R.string.timer_30m),
+                                45 to stringResource(R.string.timer_45m),
+                                60 to stringResource(R.string.timer_60m)
+                            ).forEach { (minutes, label) ->
+                                DropdownMenuItem(
+                                    text = { Text(label) },
+                                    onClick = {
+                                        playbackManager.setSleepTimer(minutes)
+                                        showTimerMenu = false
+                                    }
+                                )
                             }
                         }
-                    ) {
+                    }
+
+                    // Repeat Mode Toggle
+                    IconButton(onClick = { playbackManager.toggleRepeat() }) {
                         Icon(
-                            imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                            contentDescription = "Play/Pause"
+                            imageVector = if (repeatMode) Icons.Default.RepeatOne else Icons.Default.Repeat,
+                            contentDescription = "Toggle Repeat",
+                            tint = if (repeatMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    
-                    // Next
-                    FilledTonalIconButton(
-                        onClick = {
-                            if (currentAyah < totalAyahs) {
-                                val next = currentAyah + 1
-                                if (isPlaying) {
-                                    playAyah(next)
-                                } else {
-                                    lastPlayedAyah = next
-                                    onAyahChanged(next)
-                                }
-                            }
-                        }
-                    ) { Icon(Icons.Default.SkipNext, contentDescription = "Next Ayah") }
                 }
             }
-            
-            // Row 2: Progress Slider
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Slider(
-                    value = currentAyah.toFloat(),
-                    onValueChange = { targetVal ->
-                        val target = targetVal.roundToInt()
-                        if (target in 1..totalAyahs) {
-                            if (isPlaying) {
-                                playAyah(target)
-                            } else {
-                                lastPlayedAyah = target
-                                onAyahChanged(target)
-                            }
+
+            // Row 2: Playback Action Buttons
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Prev Ayah
+                IconButton(
+                    onClick = {
+                        if (currentAyahId > 1) {
+                            playbackManager.jumpToAyah(currentAyahId - 1)
                         }
                     },
-                    valueRange = 1f..totalAyahs.toFloat(),
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = SliderDefaults.colors(
-                        thumbColor = MaterialTheme.colorScheme.primary,
-                        activeTrackColor = MaterialTheme.colorScheme.primary,
-                        inactiveTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.24f)
-                    )
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    enabled = currentSurahId == surah.id
                 ) {
-                    Text(
-                        text = "Ayah $currentAyah",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.secondary
+                    Icon(
+                        imageVector = Icons.Default.SkipPrevious,
+                        contentDescription = "Previous Verse",
+                        modifier = Modifier.size(28.dp)
                     )
-                    Text(
-                        text = "Ayah $totalAyahs",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.secondary
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                // Play / Pause
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.size(64.dp)
+                ) {
+                    if (isBuffering) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(56.dp)
+                        )
+                    } else {
+                        FilledIconButton(
+                            onClick = {
+                                if (currentSurahId == surah.id) {
+                                    playbackManager.togglePlayPause()
+                                } else {
+                                    playbackManager.playSurah(surah, 1)
+                                }
+                            },
+                            modifier = Modifier
+                                .size(56.dp)
+                                .scale(playScale)
+                        ) {
+                            Icon(
+                                imageVector = if (isPlaying && currentSurahId == surah.id) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                contentDescription = "Play/Pause",
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                // Next Ayah
+                IconButton(
+                    onClick = {
+                        if (currentAyahId < surah.totalVerses) {
+                            playbackManager.jumpToAyah(currentAyahId + 1)
+                        }
+                    },
+                    enabled = currentSurahId == surah.id
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.SkipNext,
+                        contentDescription = "Next Verse",
+                        modifier = Modifier.size(28.dp)
                     )
+                }
+            }
+
+            // Row 3: Progress
+            if (currentSurahId == surah.id) {
+                val progress = currentAyahId.toFloat() / surah.totalVerses.toFloat()
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    LinearProgressIndicator(
+                        progress = { progress },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(6.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                        strokeCap = StrokeCap.Round
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = stringResource(R.string.player_ayah_progress, currentAyahId, surah.totalVerses),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
                 }
             }
         }
     }
 }
+
+private val QuranHelper.Surah.totalVerses: Int get() = this.totalVerses

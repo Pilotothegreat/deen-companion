@@ -25,8 +25,8 @@ android {
         applicationId = "com.pilotothegreat.deencompanion"
         minSdk = 26
         targetSdk = 37
-        versionCode = 115
-        versionName = "1.1.5"
+        versionCode = 116
+        versionName = "1.1.6"
         base.archivesName = "deen-$versionName"
     }
     buildTypes {
@@ -83,6 +83,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-text-google-fonts:1.7.6")
     implementation("androidx.media3:media3-exoplayer:1.3.1")
     implementation("androidx.media3:media3-ui:1.3.1")
+    implementation("androidx.media3:media3-session:1.3.1")
 
     implementation(libs.kotlinx.serialization.json)
 

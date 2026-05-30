@@ -14,10 +14,16 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -53,6 +59,7 @@ import com.pilotothegreat.deencompanion.util.PageTitle
 import com.pilotothegreat.deencompanion.util.PrayerTimeCalculator
 import com.pilotothegreat.deencompanion.util.categoryTitleSmall
 import com.pilotothegreat.deencompanion.util.px
+import com.pilotothegreat.deencompanion.util.toLocaleHourString
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
@@ -397,65 +404,140 @@ fun Settings(paddingValues: PaddingValues) {
                         style = MaterialTheme.typography.bodySmall,
                         color = colorScheme.secondary
                     )
-                    
-                    // GitHub Releases update checker chip
-                    val updateAvailable by viewModel.updateAvailable.collectAsState()
-                    if (updateAvailable != null) {
-                        Spacer(Modifier.height(12.dp))
-                        Card(
-                            colors = CardDefaults.cardColors(containerColor = colorScheme.primaryContainer),
-                            modifier = Modifier.clickable {
-                                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://github.com/Pilotothegreat/deen-companion/releases/latest"))
-                                context.startActivity(intent)
-                            }
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                              ) {
-                                Icon(
-                                    imageVector = Icons.Default.Launch,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp),
-                                    tint = colorScheme.primary
-                                )
-                                Text(
-                                    text = stringResource(R.string.update_available, updateAvailable ?: ""),
-                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = colorScheme.onPrimaryContainer
-                                )
-                            }
-                        }
-                    }
                 }
             }
         }
+        item {
+            val updateAvailable by viewModel.updateAvailable.collectAsState()
+            val updateState by viewModel.updateState.collectAsState()
+            val lastChecked by viewModel.lastCheckedTimestamp.collectAsState()
+
+            val lastCheckedStr = remember(lastChecked) {
+                if (lastChecked == 0L) "--"
+                else {
+                    val instant = java.time.Instant.ofEpochMilli(lastChecked)
+                    val ldt = java.time.LocalDateTime.ofInstant(instant, java.time.ZoneId.systemDefault())
+                    ldt.toLocalTime().toLocaleHourString(context)
+                }
+            }
+
+            val summaryText = when (updateState) {
+                SettingsVM.UpdateState.CHECKING -> stringResource(R.string.checking_updates)
+                SettingsVM.UpdateState.UPDATE_AVAILABLE -> stringResource(R.string.update_available, updateAvailable ?: "")
+                SettingsVM.UpdateState.UP_TO_DATE -> stringResource(R.string.up_to_date) + " • " + stringResource(R.string.last_checked, lastCheckedStr)
+                SettingsVM.UpdateState.FAILED -> stringResource(R.string.update_check_failed) + " • " + stringResource(R.string.last_checked, lastCheckedStr)
+                else -> stringResource(R.string.check_for_updates) + " • " + stringResource(R.string.last_checked, lastCheckedStr)
+            }
+
+            NavigatePreference(
+                title = stringResource(R.string.check_for_updates),
+                summary = summaryText,
+                icon = painterResource(R.drawable.version),
+                onClick = {
+                    if (updateState == SettingsVM.UpdateState.UPDATE_AVAILABLE) {
+                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://github.com/Pilotothegreat/deen-companion/releases/latest"))
+                        context.startActivity(intent)
+                    } else {
+                        viewModel.checkForUpdates(force = true)
+                    }
+                }
+            )
+        }
         categoryTitleSmall { stringResource(R.string.support_developer) }
         item {
+            val interactionSource = remember { MutableInteractionSource() }
+            val isPressed by interactionSource.collectIsPressedAsState()
+            val scale by animateFloatAsState(
+                targetValue = if (isPressed) 0.96f else 1f,
+                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+            )
             Card(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .graphicsLayer {
+                        scaleX = scale
+                        scaleY = scale
+                    }
+                    .padding(vertical = 4.dp)
+                    .drawBehind {
+                        // Kufiya pattern background
+                        val step = 16.dp.toPx()
+                        val strokeWidth = 1.dp.toPx()
+                        val lineColor = Color.LightGray.copy(alpha = 0.08f)
+                        var offset = 0f
+                        while (offset < size.width + size.height) {
+                            drawLine(
+                                color = lineColor,
+                                start = Offset(offset, 0f),
+                                end = Offset(0f, offset),
+                                strokeWidth = strokeWidth
+                            )
+                            drawLine(
+                                color = lineColor,
+                                start = Offset(size.width - offset, 0f),
+                                end = Offset(size.width, offset),
+                                strokeWidth = strokeWidth
+                            )
+                            offset += step
+                        }
+                    },
                 colors = CardDefaults.cardColors(containerColor = colorScheme.tertiaryContainer)
             ) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Icon(Icons.Default.Favorite, contentDescription = null, tint = colorScheme.onTertiaryContainer)
-                        Text(stringResource(R.string.support_deen_companion),
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                            color = colorScheme.onTertiaryContainer)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Icon(Icons.Default.Favorite, contentDescription = null, tint = Color(0xFFC8102E))
+                            Text(stringResource(R.string.support_deen_companion),
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = colorScheme.onTertiaryContainer)
+                        }
+                        
+                        Surface(
+                            shape = MaterialTheme.shapes.small,
+                            color = Color(0xFF556B2F).copy(alpha = 0.2f),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF556B2F).copy(alpha = 0.4f))
+                        ) {
+                            Text(
+                                text = stringResource(R.string.palestine_badge),
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                color = Color(0xFF556B2F)
+                            )
+                        }
                     }
                     Text(
                         text = stringResource(R.string.support_deen_summary),
                         style = MaterialTheme.typography.bodySmall,
-                        color = colorScheme.onTertiaryContainer
+                        color = colorScheme.onTertiaryContainer.copy(alpha = 0.8f)
                     )
+
+                    // Palestine cause note
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = colorScheme.surface.copy(alpha = 0.4f))
+                    ) {
+                        Text(
+                            text = stringResource(R.string.palestine_cause_support),
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(12.dp),
+                            color = Color(0xFF556B2F),
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+
                     Spacer(Modifier.height(4.dp))
                     // Phone number card with bottom sheet flow
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(colorScheme.tertiary.copy(alpha = 0.15f), MaterialTheme.shapes.medium)
-                            .clickable {
+                            .clickable(
+                                interactionSource = interactionSource,
+                                indication = androidx.compose.foundation.LocalIndication.current
+                            ) {
                                 // 1. Copy mobile number to clipboard
                                 val clipboard = context.getSystemService(ClipboardManager::class.java)
                                 clipboard.setPrimaryClip(ClipData.newPlainText("Phone", "91904926"))
@@ -531,14 +613,55 @@ fun PaymentBottomSheetContent(
         modifier = Modifier
             .fillMaxWidth()
             .navigationBarsPadding()
+            .drawBehind {
+                // Kufiya pattern background
+                val step = 20.dp.toPx()
+                val strokeWidth = 1.dp.toPx()
+                val lineColor = Color.LightGray.copy(alpha = 0.05f)
+                var offset = 0f
+                while (offset < size.width + size.height) {
+                    drawLine(
+                        color = lineColor,
+                        start = Offset(offset, 0f),
+                        end = Offset(0f, offset),
+                        strokeWidth = strokeWidth
+                    )
+                    drawLine(
+                        color = lineColor,
+                        start = Offset(size.width - offset, 0f),
+                        end = Offset(size.width, offset),
+                        strokeWidth = strokeWidth
+                    )
+                    offset += step
+                }
+            }
             .padding(start = 24.dp, end = 24.dp, bottom = 32.dp, top = 8.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(
-            text = stringResource(R.string.payment_sheet_title),
-            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-            color = colorScheme.primary
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.payment_sheet_title),
+                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                color = colorScheme.primary
+            )
+            
+            Surface(
+                shape = MaterialTheme.shapes.small,
+                color = Color(0xFFC8102E).copy(alpha = 0.15f),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFC8102E).copy(alpha = 0.3f))
+            ) {
+                Text(
+                    text = stringResource(R.string.palestine_badge),
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    color = Color(0xFFC8102E)
+                )
+            }
+        }
 
         Text(
             text = stringResource(R.string.payment_sheet_desc),
@@ -546,20 +669,54 @@ fun PaymentBottomSheetContent(
             color = colorScheme.onSurfaceVariant
         )
 
+        // Palestine warning card
+        Card(
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF556B2F).copy(alpha = 0.12f))
+        ) {
+            Row(
+                modifier = Modifier.padding(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Favorite,
+                    contentDescription = null,
+                    tint = Color(0xFFC8102E),
+                    modifier = Modifier.size(16.dp)
+                )
+                Text(
+                    text = stringResource(R.string.palestine_cause_support),
+                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                    color = Color(0xFF556B2F)
+                )
+            }
+        }
+
         Spacer(modifier = Modifier.height(4.dp))
 
-        // FIXED: Replaced LazyColumn with plain Column to avoid nested gesture conflicts inside ModalBottomSheet
-        // and changed remember key to bank.packageName to ensure fresh installation checks.
         Column(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
             omaniBankApps.forEach { bank ->
                 val isInstalled = remember(bank.packageName) { isPackageInstalled(context, bank.packageName) }
+                val bankInteractionSource = remember { MutableInteractionSource() }
+                val bankPressed by bankInteractionSource.collectIsPressedAsState()
+                val bankScale by animateFloatAsState(
+                    targetValue = if (bankPressed) 0.96f else 1f,
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+                )
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable {
+                        .graphicsLayer {
+                            scaleX = bankScale
+                            scaleY = bankScale
+                        }
+                        .clickable(
+                            interactionSource = bankInteractionSource,
+                            indication = androidx.compose.foundation.LocalIndication.current
+                        ) {
                             if (isInstalled) {
                                 val launchIntent = context.packageManager.getLaunchIntentForPackage(bank.packageName)
                                 if (launchIntent != null) {
