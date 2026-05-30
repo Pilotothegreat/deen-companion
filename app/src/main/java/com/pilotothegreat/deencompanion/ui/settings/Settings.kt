@@ -68,11 +68,11 @@ data class OmaniBankApp(
 )
 
 val omaniBankApps = listOf(
-    OmaniBankApp("Bank Muscat", "com.bankmuscat.mobileapp", "BM", Color(0xFFC70039)),
+    OmaniBankApp("Bank Muscat", "com.ducont.muscatbank", "BM", Color(0xFFC70039)),
     OmaniBankApp("bm Wallet", "app.banking.bankmuscat", "bm", Color(0xFFC70039)),
     OmaniBankApp("NBO", "om.nbo.nbo", "NBO", Color(0xFF003F88)),
     OmaniBankApp("Bank Dhofar", "com.bankdhofar.mobilebanking", "BD", Color(0xFFD62246)),
-    OmaniBankApp("Sohar International", "com.soharinternational.mobilebanking", "SI", Color(0xFFC5A059)),
+    OmaniBankApp("Sohar International", "com.BankSoharMB", "SI", Color(0xFFC5A059)),
     OmaniBankApp("Oman Arab Bank", "com.oab.mobile", "OAB", Color(0xFF006D77)),
     OmaniBankApp("Ahli Bank", "com.ahlibank", "AB", Color(0xFF8D5B4C))
 )
@@ -548,12 +548,14 @@ fun PaymentBottomSheetContent(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        LazyColumn(
+        // FIXED: Replaced LazyColumn with plain Column to avoid nested gesture conflicts inside ModalBottomSheet
+        // and changed remember key to bank.packageName to ensure fresh installation checks.
+        Column(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
-            items(omaniBankApps) { bank ->
-                val isInstalled = remember(context) { isPackageInstalled(context, bank.packageName) }
+            omaniBankApps.forEach { bank ->
+                val isInstalled = remember(bank.packageName) { isPackageInstalled(context, bank.packageName) }
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
