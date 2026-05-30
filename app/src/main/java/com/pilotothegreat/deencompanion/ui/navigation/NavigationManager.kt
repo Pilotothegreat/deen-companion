@@ -2,8 +2,12 @@ package com.pilotothegreat.deencompanion.ui.navigation
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -100,8 +104,8 @@ fun NavigationManager() {
             ) {
                 AnimatedVisibility(
                     visible = showBottomBar,
-                    enter = slideInVertically {it} + fadeIn(tween()),
-                    exit = slideOutVertically {it} + fadeOut(tween())
+                    enter = slideInVertically {it} + fadeIn(spring(dampingRatio = Spring.DampingRatioMediumBouncy)),
+                    exit = slideOutVertically {it} + fadeOut(spring(dampingRatio = Spring.DampingRatioMediumBouncy))
                 ) {
                     HorizontalFloatingToolbar(
                         modifier = Modifier.navBarShadow(),
@@ -127,18 +131,18 @@ fun NavigationManager() {
                 entry<QuranReaderKey> { QuranReader(it.surahNumber, it.surahName, it.scrollToVerse, it.autoPlay) }
             },
             transitionSpec = {
-                if (backStack.size == 1) fadeIn(tween()) togetherWith fadeOut(tween())
+                if (backStack.size == 1) fadeIn(spring(dampingRatio = Spring.DampingRatioMediumBouncy)) togetherWith fadeOut(spring(dampingRatio = Spring.DampingRatioMediumBouncy))
                 else {
                     slideInHorizontally { it } togetherWith
                     slideOutHorizontally { -it / 2 } + scaleOut(targetScale = 0.7f) + fadeOut()
                 }
             },
             popTransitionSpec = {
-                slideInHorizontally { -it / 2 } + scaleIn(initialScale = 0.7f) + fadeIn(tween()) togetherWith
+                slideInHorizontally { -it / 2 } + scaleIn(initialScale = 0.7f) + fadeIn(spring(dampingRatio = Spring.DampingRatioMediumBouncy)) togetherWith
                 slideOutHorizontally { it }
             },
             predictivePopTransitionSpec = {
-                slideInHorizontally { -it/2 } + scaleIn(initialScale = 0.7f) + fadeIn(tween()) togetherWith
+                slideInHorizontally { -it/2 } + scaleIn(initialScale = 0.7f) + fadeIn(spring(dampingRatio = Spring.DampingRatioMediumBouncy)) togetherWith
                 slideOutHorizontally { it }
             }
         )
@@ -150,6 +154,21 @@ fun NavigationButton(navigator: Navigator, route: NavKey, name: String, icon: Im
     val selected = navigator.current == route
     val horizontalPadding by animateDpAsState(if (selected) 24.dp else 12.dp)
     val haptic = LocalHapticFeedback.current
+    val scale = remember { Animatable(1f) }
+
+    LaunchedEffect(selected) {
+        if (selected) {
+            scale.animateTo(
+                targetValue = 1.15f,
+                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+            )
+            scale.animateTo(
+                targetValue = 1f,
+                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+            )
+        }
+    }
+
     Button (
         colors =
             if (navigator.current == route){
@@ -161,7 +180,11 @@ fun NavigationButton(navigator: Navigator, route: NavKey, name: String, icon: Im
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
             navigator.setTo(route)
         },
-        contentPadding = PaddingValues(vertical = 8.dp, horizontal = horizontalPadding)
+        contentPadding = PaddingValues(vertical = 8.dp, horizontal = horizontalPadding),
+        modifier = Modifier.graphicsLayer {
+            scaleX = scale.value
+            scaleY = scale.value
+        }
     ) {
         Row {
             Icon(

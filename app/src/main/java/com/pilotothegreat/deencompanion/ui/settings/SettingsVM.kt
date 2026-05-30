@@ -49,7 +49,53 @@ class SettingsVM(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 24)
 
     val appLanguage: StateFlow<String> = appPreferenceRepo.appLanguage
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "en")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "ar")
+
+    private val _updateAvailable = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
+    val updateAvailable: StateFlow<String?> = _updateAvailable
+
+    init {
+        checkForUpdates()
+    }
+
+    fun checkForUpdates() {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                val url = java.net.URL("https://api.github.com/repos/Pilotothegreat/deen-companion/releases/latest")
+                val connection = url.openConnection() as java.net.HttpURLConnection
+                connection.requestMethod = "GET"
+                connection.connectTimeout = 5000
+                connection.readTimeout = 5000
+                connection.setRequestProperty("User-Agent", "Deen-Companion-App")
+
+                if (connection.responseCode == 200) {
+                    val jsonStr = connection.inputStream.bufferedReader().use { it.readText() }
+                    val json = org.json.JSONObject(jsonStr)
+                    val tagName = json.getString("tag_name")
+                    val cleanTag = tagName.replace("v", "").trim()
+                    val currentVersion = com.pilotothegreat.deencompanion.BuildConfig.VERSION_NAME.replace("v", "").trim()
+                    if (isNewerVersion(currentVersion, cleanTag)) {
+                        _updateAvailable.value = tagName
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun isNewerVersion(current: String, latest: String): Boolean {
+        val currentParts = current.split(".").mapNotNull { it.toIntOrNull() }
+        val latestParts = latest.split(".").mapNotNull { it.toIntOrNull() }
+        val length = maxOf(currentParts.size, latestParts.size)
+        for (i in 0 until length) {
+            val curr = currentParts.getOrElse(i) { 0 }
+            val lat = latestParts.getOrElse(i) { 0 }
+            if (lat > curr) return true
+            if (curr > lat) return false
+        }
+        return false
+    }
 
     fun setTheme(value: Theme) {
         viewModelScope.launch {

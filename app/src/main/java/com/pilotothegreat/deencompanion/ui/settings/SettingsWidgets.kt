@@ -223,6 +223,9 @@ fun ThemePreferenceContainer(currentTheme: Theme, material: Boolean, onThemeChan
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 ThemePreference(themeLight, themeLight == currentTheme) { onThemeChanged(themeLight) }
                 ThemePreference(themeDark, themeDark == currentTheme) { onThemeChanged(themeDark) }
+                if (!material) {
+                    ThemePreference(Theme.Amoled, Theme.Amoled == currentTheme) { onThemeChanged(Theme.Amoled) }
+                }
             }
             ThemeAutoPreference(themeAuto, themeAuto == currentTheme) { onThemeChanged(themeAuto) }
         }

@@ -57,6 +57,7 @@ class AppPreferenceRepo(
         private val HIJRI_METHOD = stringPreferencesKey("hijri_method")
         private val NOTIFICATION_VOLUME = intPreferencesKey("notification_volume")
         private val LAST_PRAYER_TIME_UPDATE = longPreferencesKey("last_prayer_time_update")
+        private val DISMISSED_RAMADAN_HILAL_YEAR = intPreferencesKey("dismissed_ramadan_hilal_year")
     }
 
     private val dataStore = getDataStore(context)
@@ -132,7 +133,7 @@ class AppPreferenceRepo(
     }
 
     // App Language ("en" or "ar")
-    val appLanguage: Flow<String> = data.map { it[APP_LANGUAGE] ?: "en" }.distinctUntilChanged()
+    val appLanguage: Flow<String> = data.map { it[APP_LANGUAGE] ?: "ar" }.distinctUntilChanged()
     suspend fun setAppLanguage(value: String) {
         context.getSharedPreferences("settings", Context.MODE_PRIVATE)
             .edit()
@@ -154,4 +155,8 @@ class AppPreferenceRepo(
     // Last Prayer Time Update (epoch millis)
     val lastPrayerTimeUpdate: Flow<Long> = data.map { it[LAST_PRAYER_TIME_UPDATE] ?: 0L }.distinctUntilChanged()
     suspend fun setLastPrayerTimeUpdate(value: Long) = dataStore.edit { it[LAST_PRAYER_TIME_UPDATE] = value }
+
+    // Dismissed Ramadan Hilal card year
+    val dismissedRamadanHilalYear: Flow<Int> = data.map { it[DISMISSED_RAMADAN_HILAL_YEAR] ?: 0 }.distinctUntilChanged()
+    suspend fun setDismissedRamadanHilalYear(value: Int) = dataStore.edit { it[DISMISSED_RAMADAN_HILAL_YEAR] = value }
 }

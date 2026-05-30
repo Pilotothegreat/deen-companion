@@ -12,7 +12,8 @@ import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -67,13 +68,13 @@ data class OmaniBankApp(
 )
 
 val omaniBankApps = listOf(
-    OmaniBankApp("Bank Muscat", "om.com.bankmuscat.mobilebanking", "BM", Color(0xFFC70039)),
+    OmaniBankApp("Bank Muscat", "com.bankmuscat.mobileapp", "BM", Color(0xFFC70039)),
+    OmaniBankApp("bm Wallet", "app.banking.bankmuscat", "bm", Color(0xFFC70039)),
     OmaniBankApp("NBO", "om.nbo.nbo", "NBO", Color(0xFF003F88)),
     OmaniBankApp("Bank Dhofar", "com.bankdhofar.mobilebanking", "BD", Color(0xFFD62246)),
     OmaniBankApp("Sohar International", "com.soharinternational.mobilebanking", "SI", Color(0xFFC5A059)),
     OmaniBankApp("Oman Arab Bank", "com.oab.mobile", "OAB", Color(0xFF006D77)),
-    OmaniBankApp("Ahli Bank", "com.ahlibank", "AB", Color(0xFF8D5B4C)),
-    OmaniBankApp("Omantel Pay", "om.com.omantel.wallet", "OP", Color(0xFFE65F2B))
+    OmaniBankApp("Ahli Bank", "com.ahlibank", "AB", Color(0xFF8D5B4C))
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -351,7 +352,10 @@ fun Settings(paddingValues: PaddingValues) {
             val scroll = rememberScrollState(0)
             val panelWidth = 272.dp.px.toInt()
             LaunchedEffect(currentTheme) {
-                scroll.animateScrollTo(panelWidth * (currentTheme.ordinal / 3), tween())
+                scroll.animateScrollTo(
+                    panelWidth * (currentTheme.ordinal / 3),
+                    spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+                )
             }
             Row(
                 modifier = Modifier
@@ -388,12 +392,42 @@ fun Settings(paddingValues: PaddingValues) {
                         style = MaterialTheme.typography.bodyMedium,
                         color = colorScheme.onSurfaceVariant
                     )
-                    Spacer(Modifier.height(8.dp))
                     Text(
                         text = stringResource(R.string.about_credits),
                         style = MaterialTheme.typography.bodySmall,
                         color = colorScheme.secondary
                     )
+                    
+                    // GitHub Releases update checker chip
+                    val updateAvailable by viewModel.updateAvailable.collectAsState()
+                    if (updateAvailable != null) {
+                        Spacer(Modifier.height(12.dp))
+                        Card(
+                            colors = CardDefaults.cardColors(containerColor = colorScheme.primaryContainer),
+                            modifier = Modifier.clickable {
+                                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://github.com/Pilotothegreat/deen-companion/releases/latest"))
+                                context.startActivity(intent)
+                            }
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                              ) {
+                                Icon(
+                                    imageVector = Icons.Default.Launch,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp),
+                                    tint = colorScheme.primary
+                                )
+                                Text(
+                                    text = stringResource(R.string.update_available, updateAvailable ?: ""),
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = colorScheme.onPrimaryContainer
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -451,11 +485,11 @@ fun Settings(paddingValues: PaddingValues) {
         }
         item {
             NavigatePreference(
-                title = stringResource(R.string.source_app),
-                summary = stringResource(R.string.source_app_summary),
-                icon = painterResource(R.drawable.version),
+                title = stringResource(R.string.github_repository),
+                summary = stringResource(R.string.github_repository_summary),
+                icon = painterResource(R.drawable.github),
                 onClick = {
-                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://github.com/leekleak/traffic-light"))
+                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://github.com/Pilotothegreat/deen-companion"))
                     context.startActivity(intent)
                 }
             )

@@ -2,6 +2,7 @@
 package com.pilotothegreat.deencompanion.ui.overview
 
 import android.content.Context
+import kotlinx.coroutines.launch
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
@@ -34,12 +35,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Launch
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.animation.core.Spring
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -374,6 +379,123 @@ fun Overview(
             }
         }
 
+        // Ramadan Hilal Card
+        val coroutineScope = rememberCoroutineScope()
+        val dismissedYear by appPreferenceRepo.dismissedRamadanHilalYear.collectAsState(initial = 0)
+        val currentHijri = remember(hijriMethod) {
+            try {
+                var hijri = HijrahDate.now()
+                if (hijriMethod == com.pilotothegreat.deencompanion.database.HijriMethod.REGIONAL) {
+                    hijri = HijrahDate.from(LocalDate.now().plusDays(1))
+                }
+                hijri
+            } catch (e: Exception) {
+                null
+            }
+        }
+        val shabanMonth = 8
+        val isShaban = currentHijri?.get(java.time.temporal.ChronoField.MONTH_OF_YEAR) == shabanMonth
+        val shabanDay = currentHijri?.get(java.time.temporal.ChronoField.DAY_OF_MONTH) ?: 0
+        val isHilalPeriod = isShaban && shabanDay in 20..29
+        val hijriYear = currentHijri?.get(java.time.temporal.ChronoField.YEAR) ?: 0
+        val showHilalCard = isHilalPeriod && dismissedYear != hijriYear
+
+        if (showHilalCard) {
+            val daysUntilRamadan = 30 - shabanDay
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                shape = MaterialTheme.shapes.large,
+                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            Brush.linearGradient(
+                                colors = listOf(
+                                    Color(0xFF1A1B41), // Deep Indigo
+                                    Color(0xFF2C2F75), // Mid Indigo
+                                    Color(0xFF4C1C5C)  // Dark Purple/Indigo
+                                )
+                            )
+                        )
+                        .padding(16.dp)
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = if (lang == "ar") "اقترب شهر رمضان المبارك" else "Ramadan is approaching",
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = Color(0xFFC5A059) // Warm gold primary
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = if (lang == "ar") "متبقي $daysUntilRamadan يوم على شهر رمضان" else "$daysUntilRamadan days until Ramadan",
+                                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
+                                    color = Color.White
+                                )
+                            }
+                            IconButton(
+                                onClick = {
+                                    coroutineScope.launch {
+                                        appPreferenceRepo.setDismissedRamadanHilalYear(hijriYear)
+                                    }
+                                },
+                                modifier = Modifier.size(24.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Dismiss",
+                                    tint = Color.White.copy(alpha = 0.7f)
+                                )
+                            }
+                        }
+                        
+                        Text(
+                            text = if (lang == "ar") 
+                                "ترقبوا إعلان رؤية الهلال من وزارة الأوقاف والشؤون الدينية بسلطنة عُمان." 
+                                else "Official moon sighting announcement will be released by Oman Ministry of Awqaf & Religious Affairs.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.White.copy(alpha = 0.85f)
+                        )
+                        
+                        Spacer(modifier = Modifier.height(4.dp))
+                        
+                        Row(
+                            modifier = Modifier
+                                .clickable {
+                                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://mara.gov.om"))
+                                    context.startActivity(intent)
+                                }
+                                .background(Color(0xFFC5A059).copy(alpha = 0.2f), MaterialTheme.shapes.small)
+                                .padding(horizontal = 12.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Launch,
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp),
+                                tint = Color(0xFFFFD700)
+                            )
+                            Text(
+                                text = "mara.gov.om",
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                color = Color(0xFFFFD700)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
         if (windowSizeClass.isWidthAtLeastBreakpoint(400)) {
             EqualHeightRow (
                 modifier = Modifier.padding(horizontal = 16.dp),
@@ -676,9 +798,27 @@ fun OverviewItems(viewModel: OverviewVM, nextPrayerName: String) {
         // Tasbih Card
         val count by viewModel.tasbihCount.collectAsState(initial = 0)
         val haptic = LocalHapticFeedback.current
+        val tasbihScale = remember { Animatable(1f) }
+        LaunchedEffect(count) {
+            if (count > 0) {
+                tasbihScale.animateTo(
+                    targetValue = 1.1f,
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+                )
+                tasbihScale.animateTo(
+                    targetValue = 1f,
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+                )
+            }
+        }
+        
         CategoryTitleText(stringResource(R.string.tasbih_counter))
         Box(
             modifier = Modifier
+                .graphicsLayer {
+                    scaleX = tasbihScale.value
+                    scaleY = tasbihScale.value
+                }
                 .card()
                 .clickable {
                     haptic.performHapticFeedback(HapticFeedbackType.ContextClick)

@@ -56,8 +56,9 @@
     <string name="support_deen_summary">إذا كان هذا التطبيق يفيدك، يرجى التفكير في دعم تطويره.</string>
     <string name="bank_transfer_phone_pay">التحويل البنكي / الدفع بالهاتف</string>
     <string name="payment_tap_hint">اضغط للنسخ • يعمل مع بنك مسقط، عمان نت وغيرها</string>
-    <string name="source_app">التطبيق المصدر</string>
-    <string name="source_app_summary">مبني على github.com/leekleak/traffic-light</string>
+    <string name="github_repository">مستودع GitHub</string>
+    <string name="github_repository_summary">github.com/Pilotothegreat/deen-companion</string>
+    <string name="update_available">يتوفر تحديث جديد: %1$s</string>
     <string name="application_settings">إعدادات التطبيق</string>
     <string name="minutes_after_adhan_detail">دقيقة بعد الأذان</string>
     <string name="arabic_text_size_sp">حجم الخط العربي بالنقاط (sp)</string>
@@ -65,7 +66,7 @@
     <string name="notifications">التنبيهات</string>
     <string name="notifications_sound">التنبيهات &gt; الصوت</string>
     <string name="about_desc">تطبيق إسلامي مفتوح المصدر للمسلمين.</string>
-    <string name="about_credits">مبني على تصميم وواجهة تطبيق Traffic Light بواسطة leekleak. تم تطويره باستخدام Material Design 3 و Jetpack Compose.</string>
+    <string name="about_credits">تم تطويره باستخدام Material Design 3 و Jetpack Compose.</string>
     <string name="last_updated">تم التحديث: %1$s</string>
     <string name="calc_mwl">رابطة العالم الإسلامي</string>
     <string name="calc_isna">الجمعية الإسلامية لأمريكا الشمالية</string>
@@ -89,4 +90,7 @@
     <string name="open_bank_app">فتح %1$s</string>
     <string name="bank_not_installed">%1$s غير مثبت. يمكنك فتح تطبيق البنك الخاص بك يدويًا لإتمام التحويل.</string>
     <string name="copied_to_clipboard">تم النسخ إلى الحافظة!</string>
+    <string name="reciter_mishary">مشاري العفاسي</string>
+    <string name="reciter_husary">الحصري</string>
+    <string name="reciter_abdul_basit">عبد الباسط عبد الصمد</string>
 </resources>

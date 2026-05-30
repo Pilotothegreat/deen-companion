@@ -61,7 +61,7 @@ class MainActivity : ComponentActivity() {
         }
 
         val sharedPrefs = base.getSharedPreferences("settings", Context.MODE_PRIVATE)
-        val lang = sharedPrefs.getString("app_language", "en") ?: "en"
+        val lang = sharedPrefs.getString("app_language", "ar") ?: "ar"
         val locale = Locale(lang)
         Locale.setDefault(locale)
         val config = Configuration(base.resources.configuration)
@@ -195,7 +195,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppWithLocale(content: @Composable () -> Unit) {
     val appPreferenceRepo: AppPreferenceRepo = koinInject()
-    val lang by appPreferenceRepo.appLanguage.collectAsState(initial = "en")
+    val lang by appPreferenceRepo.appLanguage.collectAsState(initial = "ar")
     val context = LocalContext.current
 
     val localizedContext = remember(context, lang) {
@@ -218,6 +218,29 @@ fun AppWithLocale(content: @Composable () -> Unit) {
                 override fun getResources() = configurationContext.resources
                 override fun getAssets() = configurationContext.assets
                 override fun getTheme() = configurationContext.theme
+            }
+        }
+    }
+
+    LaunchedEffect(lang) {
+        val isRobolectric = try {
+            Class.forName("org.robolectric.Robolectric") != null
+        } catch (e: Exception) {
+            false
+        }
+        if (!isRobolectric) {
+            val localeList = androidx.core.os.LocaleListCompat.forLanguageTags(lang)
+            androidx.appcompat.app.AppCompatDelegate.setApplicationLocales(localeList)
+            
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                var actContext = context
+                while (actContext is android.content.ContextWrapper) {
+                    if (actContext is android.app.Activity) {
+                        actContext.recreate()
+                        break
+                    }
+                    actContext = actContext.baseContext
+                }
             }
         }
     }

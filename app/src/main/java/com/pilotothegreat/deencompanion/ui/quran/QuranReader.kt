@@ -179,7 +179,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                     fontFamily = scheherazadeFont,
                                     fontSize = arabicFontSize.sp,
                                     color = if (isHighlighted) colorScheme.primary else colorScheme.onSurface,
-                                    lineHeight = (arabicFontSize * 1.8f).sp,
+                                    lineHeight = (arabicFontSize * 2.4f).sp,
                                     textAlign = TextAlign.Start,
                                     modifier = Modifier.fillMaxWidth()
                                 )

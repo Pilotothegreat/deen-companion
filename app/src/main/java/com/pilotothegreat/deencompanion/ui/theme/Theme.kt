@@ -16,6 +16,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
@@ -66,7 +67,8 @@ enum class Theme {
     DarkMaterial,
     Auto,
     Light,
-    Dark;
+    Dark,
+    Amoled;
 
     @Composable
     fun getColors(): ColorScheme {
@@ -80,6 +82,7 @@ enum class Theme {
                 Auto -> if (darkTheme) darkScheme else lightScheme
                 Light -> lightScheme
                 Dark -> darkScheme
+                Amoled -> amoledScheme
             }
         }
 
@@ -90,6 +93,7 @@ enum class Theme {
             Auto -> if (darkTheme) darkScheme else lightScheme
             Light -> lightScheme
             Dark -> darkScheme
+            Amoled -> amoledScheme
         }
     }
 
@@ -99,6 +103,7 @@ enum class Theme {
             AutoMaterial, Auto -> stringResource(R.string.auto)
             LightMaterial, Light -> stringResource(R.string.light)
             DarkMaterial, Dark -> stringResource(R.string.dark)
+            Amoled -> "أسود - AMOLED"
         }
     }
 
@@ -109,7 +114,8 @@ enum class Theme {
             darkTheme && this == AutoMaterial ||
             darkTheme && this == Auto ||
             this == DarkMaterial ||
-            this == Dark
+            this == Dark ||
+            this == Amoled
         )
     }
 }
@@ -118,6 +124,13 @@ enum class Theme {
 @Composable
 fun Modifier.card(): Modifier {
     return this
+        .shadow(
+            elevation = 6.dp,
+            shape = MaterialTheme.shapes.large,
+            clip = false,
+            ambientColor = Color(0x44C5A028),
+            spotColor = Color(0x44C5A028)
+        )
         .clip(MaterialTheme.shapes.large)
         .background(colorScheme.surfaceContainer)
 }
@@ -203,5 +216,43 @@ internal val darkScheme = darkColorScheme(
     surfaceContainer = surfaceContainerDark,
     surfaceContainerHigh = surfaceContainerHighDark,
     surfaceContainerHighest = surfaceContainerHighestDark,
+)
+
+internal val amoledScheme = darkColorScheme(
+    primary = Color(0xFFC5A059),
+    onPrimary = Color(0xFF000000),
+    primaryContainer = Color(0xFF1E1C16),
+    onPrimaryContainer = Color(0xFFEFE8DA),
+    secondary = Color(0xFFC5A059),
+    onSecondary = Color(0xFF000000),
+    secondaryContainer = Color(0xFF1E1C16),
+    onSecondaryContainer = Color(0xFFEFE8DA),
+    tertiary = Color(0xFFC5A059),
+    onTertiary = Color(0xFF000000),
+    tertiaryContainer = Color(0xFF1E1C16),
+    onTertiaryContainer = Color(0xFFEFE8DA),
+    error = Color(0xFFFFB4AB),
+    onError = Color(0xFF690005),
+    errorContainer = Color(0xFF93000A),
+    onErrorContainer = Color(0xFFFFDAD6),
+    background = Color(0xFF000000),
+    onBackground = Color(0xFFFFFFFF),
+    surface = Color(0xFF000000),
+    onSurface = Color(0xFFFFFFFF),
+    surfaceVariant = Color(0xFF0D0D0D),
+    onSurfaceVariant = Color(0xFFE0E0E0),
+    outline = Color(0xFF303030),
+    outlineVariant = Color(0xFF303030),
+    scrim = Color(0xFF000000),
+    inverseSurface = Color(0xFFE6E1E5),
+    inverseOnSurface = Color(0xFF313033),
+    inversePrimary = Color(0xFFC5A059),
+    surfaceDim = Color(0xFF0A0A0A),
+    surfaceBright = Color(0xFF141414),
+    surfaceContainerLowest = Color(0xFF000000),
+    surfaceContainerLow = Color(0xFF070707),
+    surfaceContainer = Color(0xFF0D0D0D),
+    surfaceContainerHigh = Color(0xFF121212),
+    surfaceContainerHighest = Color(0xFF1A1A1A),
 )
 

@@ -57,8 +57,9 @@
     <string name="support_deen_summary">If this app benefits you, consider supporting its development.</string>
     <string name="bank_transfer_phone_pay">Bank Transfer / Phone Pay</string>
     <string name="payment_tap_hint">Tap to copy • Works with BankMuscat, OmanNet &amp; others</string>
-    <string name="source_app">Source App</string>
-    <string name="source_app_summary">Based on github.com/leekleak/traffic-light</string>
+    <string name="github_repository">GitHub Repository</string>
+    <string name="github_repository_summary">github.com/Pilotothegreat/deen-companion</string>
+    <string name="update_available">New Update Available: %1$s</string>
     <string name="application_settings">Application Settings</string>
     <string name="minutes_after_adhan_detail">Minutes after Adhan</string>
     <string name="arabic_text_size_sp">Arabic text size in sp</string>
@@ -66,7 +67,7 @@
     <string name="notifications">Notifications</string>
     <string name="notifications_sound">Notifications &gt; Sound</string>
     <string name="about_desc">An open-source Islamic companion app for Muslims.</string>
-    <string name="about_credits">Based on the UI/UX of Traffic Light by leekleak. Built with Material Design 3 and Jetpack Compose.</string>
+    <string name="about_credits">Built with Material Design 3 and Jetpack Compose.</string>
     <string name="last_updated">Updated: %1$s</string>
     <string name="calc_mwl">Muslim World League</string>
     <string name="calc_isna">Islamic Society of North America</string>
@@ -90,4 +91,7 @@
     <string name="open_bank_app">Open %1$s</string>
     <string name="bank_not_installed">%1$s is not installed. You can open your banking app manually to complete the transfer.</string>
     <string name="copied_to_clipboard">Copied to clipboard!</string>
+    <string name="reciter_mishary">Mishary Alafasy</string>
+    <string name="reciter_husary">Al-Husary</string>
+    <string name="reciter_abdul_basit">Abdul Basit</string>
 </resources>
