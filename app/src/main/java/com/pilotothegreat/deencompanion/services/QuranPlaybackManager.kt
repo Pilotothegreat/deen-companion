@@ -42,6 +42,9 @@ class QuranPlaybackManager(private val context: Context) {
     private val _sleepTimerRemaining = MutableStateFlow(0L) // Remaining seconds
     val sleepTimerRemaining: StateFlow<Long> = _sleepTimerRemaining.asStateFlow()
 
+    private val _endOfSurahEnabled = MutableStateFlow(false)
+    val endOfSurahEnabled: StateFlow<Boolean> = _endOfSurahEnabled.asStateFlow()
+
     private val _repeatMode = MutableStateFlow(false)
     val repeatMode: StateFlow<Boolean> = _repeatMode.asStateFlow()
 
@@ -82,10 +85,19 @@ class QuranPlaybackManager(private val context: Context) {
 
             override fun onPlaybackStateChanged(playbackState: Int) {
                 _isBuffering.value = playbackState == Player.STATE_BUFFERING
+                if (_endOfSurahEnabled.value && playbackState == Player.STATE_ENDED) {
+                    player.pause()
+                    _endOfSurahEnabled.value = false
+                }
             }
 
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 mediaItem?.let { updateStateFromMediaItem(it) }
+                val p = controller
+                if (p != null && _endOfSurahEnabled.value && p.currentMediaItemIndex == p.mediaItemCount - 1 && p.playbackState == Player.STATE_ENDED) {
+                    p.pause()
+                    _endOfSurahEnabled.value = false
+                }
             }
         })
     }
@@ -169,8 +181,17 @@ class QuranPlaybackManager(private val context: Context) {
         controller?.setPlaybackSpeed(speed)
     }
 
+    fun setEndOfSurahEnabled(enabled: Boolean) {
+        _endOfSurahEnabled.value = enabled
+        if (enabled) {
+            sleepTimerJob?.cancel()
+            _sleepTimerRemaining.value = 0L
+        }
+    }
+
     fun setSleepTimer(minutes: Int) {
         sleepTimerJob?.cancel()
+        _endOfSurahEnabled.value = false
         if (minutes <= 0) {
             _sleepTimerRemaining.value = 0L
             return

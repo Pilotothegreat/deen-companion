@@ -64,7 +64,7 @@
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/prayer_widget_info" />
+                android:resource="@xml/widget_next_prayer_info" />
         </receiver>
 
         <receiver

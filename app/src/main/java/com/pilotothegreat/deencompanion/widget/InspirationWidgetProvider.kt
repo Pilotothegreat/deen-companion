@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.widget.RemoteViews
 import com.pilotothegreat.deencompanion.MainActivity
 import com.pilotothegreat.deencompanion.R
@@ -16,6 +17,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.time.LocalDate
+import java.util.Locale
 
 class InspirationWidgetProvider : AppWidgetProvider(), KoinComponent {
 
@@ -27,7 +29,7 @@ class InspirationWidgetProvider : AppWidgetProvider(), KoinComponent {
         Pair("And He found you lost and guided you.", "وَوَجَدَكَ ضَالًّا فَهَدَىٰ"),
         Pair("Call upon Me; I will answer you.", "ادْعُونِي أَسْتَجِبْ لَكُمْ"),
         Pair("My mercy encompasses all things.", "وَرَحْمَتِي وَسِعَتْ كُلَّ شَيْءٍ"),
-        Pair("Remember Me; I will remember you.", "فَاذْكُرُونِي أَسْتَجِبْ لَكُمْ"),
+        Pair("Remember Me; I will remember you.", "فَاذْكُرُونِي أَذْكُرْكُمْ"),
         Pair("Allah does not burden a soul beyond that it can bear.", "لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا"),
         Pair("Indeed, actions are but by intentions.", "إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ")
     )
@@ -81,7 +83,16 @@ class InspirationWidgetProvider : AppWidgetProvider(), KoinComponent {
 
     private suspend fun updateWidgets(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
         try {
+            val lastUpdated = repo.lastPrayerTimeUpdate.first()
+            val hasOpened = lastUpdated != 0L
+
             val lang = repo.appLanguage.first()
+            val locale = Locale(lang)
+            val config = Configuration(context.resources.configuration).apply {
+                setLocale(locale)
+            }
+            val localizedContext = context.createConfigurationContext(config)
+
             val dayIndex = LocalDate.now().dayOfYear % inspirations.size
             val inspiration = inspirations[dayIndex]
             val ref = refs[dayIndex]
@@ -91,15 +102,22 @@ class InspirationWidgetProvider : AppWidgetProvider(), KoinComponent {
             for (appWidgetId in appWidgetIds) {
                 val views = RemoteViews(context.packageName, R.layout.inspiration_widget_layout)
                 
-                views.setTextViewText(R.id.widget_inspiration_text, "\"$text\"")
-                views.setTextViewText(R.id.widget_inspiration_ref, "— $ref")
+                views.setTextViewText(R.id.widget_title, localizedContext.getString(R.string.daily_inspiration))
+
+                if (hasOpened) {
+                    views.setTextViewText(R.id.widget_inspiration_text, "\"$text\"")
+                    views.setTextViewText(R.id.widget_inspiration_ref, "— $ref")
+                } else {
+                    views.setTextViewText(R.id.widget_inspiration_text, localizedContext.getString(R.string.widget_placeholder_initialize))
+                    views.setTextViewText(R.id.widget_inspiration_ref, "--")
+                }
 
                 // Open app on widget click
                 val mainIntent = Intent(context, MainActivity::class.java)
                 val pendingIntent = PendingIntent.getActivity(
                     context, 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
-                views.setOnClickPendingIntent(R.id.widget_container, pendingIntent)
+                views.setOnClickPendingIntent(android.R.id.background, pendingIntent)
 
                 appWidgetManager.updateAppWidget(appWidgetId, views)
             }

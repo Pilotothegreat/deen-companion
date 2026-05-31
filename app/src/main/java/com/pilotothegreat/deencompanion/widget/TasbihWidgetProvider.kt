@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.widget.RemoteViews
 import com.pilotothegreat.deencompanion.MainActivity
 import com.pilotothegreat.deencompanion.R
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import java.util.Locale
 
 class TasbihWidgetProvider : AppWidgetProvider(), KoinComponent {
 
@@ -81,14 +83,39 @@ class TasbihWidgetProvider : AppWidgetProvider(), KoinComponent {
 
     private suspend fun updateWidgets(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
         try {
+            val lastUpdated = repo.lastPrayerTimeUpdate.first()
+            val hasOpened = lastUpdated != 0L
+
+            val lang = repo.appLanguage.first()
+            val locale = Locale(lang)
+            val config = Configuration(context.resources.configuration).apply {
+                setLocale(locale)
+            }
+            val localizedContext = context.createConfigurationContext(config)
+
             val count = repo.tasbihCount.first()
             val dhikr = repo.tasbihDhikr.first()
 
             for (appWidgetId in appWidgetIds) {
                 val views = RemoteViews(context.packageName, R.layout.tasbih_widget_layout)
                 
-                views.setTextViewText(R.id.widget_tasbih_count, count.toString())
-                views.setTextViewText(R.id.widget_dhikr_name, dhikr)
+                views.setTextViewText(R.id.widget_title, localizedContext.getString(R.string.tasbih_counter))
+
+                if (hasOpened) {
+                    views.setTextViewText(R.id.widget_tasbih_count, count.toString())
+                    // Dhikr preset localization check: if presets, localize them
+                    val localizedDhikr = when (dhikr) {
+                        "سبحان الله" -> localizedContext.getString(R.string.tasbih_dhikr_subhanallah)
+                        "الحمد لله" -> localizedContext.getString(R.string.tasbih_dhikr_alhamdulillah)
+                        "لا إله إلا الله" -> localizedContext.getString(R.string.tasbih_dhikr_lailahaillallah)
+                        "الله أكبر" -> localizedContext.getString(R.string.tasbih_dhikr_allahuakbar)
+                        else -> dhikr
+                    }
+                    views.setTextViewText(R.id.widget_dhikr_name, localizedDhikr)
+                } else {
+                    views.setTextViewText(R.id.widget_tasbih_count, "0")
+                    views.setTextViewText(R.id.widget_dhikr_name, localizedContext.getString(R.string.widget_placeholder_initialize))
+                }
 
                 // Increment button broadcast intent
                 val incrementIntent = Intent(context, TasbihWidgetProvider::class.java).apply {
@@ -107,7 +134,7 @@ class TasbihWidgetProvider : AppWidgetProvider(), KoinComponent {
                 val mainPendingIntent = PendingIntent.getActivity(
                     context, 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
-                views.setOnClickPendingIntent(R.id.widget_container, mainPendingIntent)
+                views.setOnClickPendingIntent(android.R.id.background, mainPendingIntent)
 
                 appWidgetManager.updateAppWidget(appWidgetId, views)
             }

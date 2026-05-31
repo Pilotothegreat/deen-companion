@@ -153,4 +153,26 @@
     <string name="palestine_badge">دعم فلسطين</string>
     <string name="dismiss">تجاهل</string>
     <string name="donate_now">تبرع الآن</string>
+    <string name="later">لاحقاً</string>
+    <string name="never_show_again">عدم الإظهار مجدداً</string>
+    <string name="ok">موافق</string>
+    <string name="cancel">إلغاء</string>
+    <string name="timer_end_of_surah">نهاية السورة</string>
+    <string name="app_language_subtitle">لغة التطبيق</string>
+    <string name="installed_status">جاهز</string>
+    <string name="not_installed_status">غير مثبت</string>
+    <string name="theme_amoled">أسود - AMOLED</string>
+    <string name="previous_verse">الآية السابقة</string>
+    <string name="next_verse">الآية التالية</string>
+    <string name="play_pause">تشغيل / إيقاف مؤقت</string>
+    <string name="sync_full_book">مزامنة الكتاب كاملاً</string>
+    <string name="favorite">المفضلة</string>
+    <string name="grade_sahih">صحيح</string>
+    <string name="grade_hasan">حسن</string>
+    <string name="grade_daif">ضعيف</string>
+    <string name="grade_mawdu">موضوع</string>
+    <string name="widget_placeholder_initialize">افتح التطبيق للبدء</string>
+    <string name="widget_next_prayer_desc">يعرض وقت الصلاة القادمة والعد التنازلي المباشر.</string>
+    <string name="widget_tasbih_desc">وصول سريع لعرض وزيادة عداد التسبيح الخاص بك.</string>
+    <string name="widget_inspiration_desc">يعرض آية قرآنية أو حديثاً شريفاً ملهماً يومياً.</string>
 </resources>

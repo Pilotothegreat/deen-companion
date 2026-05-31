@@ -2,6 +2,16 @@
 package com.pilotothegreat.deencompanion.ui.overview
 
 import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import androidx.compose.foundation.Canvas
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import android.os.Vibrator
 import android.os.Build
 import android.os.VibrationEffect
@@ -130,12 +140,8 @@ import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.Path
 import androidx.compose.material.icons.filled.CompassCalibration
 import java.time.chrono.HijrahDate
 import java.util.Locale
@@ -264,17 +270,11 @@ fun Overview(
     var nextPrayer by remember { mutableStateOf(NextPrayer("Fajr", "--", "--", 0L)) }
     var showTasbihSheet by remember { mutableStateOf(false) }
 
-    val launchCount by appPreferenceRepo.appLaunchCount.collectAsState(initial = 0)
-    val donationDismissed by appPreferenceRepo.donationPromptDismissed.collectAsState(initial = false)
-    val lastPromptTime by appPreferenceRepo.lastDonationPromptShowTime.collectAsState(initial = 0L)
-    
     var showDonationDialog by remember { mutableStateOf(false) }
     var showDonationBottomSheet by remember { mutableStateOf(false) }
 
-    LaunchedEffect(launchCount, donationDismissed, lastPromptTime) {
-        val now = System.currentTimeMillis()
-        val daysSinceLastPrompt = (now - lastPromptTime) / (1000L * 60 * 60 * 24)
-        if (launchCount >= 3 && !donationDismissed && daysSinceLastPrompt >= 3) {
+    LaunchedEffect(Unit) {
+        viewModel.checkAndShowDonation {
             showDonationDialog = true
         }
     }
@@ -627,15 +627,27 @@ fun Overview(
                 }
             },
             dismissButton = {
-                TextButton(
-                    onClick = {
-                        showDonationDialog = false
-                        coroutineScope.launch {
-                            appPreferenceRepo.setDonationPromptDismissed(true)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TextButton(
+                        onClick = {
+                            showDonationDialog = false
+                            coroutineScope.launch {
+                                appPreferenceRepo.setLastDonationPromptShowTime(System.currentTimeMillis())
+                            }
                         }
+                    ) {
+                        Text(stringResource(R.string.later))
                     }
-                ) {
-                    Text(stringResource(R.string.dismiss))
+                    TextButton(
+                        onClick = {
+                            showDonationDialog = false
+                            coroutineScope.launch {
+                                appPreferenceRepo.setDonationPromptDismissed(true)
+                            }
+                        }
+                    ) {
+                        Text(stringResource(R.string.never_show_again))
+                    }
                 }
             }
         )
@@ -882,7 +894,28 @@ fun OverviewItems(viewModel: OverviewVM, nextPrayerName: String, navigator: Navi
             modifier = Modifier.padding(horizontal = 12.dp)
         )
 
-        QiblaCompactCard(viewModel, navigator)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Max)
+                .padding(vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            LiveQiblaCompassCard(
+                viewModel = viewModel,
+                navigator = navigator,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+            )
+            TasbihDialCard(
+                viewModel = viewModel,
+                onTasbihClick = onTasbihClick,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+            )
+        }
 
         // Daily Verse Card
         val inspirationIndex = remember { LocalDate.now().dayOfYear % inspirations.size }
@@ -919,110 +952,285 @@ fun OverviewItems(viewModel: OverviewVM, nextPrayerName: String, navigator: Navi
             }
         }
 
-        // Tasbih Card
-        val count by viewModel.tasbihCount.collectAsState(initial = 0)
-        val haptic = LocalHapticFeedback.current
-        val tasbihScale = remember { Animatable(1f) }
-        LaunchedEffect(count) {
-            if (count > 0) {
-                tasbihScale.animateTo(
-                    targetValue = 1.1f,
-                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
-                )
-                tasbihScale.animateTo(
-                    targetValue = 1f,
-                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
-                )
+    }
+}
+
+private fun getSmoothRotation(target: Float, current: Float): Float {
+    var diff = (target - current) % 360f
+    if (diff < -180f) diff += 360f
+    if (diff > 180f) diff -= 360f
+    return current + diff
+}
+
+@Composable
+fun LiveQiblaCompassCard(
+    viewModel: OverviewVM,
+    navigator: Navigator,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val lat by viewModel.latitude.collectAsState(initial = 21.3891)
+    val lon by viewModel.longitude.collectAsState(initial = 39.8579)
+    val qiblaBearing = remember(lat, lon) { calculateQiblaDirection(lat, lon).toFloat() }
+
+    var rawHeading by remember { mutableStateOf(0f) }
+    var smoothHeading by remember { mutableStateOf(0f) }
+
+    DisposableEffect(context) {
+        val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        val rotationVectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
+        val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        val magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
+
+        var gravity: FloatArray? = null
+        var geomagnetic: FloatArray? = null
+
+        val listener = object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent) {
+                if (event.sensor.type == Sensor.TYPE_ROTATION_VECTOR) {
+                    val rMatrix = FloatArray(9)
+                    SensorManager.getRotationMatrixFromVector(rMatrix, event.values)
+                    val orientation = FloatArray(3)
+                    SensorManager.getOrientation(rMatrix, orientation)
+                    val azimuth = Math.toDegrees(orientation[0].toDouble()).toFloat()
+                    val heading = (azimuth + 360f) % 360f
+                    rawHeading = heading
+                    smoothHeading = getSmoothRotation(heading, smoothHeading)
+                } else {
+                    if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
+                        gravity = event.values.clone()
+                    } else if (event.sensor.type == Sensor.TYPE_MAGNETIC_FIELD) {
+                        geomagnetic = event.values.clone()
+                    }
+                    val g = gravity
+                    val m = geomagnetic
+                    if (g != null && m != null) {
+                        val r = FloatArray(9)
+                        val i = FloatArray(9)
+                        if (SensorManager.getRotationMatrix(r, i, g, m)) {
+                            val orientation = FloatArray(3)
+                            SensorManager.getOrientation(r, orientation)
+                            val azimuth = Math.toDegrees(orientation[0].toDouble()).toFloat()
+                            val heading = (azimuth + 360f) % 360f
+                            rawHeading = heading
+                            smoothHeading = getSmoothRotation(heading, smoothHeading)
+                        }
+                    }
+                }
             }
+
+            override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
         }
-        
-        CategoryTitleText(stringResource(R.string.tasbih_counter))
-        val dhikr by viewModel.tasbihDhikr.collectAsState(initial = "سبحان الله")
-        val target by viewModel.tasbihTarget.collectAsState(initial = 33)
-        Box(
+
+        if (rotationVectorSensor != null) {
+            sensorManager.registerListener(listener, rotationVectorSensor, SensorManager.SENSOR_DELAY_UI)
+        } else {
+            sensorManager.registerListener(listener, accelerometer, SensorManager.SENSOR_DELAY_UI)
+            sensorManager.registerListener(listener, magnetometer, SensorManager.SENSOR_DELAY_UI)
+        }
+
+        onDispose {
+            sensorManager.unregisterListener(listener)
+        }
+    }
+
+    val animatedHeading by animateFloatAsState(
+        targetValue = smoothHeading,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        )
+    )
+
+    val relativeAngle = qiblaBearing - animatedHeading
+
+    var visible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        visible = true
+    }
+    val cardScale by animateFloatAsState(
+        targetValue = if (visible) 1f else 0.8f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)
+    )
+
+    val outlineVariantColor = colorScheme.outlineVariant
+    val secondaryColor = colorScheme.secondary.copy(alpha = 0.5f)
+    val primaryColor = colorScheme.primary
+    val outlineColor = colorScheme.outline
+    val onPrimaryContainerColor = colorScheme.onPrimaryContainer
+
+    Card(
+        modifier = modifier
+            .graphicsLayer {
+                scaleX = cardScale
+                scaleY = cardScale
+            }
+            .clickable { navigator.goTo(QiblaKey) },
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        shape = MaterialTheme.shapes.large
+    ) {
+        Column(
             modifier = Modifier
-                .graphicsLayer {
-                    scaleX = tasbihScale.value
-                    scaleY = tasbihScale.value
-                }
-                .card()
-                .clickable {
-                    onTasbihClick()
-                }
-                .padding(16.dp)
-                .fillMaxWidth()
+                .padding(12.dp)
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            Text(
+                text = stringResource(R.string.qibla_compass),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .padding(4.dp),
+                contentAlignment = Alignment.Center
             ) {
-                Column {
-                    Text(dhikr, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
-                    Text(stringResource(R.string.tasbih_target, target), style = MaterialTheme.typography.labelSmall, color = colorScheme.secondary)
-                }
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text(
-                        text = "$count / $target",
-                        style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
-                        color = colorScheme.primary
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val radius = size.minDimension / 2
+                    drawCircle(
+                        color = outlineVariantColor,
+                        radius = radius,
+                        style = Stroke(width = 2.dp.toPx())
                     )
-                    Icon(
-                        imageVector = Icons.Default.Launch,
-                        contentDescription = "Open Tasbih",
-                        tint = colorScheme.secondary,
-                        modifier = Modifier.size(20.dp)
+                }
+
+                Canvas(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer {
+                            rotationZ = relativeAngle
+                        }
+                ) {
+                    val radius = size.minDimension / 2
+                    val center = Offset(size.width / 2, size.height / 2)
+
+                    drawLine(
+                        color = secondaryColor,
+                        start = center,
+                        end = Offset(center.x, center.y - radius + 8.dp.toPx()),
+                        strokeWidth = 2.dp.toPx()
+                    )
+
+                    val needlePath = Path().apply {
+                        moveTo(center.x, center.y - radius)
+                        lineTo(center.x - 6.dp.toPx(), center.y)
+                        lineTo(center.x + 6.dp.toPx(), center.y)
+                        close()
+                    }
+                    drawPath(
+                        path = needlePath,
+                        color = primaryColor
+                    )
+
+                    val southPath = Path().apply {
+                        moveTo(center.x, center.y + radius)
+                        lineTo(center.x - 6.dp.toPx(), center.y)
+                        lineTo(center.x + 6.dp.toPx(), center.y)
+                        close()
+                    }
+                    drawPath(
+                        path = southPath,
+                        color = outlineColor
+                    )
+
+                    drawCircle(
+                        color = onPrimaryContainerColor,
+                        radius = 4.dp.toPx()
                     )
                 }
             }
+
+            Text(
+                text = stringResource(R.string.degrees_symbol, qiblaBearing),
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }
 
 @Composable
-fun QiblaCompactCard(viewModel: OverviewVM, navigator: Navigator) {
-    val lat by viewModel.latitude.collectAsState(initial = 21.3891)
-    val lon by viewModel.longitude.collectAsState(initial = 39.8579)
-    val angle = remember(lat, lon) { calculateQiblaDirection(lat, lon) }
+fun TasbihDialCard(
+    viewModel: OverviewVM,
+    onTasbihClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val count by viewModel.tasbihCount.collectAsState(initial = 0)
+    val dhikr by viewModel.tasbihDhikr.collectAsState(initial = "سبحان الله")
+    val target by viewModel.tasbihTarget.collectAsState(initial = 33)
+
+    var visible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        visible = true
+    }
+    val cardScale by animateFloatAsState(
+        targetValue = if (visible) 1f else 0.8f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)
+    )
+
+    val progress = remember(count, target) {
+        if (target > 0) count.toFloat() / target else 0f
+    }
+
     Card(
-        modifier = Modifier.fillMaxWidth().clickable { navigator.goTo(QiblaKey) },
-        colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainerLow)
+        modifier = modifier
+            .graphicsLayer {
+                scaleX = cardScale
+                scaleY = cardScale
+            }
+            .clickable { onTasbihClick() },
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        shape = MaterialTheme.shapes.large
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp).fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier
+                .padding(12.dp)
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(Icons.Default.CompassCalibration, contentDescription = null, tint = colorScheme.primary)
-                Text(stringResource(R.string.qibla_direction), style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = dhikr,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .padding(4.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.outlineVariant,
+                    strokeWidth = 6.dp
+                )
+                Text(
+                    text = count.toString(),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Black,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
             }
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(
-                        String.format(Locale.US, "%.1f°", angle),
-                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                        color = colorScheme.primary
-                    )
-                    Text(
-                        stringResource(R.string.clockwise_from_true_north),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = colorScheme.secondary
-                    )
-                }
-                val primaryColor = colorScheme.primary
-                Canvas(Modifier.size(24.dp)) {
-                    val arrowWidth = 4.dp.toPx()
-                    rotate(angle.toFloat()) {
-                        drawPath(Path().apply {
-                            moveTo(size.width/2, 0f)
-                            lineTo(size.width/2+arrowWidth, size.height)
-                            lineTo(size.width/2-arrowWidth, size.height)
-                            close()
-                        }, color = primaryColor)
-                    }
-                }
-            }
+
+            Text(
+                text = stringResource(R.string.tasbih_target, target),
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.secondary
+            )
         }
     }
 }

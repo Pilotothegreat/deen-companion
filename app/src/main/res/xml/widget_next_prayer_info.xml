@@ -2,8 +2,10 @@
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:minWidth="110dp"
     android:minHeight="72dp"
-    android:updatePeriodMillis="0"
+    android:updatePeriodMillis="60000"
     android:initialLayout="@layout/prayer_widget_layout"
+    android:previewLayout="@layout/prayer_widget_layout"
+    android:description="@string/widget_next_prayer_desc"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen">
 </appwidget-provider>

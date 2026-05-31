@@ -1,4 +1,3 @@
-// FIXED: Implement goAsync() for background execution in widget provider
 package com.pilotothegreat.deencompanion.widget
 
 import android.app.AlarmManager
@@ -8,6 +7,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.SystemClock
 import android.widget.RemoteViews
 import com.pilotothegreat.deencompanion.MainActivity
@@ -15,6 +15,7 @@ import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
 import com.pilotothegreat.deencompanion.ui.overview.calculateNextPrayer
 import com.pilotothegreat.deencompanion.util.PrayerTimeCalculator
+import com.pilotothegreat.deencompanion.util.toLocaleHourString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -23,6 +24,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.time.LocalDate
 import java.time.ZoneId
+import java.util.Locale
 
 class PrayerWidgetProvider : AppWidgetProvider(), KoinComponent {
 
@@ -81,43 +83,59 @@ class PrayerWidgetProvider : AppWidgetProvider(), KoinComponent {
 
     private suspend fun updateWidgets(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
         try {
-            val lat = repo.latitude.first()
-            val lon = repo.longitude.first()
-            val tzId = repo.timezoneId.first()
-            val calcMethod = repo.calcMethod.first()
-            val asrSchool = repo.asrSchool.first()
-
-            val zoneId = try { ZoneId.of(tzId) } catch (e: Exception) { ZoneId.systemDefault() }
-            val today = LocalDate.now(zoneId)
-            val zonedDateTime = today.atStartOfDay(zoneId)
-            val offsetHours = zonedDateTime.offset.totalSeconds / 3600.0
-
-            val times = PrayerTimeCalculator.calculate(
-                date = today,
-                latitude = lat,
-                longitude = lon,
-                timezoneOffsetHours = offsetHours,
-                method = calcMethod,
-                asrSchool = asrSchool
-            )
-
-            val next = calculateNextPrayer(times, tzId, context)
+            val lastUpdated = repo.lastPrayerTimeUpdate.first()
+            val hasOpened = lastUpdated != 0L
+            val lang = repo.appLanguage.first()
+            val locale = Locale(lang)
+            val config = Configuration(context.resources.configuration).apply {
+                setLocale(locale)
+            }
+            val localizedContext = context.createConfigurationContext(config)
 
             for (appWidgetId in appWidgetIds) {
                 val views = RemoteViews(context.packageName, R.layout.prayer_widget_layout)
-                
-                // Show prayer name and countdown (e.g. "Dhuhr in 2h 15m")
-                views.setTextViewText(R.id.widget_title, "Deen Companion")
-                views.setTextViewText(R.id.widget_prayer_name, next.name)
-                views.setTextViewText(R.id.widget_countdown, "in ${next.remainingTimeStr}")
-                views.setTextViewText(R.id.widget_prayer_time, next.timeStr)
 
-                // Set click intent to open main application
+                if (hasOpened) {
+                    val lat = repo.latitude.first()
+                    val lon = repo.longitude.first()
+                    val tzId = repo.timezoneId.first()
+                    val calcMethod = repo.calcMethod.first()
+                    val asrSchool = repo.asrSchool.first()
+
+                    val zoneId = try { ZoneId.of(tzId) } catch (e: Exception) { ZoneId.systemDefault() }
+                    val today = LocalDate.now(zoneId)
+                    val zonedDateTime = today.atStartOfDay(zoneId)
+                    val offsetHours = zonedDateTime.offset.totalSeconds / 3600.0
+
+                    val times = PrayerTimeCalculator.calculate(
+                        date = today,
+                        latitude = lat,
+                        longitude = lon,
+                        timezoneOffsetHours = offsetHours,
+                        method = calcMethod,
+                        asrSchool = asrSchool
+                    )
+
+                    // Get next prayer in localized context
+                    val next = calculateNextPrayer(times, tzId, localizedContext)
+
+                    views.setTextViewText(R.id.widget_prayer_name, next.name)
+                    views.setTextViewText(R.id.widget_countdown, "in ${next.remainingTimeStr}")
+                    views.setTextViewText(R.id.widget_prayer_time, next.timeStr)
+                } else {
+                    views.setTextViewText(R.id.widget_prayer_name, localizedContext.getString(R.string.app_name))
+                    views.setTextViewText(R.id.widget_countdown, localizedContext.getString(R.string.widget_placeholder_initialize))
+                    views.setTextViewText(R.id.widget_prayer_time, "--:--")
+                }
+
+                views.setTextViewText(R.id.widget_title, localizedContext.getString(R.string.app_name))
+
+                // Set click intent to open main application on the background ID
                 val mainIntent = Intent(context, MainActivity::class.java)
                 val pendingIntent = PendingIntent.getActivity(
                     context, 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
-                views.setOnClickPendingIntent(R.id.widget_container, pendingIntent)
+                views.setOnClickPendingIntent(android.R.id.background, pendingIntent)
 
                 appWidgetManager.updateAppWidget(appWidgetId, views)
             }
@@ -139,8 +157,8 @@ class PrayerWidgetProvider : AppWidgetProvider(), KoinComponent {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            // 10 minutes interval (600,000 ms)
-            val triggerTime = SystemClock.elapsedRealtime() + 10 * 60 * 1000L
+            // 1 minute interval (60,000 ms)
+            val triggerTime = SystemClock.elapsedRealtime() + 60 * 1000L
             alarmManager.setAndAllowWhileIdle(
                 AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 triggerTime,
@@ -172,4 +190,3 @@ class PrayerWidgetProvider : AppWidgetProvider(), KoinComponent {
         }
     }
 }
-

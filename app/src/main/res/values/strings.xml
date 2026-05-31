@@ -154,4 +154,26 @@
     <string name="palestine_badge">Supporting Palestine</string>
     <string name="dismiss">Dismiss</string>
     <string name="donate_now">Donate Now</string>
+    <string name="later">Later</string>
+    <string name="never_show_again">Never show again</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="timer_end_of_surah">End of Surah</string>
+    <string name="app_language_subtitle">Application Language</string>
+    <string name="installed_status">Installed</string>
+    <string name="not_installed_status">Not Installed</string>
+    <string name="theme_amoled">AMOLED</string>
+    <string name="previous_verse">Previous Verse</string>
+    <string name="next_verse">Next Verse</string>
+    <string name="play_pause">Play or Pause</string>
+    <string name="sync_full_book">Sync Full Book</string>
+    <string name="favorite">Favorite</string>
+    <string name="grade_sahih">Sahih</string>
+    <string name="grade_hasan">Hasan</string>
+    <string name="grade_daif">Da\'if</string>
+    <string name="grade_mawdu">Mawdu</string>
+    <string name="widget_placeholder_initialize">Open app to initialize</string>
+    <string name="widget_next_prayer_desc">Shows the next prayer time and a live countdown.</string>
+    <string name="widget_tasbih_desc">Quick access to view and increment your tasbih count.</string>
+    <string name="widget_inspiration_desc">Shows a daily inspirational Quranic verse or Hadith.</string>
 </resources>

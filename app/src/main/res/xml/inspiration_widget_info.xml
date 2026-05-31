@@ -4,6 +4,8 @@
     android:minHeight="72dp"
     android:updatePeriodMillis="0"
     android:initialLayout="@layout/inspiration_widget_layout"
+    android:previewLayout="@layout/inspiration_widget_layout"
+    android:description="@string/widget_inspiration_desc"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen">
 </appwidget-provider>

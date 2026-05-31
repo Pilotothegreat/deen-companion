@@ -26,6 +26,24 @@ class OverviewVM(
     private val appPreferenceRepo: AppPreferenceRepo
 ) : ViewModel() {
 
+    private var hasCheckedDonationThisSession = false
+
+    fun checkAndShowDonation(onShow: () -> Unit) {
+        if (hasCheckedDonationThisSession) return
+        hasCheckedDonationThisSession = true
+        viewModelScope.launch {
+            val count = appPreferenceRepo.appLaunchCount.first()
+            val dismissed = appPreferenceRepo.donationPromptDismissed.first()
+            val lastShow = appPreferenceRepo.lastDonationPromptShowTime.first()
+            val now = System.currentTimeMillis()
+            val sevenDaysInMillis = 7L * 24 * 60 * 60 * 1000
+
+            if (count >= 5 && !dismissed && (now - lastShow >= sevenDaysInMillis)) {
+                onShow()
+            }
+        }
+    }
+
     private val _isRefreshingLocation = MutableStateFlow(false)
     val isRefreshingLocation = _isRefreshingLocation.asStateFlow()
 

@@ -10,6 +10,7 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext.startKoin
 import timber.log.Timber
 import com.pilotothegreat.deencompanion.services.IqamaAlarmManager
+import com.pilotothegreat.deencompanion.services.QuranPlaybackManager
 
 class DeenApplication : Application() {
 
@@ -39,5 +40,14 @@ class DeenApplication : Application() {
             )
         }
     }
-}
 
+    override fun onTerminate() {
+        super.onTerminate()
+        try {
+            val playbackManager: QuranPlaybackManager = org.koin.core.context.GlobalContext.get().get()
+            playbackManager.release()
+        } catch (e: Exception) {
+            Timber.e(e, "Error releasing QuranPlaybackManager in onTerminate")
+        }
+    }
+}
