@@ -18,6 +18,7 @@ import android.os.VibrationEffect
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.Spacer
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
@@ -270,12 +271,22 @@ fun Overview(
     var nextPrayer by remember { mutableStateOf(NextPrayer("Fajr", "--", "--", 0L)) }
     var showTasbihSheet by remember { mutableStateOf(false) }
 
+    var shownThisSession by remember { mutableStateOf(false) }
     var showDonationDialog by remember { mutableStateOf(false) }
     var showDonationBottomSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        viewModel.checkAndShowDonation {
-            showDonationDialog = true
+        if (!shownThisSession) {
+            val count = appPreferenceRepo.appLaunchCount.first()
+            val dismissed = appPreferenceRepo.donationPromptDismissed.first()
+            val lastShow = appPreferenceRepo.lastDonationPromptShowTime.first()
+            val now = System.currentTimeMillis()
+            val sevenDaysInMillis = 7L * 24 * 60 * 60 * 1000
+
+            if (count >= 5 && !dismissed && (now - lastShow >= sevenDaysInMillis)) {
+                showDonationDialog = true
+                shownThisSession = true
+            }
         }
     }
     

@@ -176,4 +176,6 @@
     <string name="widget_next_prayer_desc">Shows the next prayer time and a live countdown.</string>
     <string name="widget_tasbih_desc">Quick access to view and increment your tasbih count.</string>
     <string name="widget_inspiration_desc">Shows a daily inspirational Quranic verse or Hadith.</string>
+    <string name="juz_number">Juz %d</string>
+    <string name="verse_number_prefix">%1$d. </string>
 </resources>

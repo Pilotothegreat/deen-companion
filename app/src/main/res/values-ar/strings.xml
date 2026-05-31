@@ -175,4 +175,6 @@
     <string name="widget_next_prayer_desc">يعرض وقت الصلاة القادمة والعد التنازلي المباشر.</string>
     <string name="widget_tasbih_desc">وصول سريع لعرض وزيادة عداد التسبيح الخاص بك.</string>
     <string name="widget_inspiration_desc">يعرض آية قرآنية أو حديثاً شريفاً ملهماً يومياً.</string>
+    <string name="juz_number">الجزء %d</string>
+    <string name="verse_number_prefix">%1$d. </string>
 </resources>
