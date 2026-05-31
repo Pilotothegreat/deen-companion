@@ -30,6 +30,9 @@ class HadithVM(
     private val _isSearching = MutableStateFlow(false)
     val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
 
+    private val _isSyncing = MutableStateFlow(false)
+    val isSyncing: StateFlow<Boolean> = _isSyncing.asStateFlow()
+
     // Pagination state for active book
     private val _activeBookId = MutableStateFlow<String?>(null)
     val activeBookId: StateFlow<String?> = _activeBookId.asStateFlow()
@@ -86,7 +89,20 @@ class HadithVM(
         currentPage = 0
         hasMoreToLoad = true
         if (bookId != null) {
-            loadNextPage()
+            viewModelScope.launch {
+                try {
+                    val count = repository.getHadithCount(bookId)
+                    if (count <= 20) {
+                        _isSyncing.value = true
+                        repository.syncFullBook(bookId)
+                    }
+                } catch (e: Exception) {
+                    Timber.e(e, "Error checking sync requirements for book: $bookId")
+                } finally {
+                    _isSyncing.value = false
+                    loadNextPage()
+                }
+            }
         }
     }
 
@@ -131,10 +147,17 @@ class HadithVM(
 
     fun forceSyncBook(bookId: String) {
         viewModelScope.launch {
-            repository.syncFullBook(bookId)
-            // Reload if currently showing this book
-            if (_activeBookId.value == bookId) {
-                selectBook(bookId)
+            _isSyncing.value = true
+            try {
+                repository.syncFullBook(bookId)
+            } catch (e: Exception) {
+                Timber.e(e, "Error manually syncing book: $bookId")
+            } finally {
+                _isSyncing.value = false
+                _loadedHadiths.value = emptyList()
+                currentPage = 0
+                hasMoreToLoad = true
+                loadNextPage()
             }
         }
     }

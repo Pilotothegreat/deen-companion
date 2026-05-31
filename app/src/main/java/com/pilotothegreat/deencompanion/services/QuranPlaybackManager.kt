@@ -220,6 +220,13 @@ class QuranPlaybackManager(private val context: Context) {
         player.repeatMode = if (!currentMode) Player.REPEAT_MODE_ALL else Player.REPEAT_MODE_OFF
     }
 
+    fun stopAndClear() {
+        controller?.stop()
+        controller?.clearMediaItems()
+        _currentSurahId.value = -1
+        _isPlaying.value = false
+    }
+
     fun release() {
         sleepTimerJob?.cancel()
         scope.cancel()

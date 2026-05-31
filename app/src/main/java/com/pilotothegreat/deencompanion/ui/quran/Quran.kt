@@ -61,12 +61,17 @@ import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
+import androidx.compose.ui.res.stringResource
+import com.pilotothegreat.deencompanion.R
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun Quran(paddingValues: PaddingValues) {
     val context = LocalContext.current
     val navigator: Navigator = koinInject()
+    val appPreferenceRepo: AppPreferenceRepo = koinInject()
+    val lang by appPreferenceRepo.appLanguage.collectAsState(initial = "en")
     val hazeState = rememberHazeState()
     val searchState = rememberTextFieldState("")
     val searchQuery by remember { derivedStateOf { searchState.text.toString().trim() } }
@@ -115,7 +120,7 @@ fun Quran(paddingValues: PaddingValues) {
             }
 
             Text(
-                text = "Search Results (${searchResults.size})",
+                text = if (lang == "ar") "نتائج البحث (${toArabicNumerals(searchResults.size)})" else "Search Results (${searchResults.size})",
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
@@ -136,7 +141,7 @@ fun Quran(paddingValues: PaddingValues) {
                     ) {
                         Column(modifier = Modifier.padding(12.dp)) {
                             Text(
-                                text = "${surah.transliteration} (Ayah ${verse.id})",
+                                text = if (lang == "ar") "${surah.name} (آية ${toArabicNumerals(verse.id)})" else "${surah.transliteration} (Ayah ${verse.id})",
                                 style = MaterialTheme.typography.titleSmall,
                                 color = colorScheme.primary
                             )
@@ -163,11 +168,18 @@ fun Quran(paddingValues: PaddingValues) {
         }
     }
 
-    PageTitle(false, hazeState, "Quran Browser")
+    PageTitle(false, hazeState, stringResource(R.string.quran_browser))
 }
 
 @Composable
-fun SurahsList(surahs: List<QuranHelper.Surah>, navigator: Navigator, bottomPadding: androidx.compose.ui.unit.Dp) {
+fun SurahsList(
+    surahs: List<QuranHelper.Surah>,
+    navigator: Navigator,
+    bottomPadding: androidx.compose.ui.unit.Dp
+) {
+    val appPreferenceRepo: AppPreferenceRepo = koinInject()
+    val lang by appPreferenceRepo.appLanguage.collectAsState(initial = "en")
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(bottom = bottomPadding + 16.dp),
@@ -191,21 +203,37 @@ fun SurahsList(surahs: List<QuranHelper.Surah>, navigator: Navigator, bottomPadd
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = surah.id.toString(),
+                            text = if (lang == "ar") toArabicNumerals(surah.id) else surah.id.toString(),
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                             color = colorScheme.onPrimaryContainer
                         )
                     }
                     Column {
-                        Text(surah.transliteration, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
-                        Text("${surah.type.replaceFirstChar { it.uppercase() }} • ${surah.totalVerses} Verses", style = MaterialTheme.typography.labelSmall, color = colorScheme.secondary)
+                        Text(
+                            text = if (lang == "ar") surah.name else surah.transliteration,
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                        )
+                        val typeText = if (lang == "ar") {
+                            if (surah.type.lowercase() == "meccan") "مكية" else "مدنية"
+                        } else {
+                            surah.type.replaceFirstChar { it.uppercase() }
+                        }
+                        val versesLabel = if (lang == "ar") "آياتها" else "Verses"
+                        val versesCountText = if (lang == "ar") toArabicNumerals(surah.totalVerses) else surah.totalVerses.toString()
+                        Text(
+                            text = if (lang == "ar") "$typeText • $versesLabel $versesCountText" else "$typeText • $versesCountText $versesLabel",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = colorScheme.secondary
+                        )
                     }
                 }
-                Text(
-                    text = surah.name,
-                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                    color = colorScheme.primary
-                )
+                if (lang != "ar") {
+                    Text(
+                        text = surah.name,
+                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                        color = colorScheme.primary
+                    )
+                }
             }
         }
     }

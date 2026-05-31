@@ -40,6 +40,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import com.pilotothegreat.deencompanion.R
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -112,9 +114,9 @@ fun NavigationManager() {
                         modifier = Modifier.navBarShadow(),
                         expanded = true,
                         content = {
-                            NavigationButton(navigator, OverviewKey, "Today", Icons.Default.Today)
-                            NavigationButton(navigator, QuranKey, "Quran", Icons.Default.MenuBook)
-                            NavigationButton(navigator, HadithKey, "Hadith", Icons.Default.LibraryBooks)
+                            NavigationButton(navigator, OverviewKey, stringResource(R.string.today), Icons.Default.Today)
+                            NavigationButton(navigator, QuranKey, stringResource(R.string.quran), Icons.Default.MenuBook)
+                            NavigationButton(navigator, HadithKey, stringResource(R.string.hadith), Icons.Default.LibraryBooks)
                         },
                     )
                 }

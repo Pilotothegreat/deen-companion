@@ -207,7 +207,7 @@ fun Qibla() {
                     )
                     Column {
                         Text(
-                            text = if (cityName.isNotEmpty()) cityName else "Makkah, Saudi Arabia",
+                            text = if (cityName.isNotEmpty()) cityName else stringResource(R.string.default_location),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )

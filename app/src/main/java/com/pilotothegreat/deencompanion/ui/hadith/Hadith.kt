@@ -21,9 +21,12 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
 import org.koin.compose.koinInject
+import com.pilotothegreat.deencompanion.ui.quran.toArabicNumerals
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.runtime.*
@@ -79,6 +82,7 @@ fun Hadith(paddingValues: PaddingValues) {
     val searchResults by viewModel.searchResults.collectAsState()
     val isSearching by viewModel.isSearching.collectAsState()
     val favorites by viewModel.favorites.collectAsState()
+    val isSyncing by viewModel.isSyncing.collectAsState()
 
     val tabs = listOf(stringResource(R.string.collections_tab), stringResource(R.string.favorites_tab))
     val pagerState = rememberPagerState(pageCount = { tabs.size })
@@ -136,7 +140,8 @@ fun Hadith(paddingValues: PaddingValues) {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 viewModel.toggleFavorite(hadith.id, hadith.isFavorite)
                             },
-                            lang = lang
+                            lang = lang,
+                            showCollectionName = true
                         )
                     }
                 }
@@ -154,7 +159,7 @@ fun Hadith(paddingValues: PaddingValues) {
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = { viewModel.selectBook(null) }) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = stringResource(R.string.go_back))
                     }
                     Column(modifier = Modifier.padding(start = 8.dp)) {
                         Text(
@@ -171,9 +176,11 @@ fun Hadith(paddingValues: PaddingValues) {
 
                 // Manual pull/download full book
                 IconButton(onClick = { book?.id?.let { viewModel.forceSyncBook(it) } }) {
-                    Icon(imageVector = Icons.Default.Refresh, contentDescription = "Sync Full Book", tint = colorScheme.primary)
+                    Icon(imageVector = Icons.Default.Refresh, contentDescription = stringResource(R.string.sync_full_book), tint = colorScheme.primary)
                 }
             }
+
+            var isRefreshing by remember { mutableStateOf(false) }
 
             val listState = rememberLazyListState()
             val shouldLoadMore = remember {
@@ -190,34 +197,67 @@ fun Hadith(paddingValues: PaddingValues) {
                 }
             }
 
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = paddingBottom + 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(loadedHadiths, key = { it.id }) { hadith ->
-                    HadithCard(
-                        collectionName = getLocalizedBookName(hadith.bookId, book?.name ?: "", lang),
-                        hadith = hadith,
-                        isFavorite = hadith.isFavorite,
-                        onFavoriteToggle = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            viewModel.toggleFavorite(hadith.id, hadith.isFavorite)
-                        },
-                        lang = lang
-                    )
+            if (isSyncing) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        CircularProgressIndicator(color = colorScheme.primary)
+                        Text(
+                            text = if (lang == "ar") "جاري تحميل المجموعة كاملة..." else "Downloading entire collection...",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = colorScheme.outline
+                        )
+                    }
                 }
+            } else {
+                PullToRefreshBox(
+                    isRefreshing = isRefreshing,
+                    onRefresh = {
+                        isRefreshing = true
+                        scope.launch {
+                            book?.id?.let { viewModel.forceSyncBook(it) }
+                            kotlinx.coroutines.delay(1200)
+                            isRefreshing = false
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = paddingBottom + 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(loadedHadiths, key = { it.id }) { hadith ->
+                            HadithCard(
+                                collectionName = getLocalizedBookName(hadith.bookId, book?.name ?: "", lang),
+                                hadith = hadith,
+                                isFavorite = hadith.isFavorite,
+                                onFavoriteToggle = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    viewModel.toggleFavorite(hadith.id, hadith.isFavorite)
+                                },
+                                lang = lang,
+                                showCollectionName = false
+                            )
+                        }
 
-                if (viewModel.hasMoreToLoad) {
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        if (viewModel.hasMoreToLoad) {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                                }
+                            }
                         }
                     }
                 }
@@ -351,7 +391,8 @@ fun FavoritesTab(
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         viewModel.toggleFavorite(hadith.id, true)
                     },
-                    lang = lang
+                    lang = lang,
+                    showCollectionName = true
                 )
             }
         }
@@ -364,214 +405,80 @@ fun HadithCard(
     hadith: HadithEntity,
     isFavorite: Boolean,
     onFavoriteToggle: () -> Unit,
-    lang: String
+    lang: String,
+    showCollectionName: Boolean = false
 ) {
-    var expanded by remember { mutableStateOf(false) }
     val arabicFontFamily = remember { FontFamily(Font(R.font.scheherazade_new)) }
     val favScale = remember { Animatable(1f) }
     val scope = rememberCoroutineScope()
 
     Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .clickable { expanded = !expanded },
-        colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainerLow)
+            .fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainerLow),
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // Header Row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(
-                        text = collectionName,
-                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                        color = colorScheme.primary
+            // Arabic Text (always)
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                Text(
+                    text = hadith.arabic,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontSize = 20.sp,
+                        lineHeight = 34.sp,
+                        fontWeight = FontWeight.Medium,
+                        fontFamily = arabicFontFamily
+                    ),
+                    textAlign = TextAlign.Justify,
+                    modifier = Modifier.fillMaxWidth(),
+                    color = colorScheme.onSurface
+                )
+            }
+
+            if (lang == "en") {
+                Spacer(Modifier.height(12.dp))
+                HorizontalDivider(
+                    thickness = 0.5.dp,
+                    color = colorScheme.outlineVariant.copy(alpha = 0.4f)
+                )
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    text = hadith.english,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        lineHeight = 22.sp,
+                        color = colorScheme.onSurfaceVariant
                     )
-                    Text(
-                        text = stringResource(R.string.hadith_number_prefix, hadith.number),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = colorScheme.secondary
-                    )
-                }
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    // Grade Badge
-                    val isSahih = hadith.grade.contains("Sahih", ignoreCase = true)
-                    val isHasan = hadith.grade.contains("Hasan", ignoreCase = true)
-                    val isDaif = hadith.grade.contains("Da'if", ignoreCase = true) ||
-                                 hadith.grade.contains("Daif", ignoreCase = true)
-                    val isMawdu = hadith.grade.contains("Mawdu", ignoreCase = true) ||
-                                  hadith.grade.contains("Fabricated", ignoreCase = true)
-
-                    val badgeColor = when {
-                        isSahih  -> colorScheme.primaryContainer
-                        isHasan  -> colorScheme.tertiaryContainer
-                        isDaif   -> colorScheme.secondaryContainer
-                        isMawdu  -> colorScheme.errorContainer
-                        else     -> colorScheme.surfaceVariant
-                    }
-                    val badgeTextColor = when {
-                        isSahih  -> colorScheme.onPrimaryContainer
-                        isHasan  -> colorScheme.onTertiaryContainer
-                        isDaif   -> colorScheme.onSecondaryContainer
-                        isMawdu  -> colorScheme.onErrorContainer
-                        else     -> colorScheme.onSurfaceVariant
-                    }
-
-                    Surface(
-                        color = badgeColor,
-                        shape = shapes.extraSmall,
-                        modifier = Modifier.padding(end = 8.dp)
-                    ) {
-                        Text(
-                            text = getLocalizedGrade(hadith.grade, lang),
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                            color = badgeTextColor
-                        )
-                    }
-
-                    // Favorite Button with animation
-                    IconButton(
-                        onClick = {
-                            scope.launch {
-                                favScale.animateTo(0.7f, spring(stiffness = Spring.StiffnessHigh))
-                                onFavoriteToggle()
-                                favScale.animateTo(1f, spring(bouncyFlow()))
-                            }
-                        },
-                        modifier = Modifier.graphicsLayer {
-                            scaleX = favScale.value
-                            scaleY = favScale.value
-                        }
-                    ) {
-                        Icon(
-                            imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                            contentDescription = "Favorite",
-                            tint = if (isFavorite) Color.Red else colorScheme.outline
-                        )
-                    }
-                }
+                )
             }
 
             Spacer(Modifier.height(8.dp))
 
-            // Narrator
-            if (hadith.narrator.isNotEmpty()) {
-                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                    Text(
-                        text = stringResource(R.string.narrated_by_prefix, hadith.narrator),
-                        style = MaterialTheme.typography.bodySmall.copy(fontStyle = FontStyle.Italic),
-                        color = colorScheme.secondary,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-                Spacer(Modifier.height(12.dp))
-            }
-
-            if (!expanded) {
-                val previewText = if (lang == "ar") {
-                    if (hadith.arabic.length > 120) {
-                        hadith.arabic.take(120) + "…"
-                    } else {
-                        hadith.arabic
-                    }
-                } else {
-                    if (hadith.english.length > 120) {
-                        hadith.english.take(120) + "…"
-                    } else {
-                        hadith.english
-                    }
-                }
-                
-                if (lang == "ar") {
-                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                        Text(
-                            text = previewText,
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                fontSize = 18.sp,
-                                lineHeight = 28.sp,
-                                fontFamily = arabicFontFamily
-                            ),
-                            textAlign = TextAlign.Justify,
-                            modifier = Modifier.fillMaxWidth(),
-                            color = colorScheme.onSurfaceVariant
-                        )
-                    }
-                } else {
-                    Text(
-                        text = previewText,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = colorScheme.onSurfaceVariant
-                    )
-                }
-            } else {
-                // Arabic Text
-                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                    Text(
-                        text = hadith.arabic,
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontSize = 22.sp,
-                            lineHeight = 36.sp,
-                            fontWeight = FontWeight.Medium,
-                            fontFamily = arabicFontFamily
-                        ),
-                        textAlign = TextAlign.Justify,
-                        modifier = Modifier.fillMaxWidth(),
-                        color = colorScheme.onSurface
-                    )
-                }
-
-                if (lang == "ar") {
-                    var showTranslation by remember { mutableStateOf(false) }
-                    Spacer(Modifier.height(12.dp))
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainer),
-                        shape = MaterialTheme.shapes.small
-                    ) {
-                        Column(modifier = Modifier.padding(12.dp)) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { showTranslation = !showTranslation },
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.english_translation),
-                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                                    color = colorScheme.primary
-                                )
-                                Icon(
-                                    imageVector = if (showTranslation) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                                    contentDescription = stringResource(R.string.english_translation),
-                                    tint = colorScheme.primary
-                                )
-                            }
-                            
-                            AnimatedVisibility(visible = showTranslation) {
-                                Column {
-                                    Spacer(Modifier.height(8.dp))
-                                    Text(
-                                        text = hadith.english,
-                                        style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
-                                        color = colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = {
+                        scope.launch {
+                            favScale.animateTo(0.7f, spring(stiffness = Spring.StiffnessHigh))
+                            onFavoriteToggle()
+                            favScale.animateTo(1f, spring(bouncyFlow()))
                         }
-                    }
-                } else {
-                    Spacer(Modifier.height(12.dp))
-                    // English Text
-                    Text(
-                        text = hadith.english,
-                        style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
-                        color = colorScheme.onSurfaceVariant
+                    },
+                    modifier = Modifier
+                        .size(36.dp)
+                        .graphicsLayer {
+                            scaleX = favScale.value
+                            scaleY = favScale.value
+                        }
+                ) {
+                    Icon(
+                        imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = stringResource(R.string.favorite),
+                        tint = if (isFavorite) Color.Red else colorScheme.outline,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }

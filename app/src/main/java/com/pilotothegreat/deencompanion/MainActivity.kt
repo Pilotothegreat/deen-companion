@@ -25,6 +25,7 @@ import org.koin.android.ext.android.inject
 import timber.log.Timber
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -127,14 +128,14 @@ class MainActivity : ComponentActivity() {
                                 showRationale.value = false
                                 permissionsLauncher.launch(permissionsToRequest)
                             },
-                            title = { Text("Permissions Required") },
-                            text = { Text("This app needs location for accurate prayer times and notifications for Iqama reminders.") },
+                            title = { Text(stringResource(R.string.permissions_required)) },
+                            text = { Text(stringResource(R.string.permissions_required_desc)) },
                             confirmButton = {
                                 androidx.compose.material3.TextButton(onClick = {
                                     showRationale.value = false
                                     permissionsLauncher.launch(permissionsToRequest)
                                 }) {
-                                    Text("OK")
+                                    Text(stringResource(R.string.ok))
                                 }
                             }
                         )
@@ -158,8 +159,8 @@ class MainActivity : ComponentActivity() {
                     if (showExactAlarmRationale) {
                         androidx.compose.material3.AlertDialog(
                             onDismissRequest = { showExactAlarmRationale = false },
-                            title = { Text("Exact Alarm Permission Required") },
-                            text = { Text("This app needs exact alarm permission for accurate Iqama reminders.") },
+                            title = { Text(stringResource(R.string.exact_alarm_permission_required)) },
+                            text = { Text(stringResource(R.string.exact_alarm_permission_required_desc)) },
                             confirmButton = {
                                 androidx.compose.material3.TextButton(onClick = {
                                     showExactAlarmRationale = false
@@ -176,12 +177,12 @@ class MainActivity : ComponentActivity() {
                                         }
                                     }
                                 }) {
-                                    Text("Grant")
+                                    Text(stringResource(R.string.grant))
                                 }
                             },
                             dismissButton = {
                                 androidx.compose.material3.TextButton(onClick = { showExactAlarmRationale = false }) {
-                                    Text("Cancel")
+                                    Text(stringResource(R.string.cancel))
                                 }
                             }
                         )

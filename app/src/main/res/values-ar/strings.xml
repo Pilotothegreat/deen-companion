@@ -181,4 +181,18 @@
     <string name="show_translation">عرض الترجمة</string>
     <string name="hide_translation">إخفاء الترجمة</string>
     <string name="juz_arabic_label">الجزء %s</string>
+    <string name="surah_page_indicator">صفحة %1$s من %2$s</string>
+    <string name="sleep_mode">مؤقت النوم</string>
+    <string name="default_location">مكة المكرمة، المملكة العربية السعودية</string>
+    <string name="pull_refresh_hint">اسحب للتحديث</string>
+    <string name="surah_label">سورة</string>
+    <string name="meccan_type">مكية</string>
+    <string name="medinan_type">مدنية</string>
+    <string name="quran">القرآن</string>
+    <string name="hadith">الحديث</string>
+    <string name="permissions_required">الصلاحيات المطلوبة</string>
+    <string name="permissions_required_desc">يحتاج هذا التطبيق إلى الوصول للموقع لعرض مواقيت صلاة دقيقة ولتنبيهات الإقامة.</string>
+    <string name="exact_alarm_permission_required">صلاحية التنبيه الدقيق مطلوبة</string>
+    <string name="exact_alarm_permission_required_desc">يحتاج هذا التطبيق إلى صلاحية التنبيه الدقيق لإرسال تنبيهات الإقامة في وقتها.</string>
+    <string name="grant">منح الصلاحية</string>
 </resources>

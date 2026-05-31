@@ -3,6 +3,8 @@
     <string name="app_name">Deen Companion</string>
     <string name="app_name_short">Deen</string>
     <string name="today">Today</string>
+    <string name="quran">Quran</string>
+    <string name="hadith">Hadith</string>
     <string name="settings">Settings</string>
     <string name="about">About</string>
     <string name="ui">Interface</string>
@@ -182,4 +184,16 @@
     <string name="show_translation">Show Translation</string>
     <string name="hide_translation">Hide Translation</string>
     <string name="juz_arabic_label">الجزء %s</string>
+    <string name="surah_page_indicator">Page %1$d of %2$d</string>
+    <string name="sleep_mode">Sleep Mode</string>
+    <string name="default_location">Makkah, Saudi Arabia</string>
+    <string name="pull_refresh_hint">Pull to refresh</string>
+    <string name="surah_label">Surah</string>
+    <string name="meccan_type">Meccan</string>
+    <string name="medinan_type">Medinan</string>
+    <string name="permissions_required">Permissions Required</string>
+    <string name="permissions_required_desc">This app needs location for accurate prayer times and notifications for Iqama reminders.</string>
+    <string name="exact_alarm_permission_required">Exact Alarm Permission Required</string>
+    <string name="exact_alarm_permission_required_desc">This app needs exact alarm permission for accurate Iqama reminders.</string>
+    <string name="grant">Grant</string>
 </resources>

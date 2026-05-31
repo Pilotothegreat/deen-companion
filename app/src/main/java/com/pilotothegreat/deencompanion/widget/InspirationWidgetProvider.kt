@@ -45,6 +45,23 @@ class InspirationWidgetProvider : AppWidgetProvider(), KoinComponent {
         "Bukhari & Muslim"
     )
 
+    private fun getLocalizedInspirationRef(ref: String, lang: String): String {
+        if (lang != "ar") return ref
+        return ref.replace("Quran", "القرآن")
+            .replace("Bukhari & Muslim", "البخاري ومسلم")
+            .replace("Bukhari", "البخاري")
+            .replace("1", "١")
+            .replace("2", "٢")
+            .replace("3", "٣")
+            .replace("4", "٤")
+            .replace("5", "٥")
+            .replace("6", "٦")
+            .replace("7", "٧")
+            .replace("8", "٨")
+            .replace("9", "٩")
+            .replace("0", "٠")
+    }
+
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
         if (intent.action == AppWidgetManager.ACTION_APPWIDGET_UPDATE) {
@@ -106,7 +123,7 @@ class InspirationWidgetProvider : AppWidgetProvider(), KoinComponent {
 
                 if (hasOpened) {
                     views.setTextViewText(R.id.widget_inspiration_text, "\"$text\"")
-                    views.setTextViewText(R.id.widget_inspiration_ref, "— $ref")
+                    views.setTextViewText(R.id.widget_inspiration_ref, "— ${getLocalizedInspirationRef(ref, lang)}")
                 } else {
                     views.setTextViewText(R.id.widget_inspiration_text, localizedContext.getString(R.string.widget_placeholder_initialize))
                     views.setTextViewText(R.id.widget_inspiration_ref, "--")
