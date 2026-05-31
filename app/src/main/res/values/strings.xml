@@ -179,4 +179,6 @@
     <string name="juz_number">Juz %d</string>
     <string name="verse_number_prefix">%1$d. </string>
     <string name="english_translation">English Translation</string>
+    <string name="show_translation">Show Translation</string>
+    <string name="hide_translation">Hide Translation</string>
 </resources>

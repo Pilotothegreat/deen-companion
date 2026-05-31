@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -43,12 +44,11 @@ fun QuranAudioPlayer(
         modifier = modifier
     ) {
         Surface(
+            tonalElevation = 8.dp,
+            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .navigationBarsPadding(),
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            tonalElevation = 3.dp,
-            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+                .navigationBarsPadding()
         ) {
             Box(modifier = Modifier.fillMaxWidth()) {
                 val progress = if (surah.totalVerses > 0) currentAyahId.toFloat() / surah.totalVerses.toFloat() else 0f
@@ -56,7 +56,7 @@ fun QuranAudioPlayer(
                     progress = { progress },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(3.dp)
+                        .height(2.dp)
                         .align(Alignment.TopCenter),
                     color = MaterialTheme.colorScheme.primary,
                     trackColor = Color.Transparent,
@@ -66,7 +66,7 @@ fun QuranAudioPlayer(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 11.dp, bottom = 12.dp, start = 16.dp, end = 16.dp),
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -77,20 +77,20 @@ fun QuranAudioPlayer(
                     ) {
                         Text(
                             text = surah.transliteration,
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 text = stringResource(selectedReciter.labelRes),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.secondary
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Icon(
                                 imageVector = Icons.Default.ArrowDropDown,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.secondary,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(16.dp)
                             )
                         }
@@ -133,8 +133,13 @@ fun QuranAudioPlayer(
                             onClick = {
                                 playbackManager.togglePlayPause()
                             },
-                            modifier = Modifier.scale(playScale),
-                            shape = MaterialTheme.shapes.medium
+                            modifier = Modifier
+                                .size(48.dp)
+                                .scale(playScale),
+                            shape = CircleShape,
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
                         ) {
                             if (isBuffering) {
                                 CircularProgressIndicator(

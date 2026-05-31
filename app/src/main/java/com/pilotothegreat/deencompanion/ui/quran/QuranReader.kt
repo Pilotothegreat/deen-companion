@@ -15,6 +15,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
@@ -101,8 +103,15 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
 
     val activeAyah = if (currentSurahId == surahNumber) currentAyahId else scrollToVerse ?: 1
 
-    val pages = remember(surah) {
-        surah?.verses?.chunked(8) ?: emptyList()
+    val configuration = LocalConfiguration.current
+    val screenHeightDp = configuration.screenHeightDp
+    val paddingDp = 240f // 80 top + 100 bottom + 60 safety/margins
+    val availableHeight = (screenHeightDp - paddingDp).coerceAtLeast(100f)
+    val approximateLineHeight = arabicFontSize * 2.3f
+    val versesPerPage = (availableHeight / approximateLineHeight).toInt().coerceAtLeast(2)
+
+    val pages = remember(surah, versesPerPage) {
+        surah?.verses?.chunked(versesPerPage) ?: emptyList()
     }
 
     val pagerState = rememberPagerState(pageCount = { pages.size })
@@ -154,8 +163,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                 ) {
                     Column(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState()),
+                            .fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         if (pageIdx == 0 && surah.id != 9 && surah.id != 1) {
@@ -274,22 +282,39 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                             }
                         }
 
-                        if (lang == "en") {
-                            Spacer(modifier = Modifier.height(24.dp))
-                            HorizontalDivider(thickness = 0.5.dp, color = colorScheme.outlineVariant.copy(alpha = 0.5f))
-                            Spacer(modifier = Modifier.height(12.dp))
+                        var showTranslation by remember { mutableStateOf(false) }
 
-                            pageVerses.forEach { verse ->
-                                val isHighlighted = verse.id == activeAyah
-                                Text(
-                                    text = stringResource(R.string.verse_number_prefix, verse.id) + verse.translation,
-                                    style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
-                                    color = if (isHighlighted) colorScheme.primary else colorScheme.onSurfaceVariant,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 6.dp),
-                                    textAlign = TextAlign.Start
+                        Spacer(modifier = Modifier.height(16.dp))
+                        TextButton(onClick = { showTranslation = !showTranslation }) {
+                            Text(
+                                text = if (showTranslation) {
+                                    stringResource(R.string.hide_translation)
+                                } else {
+                                    stringResource(R.string.show_translation)
+                                }
+                            )
+                        }
+
+                        AnimatedVisibility(visible = showTranslation) {
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                HorizontalDivider(
+                                    thickness = 0.5.dp,
+                                    color = colorScheme.outlineVariant.copy(alpha = 0.5f)
                                 )
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                pageVerses.forEach { verse ->
+                                    val isHighlighted = verse.id == activeAyah
+                                    Text(
+                                        text = stringResource(R.string.verse_number_prefix, verse.id) + verse.translation,
+                                        style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+                                        color = if (isHighlighted) colorScheme.primary else colorScheme.onSurfaceVariant,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 6.dp),
+                                        textAlign = TextAlign.Start
+                                    )
+                                }
                             }
                         }
                     }

@@ -461,11 +461,14 @@ fun HadithCard(
 
             // Narrator
             if (hadith.narrator.isNotEmpty()) {
-                Text(
-                    text = stringResource(R.string.narrated_by_prefix, hadith.narrator),
-                    style = MaterialTheme.typography.bodySmall.copy(fontStyle = FontStyle.Italic),
-                    color = colorScheme.secondary
-                )
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                    Text(
+                        text = stringResource(R.string.narrated_by_prefix, hadith.narrator),
+                        style = MaterialTheme.typography.bodySmall.copy(fontStyle = FontStyle.Italic),
+                        color = colorScheme.secondary,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
                 Spacer(Modifier.height(12.dp))
             }
 

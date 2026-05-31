@@ -178,4 +178,6 @@
     <string name="juz_number">الجزء %d</string>
     <string name="verse_number_prefix">%1$d. </string>
     <string name="english_translation">الترجمة الإنجليزية</string>
+    <string name="show_translation">عرض الترجمة</string>
+    <string name="hide_translation">إخفاء الترجمة</string>
 </resources>
