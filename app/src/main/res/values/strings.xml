@@ -181,4 +181,5 @@
     <string name="english_translation">English Translation</string>
     <string name="show_translation">Show Translation</string>
     <string name="hide_translation">Hide Translation</string>
+    <string name="juz_arabic_label">الجزء %s</string>
 </resources>

@@ -6,8 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -105,10 +103,11 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
 
     val configuration = LocalConfiguration.current
     val screenHeightDp = configuration.screenHeightDp
-    val paddingDp = 240f // 80 top + 100 bottom + 60 safety/margins
-    val availableHeight = (screenHeightDp - paddingDp).coerceAtLeast(100f)
-    val approximateLineHeight = arabicFontSize * 2.3f
-    val versesPerPage = (availableHeight / approximateLineHeight).toInt().coerceAtLeast(2)
+    val versesPerPage = remember(arabicFontSize, screenHeightDp) {
+        val availableHeight = (screenHeightDp - 240f).coerceAtLeast(100f)
+        val approximateLineHeight = arabicFontSize * 2.3f
+        (availableHeight / approximateLineHeight).toInt().coerceAtLeast(2)
+    }
 
     val pages = remember(surah, versesPerPage) {
         surah?.verses?.chunked(versesPerPage) ?: emptyList()
@@ -282,38 +281,40 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                             }
                         }
 
-                        var showTranslation by remember { mutableStateOf(false) }
+                        if (pageVerses.any { it.translation.isNotEmpty() }) {
+                            var showTranslation by remember { mutableStateOf(false) }
 
-                        Spacer(modifier = Modifier.height(16.dp))
-                        TextButton(onClick = { showTranslation = !showTranslation }) {
-                            Text(
-                                text = if (showTranslation) {
-                                    stringResource(R.string.hide_translation)
-                                } else {
-                                    stringResource(R.string.show_translation)
-                                }
-                            )
-                        }
-
-                        AnimatedVisibility(visible = showTranslation) {
-                            Column(modifier = Modifier.fillMaxWidth()) {
-                                HorizontalDivider(
-                                    thickness = 0.5.dp,
-                                    color = colorScheme.outlineVariant.copy(alpha = 0.5f)
+                            Spacer(modifier = Modifier.height(16.dp))
+                            TextButton(onClick = { showTranslation = !showTranslation }) {
+                                Text(
+                                    text = if (showTranslation) {
+                                        stringResource(R.string.hide_translation)
+                                    } else {
+                                        stringResource(R.string.show_translation)
+                                    }
                                 )
-                                Spacer(modifier = Modifier.height(12.dp))
+                            }
 
-                                pageVerses.forEach { verse ->
-                                    val isHighlighted = verse.id == activeAyah
-                                    Text(
-                                        text = stringResource(R.string.verse_number_prefix, verse.id) + verse.translation,
-                                        style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
-                                        color = if (isHighlighted) colorScheme.primary else colorScheme.onSurfaceVariant,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(vertical = 6.dp),
-                                        textAlign = TextAlign.Start
+                            AnimatedVisibility(visible = showTranslation) {
+                                Column(modifier = Modifier.fillMaxWidth()) {
+                                    HorizontalDivider(
+                                        thickness = 0.5.dp,
+                                        color = colorScheme.outlineVariant.copy(alpha = 0.5f)
                                     )
+                                    Spacer(modifier = Modifier.height(12.dp))
+
+                                    pageVerses.forEach { verse ->
+                                        val isHighlighted = verse.id == activeAyah
+                                        Text(
+                                            text = stringResource(R.string.verse_number_prefix, verse.id) + verse.translation,
+                                            style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+                                            color = if (isHighlighted) colorScheme.primary else colorScheme.onSurfaceVariant,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 6.dp),
+                                            textAlign = TextAlign.Start
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -417,7 +418,7 @@ fun JuzHeader(juzNumber: Int) {
                 color = colorScheme.onSecondaryContainer
             )
             Text(
-                text = "الجزء ${toArabicNumerals(juzNumber)}",
+                text = stringResource(R.string.juz_arabic_label, toArabicNumerals(juzNumber)),
                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                 color = colorScheme.onSecondaryContainer
             )

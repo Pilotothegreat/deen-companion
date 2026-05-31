@@ -51,7 +51,7 @@ fun QuranAudioPlayer(
                 .navigationBarsPadding()
         ) {
             Box(modifier = Modifier.fillMaxWidth()) {
-                val progress = if (surah.totalVerses > 0) currentAyahId.toFloat() / surah.totalVerses.toFloat() else 0f
+                val progress = if (surah.verses.size > 0) currentAyahId.toFloat() / surah.verses.size.toFloat() else 0f
                 LinearProgressIndicator(
                     progress = { progress },
                     modifier = Modifier
@@ -157,7 +157,7 @@ fun QuranAudioPlayer(
 
                         IconButton(
                             onClick = {
-                                if (currentAyahId < surah.totalVerses) {
+                                if (currentAyahId < surah.verses.size) {
                                     playbackManager.jumpToAyah(currentAyahId + 1)
                                 }
                             }
@@ -175,4 +175,4 @@ fun QuranAudioPlayer(
     }
 }
 
-private val QuranHelper.Surah.totalVerses: Int get() = this.totalVerses
+
