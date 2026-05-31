@@ -178,4 +178,5 @@
     <string name="widget_inspiration_desc">Shows a daily inspirational Quranic verse or Hadith.</string>
     <string name="juz_number">Juz %d</string>
     <string name="verse_number_prefix">%1$d. </string>
+    <string name="english_translation">English Translation</string>
 </resources>

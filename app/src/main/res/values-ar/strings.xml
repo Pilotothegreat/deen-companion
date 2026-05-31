@@ -177,4 +177,5 @@
     <string name="widget_inspiration_desc">يعرض آية قرآنية أو حديثاً شريفاً ملهماً يومياً.</string>
     <string name="juz_number">الجزء %d</string>
     <string name="verse_number_prefix">%1$d. </string>
+    <string name="english_translation">الترجمة الإنجليزية</string>
 </resources>

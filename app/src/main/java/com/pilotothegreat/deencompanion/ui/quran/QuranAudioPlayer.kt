@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -41,14 +42,13 @@ fun QuranAudioPlayer(
         visible = currentSurahId == surah.id,
         modifier = modifier
     ) {
-        Card(
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
                 .navigationBarsPadding(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-            shape = MaterialTheme.shapes.large
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            tonalElevation = 3.dp,
+            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
         ) {
             Box(modifier = Modifier.fillMaxWidth()) {
                 val progress = if (surah.totalVerses > 0) currentAyahId.toFloat() / surah.totalVerses.toFloat() else 0f

@@ -33,6 +33,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.foundation.BorderStroke
 import com.pilotothegreat.deencompanion.R
+import com.pilotothegreat.deencompanion.ui.theme.Theme
 import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
 import com.pilotothegreat.deencompanion.services.QuranPlaybackManager
 import com.pilotothegreat.deencompanion.util.PageTitle
@@ -122,9 +123,13 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
         }
     }
 
+    val themeState by appPreferenceRepo.theme.collectAsState(Theme.AutoMaterial)
+    val isDark = themeState.isDark()
+    val mushafBgColor = if (isDark) colorScheme.background else Color(0xFFFDFBF7)
+
     Box(
         modifier = Modifier
-            .background(colorScheme.surface)
+            .background(mushafBgColor)
             .fillMaxSize()
             .hazeSource(hazeState)
     ) {
@@ -137,153 +142,154 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                 state = pagerState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = 80.dp, bottom = 120.dp)
+                    .padding(top = 80.dp, bottom = 100.dp)
             ) { pageIdx ->
                 val pageVerses = pages.getOrNull(pageIdx) ?: emptyList()
 
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                        .padding(horizontal = 24.dp, vertical = 16.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Card(
-                        modifier = Modifier.fillMaxSize(),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFDFBF7)),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                        shape = MaterialTheme.shapes.large
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState()),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp)
-                                .verticalScroll(rememberScrollState()),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            if (pageIdx == 0 && surah.id != 9 && surah.id != 1) {
-                                Card(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(bottom = 16.dp),
-                                    colors = CardDefaults.cardColors(containerColor = colorScheme.primaryContainer.copy(alpha = 0.15f)),
-                                    shape = MaterialTheme.shapes.medium,
-                                    border = BorderStroke(1.dp, colorScheme.primary.copy(alpha = 0.3f))
-                                ) {
-                                    Text(
-                                        text = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
-                                        style = MaterialTheme.typography.headlineMedium.copy(
-                                            fontWeight = FontWeight.Bold,
-                                            fontFamily = quranFontFamily
-                                        ),
-                                        textAlign = TextAlign.Center,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(vertical = 12.dp),
-                                        color = colorScheme.primary
-                                    )
-                                }
-                            }
+                        if (pageIdx == 0 && surah.id != 9 && surah.id != 1) {
+                            Text(
+                                text = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+                                style = MaterialTheme.typography.headlineLarge.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = quranFontFamily,
+                                    fontSize = 32.sp
+                                ),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 24.dp),
+                                color = if (isDark) colorScheme.primary else Color(0xFF8B0000)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
 
-                            val primaryContainerColor = colorScheme.primaryContainer
-                            val onPrimaryContainerColor = colorScheme.onPrimaryContainer
-                            val segments = remember(pageVerses, activeAyah, primaryContainerColor, onPrimaryContainerColor) {
-                                val list = mutableListOf<Any>()
-                                var builder = AnnotatedString.Builder()
-                                
-                                pageVerses.forEach { verse ->
-                                    val boundary = juzData.firstOrNull { it.surahNumber == surah.id && it.verseNumber == verse.id }
-                                    if (boundary != null) {
-                                        val annotated = builder.toAnnotatedString()
-                                        if (annotated.isNotEmpty()) {
-                                            list.add(annotated)
-                                        }
-                                        list.add(boundary)
-                                        builder = AnnotatedString.Builder()
+                        val primaryContainerColor = colorScheme.primaryContainer
+                        val onPrimaryContainerColor = colorScheme.onPrimaryContainer
+                        val secondaryColor = colorScheme.secondary
+                        val segments = remember(pageVerses, activeAyah, primaryContainerColor, onPrimaryContainerColor, isDark, secondaryColor) {
+                            val list = mutableListOf<Any>()
+                            var builder = AnnotatedString.Builder()
+                            
+                            pageVerses.forEach { verse ->
+                                val boundary = juzData.firstOrNull { it.surahNumber == surah.id && it.verseNumber == verse.id }
+                                if (boundary != null) {
+                                    val annotated = builder.toAnnotatedString()
+                                    if (annotated.isNotEmpty()) {
+                                        list.add(annotated)
                                     }
-                                    
-                                    val start = builder.length
-                                    val verseText = "${verse.text} ﴾${toArabicNumerals(verse.id)}﴿ "
-                                    builder.append(verseText)
-                                    val end = builder.length
-                                    
-                                    builder.addStringAnnotation(
-                                        tag = "AYAH_CLICK",
-                                        annotation = verse.id.toString(),
+                                    list.add(boundary)
+                                    builder = AnnotatedString.Builder()
+                                }
+                                
+                                val start = builder.length
+                                val verseText = "${verse.text} "
+                                builder.append(verseText)
+                                
+                                val startOrn = builder.length
+                                val ornament = "﴾${toArabicNumerals(verse.id)}﴿ "
+                                builder.append(ornament)
+                                val endOrn = builder.length
+                                
+                                val end = builder.length
+                                
+                                builder.addStringAnnotation(
+                                    tag = "AYAH_CLICK",
+                                    annotation = verse.id.toString(),
+                                    start = start,
+                                    end = end
+                                )
+                                
+                                if (verse.id == activeAyah) {
+                                    builder.addStyle(
+                                        style = SpanStyle(
+                                            background = primaryContainerColor,
+                                            color = onPrimaryContainerColor
+                                        ),
                                         start = start,
                                         end = end
                                     )
-                                    
-                                    if (verse.id == activeAyah) {
-                                        builder.addStyle(
-                                            style = SpanStyle(
-                                                background = primaryContainerColor,
-                                                color = onPrimaryContainerColor
+                                } else {
+                                    builder.addStyle(
+                                        style = SpanStyle(
+                                            color = if (isDark) secondaryColor else Color(0xFFC5A059),
+                                            fontWeight = FontWeight.Bold
+                                        ),
+                                        start = startOrn,
+                                        end = endOrn
+                                    )
+                                }
+                            }
+                            val finalAnnotated = builder.toAnnotatedString()
+                            if (finalAnnotated.isNotEmpty()) {
+                                list.add(finalAnnotated)
+                            }
+                            list
+                        }
+
+                        segments.forEach { segment ->
+                            when (segment) {
+                                is JuzBoundary -> {
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    JuzHeader(segment.juzNumber)
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                }
+                                is AnnotatedString -> {
+                                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                                        ClickableText(
+                                            text = segment,
+                                            style = MaterialTheme.typography.bodyLarge.copy(
+                                                fontSize = arabicFontSize.sp,
+                                                fontFamily = quranFontFamily,
+                                                lineHeight = (arabicFontSize * 2.3f).sp,
+                                                textAlign = TextAlign.Justify
                                             ),
-                                            start = start,
-                                            end = end
+                                            onClick = { offset ->
+                                                segment.getStringAnnotations(tag = "AYAH_CLICK", start = offset, end = offset)
+                                                    .firstOrNull()?.let { annotation ->
+                                                        val clickedAyahId = annotation.item.toIntOrNull()
+                                                        if (clickedAyahId != null) {
+                                                             playbackManager.jumpToAyah(clickedAyahId)
+                                                             if (currentSurahId != surah.id) {
+                                                                 playbackManager.playSurah(surah, clickedAyahId)
+                                                             }
+                                                        }
+                                                    }
+                                            },
+                                            modifier = Modifier.fillMaxWidth()
                                         )
                                     }
                                 }
-                                val finalAnnotated = builder.toAnnotatedString()
-                                if (finalAnnotated.isNotEmpty()) {
-                                    list.add(finalAnnotated)
-                                }
-                                list
                             }
+                        }
 
-                            segments.forEach { segment ->
-                                when (segment) {
-                                    is JuzBoundary -> {
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                        JuzHeader(segment.juzNumber)
-                                        Spacer(modifier = Modifier.height(16.dp))
-                                    }
-                                    is AnnotatedString -> {
-                                        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                                            ClickableText(
-                                                text = segment,
-                                                style = MaterialTheme.typography.bodyLarge.copy(
-                                                    fontSize = arabicFontSize.sp,
-                                                    fontFamily = quranFontFamily,
-                                                    lineHeight = (arabicFontSize * 2.3f).sp,
-                                                    textAlign = TextAlign.Justify
-                                                ),
-                                                onClick = { offset ->
-                                                    segment.getStringAnnotations(tag = "AYAH_CLICK", start = offset, end = offset)
-                                                        .firstOrNull()?.let { annotation ->
-                                                            val clickedAyahId = annotation.item.toIntOrNull()
-                                                            if (clickedAyahId != null) {
-                                                                playbackManager.jumpToAyah(clickedAyahId)
-                                                                if (currentSurahId != surah.id) {
-                                                                    playbackManager.playSurah(surah, clickedAyahId)
-                                                                }
-                                                            }
-                                                        }
-                                                },
-                                                modifier = Modifier.fillMaxWidth()
-                                            )
-                                        }
-                                    }
-                                }
-                            }
+                        if (lang == "en") {
+                            Spacer(modifier = Modifier.height(24.dp))
+                            HorizontalDivider(thickness = 0.5.dp, color = colorScheme.outlineVariant.copy(alpha = 0.5f))
+                            Spacer(modifier = Modifier.height(12.dp))
 
-                            if (lang == "en") {
-                                Spacer(modifier = Modifier.height(16.dp))
-                                HorizontalDivider(thickness = 0.5.dp, color = colorScheme.outlineVariant.copy(alpha = 0.5f))
-                                Spacer(modifier = Modifier.height(8.dp))
-
-                                pageVerses.forEach { verse ->
-                                    val isHighlighted = verse.id == activeAyah
-                                    Text(
-                                        text = stringResource(R.string.verse_number_prefix, verse.id) + verse.translation,
-                                        style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 20.sp),
-                                        color = if (isHighlighted) colorScheme.primary else colorScheme.onSurfaceVariant,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(vertical = 4.dp),
-                                        textAlign = TextAlign.Start
-                                    )
-                                }
+                            pageVerses.forEach { verse ->
+                                val isHighlighted = verse.id == activeAyah
+                                Text(
+                                    text = stringResource(R.string.verse_number_prefix, verse.id) + verse.translation,
+                                    style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+                                    color = if (isHighlighted) colorScheme.primary else colorScheme.onSurfaceVariant,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 6.dp),
+                                    textAlign = TextAlign.Start
+                                )
                             }
                         }
                     }

@@ -19,7 +19,11 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material3.*
+import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
+import org.koin.compose.koinInject
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.runtime.*
@@ -56,6 +60,9 @@ fun Hadith(paddingValues: PaddingValues) {
     val viewModel: HadithVM = koinViewModel()
     val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
+
+    val appPreferenceRepo: AppPreferenceRepo = koinInject()
+    val lang by appPreferenceRepo.appLanguage.collectAsState(initial = "en")
 
     val hazeState = rememberHazeState()
     val searchState = rememberTextFieldState("")
@@ -122,13 +129,14 @@ fun Hadith(paddingValues: PaddingValues) {
                     items(searchResults, key = { it.id }) { hadith ->
                         val bookName = books.firstOrNull { it.id == hadith.bookId }?.name ?: hadith.bookId
                         HadithCard(
-                            collectionName = bookName,
+                            collectionName = getLocalizedBookName(hadith.bookId, bookName, lang),
                             hadith = hadith,
                             isFavorite = hadith.isFavorite,
                             onFavoriteToggle = {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 viewModel.toggleFavorite(hadith.id, hadith.isFavorite)
-                            }
+                            },
+                            lang = lang
                         )
                     }
                 }
@@ -150,11 +158,11 @@ fun Hadith(paddingValues: PaddingValues) {
                     }
                     Column(modifier = Modifier.padding(start = 8.dp)) {
                         Text(
-                            text = book?.name ?: "",
+                            text = getLocalizedBookName(book?.id ?: "", book?.name ?: "", lang),
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                         )
                         Text(
-                            text = book?.compiler ?: "",
+                            text = getLocalizedCompiler(book?.id ?: "", book?.compiler ?: "", lang),
                             style = MaterialTheme.typography.bodySmall,
                             color = colorScheme.secondary
                         )
@@ -190,13 +198,14 @@ fun Hadith(paddingValues: PaddingValues) {
             ) {
                 items(loadedHadiths, key = { it.id }) { hadith ->
                     HadithCard(
-                        collectionName = book?.name ?: "",
+                        collectionName = getLocalizedBookName(hadith.bookId, book?.name ?: "", lang),
                         hadith = hadith,
                         isFavorite = hadith.isFavorite,
                         onFavoriteToggle = {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             viewModel.toggleFavorite(hadith.id, hadith.isFavorite)
-                        }
+                        },
+                        lang = lang
                     )
                 }
 
@@ -236,8 +245,8 @@ fun Hadith(paddingValues: PaddingValues) {
                     .weight(1f)
             ) { page ->
                 when (page) {
-                    0 -> CollectionsTab(books) { viewModel.selectBook(it.id) }
-                    1 -> FavoritesTab(favorites, books, viewModel, paddingBottom)
+                    0 -> CollectionsTab(books, lang) { viewModel.selectBook(it.id) }
+                    1 -> FavoritesTab(favorites, books, viewModel, paddingBottom, lang)
                 }
             }
         }
@@ -249,6 +258,7 @@ fun Hadith(paddingValues: PaddingValues) {
 @Composable
 fun CollectionsTab(
     books: List<HadithBookEntity>,
+    lang: String,
     onBookClick: (HadithBookEntity) -> Unit
 ) {
     if (books.isEmpty()) {
@@ -276,14 +286,16 @@ fun CollectionsTab(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
+                            val localizedBookName = getLocalizedBookName(book.id, book.name, lang)
+                            val localizedCompiler = getLocalizedCompiler(book.id, book.compiler, lang)
                             Text(
-                                text = book.name,
+                                text = localizedBookName,
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                 color = colorScheme.primary
                             )
                             Spacer(Modifier.height(4.dp))
                             Text(
-                                text = stringResource(R.string.compiled_by_prefix, book.compiler),
+                                text = stringResource(R.string.compiled_by_prefix, localizedCompiler),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = colorScheme.secondary
                             )
@@ -306,7 +318,8 @@ fun FavoritesTab(
     favorites: List<HadithEntity>,
     books: List<HadithBookEntity>,
     viewModel: HadithVM,
-    bottomPadding: androidx.compose.ui.unit.Dp
+    bottomPadding: androidx.compose.ui.unit.Dp,
+    lang: String
 ) {
     val haptic = LocalHapticFeedback.current
 
@@ -331,13 +344,14 @@ fun FavoritesTab(
             items(favorites, key = { it.id }) { hadith ->
                 val bookName = books.firstOrNull { it.id == hadith.bookId }?.name ?: hadith.bookId
                 HadithCard(
-                    collectionName = bookName,
+                    collectionName = getLocalizedBookName(hadith.bookId, bookName, lang),
                     hadith = hadith,
                     isFavorite = true,
                     onFavoriteToggle = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         viewModel.toggleFavorite(hadith.id, true)
-                    }
+                    },
+                    lang = lang
                 )
             }
         }
@@ -349,7 +363,8 @@ fun HadithCard(
     collectionName: String,
     hadith: HadithEntity,
     isFavorite: Boolean,
-    onFavoriteToggle: () -> Unit
+    onFavoriteToggle: () -> Unit,
+    lang: String
 ) {
     var expanded by remember { mutableStateOf(false) }
     val arabicFontFamily = remember { FontFamily(Font(R.font.scheherazade_new)) }
@@ -412,7 +427,7 @@ fun HadithCard(
                         modifier = Modifier.padding(end = 8.dp)
                     ) {
                         Text(
-                            text = hadith.grade,
+                            text = getLocalizedGrade(hadith.grade, lang),
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                             color = badgeTextColor
@@ -455,24 +470,49 @@ fun HadithCard(
             }
 
             if (!expanded) {
-                val previewText = if (hadith.english.length > 120) {
-                    hadith.english.take(120) + "…"
+                val previewText = if (lang == "ar") {
+                    if (hadith.arabic.length > 120) {
+                        hadith.arabic.take(120) + "…"
+                    } else {
+                        hadith.arabic
+                    }
                 } else {
-                    hadith.english
+                    if (hadith.english.length > 120) {
+                        hadith.english.take(120) + "…"
+                    } else {
+                        hadith.english
+                    }
                 }
-                Text(
-                    text = previewText,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = colorScheme.onSurfaceVariant
-                )
+                
+                if (lang == "ar") {
+                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                        Text(
+                            text = previewText,
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontSize = 18.sp,
+                                lineHeight = 28.sp,
+                                fontFamily = arabicFontFamily
+                            ),
+                            textAlign = TextAlign.Justify,
+                            modifier = Modifier.fillMaxWidth(),
+                            color = colorScheme.onSurfaceVariant
+                        )
+                    }
+                } else {
+                    Text(
+                        text = previewText,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colorScheme.onSurfaceVariant
+                    )
+                }
             } else {
                 // Arabic Text
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     Text(
                         text = hadith.arabic,
                         style = MaterialTheme.typography.bodyLarge.copy(
-                            fontSize = 20.sp,
-                            lineHeight = 34.sp,
+                            fontSize = 22.sp,
+                            lineHeight = 36.sp,
                             fontWeight = FontWeight.Medium,
                             fontFamily = arabicFontFamily
                         ),
@@ -482,17 +522,102 @@ fun HadithCard(
                     )
                 }
 
-                Spacer(Modifier.height(12.dp))
-
-                // English Text
-                Text(
-                    text = hadith.english,
-                    style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
-                    color = colorScheme.onSurfaceVariant
-                )
+                if (lang == "ar") {
+                    var showTranslation by remember { mutableStateOf(false) }
+                    Spacer(Modifier.height(12.dp))
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainer),
+                        shape = MaterialTheme.shapes.small
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { showTranslation = !showTranslation },
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.english_translation),
+                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                    color = colorScheme.primary
+                                )
+                                Icon(
+                                    imageVector = if (showTranslation) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                    contentDescription = stringResource(R.string.english_translation),
+                                    tint = colorScheme.primary
+                                )
+                            }
+                            
+                            AnimatedVisibility(visible = showTranslation) {
+                                Column {
+                                    Spacer(Modifier.height(8.dp))
+                                    Text(
+                                        text = hadith.english,
+                                        style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+                                        color = colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    Spacer(Modifier.height(12.dp))
+                    // English Text
+                    Text(
+                        text = hadith.english,
+                        style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+                        color = colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
     }
 }
 
 private fun bouncyFlow() = Spring.DampingRatioHighBouncy
+
+fun getLocalizedBookName(bookId: String, defaultName: String, lang: String): String {
+    if (lang != "ar") return defaultName
+    return when (bookId) {
+        "bukhari" -> "صحيح البخاري"
+        "muslim" -> "صحيح مسلم"
+        "tirmidhi" -> "سنن الترمذي"
+        "abudawud" -> "سنن أبي داود"
+        "nasai" -> "سنن النسائي"
+        "ibnmajah" -> "سنن ابن ماجه"
+        "malik" -> "موطأ مالك"
+        "ahmad" -> "مسند أحمد"
+        "nawawi" -> "الأربعون النووية"
+        "riyad" -> "رياض الصالحين"
+        else -> defaultName
+    }
+}
+
+fun getLocalizedCompiler(bookId: String, defaultCompiler: String, lang: String): String {
+    if (lang != "ar") return defaultCompiler
+    return when (bookId) {
+        "bukhari" -> "الإمام البخاري"
+        "muslim" -> "الإمام مسلم"
+        "tirmidhi" -> "الإمام الترمذي"
+        "abudawud" -> "الإمام أبو داود"
+        "nasai" -> "الإمام النسائي"
+        "ibnmajah" -> "الإمام ابن ماجه"
+        "malik" -> "الإمام مالك"
+        "ahmad" -> "الإمام أحمد بن حنبل"
+        "nawawi" -> "الإمام النووي"
+        else -> defaultCompiler
+    }
+}
+
+fun getLocalizedGrade(grade: String, lang: String): String {
+    if (lang != "ar") return grade
+    return when {
+        grade.contains("Sahih", ignoreCase = true) -> "صحيح"
+        grade.contains("Hasan", ignoreCase = true) -> "حسن"
+        grade.contains("Da'if", ignoreCase = true) || grade.contains("Daif", ignoreCase = true) -> "ضعيف"
+        grade.contains("Mawdu", ignoreCase = true) || grade.contains("Fabricated", ignoreCase = true) -> "موضوع"
+        else -> grade
+    }
+}
