@@ -196,4 +196,5 @@
     <string name="exact_alarm_permission_required">Exact Alarm Permission Required</string>
     <string name="exact_alarm_permission_required_desc">This app needs exact alarm permission for accurate Iqama reminders.</string>
     <string name="grant">Grant</string>
+    <string name="ai_assistant">AI Assistant</string>
 </resources>

@@ -428,7 +428,8 @@ fun HadithCard(
                         fontSize = 20.sp,
                         lineHeight = 34.sp,
                         fontWeight = FontWeight.Medium,
-                        fontFamily = arabicFontFamily
+                        fontFamily = arabicFontFamily,
+                        localeList = androidx.compose.ui.text.intl.LocaleList(androidx.compose.ui.text.intl.Locale("ar"))
                     ),
                     textAlign = TextAlign.Justify,
                     modifier = Modifier.fillMaxWidth(),

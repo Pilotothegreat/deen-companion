@@ -30,14 +30,16 @@ class DeenApplication : Application() {
             Timber.plant(Timber.DebugTree())
         }
 
-        startKoin {
-            androidContext(this@DeenApplication)
-            modules(
-                databaseModule,
-                managerModule,
-                viewModelModule,
-                navigationModule
-            )
+        if (org.koin.core.context.GlobalContext.getOrNull() == null) {
+            startKoin {
+                androidContext(this@DeenApplication)
+                modules(
+                    databaseModule,
+                    managerModule,
+                    viewModelModule,
+                    navigationModule
+                )
+            }
         }
     }
 

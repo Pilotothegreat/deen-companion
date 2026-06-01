@@ -128,6 +128,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.clip
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.material.icons.filled.Mic
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -137,6 +140,7 @@ import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
 import com.pilotothegreat.deencompanion.ui.navigation.Navigator
 import com.pilotothegreat.deencompanion.ui.navigation.SettingsKey
 import com.pilotothegreat.deencompanion.ui.navigation.QiblaKey
+import com.pilotothegreat.deencompanion.ui.navigation.AssistantKey
 import com.pilotothegreat.deencompanion.ui.theme.card
 import com.pilotothegreat.deencompanion.ui.theme.googleSans
 import com.pilotothegreat.deencompanion.util.CategoryTitleText
@@ -679,14 +683,26 @@ fun Overview(
     }
 }
     PageTitle(false, hazeState, stringResource(R.string.app_name)) {
-        IconButton(
+        Row(
             modifier = Modifier.align(Alignment.CenterEnd),
-            onClick = { navigator.goTo(SettingsKey) }
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                painterResource(R.drawable.settings),
-                contentDescription = stringResource(R.string.settings)
-            )
+            IconButton(
+                onClick = { navigator.goTo(AssistantKey) }
+            ) {
+                Icon(
+                    imageVector = androidx.compose.material.icons.Icons.Default.Mic,
+                    contentDescription = stringResource(R.string.ai_assistant)
+                )
+            }
+            IconButton(
+                onClick = { navigator.goTo(SettingsKey) }
+            ) {
+                Icon(
+                    painterResource(R.drawable.settings),
+                    contentDescription = stringResource(R.string.settings)
+                )
+            }
         }
     }
 
@@ -1057,18 +1073,34 @@ fun OverviewItems(viewModel: OverviewVM, nextPrayerName: String, navigator: Navi
                 .fillMaxWidth()
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = "\"$quote\"",
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontStyle = if (lang == "ar") androidx.compose.ui.text.font.FontStyle.Normal else androidx.compose.ui.text.font.FontStyle.Italic,
-                        fontFamily = if (lang == "ar") arabicFontFamily else null,
-                        fontSize = if (lang == "ar") 22.sp else 16.sp,
-                        lineHeight = if (lang == "ar") 32.sp else 20.sp
-                    ),
-                    color = colorScheme.onSurface,
-                    textAlign = if (lang == "ar") TextAlign.Right else TextAlign.Left,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                if (lang == "ar") {
+                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                        Text(
+                            text = "\"$quote\"",
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontStyle = androidx.compose.ui.text.font.FontStyle.Normal,
+                                fontFamily = arabicFontFamily,
+                                fontSize = 22.sp,
+                                lineHeight = 32.sp
+                            ),
+                            color = colorScheme.onSurface,
+                            textAlign = TextAlign.Right,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                } else {
+                    Text(
+                        text = "\"$quote\"",
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                            fontSize = 16.sp,
+                            lineHeight = 20.sp
+                        ),
+                        color = colorScheme.onSurface,
+                        textAlign = TextAlign.Left,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
                 Text(
                     text = "— ${getLocalizedInspirationRef(currentInspiration.ref, lang)}",
                     style = MaterialTheme.typography.labelSmall,

@@ -22,10 +22,9 @@ object LocationHelper {
 
     @SuppressLint("MissingPermission")
     suspend fun getDeviceLocation(context: Context): LocationData? = withContext(Dispatchers.IO) {
-        val hasGpsPerm = context.checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED
         val hasCoarsePerm = context.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED
 
-        if (hasGpsPerm || hasCoarsePerm) {
+        if (hasCoarsePerm) {
             val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager ?: return@withContext null
             val providers = locationManager.getProviders(true)
             var bestLocation: Location? = null

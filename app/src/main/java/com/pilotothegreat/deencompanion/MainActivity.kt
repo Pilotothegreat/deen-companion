@@ -91,6 +91,18 @@ class MainActivity : ComponentActivity() {
                 } catch (e: Exception) {
                     Timber.e(e, "Failed to increment launch count")
                 }
+                try {
+                    val workRequest = androidx.work.PeriodicWorkRequestBuilder<com.pilotothegreat.deencompanion.services.AdhanNotificationWorker>(
+                        24, java.util.concurrent.TimeUnit.HOURS
+                    ).build()
+                    androidx.work.WorkManager.getInstance(this@MainActivity).enqueueUniquePeriodicWork(
+                        "adhan_scheduler",
+                        androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+                        workRequest
+                    )
+                } catch (e: Exception) {
+                    Timber.e(e, "Failed to enqueue AdhanNotificationWorker on launch")
+                }
             }
 
             setContent {
@@ -103,7 +115,6 @@ class MainActivity : ComponentActivity() {
 
                     val permissionsToRequest = remember {
                         mutableListOf(
-                            Manifest.permission.ACCESS_FINE_LOCATION,
                             Manifest.permission.ACCESS_COARSE_LOCATION
                         ).apply {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

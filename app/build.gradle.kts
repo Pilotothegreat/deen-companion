@@ -120,5 +120,8 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
     testImplementation(libs.robolectric)
+    testImplementation("androidx.compose.ui:ui-test-junit4:1.7.6")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:1.7.6")
+    testImplementation("androidx.test.ext:junit:1.1.5")
 }
 

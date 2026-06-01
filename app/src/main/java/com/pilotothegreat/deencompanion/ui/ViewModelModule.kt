@@ -32,4 +32,12 @@ val viewModelModule = module {
             throw e
         }
     }
+    viewModel {
+        try {
+            com.pilotothegreat.deencompanion.ui.assistant.AssistantViewModel(get(), get())
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to create AssistantViewModel")
+            throw e
+        }
+    }
 }

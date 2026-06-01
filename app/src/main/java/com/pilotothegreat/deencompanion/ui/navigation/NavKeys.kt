@@ -28,5 +28,8 @@ data class QuranReaderKey(val surahNumber: Int, val surahName: String, val scrol
 @Serializable
 data object QiblaKey : NavKey
 
+@Serializable
+data object AssistantKey : NavKey
+
 val mainScreens = listOf(OverviewKey, QuranKey, HadithKey)
 
