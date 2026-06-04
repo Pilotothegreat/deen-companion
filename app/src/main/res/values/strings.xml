@@ -50,6 +50,8 @@
     <string name="hijri_calendar">Hijri Calendar</string>
     <string name="regional_moon_sighting">Regional Moon Sighting</string>
     <string name="regional_moon_sighting_summary">Follow local moon sighting instead of Umm al-Qura</string>
+    <string name="hijri_correction">Hijri Correction</string>
+    <string name="hijri_correction_summary">Adjust Hijri date manually by plus or minus days</string>
     <string name="quran_customization">Quran Customization</string>
     <string name="arabic_text_size">Arabic Text Size</string>
     <string name="app_language_title">App Language</string>

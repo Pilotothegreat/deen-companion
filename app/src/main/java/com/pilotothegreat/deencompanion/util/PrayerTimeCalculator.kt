@@ -89,16 +89,36 @@ class PrayerTimeCalculator {
             val sunriseTime = doubleToTime(sunriseLocal)
             val maghribTime = doubleToTime(sunsetLocal)
 
+            val nightLength = (24.0 - 2.0 * (sunriseHA / 15.0)).coerceIn(4.0, 20.0)
+
             // Fajr
-            val fajrHA = hourAngle(-method.fajrAngle, latitude, dd)
-            val fajrTime = doubleToTime(dhuhrLocal - (fajrHA / 15.0))
+            val fajrAngle = method.fajrAngle
+            val isFajrImpossible = isAngleImpossible(-fajrAngle, latitude, dd)
+            val useFajrAdjustment = abs(latitude) > 48.0 || isFajrImpossible
+            val fajrTime = if (useFajrAdjustment) {
+                val fajrPortion = fajrAngle / 60.0
+                val fajrOffset = fajrPortion * nightLength
+                doubleToTime(sunriseLocal - fajrOffset)
+            } else {
+                val fajrHA = hourAngle(-fajrAngle, latitude, dd)
+                doubleToTime(dhuhrLocal - (fajrHA / 15.0))
+            }
 
             // Isha
             val ishaTime = if (method.isIshaInterval) {
                 doubleToTime(sunsetLocal + (method.ishaIntervalMins / 60.0))
             } else {
-                val ishaHA = hourAngle(-method.ishaAngle, latitude, dd)
-                doubleToTime(dhuhrLocal + (ishaHA / 15.0))
+                val ishaAngle = method.ishaAngle
+                val isIshaImpossible = isAngleImpossible(-ishaAngle, latitude, dd)
+                val useIshaAdjustment = abs(latitude) > 48.0 || isIshaImpossible
+                if (useIshaAdjustment) {
+                    val ishaPortion = ishaAngle / 60.0
+                    val ishaOffset = ishaPortion * nightLength
+                    doubleToTime(sunsetLocal + ishaOffset)
+                } else {
+                    val ishaHA = hourAngle(-ishaAngle, latitude, dd)
+                    doubleToTime(dhuhrLocal + (ishaHA / 15.0))
+                }
             }
 
             // Asr
@@ -126,6 +146,14 @@ class PrayerTimeCalculator {
             if (cosHA < -1.0) return 180.0
             if (cosHA > 1.0) return 0.0
             return Math.toDegrees(acos(cosHA))
+        }
+
+        private fun isAngleImpossible(angleOrAltitude: Double, lat: Double, decl: Double): Boolean {
+            val altitudeRad = Math.toRadians(angleOrAltitude)
+            val latRad = Math.toRadians(lat)
+            val declRad = Math.toRadians(decl)
+            val cosHA = (sin(altitudeRad) - sin(latRad) * sin(declRad)) / (cos(latRad) * cos(declRad))
+            return cosHA < -1.0 || cosHA > 1.0
         }
 
         private fun doubleToTime(value: Double): LocalTime {

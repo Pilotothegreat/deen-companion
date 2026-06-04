@@ -47,6 +47,8 @@
     <string name="hijri_calendar">التقويم الهجري</string>
     <string name="regional_moon_sighting">رؤية الهلال المحلية</string>
     <string name="regional_moon_sighting_summary">اتبع رؤية الهلال المحلية بدلاً من أم القرى</string>
+    <string name="hijri_correction">تعديل التاريخ الهجري</string>
+    <string name="hijri_correction_summary">تعديل التاريخ الهجري يدوياً بزيادة أو نقصان الأيام</string>
     <string name="quran_customization">تخصيص المصحف</string>
     <string name="arabic_text_size">حجم النص العربي</string>
     <string name="app_language_title">لغة التطبيق</string>

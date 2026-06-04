@@ -54,6 +54,9 @@ class SettingsVM(
     val appLanguage: StateFlow<String> = appPreferenceRepo.appLanguage
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "ar")
 
+    val hijriOffset: StateFlow<Int> = appPreferenceRepo.hijriOffset
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
     private val _updateAvailable = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
     val updateAvailable: StateFlow<String?> = _updateAvailable
 
@@ -197,6 +200,12 @@ class SettingsVM(
     fun setAppLanguage(value: String) {
         viewModelScope.launch {
             appPreferenceRepo.setAppLanguage(value)
+        }
+    }
+
+    fun setHijriOffset(value: Int) {
+        viewModelScope.launch {
+            appPreferenceRepo.setHijriOffset(value)
         }
     }
 

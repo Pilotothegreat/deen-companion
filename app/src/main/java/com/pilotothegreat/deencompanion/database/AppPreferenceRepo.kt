@@ -66,6 +66,7 @@ class AppPreferenceRepo(
         private val TASBIH_DHIKR = stringPreferencesKey("tasbih_dhikr")
         private val TASBIH_TARGET = intPreferencesKey("tasbih_target")
         private val TASBIH_HISTORY = stringSetPreferencesKey("tasbih_history")
+        private val HIJRI_OFFSET = intPreferencesKey("hijri_offset")
     }
 
     private val dataStore = getDataStore(context)
@@ -159,6 +160,10 @@ class AppPreferenceRepo(
         prefs[HIJRI_METHOD]?.let { valueOfOrNull<HijriMethod>(it) } ?: HijriMethod.UMM_AL_QURA
     }.distinctUntilChanged()
     suspend fun setHijriCalendarMethod(value: HijriMethod) = dataStore.edit { it[HIJRI_METHOD] = value.name }
+
+    // Hijri Offset Correction
+    val hijriOffset: Flow<Int> = data.map { it[HIJRI_OFFSET] ?: 0 }.distinctUntilChanged()
+    suspend fun setHijriOffset(value: Int) = dataStore.edit { it[HIJRI_OFFSET] = value }
 
     // Notification Volume (0-100)
     val notificationVolume: Flow<Int> = data.map { it[NOTIFICATION_VOLUME] ?: 80 }.distinctUntilChanged()

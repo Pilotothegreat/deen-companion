@@ -323,6 +323,7 @@ fun Overview(
     val city by viewModel.cityName.collectAsState(initial = "")
     val lat by viewModel.latitude.collectAsState(initial = 21.3891)
     val lon by viewModel.longitude.collectAsState(initial = 39.8579)
+    val hijriOffset by viewModel.hijriOffset.collectAsState(initial = 0)
     var nextPrayer by remember { mutableStateOf(NextPrayer("Fajr", "--", "--", 0L)) }
 
     var shownThisSession by remember { mutableStateOf(false) }
@@ -453,12 +454,12 @@ fun Overview(
         val hijriFormatter = remember(locale) { java.time.format.DateTimeFormatter.ofPattern("d MMMM yyyy", locale) }
         val gregDateStr = remember(locale) { LocalDate.now().format(gregFormatter) }
         val hijriMethod by appPreferenceRepo.hijriCalendarMethod.collectAsState(initial = com.pilotothegreat.deencompanion.database.HijriMethod.UMM_AL_QURA)
-        val hijriDateStr = remember(locale, hijriMethod) { 
+        val hijriDateStr = remember(locale, hijriMethod, hijriOffset) { 
             try {
-                var hijri = HijrahDate.now()
-                if (hijriMethod == com.pilotothegreat.deencompanion.database.HijriMethod.REGIONAL) {
-                    hijri = HijrahDate.from(LocalDate.now().plusDays(1))
-                }
+                val baseDays = if (hijriMethod == com.pilotothegreat.deencompanion.database.HijriMethod.REGIONAL) 1L else 0L
+                val totalOffset = baseDays + hijriOffset
+                val targetLocalDate = LocalDate.now().plusDays(totalOffset)
+                val hijri = HijrahDate.from(targetLocalDate)
                 hijri.format(hijriFormatter) + " AH"
             } catch (e: Exception) {
                 ""
@@ -548,13 +549,12 @@ fun Overview(
 
         // Ramadan Hilal Card
         val dismissedYear by appPreferenceRepo.dismissedRamadanHilalYear.collectAsState(initial = 0)
-        val currentHijri = remember(hijriMethod) {
+        val currentHijri = remember(hijriMethod, hijriOffset) {
             try {
-                var hijri = HijrahDate.now()
-                if (hijriMethod == com.pilotothegreat.deencompanion.database.HijriMethod.REGIONAL) {
-                    hijri = HijrahDate.from(LocalDate.now().plusDays(1))
-                }
-                hijri
+                val baseDays = if (hijriMethod == com.pilotothegreat.deencompanion.database.HijriMethod.REGIONAL) 1L else 0L
+                val totalOffset = baseDays + hijriOffset
+                val targetLocalDate = LocalDate.now().plusDays(totalOffset)
+                HijrahDate.from(targetLocalDate)
             } catch (e: Exception) {
                 null
             }
@@ -1454,6 +1454,14 @@ fun TasbihDialCard(
                                     vibrator?.vibrate(120)
                                 }
                             } catch (e: Exception) {}
+                            
+                            val nextDhikr = when (dhikr) {
+                                "سبحان الله" -> "الحمد لله"
+                                "الحمد لله" -> "الله أكبر"
+                                "الله أكبر" -> "لا إله إلا الله"
+                                else -> "سبحان الله"
+                            }
+                            viewModel.setTasbihDhikr(nextDhikr)
                             viewModel.resetTasbih()
                         } else {
                             viewModel.incrementTasbih()
