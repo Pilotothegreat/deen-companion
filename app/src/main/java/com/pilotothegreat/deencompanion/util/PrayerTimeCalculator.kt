@@ -10,15 +10,16 @@ class PrayerTimeCalculator {
         val fajrAngle: Double,
         val ishaAngle: Double,
         val isIshaInterval: Boolean = false,
-        val ishaIntervalMins: Long = 0
+        val ishaIntervalMins: Long = 0,
+        val dhuhrBufferMins: Int = 0
     ) {
-        MWL(18.0, 17.0),
-        ISNA(15.0, 15.0),
-        EGYPT(19.5, 17.5),
-        MAKKAH(18.5, 90.0, true, 90), // Umm Al-Qura (90 mins after Maghrib)
-        KARACHI(18.0, 18.0),
-        JAFARI(16.0, 14.0),
-        TEHRAN(17.7, 14.0)
+        MWL(18.0, 17.0, false, 0, 1),
+        ISNA(15.0, 15.0, false, 0, 1),
+        EGYPT(19.5, 17.5, false, 0, 0),
+        MAKKAH(18.5, 90.0, true, 90, 1), // Umm Al-Qura (90 mins after Maghrib)
+        KARACHI(18.0, 18.0, false, 0, 0),
+        JAFARI(16.0, 14.0, false, 0, 0),
+        TEHRAN(17.7, 14.0, false, 0, 0)
     }
 
     enum class AsrSchool(val shadowFactor: Double) {
@@ -42,7 +43,8 @@ class PrayerTimeCalculator {
             longitude: Double,
             timezoneOffsetHours: Double,
             method: CalculationMethod = CalculationMethod.MWL,
-            asrSchool: AsrSchool = AsrSchool.STANDARD
+            asrSchool: AsrSchool = AsrSchool.STANDARD,
+            hijriMonth: Int? = null
         ): PrayerTimes {
             val year = date.year
             val month = date.monthValue
@@ -79,7 +81,8 @@ class PrayerTimeCalculator {
 
             // Mid Day (Dhuhr)
             val dhuhrLocal = 12.0 + timezoneOffsetHours - (longitude / 15.0) - eqt
-            val dhuhrTime = doubleToTime(dhuhrLocal + (1.0 / 60.0)) // +1 minute precautionary buffer for Zawal (sun's post-meridian declination)
+            val dhuhrBuffer = method.dhuhrBufferMins / 60.0
+            val dhuhrTime = doubleToTime(dhuhrLocal + dhuhrBuffer) // Precautionary buffer for Zawal if applicable
 
             // Sunrise and Sunset
             val sunriseHA = hourAngle(-0.833, latitude, dd)
@@ -106,7 +109,13 @@ class PrayerTimeCalculator {
 
             // Isha
             val ishaTime = if (method.isIshaInterval) {
-                doubleToTime(sunsetLocal + (2.0 / 60.0) + (method.ishaIntervalMins / 60.0)) // Offset Isha according to the buffered Maghrib time
+                val actualHijriMonth = hijriMonth ?: try {
+                    java.time.chrono.HijrahDate.from(date).get(java.time.temporal.ChronoField.MONTH_OF_YEAR)
+                } catch (e: Exception) {
+                    1
+                }
+                val intervalMins = if (method == CalculationMethod.MAKKAH && actualHijriMonth == 9) 120L else method.ishaIntervalMins
+                doubleToTime(sunsetLocal + (2.0 / 60.0) + (intervalMins / 60.0)) // Offset Isha according to the buffered Maghrib time
             } else {
                 val ishaAngle = method.ishaAngle
                 val isIshaImpossible = isAngleImpossible(-ishaAngle, latitude, dd)

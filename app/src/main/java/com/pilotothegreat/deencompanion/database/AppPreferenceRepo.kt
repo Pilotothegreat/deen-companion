@@ -67,6 +67,16 @@ class AppPreferenceRepo(
         private val TASBIH_TARGET = intPreferencesKey("tasbih_target")
         private val TASBIH_HISTORY = stringSetPreferencesKey("tasbih_history")
         private val HIJRI_OFFSET = intPreferencesKey("hijri_offset")
+        private val FAJR_IQAMA_IS_FIXED = booleanPreferencesKey("fajr_iqama_is_fixed")
+        private val DHUHR_IQAMA_IS_FIXED = booleanPreferencesKey("dhuhr_iqama_is_fixed")
+        private val ASR_IQAMA_IS_FIXED = booleanPreferencesKey("asr_iqama_is_fixed")
+        private val MAGHRIB_IQAMA_IS_FIXED = booleanPreferencesKey("maghrib_iqama_is_fixed")
+        private val ISHA_IQAMA_IS_FIXED = booleanPreferencesKey("isha_iqama_is_fixed")
+        private val FAJR_IQAMA_TIME = stringPreferencesKey("fajr_iqama_time")
+        private val DHUHR_IQAMA_TIME = stringPreferencesKey("dhuhr_iqama_time")
+        private val ASR_IQAMA_TIME = stringPreferencesKey("asr_iqama_time")
+        private val MAGHRIB_IQAMA_TIME = stringPreferencesKey("maghrib_iqama_time")
+        private val ISHA_IQAMA_TIME = stringPreferencesKey("isha_iqama_time")
     }
 
     private val dataStore = getDataStore(context)
@@ -111,6 +121,36 @@ class AppPreferenceRepo(
 
     val ishaIqamaOffset: Flow<Int> = data.map { it[ISHA_IQAMA] ?: 15 }.distinctUntilChanged()
     suspend fun setIshaIqamaOffset(value: Int) = dataStore.edit { it[ISHA_IQAMA] = value }
+
+    val fajrIqamaIsFixed: Flow<Boolean> = data.map { it[FAJR_IQAMA_IS_FIXED] ?: false }.distinctUntilChanged()
+    suspend fun setFajrIqamaIsFixed(value: Boolean) = dataStore.edit { it[FAJR_IQAMA_IS_FIXED] = value }
+
+    val dhuhrIqamaIsFixed: Flow<Boolean> = data.map { it[DHUHR_IQAMA_IS_FIXED] ?: false }.distinctUntilChanged()
+    suspend fun setDhuhrIqamaIsFixed(value: Boolean) = dataStore.edit { it[DHUHR_IQAMA_IS_FIXED] = value }
+
+    val asrIqamaIsFixed: Flow<Boolean> = data.map { it[ASR_IQAMA_IS_FIXED] ?: false }.distinctUntilChanged()
+    suspend fun setAsrIqamaIsFixed(value: Boolean) = dataStore.edit { it[ASR_IQAMA_IS_FIXED] = value }
+
+    val maghribIqamaIsFixed: Flow<Boolean> = data.map { it[MAGHRIB_IQAMA_IS_FIXED] ?: false }.distinctUntilChanged()
+    suspend fun setMaghribIqamaIsFixed(value: Boolean) = dataStore.edit { it[MAGHRIB_IQAMA_IS_FIXED] = value }
+
+    val ishaIqamaIsFixed: Flow<Boolean> = data.map { it[ISHA_IQAMA_IS_FIXED] ?: false }.distinctUntilChanged()
+    suspend fun setIshaIqamaIsFixed(value: Boolean) = dataStore.edit { it[ISHA_IQAMA_IS_FIXED] = value }
+
+    val fajrIqamaTime: Flow<String> = data.map { it[FAJR_IQAMA_TIME] ?: "05:00" }.distinctUntilChanged()
+    suspend fun setFajrIqamaTime(value: String) = dataStore.edit { it[FAJR_IQAMA_TIME] = value }
+
+    val dhuhrIqamaTime: Flow<String> = data.map { it[DHUHR_IQAMA_TIME] ?: "12:30" }.distinctUntilChanged()
+    suspend fun setDhuhrIqamaTime(value: String) = dataStore.edit { it[DHUHR_IQAMA_TIME] = value }
+
+    val asrIqamaTime: Flow<String> = data.map { it[ASR_IQAMA_TIME] ?: "15:30" }.distinctUntilChanged()
+    suspend fun setAsrIqamaTime(value: String) = dataStore.edit { it[ASR_IQAMA_TIME] = value }
+
+    val maghribIqamaTime: Flow<String> = data.map { it[MAGHRIB_IQAMA_TIME] ?: "18:30" }.distinctUntilChanged()
+    suspend fun setMaghribIqamaTime(value: String) = dataStore.edit { it[MAGHRIB_IQAMA_TIME] = value }
+
+    val ishaIqamaTime: Flow<String> = data.map { it[ISHA_IQAMA_TIME] ?: "20:00" }.distinctUntilChanged()
+    suspend fun setIshaIqamaTime(value: String) = dataStore.edit { it[ISHA_IQAMA_TIME] = value }
 
     // Tasbih Count
     val tasbihCount: Flow<Int> = data.map { it[TASBIH_COUNT] ?: 0 }.distinctUntilChanged()

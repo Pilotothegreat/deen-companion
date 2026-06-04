@@ -18,7 +18,7 @@ val viewModelModule = module {
     }
     viewModel {
         try {
-            SettingsVM(get())
+            SettingsVM(get(), get())
         } catch (e: Exception) {
             Timber.e(e, "Failed to create SettingsVM")
             throw e

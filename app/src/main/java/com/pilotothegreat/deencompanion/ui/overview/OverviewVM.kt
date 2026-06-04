@@ -47,6 +47,13 @@ class OverviewVM(
     private val _isRefreshingLocation = MutableStateFlow(false)
     val isRefreshingLocation = _isRefreshingLocation.asStateFlow()
 
+    private val _locationWarningDismissed = MutableStateFlow(false)
+    val locationWarningDismissed = _locationWarningDismissed.asStateFlow()
+
+    fun dismissLocationWarning() {
+        _locationWarningDismissed.value = true
+    }
+
     val calcMethod = appPreferenceRepo.calcMethod.stateIn(
         viewModelScope, SharingStarted.Eagerly, PrayerTimeCalculator.CalculationMethod.MWL
     )
@@ -71,6 +78,18 @@ class OverviewVM(
     val asrIqamaOffset = appPreferenceRepo.asrIqamaOffset
     val maghribIqamaOffset = appPreferenceRepo.maghribIqamaOffset
     val ishaIqamaOffset = appPreferenceRepo.ishaIqamaOffset
+
+    val fajrIqamaIsFixed = appPreferenceRepo.fajrIqamaIsFixed
+    val dhuhrIqamaIsFixed = appPreferenceRepo.dhuhrIqamaIsFixed
+    val asrIqamaIsFixed = appPreferenceRepo.asrIqamaIsFixed
+    val maghribIqamaIsFixed = appPreferenceRepo.maghribIqamaIsFixed
+    val ishaIqamaIsFixed = appPreferenceRepo.ishaIqamaIsFixed
+
+    val fajrIqamaTime = appPreferenceRepo.fajrIqamaTime
+    val dhuhrIqamaTime = appPreferenceRepo.dhuhrIqamaTime
+    val asrIqamaTime = appPreferenceRepo.asrIqamaTime
+    val maghribIqamaTime = appPreferenceRepo.maghribIqamaTime
+    val ishaIqamaTime = appPreferenceRepo.ishaIqamaTime
 
     val lastPrayerTimeUpdate = appPreferenceRepo.lastPrayerTimeUpdate
     val hijriOffset = appPreferenceRepo.hijriOffset
@@ -109,6 +128,30 @@ class OverviewVM(
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
+            }
+        }
+
+        // Midnight scheduler to recalculate prayer times automatically overnight
+        viewModelScope.launch {
+            while (true) {
+                try {
+                    val tz = timezoneId.value
+                    val zoneId = try { ZoneId.of(tz) } catch (e: Exception) { ZoneId.systemDefault() }
+                    val now = java.time.ZonedDateTime.now(zoneId)
+                    val nextMidnight = now.toLocalDate().plusDays(1).atStartOfDay(zoneId)
+                    val delayMs = java.time.Duration.between(now, nextMidnight).toMillis()
+                    
+                    // Add a 5-second buffer to ensure the date has fully rolled over
+                    kotlinx.coroutines.delay(delayMs + 5000)
+                    
+                    val currentLat = latitude.first()
+                    val currentLon = longitude.first()
+                    recalculatePrayerTimes(currentLat, currentLon)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    // Fallback delay in case of exception to avoid infinite busy loop
+                    kotlinx.coroutines.delay(60000)
+                }
             }
         }
     }
@@ -152,6 +195,7 @@ class OverviewVM(
     fun refreshLocation(context: Context) {
         viewModelScope.launch {
             _isRefreshingLocation.value = true
+            _locationWarningDismissed.value = false
             try {
                 var loc = LocationHelper.getDeviceLocation(context)
                 if (loc == null) {

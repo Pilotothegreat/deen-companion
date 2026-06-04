@@ -212,16 +212,75 @@ fun Settings(paddingValues: PaddingValues) {
                 }
                 AnimatedVisibility(visible = offsetsExpanded) {
                     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                        val context = LocalContext.current
                         val fajrOffset by viewModel.fajrIqamaOffset.collectAsState()
                         val dhuhrOffset by viewModel.dhuhrIqamaOffset.collectAsState()
                         val asrOffset by viewModel.asrIqamaOffset.collectAsState()
                         val maghribOffset by viewModel.maghribIqamaOffset.collectAsState()
                         val ishaOffset by viewModel.ishaIqamaOffset.collectAsState()
-                        OffsetAdjustmentRow(stringResource(R.string.fajr), fajrOffset) { viewModel.setFajrIqamaOffset(it) }
-                        OffsetAdjustmentRow(stringResource(R.string.dhuhr), dhuhrOffset) { viewModel.setDhuhrIqamaOffset(it) }
-                        OffsetAdjustmentRow(stringResource(R.string.asr), asrOffset) { viewModel.setAsrIqamaOffset(it) }
-                        OffsetAdjustmentRow(stringResource(R.string.maghrib), maghribOffset) { viewModel.setMaghribIqamaOffset(it) }
-                        OffsetAdjustmentRow(stringResource(R.string.isha), ishaOffset) { viewModel.setIshaIqamaOffset(it) }
+
+                        val fajrIsFixed by viewModel.fajrIqamaIsFixed.collectAsState()
+                        val dhuhrIsFixed by viewModel.dhuhrIqamaIsFixed.collectAsState()
+                        val asrIsFixed by viewModel.asrIqamaIsFixed.collectAsState()
+                        val maghribIsFixed by viewModel.maghribIqamaIsFixed.collectAsState()
+                        val ishaIsFixed by viewModel.ishaIqamaIsFixed.collectAsState()
+
+                        val fajrIqamaTimeVal by viewModel.fajrIqamaTime.collectAsState()
+                        val dhuhrIqamaTimeVal by viewModel.dhuhrIqamaTime.collectAsState()
+                        val asrIqamaTimeVal by viewModel.asrIqamaTime.collectAsState()
+                        val maghribIqamaTimeVal by viewModel.maghribIqamaTime.collectAsState()
+                        val ishaIqamaTimeVal by viewModel.ishaIqamaTime.collectAsState()
+
+                        IqamaConfigRow(
+                            context = context,
+                            title = stringResource(R.string.fajr),
+                            isFixed = fajrIsFixed,
+                            offset = fajrOffset,
+                            fixedTime = fajrIqamaTimeVal,
+                            onModeChange = { viewModel.setFajrIqamaIsFixed(it) },
+                            onOffsetChange = { viewModel.setFajrIqamaOffset(it) },
+                            onTimeChange = { viewModel.setFajrIqamaTime(it) }
+                        )
+                        IqamaConfigRow(
+                            context = context,
+                            title = stringResource(R.string.dhuhr),
+                            isFixed = dhuhrIsFixed,
+                            offset = dhuhrOffset,
+                            fixedTime = dhuhrIqamaTimeVal,
+                            onModeChange = { viewModel.setDhuhrIqamaIsFixed(it) },
+                            onOffsetChange = { viewModel.setDhuhrIqamaOffset(it) },
+                            onTimeChange = { viewModel.setDhuhrIqamaTime(it) }
+                        )
+                        IqamaConfigRow(
+                            context = context,
+                            title = stringResource(R.string.asr),
+                            isFixed = asrIsFixed,
+                            offset = asrOffset,
+                            fixedTime = asrIqamaTimeVal,
+                            onModeChange = { viewModel.setAsrIqamaIsFixed(it) },
+                            onOffsetChange = { viewModel.setAsrIqamaOffset(it) },
+                            onTimeChange = { viewModel.setAsrIqamaTime(it) }
+                        )
+                        IqamaConfigRow(
+                            context = context,
+                            title = stringResource(R.string.maghrib),
+                            isFixed = maghribIsFixed,
+                            offset = maghribOffset,
+                            fixedTime = maghribIqamaTimeVal,
+                            onModeChange = { viewModel.setMaghribIqamaIsFixed(it) },
+                            onOffsetChange = { viewModel.setMaghribIqamaOffset(it) },
+                            onTimeChange = { viewModel.setMaghribIqamaTime(it) }
+                        )
+                        IqamaConfigRow(
+                            context = context,
+                            title = stringResource(R.string.isha),
+                            isFixed = ishaIsFixed,
+                            offset = ishaOffset,
+                            fixedTime = ishaIqamaTimeVal,
+                            onModeChange = { viewModel.setIshaIqamaIsFixed(it) },
+                            onOffsetChange = { viewModel.setIshaIqamaOffset(it) },
+                            onTimeChange = { viewModel.setIshaIqamaTime(it) }
+                        )
                     }
                 }
             }
@@ -838,6 +897,133 @@ private fun isPackageInstalled(context: Context, packageName: String): Boolean {
         context.packageManager.getLaunchIntentForPackage(packageName) != null
     } catch (e: Exception) {
         false
+    }
+}
+
+@Composable
+fun IqamaConfigRow(
+    context: Context,
+    title: String,
+    isFixed: Boolean,
+    offset: Int,
+    fixedTime: String,
+    onModeChange: (Boolean) -> Unit,
+    onOffsetChange: (Int) -> Unit,
+    onTimeChange: (String) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = title, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                val containerColorOffset = if (!isFixed) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
+                val textColorOffset = if (!isFixed) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                val containerColorFixed = if (isFixed) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
+                val textColorFixed = if (isFixed) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                
+                Button(
+                    onClick = { onModeChange(false) },
+                    colors = ButtonDefaults.buttonColors(containerColor = containerColorOffset, contentColor = textColorOffset),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                    modifier = Modifier.height(28.dp)
+                ) {
+                    Text(
+                        text = if (context.resources.configuration.locales[0].language == "ar") "نسبية" else "Offset",
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+                Button(
+                    onClick = { onModeChange(true) },
+                    colors = ButtonDefaults.buttonColors(containerColor = containerColorFixed, contentColor = textColorFixed),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                    modifier = Modifier.height(28.dp)
+                ) {
+                    Text(
+                        text = if (context.resources.configuration.locales[0].language == "ar") "ثابتة" else "Fixed",
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(4.dp))
+        
+        if (isFixed) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = if (context.resources.configuration.locales[0].language == "ar") "وقت الإقامة الثابت:" else "Fixed Iqama Time:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+                Button(
+                    onClick = {
+                        val parts = fixedTime.split(":")
+                        val initialHour = parts.getOrNull(0)?.toIntOrNull() ?: 12
+                        val initialMinute = parts.getOrNull(1)?.toIntOrNull() ?: 0
+                        android.app.TimePickerDialog(
+                            context,
+                            { _, hour, minute ->
+                                val formatted = String.format(Locale.US, "%02d:%02d", hour, minute)
+                                onTimeChange(formatted)
+                            },
+                            initialHour,
+                            initialMinute,
+                            android.text.format.DateFormat.is24HourFormat(context)
+                        ).show()
+                    },
+                    colors = ButtonDefaults.filledTonalButtonColors(),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                    modifier = Modifier.height(32.dp)
+                ) {
+                    Text(text = fixedTime, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold))
+                }
+            }
+        } else {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(start = 8.dp, end = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = if (context.resources.configuration.locales[0].language == "ar") "بعد الأذان بـ:" else "After Adhan:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    IconButton(
+                        onClick = { if (offset > 0) onOffsetChange(offset - 5) },
+                        colors = IconButtonDefaults.filledTonalIconButtonColors(),
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Text("-", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+                    }
+                    Text(
+                        text = String.format(Locale.US, "%d min", offset),
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                        modifier = Modifier.width(60.dp),
+                        textAlign = TextAlign.Center
+                    )
+                    IconButton(
+                        onClick = { if (offset < 60) onOffsetChange(offset + 5) },
+                        colors = IconButtonDefaults.filledTonalIconButtonColors(),
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Text("+", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        }
+        HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f), modifier = Modifier.padding(vertical = 4.dp))
     }
 }
 

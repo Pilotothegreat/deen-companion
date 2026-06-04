@@ -1,6 +1,7 @@
 package com.pilotothegreat.deencompanion.ui.settings
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 import androidx.core.net.toUri
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class SettingsVM(
+    private val context: Context,
     private val appPreferenceRepo: AppPreferenceRepo
 ) : ViewModel() {
 
@@ -47,6 +49,36 @@ class SettingsVM(
 
     val ishaIqamaOffset: StateFlow<Int> = appPreferenceRepo.ishaIqamaOffset
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 15)
+
+    val fajrIqamaIsFixed: StateFlow<Boolean> = appPreferenceRepo.fajrIqamaIsFixed
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val dhuhrIqamaIsFixed: StateFlow<Boolean> = appPreferenceRepo.dhuhrIqamaIsFixed
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val asrIqamaIsFixed: StateFlow<Boolean> = appPreferenceRepo.asrIqamaIsFixed
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val maghribIqamaIsFixed: StateFlow<Boolean> = appPreferenceRepo.maghribIqamaIsFixed
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val ishaIqamaIsFixed: StateFlow<Boolean> = appPreferenceRepo.ishaIqamaIsFixed
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val fajrIqamaTime: StateFlow<String> = appPreferenceRepo.fajrIqamaTime
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "05:00")
+
+    val dhuhrIqamaTime: StateFlow<String> = appPreferenceRepo.dhuhrIqamaTime
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "12:30")
+
+    val asrIqamaTime: StateFlow<String> = appPreferenceRepo.asrIqamaTime
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "15:30")
+
+    val maghribIqamaTime: StateFlow<String> = appPreferenceRepo.maghribIqamaTime
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "18:30")
+
+    val ishaIqamaTime: StateFlow<String> = appPreferenceRepo.ishaIqamaTime
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "20:00")
 
     val quranArabicFontSize: StateFlow<Int> = appPreferenceRepo.quranArabicFontSize
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 24)
@@ -164,30 +196,105 @@ class SettingsVM(
     fun setFajrIqamaOffset(value: Int) {
         viewModelScope.launch {
             appPreferenceRepo.setFajrIqamaOffset(value)
+            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
         }
     }
 
     fun setDhuhrIqamaOffset(value: Int) {
         viewModelScope.launch {
             appPreferenceRepo.setDhuhrIqamaOffset(value)
+            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
         }
     }
 
     fun setAsrIqamaOffset(value: Int) {
         viewModelScope.launch {
             appPreferenceRepo.setAsrIqamaOffset(value)
+            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
         }
     }
 
     fun setMaghribIqamaOffset(value: Int) {
         viewModelScope.launch {
             appPreferenceRepo.setMaghribIqamaOffset(value)
+            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
         }
     }
 
     fun setIshaIqamaOffset(value: Int) {
         viewModelScope.launch {
             appPreferenceRepo.setIshaIqamaOffset(value)
+            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+        }
+    }
+
+    fun setFajrIqamaIsFixed(value: Boolean) {
+        viewModelScope.launch {
+            appPreferenceRepo.setFajrIqamaIsFixed(value)
+            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+        }
+    }
+
+    fun setDhuhrIqamaIsFixed(value: Boolean) {
+        viewModelScope.launch {
+            appPreferenceRepo.setDhuhrIqamaIsFixed(value)
+            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+        }
+    }
+
+    fun setAsrIqamaIsFixed(value: Boolean) {
+        viewModelScope.launch {
+            appPreferenceRepo.setAsrIqamaIsFixed(value)
+            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+        }
+    }
+
+    fun setMaghribIqamaIsFixed(value: Boolean) {
+        viewModelScope.launch {
+            appPreferenceRepo.setMaghribIqamaIsFixed(value)
+            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+        }
+    }
+
+    fun setIshaIqamaIsFixed(value: Boolean) {
+        viewModelScope.launch {
+            appPreferenceRepo.setIshaIqamaIsFixed(value)
+            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+        }
+    }
+
+    fun setFajrIqamaTime(value: String) {
+        viewModelScope.launch {
+            appPreferenceRepo.setFajrIqamaTime(value)
+            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+        }
+    }
+
+    fun setDhuhrIqamaTime(value: String) {
+        viewModelScope.launch {
+            appPreferenceRepo.setDhuhrIqamaTime(value)
+            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+        }
+    }
+
+    fun setAsrIqamaTime(value: String) {
+        viewModelScope.launch {
+            appPreferenceRepo.setAsrIqamaTime(value)
+            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+        }
+    }
+
+    fun setMaghribIqamaTime(value: String) {
+        viewModelScope.launch {
+            appPreferenceRepo.setMaghribIqamaTime(value)
+            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+        }
+    }
+
+    fun setIshaIqamaTime(value: String) {
+        viewModelScope.launch {
+            appPreferenceRepo.setIshaIqamaTime(value)
+            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
         }
     }
 

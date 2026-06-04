@@ -255,6 +255,7 @@ fun calculateNextPrayer(
 
     val prayers = listOf(
         Pair("Fajr", times.fajr),
+        Pair("Sunrise", times.sunrise),
         Pair("Dhuhr", times.dhuhr),
         Pair("Asr", times.asr),
         Pair("Maghrib", times.maghrib),
@@ -312,7 +313,17 @@ fun Overview(
     val hazeState = rememberHazeState()
     val scrollState = rememberScrollState()
 
+    var hasLocationPermission by remember { mutableStateOf(false) }
     LifecycleResumeEffect(Unit) {
+        hasLocationPermission = androidx.core.content.ContextCompat.checkSelfPermission(
+            context,
+            android.Manifest.permission.ACCESS_FINE_LOCATION
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED ||
+        androidx.core.content.ContextCompat.checkSelfPermission(
+            context,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+
         viewModel.refreshLocation(context)
         onPauseOrDispose {}
     }
@@ -349,7 +360,7 @@ fun Overview(
     val currentContext by rememberUpdatedState(context)
     
     val lifecycleOwner = LocalLifecycleOwner.current
-    LaunchedEffect(lang, lifecycleOwner) {
+    LaunchedEffect(lang, lifecycleOwner, times, tz) {
         val isRobolectric = try {
             Class.forName("org.robolectric.Robolectric") != null
         } catch (e: Exception) {
@@ -358,7 +369,9 @@ fun Overview(
 
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
             while(true) {
-                nextPrayer = calculateNextPrayer(currentTimes, currentTz, currentContext)
+                nextPrayer = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+                    calculateNextPrayer(currentTimes, currentTz, currentContext)
+                }
                 if (isRobolectric) break
                 val delayMs = if (nextPrayer.durationSeconds < 3600) 1000L else 10000L
                 kotlinx.coroutines.delay(delayMs)
@@ -370,7 +383,7 @@ fun Overview(
     val paddingTop = paddingValues.calculateTopPadding()
     val paddingBottom = paddingValues.calculateBottomPadding()
 
-    var isRefreshing by remember { mutableStateOf(false) }
+    val isRefreshing by viewModel.isRefreshingLocation.collectAsState()
     val pullState = rememberPullToRefreshState()
     val cookie12SidedShape = rememberCookie12SidedShape()
 
@@ -378,12 +391,7 @@ fun Overview(
         PullToRefreshBox(
             isRefreshing = isRefreshing,
             onRefresh = {
-                isRefreshing = true
-                coroutineScope.launch {
-                    viewModel.refreshLocation(context)
-                    kotlinx.coroutines.delay(1200)
-                    isRefreshing = false
-                }
+                viewModel.refreshLocation(context)
             },
             state = pullState,
             indicator = {
@@ -459,7 +467,13 @@ fun Overview(
                 val totalOffset = baseDays + hijriOffset
                 val targetLocalDate = LocalDate.now().plusDays(totalOffset)
                 val hijri = HijrahDate.from(targetLocalDate)
-                hijri.format(hijriFormatter) + " AH"
+                val formatted = hijri.format(hijriFormatter) + " AH"
+                if (hijriMethod == com.pilotothegreat.deencompanion.database.HijriMethod.REGIONAL) {
+                    val label = if (locale.language == "ar") " (قد يختلف حسب الرؤية المحلية)" else " (May differ by local sighting)"
+                    formatted + label
+                } else {
+                    formatted
+                }
             } catch (e: Exception) {
                 ""
             }
@@ -494,19 +508,8 @@ fun Overview(
         }
 
         // Location Not Detected Warning Card
-        val hasLocationPermission = remember(context) {
-            androidx.core.content.ContextCompat.checkSelfPermission(
-                context,
-                android.Manifest.permission.ACCESS_FINE_LOCATION
-            ) == android.content.pm.PackageManager.PERMISSION_GRANTED ||
-            androidx.core.content.ContextCompat.checkSelfPermission(
-                context,
-                android.Manifest.permission.ACCESS_COARSE_LOCATION
-            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
-        }
-
-        var warningDismissed by remember { mutableStateOf(false) }
-        val showWarning = !warningDismissed && (city.isEmpty() || (lat == 21.3891 && lon == 39.8579) || !hasLocationPermission)
+        val locationWarningDismissed by viewModel.locationWarningDismissed.collectAsState()
+        val showWarning = !locationWarningDismissed && (city.isEmpty() || (lat == 21.3891 && lon == 39.8579) || !hasLocationPermission)
 
         if (showWarning) {
             Card(
@@ -515,7 +518,7 @@ fun Overview(
                     .padding(horizontal = 16.dp, vertical = 4.dp)
                     .clickable {
                         viewModel.refreshLocation(context)
-                        warningDismissed = true
+                        viewModel.dismissLocationWarning()
                     },
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
             ) {
@@ -948,6 +951,18 @@ fun OverviewItems(viewModel: OverviewVM, nextPrayerName: String, navigator: Navi
     val maghribOffset by viewModel.maghribIqamaOffset.collectAsState(initial = 10)
     val ishaOffset by viewModel.ishaIqamaOffset.collectAsState(initial = 15)
 
+    val fajrIsFixed by viewModel.fajrIqamaIsFixed.collectAsState(initial = false)
+    val dhuhrIsFixed by viewModel.dhuhrIqamaIsFixed.collectAsState(initial = false)
+    val asrIsFixed by viewModel.asrIqamaIsFixed.collectAsState(initial = false)
+    val maghribIsFixed by viewModel.maghribIqamaIsFixed.collectAsState(initial = false)
+    val ishaIsFixed by viewModel.ishaIqamaIsFixed.collectAsState(initial = false)
+
+    val fajrIqamaTimeVal by viewModel.fajrIqamaTime.collectAsState(initial = "05:00")
+    val dhuhrIqamaTimeVal by viewModel.dhuhrIqamaTime.collectAsState(initial = "12:30")
+    val asrIqamaTimeVal by viewModel.asrIqamaTime.collectAsState(initial = "15:30")
+    val maghribIqamaTimeVal by viewModel.maghribIqamaTime.collectAsState(initial = "18:30")
+    val ishaIqamaTimeVal by viewModel.ishaIqamaTime.collectAsState(initial = "20:00")
+
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         CategoryTitleText(stringResource(R.string.prayer_times))
 
@@ -961,13 +976,39 @@ fun OverviewItems(viewModel: OverviewVM, nextPrayerName: String, navigator: Navi
             else -> nextPrayerName
         }
 
+        val fajrIqama = if (fajrIsFixed) {
+            try { LocalTime.parse(fajrIqamaTimeVal) } catch (e: Exception) { times.fajr.plusMinutes(fajrOffset.toLong()) }
+        } else {
+            times.fajr.plusMinutes(fajrOffset.toLong())
+        }
+        val dhuhrIqama = if (dhuhrIsFixed) {
+            try { LocalTime.parse(dhuhrIqamaTimeVal) } catch (e: Exception) { times.dhuhr.plusMinutes(dhuhrOffset.toLong()) }
+        } else {
+            times.dhuhr.plusMinutes(dhuhrOffset.toLong())
+        }
+        val asrIqama = if (asrIsFixed) {
+            try { LocalTime.parse(asrIqamaTimeVal) } catch (e: Exception) { times.asr.plusMinutes(asrOffset.toLong()) }
+        } else {
+            times.asr.plusMinutes(asrOffset.toLong())
+        }
+        val maghribIqama = if (maghribIsFixed) {
+            try { LocalTime.parse(maghribIqamaTimeVal) } catch (e: Exception) { times.maghrib.plusMinutes(maghribOffset.toLong()) }
+        } else {
+            times.maghrib.plusMinutes(maghribOffset.toLong())
+        }
+        val ishaIqama = if (ishaIsFixed) {
+            try { LocalTime.parse(ishaIqamaTimeVal) } catch (e: Exception) { times.isha.plusMinutes(ishaOffset.toLong()) }
+        } else {
+            times.isha.plusMinutes(ishaOffset.toLong())
+        }
+
         val prayers = listOf(
-            Triple(stringResource(R.string.fajr),   times.fajr,    fajrOffset),
+            Triple(stringResource(R.string.fajr),   times.fajr,    fajrIqama),
             Triple(stringResource(R.string.sunrise), times.sunrise, null),
-            Triple(stringResource(R.string.dhuhr),  times.dhuhr,   dhuhrOffset),
-            Triple(stringResource(R.string.asr),    times.asr,     asrOffset),
-            Triple(stringResource(R.string.maghrib),times.maghrib, maghribOffset),
-            Triple(stringResource(R.string.isha),   times.isha,    ishaOffset)
+            Triple(stringResource(R.string.dhuhr),  times.dhuhr,   dhuhrIqama),
+            Triple(stringResource(R.string.asr),    times.asr,     asrIqama),
+            Triple(stringResource(R.string.maghrib),times.maghrib, maghribIqama),
+            Triple(stringResource(R.string.isha),   times.isha,    ishaIqama)
         )
 
         Card(
@@ -1002,9 +1043,8 @@ fun OverviewItems(viewModel: OverviewVM, nextPrayerName: String, navigator: Navi
                                 color = if (isNext) colorScheme.onPrimaryContainer else colorScheme.primary
                             )
                             if (offset != null) {
-                                val iqamaTime = time.plusMinutes(offset.toLong())
                                 Text(
-                                    text = stringResource(R.string.iqama_time, iqamaTime.toLocaleHourString(context)),
+                                    text = stringResource(R.string.iqama_time, offset.toLocaleHourString(context)),
                                     style = MaterialTheme.typography.labelMedium,
                                     color = if (isNext) colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                                             else colorScheme.secondary
@@ -1133,10 +1173,24 @@ fun LiveQiblaCompassCard(
     val qiblaBearing = remember(lat, lon) { calculateQiblaDirection(lat, lon).toFloat() }
     val cookie12SidedShape = rememberCookie12SidedShape()
 
+    val declination = remember(lat, lon) {
+        try {
+            val geoField = android.hardware.GeomagneticField(
+                lat.toFloat(),
+                lon.toFloat(),
+                0f,
+                System.currentTimeMillis()
+            )
+            geoField.declination
+        } catch (e: Exception) {
+            0f
+        }
+    }
+
     var rawHeading by remember { mutableStateOf(0f) }
     var smoothHeading by remember { mutableStateOf(0f) }
 
-    DisposableEffect(context) {
+    DisposableEffect(context, lat, lon) {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val rotationVectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
         val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
@@ -1153,7 +1207,7 @@ fun LiveQiblaCompassCard(
                     val orientation = FloatArray(3)
                     SensorManager.getOrientation(rMatrix, orientation)
                     val azimuth = Math.toDegrees(orientation[0].toDouble()).toFloat()
-                    val heading = (azimuth + 360f) % 360f
+                    val heading = (azimuth + declination + 360f) % 360f
                     rawHeading = heading
                     smoothHeading = getSmoothRotation(heading, smoothHeading)
                 } else {
@@ -1171,7 +1225,7 @@ fun LiveQiblaCompassCard(
                             val orientation = FloatArray(3)
                             SensorManager.getOrientation(r, orientation)
                             val azimuth = Math.toDegrees(orientation[0].toDouble()).toFloat()
-                            val heading = (azimuth + 360f) % 360f
+                            val heading = (azimuth + declination + 360f) % 360f
                             rawHeading = heading
                             smoothHeading = getSmoothRotation(heading, smoothHeading)
                         }

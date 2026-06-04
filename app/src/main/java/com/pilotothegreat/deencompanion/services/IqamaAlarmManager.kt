@@ -49,12 +49,24 @@ object IqamaAlarmManager {
         val calcMethod = appPreferenceRepo.calcMethod.first()
         val asrSchool = appPreferenceRepo.asrSchool.first()
 
-        // Iqama offsets
+        // Iqama offsets and modes
         val fajrOffset = appPreferenceRepo.fajrIqamaOffset.first()
         val dhuhrOffset = appPreferenceRepo.dhuhrIqamaOffset.first()
         val asrOffset = appPreferenceRepo.asrIqamaOffset.first()
         val maghribOffset = appPreferenceRepo.maghribIqamaOffset.first()
         val ishaOffset = appPreferenceRepo.ishaIqamaOffset.first()
+
+        val fajrIsFixed = appPreferenceRepo.fajrIqamaIsFixed.first()
+        val dhuhrIsFixed = appPreferenceRepo.dhuhrIqamaIsFixed.first()
+        val asrIsFixed = appPreferenceRepo.asrIqamaIsFixed.first()
+        val maghribIsFixed = appPreferenceRepo.maghribIqamaIsFixed.first()
+        val ishaIsFixed = appPreferenceRepo.ishaIqamaIsFixed.first()
+
+        val fajrIqamaTimeVal = appPreferenceRepo.fajrIqamaTime.first()
+        val dhuhrIqamaTimeVal = appPreferenceRepo.dhuhrIqamaTime.first()
+        val asrIqamaTimeVal = appPreferenceRepo.asrIqamaTime.first()
+        val maghribIqamaTimeVal = appPreferenceRepo.maghribIqamaTime.first()
+        val ishaIqamaTimeVal = appPreferenceRepo.ishaIqamaTime.first()
 
         val zoneId = try { ZoneId.of(tzId) } catch (e: Exception) { ZoneId.systemDefault() }
         val now = LocalDateTime.now(zoneId)
@@ -79,12 +91,38 @@ object IqamaAlarmManager {
                 asrSchool = asrSchool
             )
 
+            val fajrIqamaTime = if (fajrIsFixed) {
+                try { java.time.LocalTime.parse(fajrIqamaTimeVal) } catch (e: Exception) { times.fajr.plusMinutes(fajrOffset.toLong()) }
+            } else {
+                times.fajr.plusMinutes(fajrOffset.toLong())
+            }
+            val dhuhrIqamaTime = if (dhuhrIsFixed) {
+                try { java.time.LocalTime.parse(dhuhrIqamaTimeVal) } catch (e: Exception) { times.dhuhr.plusMinutes(dhuhrOffset.toLong()) }
+            } else {
+                times.dhuhr.plusMinutes(dhuhrOffset.toLong())
+            }
+            val asrIqamaTime = if (asrIsFixed) {
+                try { java.time.LocalTime.parse(asrIqamaTimeVal) } catch (e: Exception) { times.asr.plusMinutes(asrOffset.toLong()) }
+            } else {
+                times.asr.plusMinutes(asrOffset.toLong())
+            }
+            val maghribIqamaTime = if (maghribIsFixed) {
+                try { java.time.LocalTime.parse(maghribIqamaTimeVal) } catch (e: Exception) { times.maghrib.plusMinutes(maghribOffset.toLong()) }
+            } else {
+                times.maghrib.plusMinutes(maghribOffset.toLong())
+            }
+            val ishaIqamaTime = if (ishaIsFixed) {
+                try { java.time.LocalTime.parse(ishaIqamaTimeVal) } catch (e: Exception) { times.isha.plusMinutes(ishaOffset.toLong()) }
+            } else {
+                times.isha.plusMinutes(ishaOffset.toLong())
+            }
+
             val prayerList = listOf(
-                Pair("Fajr", times.fajr.plusMinutes(fajrOffset.toLong())),
-                Pair("Dhuhr", times.dhuhr.plusMinutes(dhuhrOffset.toLong())),
-                Pair("Asr", times.asr.plusMinutes(asrOffset.toLong())),
-                Pair("Maghrib", times.maghrib.plusMinutes(maghribOffset.toLong())),
-                Pair("Isha", times.isha.plusMinutes(ishaOffset.toLong()))
+                Pair("Fajr", fajrIqamaTime),
+                Pair("Dhuhr", dhuhrIqamaTime),
+                Pair("Asr", asrIqamaTime),
+                Pair("Maghrib", maghribIqamaTime),
+                Pair("Isha", ishaIqamaTime)
             )
 
             for (p in prayerList) {
