@@ -51,6 +51,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.text.TextMeasurer
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.platform.LocalDensity
+import kotlinx.coroutines.withContext
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 
@@ -60,9 +65,9 @@ val juzData = listOf(
     JuzBoundary(1, 1, 1),
     JuzBoundary(2, 142, 2),
     JuzBoundary(2, 253, 3),
-    JuzBoundary(3, 93, 4),
+    JuzBoundary(3, 92, 4),
     JuzBoundary(4, 24, 5),
-    JuzBoundary(4, 148, 6),
+    JuzBoundary(4, 147, 6),
     JuzBoundary(5, 82, 7),
     JuzBoundary(6, 111, 8),
     JuzBoundary(7, 88, 9),
@@ -88,6 +93,18 @@ val juzData = listOf(
     JuzBoundary(67, 1, 29),
     JuzBoundary(78, 1, 30)
 )
+
+sealed interface PageContent {
+    data class SurahHeader(val surah: QuranHelper.Surah) : PageContent
+    data class Bismillah(val surahId: Int) : PageContent
+    data class VerseItem(val surahId: Int, val verse: QuranHelper.Verse) : PageContent
+}
+
+sealed interface RenderBlock {
+    data class Header(val surah: QuranHelper.Surah) : RenderBlock
+    data class BismillahText(val surahId: Int) : RenderBlock
+    data class Verses(val verses: List<PageContent.VerseItem>) : RenderBlock
+}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -117,43 +134,99 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
 
     val configuration = LocalConfiguration.current
     val screenHeightDp = configuration.screenHeightDp
-    val pages = remember(surah, arabicFontSize, screenHeightDp) {
-        if (surah == null) return@remember emptyList<List<QuranHelper.Verse>>()
-        
-        val availableHeight = (screenHeightDp - 260f).coerceAtLeast(100f)
-        val approximateLineHeight = arabicFontSize * 2.3f
-        val maxLines = (availableHeight / approximateLineHeight).toInt().coerceAtLeast(2)
-        val charsPerLine = (320f / (arabicFontSize * 0.55f)).toInt().coerceAtLeast(20)
-        val maxCharsPerPage = maxLines * charsPerLine
-        
-        val pageList = mutableListOf<List<QuranHelper.Verse>>()
-        var currentPageVerses = mutableListOf<QuranHelper.Verse>()
-        var currentPageCharCount = 0
-        
-        for (verse in surah.verses) {
-            val verseLength = verse.text.length
-            if (currentPageCharCount + verseLength > maxCharsPerPage && currentPageVerses.isNotEmpty()) {
-                pageList.add(currentPageVerses)
-                currentPageVerses = mutableListOf()
-                currentPageCharCount = 0
-            }
-            currentPageVerses.add(verse)
-            currentPageCharCount += verseLength
-        }
-        if (currentPageVerses.isNotEmpty()) {
-            pageList.add(currentPageVerses)
-        }
-        pageList
+    val screenWidthDp = configuration.screenWidthDp
+    val density = LocalDensity.current
+    
+    val textMeasurer = rememberTextMeasurer()
+    val widthPx = remember(screenWidthDp, density) {
+        with(density) { (screenWidthDp - 72f).dp.toPx() }
+    }
+    
+    val textStyle = remember(arabicFontSize, quranFontFamily) {
+        TextStyle(
+            fontSize = arabicFontSize.sp,
+            fontFamily = quranFontFamily,
+            lineHeight = (arabicFontSize * 2.5f).sp,
+            textAlign = TextAlign.Justify
+        )
     }
 
-    val pagerState = rememberPagerState(pageCount = { pages.size })
+    var globalPages by remember { mutableStateOf<List<List<PageContent>>>(emptyList()) }
+    var isPaginating by remember { mutableStateOf(true) }
 
-    val pageIndexForActiveAyah = remember(activeAyah, pages) {
-        pages.indexOfFirst { page -> page.any { it.id == activeAyah } }
+    LaunchedEffect(surahs, arabicFontSize, screenHeightDp, widthPx) {
+        isPaginating = true
+        withContext(kotlinx.coroutines.Dispatchers.Default) {
+            val pagesList = mutableListOf<List<PageContent>>()
+            var currentPage = mutableListOf<PageContent>()
+            
+            val availableHeight = (screenHeightDp - 260f).coerceAtLeast(100f)
+            val lineH = arabicFontSize * 2.5f
+            val maxLines = (availableHeight / lineH).toInt().coerceAtLeast(5)
+
+            val allItems = mutableListOf<PageContent>()
+            for (s in surahs) {
+                allItems.add(PageContent.SurahHeader(s))
+                if (s.id != 9) { // Standalone Bismillah header only suppressed for Surah 9 (At-Tawbah)
+                    allItems.add(PageContent.Bismillah(s.id))
+                }
+                for (v in s.verses) {
+                    allItems.add(PageContent.VerseItem(s.id, v))
+                }
+            }
+
+            var i = 0
+            while (i < allItems.size) {
+                val item = allItems[i]
+                currentPage.add(item)
+                
+                val lines = calculateLines(currentPage, widthPx, textMeasurer, textStyle)
+                if (lines > maxLines && currentPage.size > 1) {
+                    currentPage.removeAt(currentPage.size - 1)
+                    pagesList.add(currentPage)
+                    currentPage = mutableListOf()
+                } else {
+                    i++
+                }
+            }
+            if (currentPage.isNotEmpty()) {
+                pagesList.add(currentPage)
+            }
+            globalPages = pagesList
+        }
+        isPaginating = false
+    }
+
+    val pagerState = rememberPagerState(pageCount = { globalPages.size })
+
+    val activePageIndex = remember(globalPages, surahNumber, scrollToVerse) {
+        val targetVerse = scrollToVerse ?: 1
+        globalPages.indexOfFirst { page ->
+            page.any { item ->
+                item is PageContent.VerseItem && item.surahId == surahNumber && item.verse.id == targetVerse
+            }
+        }.coerceAtLeast(0)
+    }
+
+    // Scroll to the active page when first loaded or changed
+    var hasScrolledToTarget by remember { mutableStateOf(false) }
+    LaunchedEffect(activePageIndex, globalPages) {
+        if (activePageIndex >= 0 && globalPages.isNotEmpty() && !hasScrolledToTarget) {
+            pagerState.scrollToPage(activePageIndex)
+            hasScrolledToTarget = true
+        }
+    }
+
+    val pageIndexForActiveAyah = remember(currentSurahId, currentAyahId, globalPages) {
+        globalPages.indexOfFirst { page ->
+            page.any { item ->
+                item is PageContent.VerseItem && item.surahId == currentSurahId && item.verse.id == currentAyahId
+            }
+        }
     }
 
     LaunchedEffect(pageIndexForActiveAyah) {
-        if (pageIndexForActiveAyah >= 0 && pagerState.currentPage != pageIndexForActiveAyah && !pagerState.isScrollInProgress) {
+        if (pageIndexForActiveAyah >= 0 && pagerState.currentPage != pageIndexForActiveAyah && !pagerState.isScrollInProgress && globalPages.isNotEmpty()) {
             pagerState.animateScrollToPage(pageIndexForActiveAyah)
         }
     }
@@ -166,6 +239,22 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
 
     val themeState by appPreferenceRepo.theme.collectAsState(Theme.AutoMaterial)
     val isDark = themeState.isDark()
+
+    val currentPageItems = globalPages.getOrNull(pagerState.currentPage) ?: emptyList()
+    val firstVerseItem = currentPageItems.firstOrNull { it is PageContent.VerseItem } as? PageContent.VerseItem
+    val firstHeaderItem = currentPageItems.firstOrNull { it is PageContent.SurahHeader } as? PageContent.SurahHeader
+    val currentSurah = remember(firstVerseItem, firstHeaderItem, surahs) {
+        val sId = firstVerseItem?.surahId ?: firstHeaderItem?.surah?.id ?: surahNumber
+        surahs.firstOrNull { it.id == sId }
+    } ?: surah
+
+    val currentJuz = remember(firstVerseItem, currentSurah) {
+        if (firstVerseItem != null) {
+            getJuzNumber(firstVerseItem.surahId, firstVerseItem.verse.id)
+        } else {
+            1
+        }
+    }
 
     // Mushaf-style colors
     val mushafBgColor = if (isDark) Color(0xFF151412) else Color(0xFFFAF6EE)
@@ -191,7 +280,37 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                         .fillMaxSize()
                         .padding(top = 84.dp, bottom = 104.dp)
                 ) { pageIdx ->
-                    val pageVerses = pages.getOrNull(pageIdx) ?: emptyList()
+                    val pageContent = globalPages.getOrNull(pageIdx) ?: emptyList()
+                    val blocks = remember(pageContent) {
+                        val result = mutableListOf<RenderBlock>()
+                        var currentVerses = mutableListOf<PageContent.VerseItem>()
+                        
+                        for (item in pageContent) {
+                            when (item) {
+                                is PageContent.SurahHeader -> {
+                                    if (currentVerses.isNotEmpty()) {
+                                        result.add(RenderBlock.Verses(currentVerses))
+                                        currentVerses = mutableListOf()
+                                    }
+                                    result.add(RenderBlock.Header(item.surah))
+                                }
+                                is PageContent.Bismillah -> {
+                                    if (currentVerses.isNotEmpty()) {
+                                        result.add(RenderBlock.Verses(currentVerses))
+                                        currentVerses = mutableListOf()
+                                    }
+                                    result.add(RenderBlock.BismillahText(item.surahId))
+                                }
+                                is PageContent.VerseItem -> {
+                                    currentVerses.add(item)
+                                }
+                            }
+                        }
+                        if (currentVerses.isNotEmpty()) {
+                            result.add(RenderBlock.Verses(currentVerses))
+                        }
+                        result
+                    }
 
                     Box(
                         modifier = Modifier
@@ -209,192 +328,195 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                             Column(
                                 modifier = Modifier
                                     .weight(1f)
-                                    .fillMaxWidth()
-                                    .verticalScroll(androidx.compose.foundation.rememberScrollState()),
+                                    .fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                // Surah banner and Bismillah on first page
-                                if (pageIdx == 0) {
-                                    SurahStartBanner(
-                                        surah = surah,
-                                        goldAccent = goldAccent,
-                                        textColor = mushafTextColor,
-                                        isDark = isDark,
-                                        fontFamily = quranFontFamily,
-                                        lang = lang
-                                    )
-                                    Spacer(modifier = Modifier.height(8.dp))
-
-                                    if (surah.id != 9 && surah.id != 1) {
-                                        Text(
-                                            text = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
-                                            style = MaterialTheme.typography.headlineLarge.copy(
-                                                fontWeight = FontWeight.Bold,
+                                blocks.forEach { block ->
+                                    when (block) {
+                                        is RenderBlock.Header -> {
+                                            SurahStartBanner(
+                                                surah = block.surah,
+                                                goldAccent = goldAccent,
+                                                textColor = mushafTextColor,
+                                                isDark = isDark,
                                                 fontFamily = quranFontFamily,
-                                                fontSize = 32.sp,
-                                                lineHeight = 48.sp
-                                            ),
-                                            textAlign = TextAlign.Center,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(vertical = 12.dp),
-                                            color = bismillahColor
-                                        )
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                    }
-                                }
+                                                lang = lang
+                                            )
+                                            Spacer(modifier = Modifier.height(8.dp))
+                                        }
+                                        is RenderBlock.BismillahText -> {
+                                            Text(
+                                                text = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+                                                style = MaterialTheme.typography.headlineLarge.copy(
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontFamily = quranFontFamily,
+                                                    fontSize = 32.sp,
+                                                    lineHeight = 48.sp
+                                                ),
+                                                textAlign = TextAlign.Center,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(vertical = 12.dp),
+                                                color = bismillahColor
+                                            )
+                                            Spacer(modifier = Modifier.height(8.dp))
+                                        }
+                                        is RenderBlock.Verses -> {
+                                            val primaryContainerColor = colorScheme.primaryContainer
+                                            val onPrimaryContainerColor = colorScheme.onPrimaryContainer
+                                            val segments = remember(block.verses, activeAyah, primaryContainerColor, onPrimaryContainerColor, isDark, goldAccent, mushafTextColor, currentSurahId, currentAyahId) {
+                                                val list = mutableListOf<Any>()
+                                                var builder = AnnotatedString.Builder()
 
-                                // Build annotated string with inline juz headers
-                                val primaryContainerColor = colorScheme.primaryContainer
-                                val onPrimaryContainerColor = colorScheme.onPrimaryContainer
-                                val segments = remember(pageVerses, activeAyah, primaryContainerColor, onPrimaryContainerColor, isDark, goldAccent, mushafTextColor) {
-                                    val list = mutableListOf<Any>()
-                                    var builder = AnnotatedString.Builder()
+                                                block.verses.forEach { verseItem ->
+                                                    val verse = verseItem.verse
+                                                    val surahId = verseItem.surahId
+                                                    
+                                                    val boundary = juzData.firstOrNull { it.surahNumber == surahId && it.verseNumber == verse.id }
+                                                    if (boundary != null) {
+                                                        val annotated = builder.toAnnotatedString()
+                                                        if (annotated.isNotEmpty()) {
+                                                            list.add(annotated)
+                                                        }
+                                                        list.add(boundary)
+                                                        builder = AnnotatedString.Builder()
+                                                    }
 
-                                    pageVerses.forEach { verse ->
-                                        val boundary = juzData.firstOrNull { it.surahNumber == surah.id && it.verseNumber == verse.id }
-                                        if (boundary != null) {
-                                            val annotated = builder.toAnnotatedString()
-                                            if (annotated.isNotEmpty()) {
-                                                list.add(annotated)
+                                                    val start = builder.length
+                                                    val isSajdah = QuranHelper.isSajdahVerse(surahId, verse.id)
+                                                    builder.append(verse.text)
+                                                    builder.append(" ")
+                                                    val startSajdah = builder.length
+                                                    if (isSajdah) {
+                                                        builder.append("۩ ")
+                                                    }
+
+                                                    val isCurrentlyPlaying = (surahId == currentSurahId && verse.id == currentAyahId)
+                                                    val isHighlighted = isCurrentlyPlaying || (surahId == surahNumber && verse.id == activeAyah)
+
+                                                    if (!isHighlighted) {
+                                                        builder.addStyle(
+                                                            style = SpanStyle(
+                                                                color = mushafTextColor,
+                                                                localeList = androidx.compose.ui.text.intl.LocaleList(androidx.compose.ui.text.intl.Locale("ar"))
+                                                            ),
+                                                            start = start,
+                                                            end = startSajdah
+                                                        )
+                                                    }
+
+                                                    if (isSajdah) {
+                                                        builder.addStyle(
+                                                            style = SpanStyle(
+                                                                color = goldAccent,
+                                                                fontWeight = FontWeight.Bold
+                                                            ),
+                                                            start = startSajdah,
+                                                            end = startSajdah + 1
+                                                        )
+                                                    }
+
+                                                    val startOrn = builder.length
+                                                    val ornament = "\u200F﴾${toArabicNumerals(verse.id)}﴿\u200F "
+                                                    builder.append(ornament)
+                                                    val endOrn = builder.length
+
+                                                    val end = builder.length
+
+                                                    builder.addStringAnnotation(
+                                                        tag = "AYAH_CLICK",
+                                                        annotation = "${surahId}_${verse.id}",
+                                                        start = start,
+                                                        end = end
+                                                    )
+
+                                                    if (isHighlighted) {
+                                                        builder.addStyle(
+                                                            style = SpanStyle(
+                                                                background = primaryContainerColor.copy(alpha = 0.3f),
+                                                                color = onPrimaryContainerColor,
+                                                                localeList = androidx.compose.ui.text.intl.LocaleList(androidx.compose.ui.text.intl.Locale("ar"))
+                                                            ),
+                                                            start = start,
+                                                            end = end
+                                                        )
+                                                    }
+
+                                                    builder.addStyle(
+                                                        style = SpanStyle(
+                                                            color = goldAccent,
+                                                            fontWeight = FontWeight.Bold
+                                                        ),
+                                                        start = startOrn,
+                                                        end = endOrn
+                                                    )
+                                                }
+                                                val finalAnnotated = builder.toAnnotatedString()
+                                                if (finalAnnotated.isNotEmpty()) {
+                                                    list.add(finalAnnotated)
+                                                }
+                                                list
                                             }
-                                            list.add(boundary)
-                                            builder = AnnotatedString.Builder()
-                                        }
 
-                                        val start = builder.length
-                                        val isSajdah = QuranHelper.isSajdahVerse(surah.id, verse.id)
-                                        builder.append(verse.text)
-                                        builder.append(" ")
-                                        val startSajdah = builder.length
-                                        if (isSajdah) {
-                                            builder.append("۩ ")
-                                        }
-
-                                        // Style the verse text (excluding Sajdah symbol if present)
-                                        if (verse.id != activeAyah) {
-                                            builder.addStyle(
-                                                style = SpanStyle(
-                                                    color = mushafTextColor,
-                                                    localeList = androidx.compose.ui.text.intl.LocaleList(androidx.compose.ui.text.intl.Locale("ar"))
-                                                ),
-                                                start = start,
-                                                end = startSajdah
-                                            )
-                                        }
-
-                                        // Style the Sajdah symbol itself
-                                        if (isSajdah) {
-                                            builder.addStyle(
-                                                style = SpanStyle(
-                                                    color = goldAccent,
-                                                    fontWeight = FontWeight.Bold
-                                                ),
-                                                start = startSajdah,
-                                                end = startSajdah + 1
-                                            )
-                                        }
-
-                                        val startOrn = builder.length
-                                        val ornament = "﴾${toArabicNumerals(verse.id)}﴿ "
-                                        builder.append(ornament)
-                                        val endOrn = builder.length
-
-                                        val end = builder.length
-
-                                        builder.addStringAnnotation(
-                                            tag = "AYAH_CLICK",
-                                            annotation = verse.id.toString(),
-                                            start = start,
-                                            end = end
-                                        )
-
-                                        if (verse.id == activeAyah) {
-                                            builder.addStyle(
-                                                style = SpanStyle(
-                                                    background = primaryContainerColor.copy(alpha = 0.3f),
-                                                    color = onPrimaryContainerColor,
-                                                    localeList = androidx.compose.ui.text.intl.LocaleList(androidx.compose.ui.text.intl.Locale("ar"))
-                                                ),
-                                                start = start,
-                                                end = end
-                                            )
-                                        }
-
-                                        // Ayah number ornament always gold
-                                        builder.addStyle(
-                                            style = SpanStyle(
-                                                color = goldAccent,
-                                                fontWeight = FontWeight.Bold
-                                            ),
-                                            start = startOrn,
-                                            end = endOrn
-                                        )
-                                    }
-                                    val finalAnnotated = builder.toAnnotatedString()
-                                    if (finalAnnotated.isNotEmpty()) {
-                                        list.add(finalAnnotated)
-                                    }
-                                    list
-                                }
-
-                                segments.forEach { segment ->
-                                    when (segment) {
-                                        is JuzBoundary -> {
-                                            Spacer(modifier = Modifier.height(8.dp))
-                                            JuzHeader(segment.juzNumber, goldAccent, isDark)
-                                            Spacer(modifier = Modifier.height(8.dp))
-                                        }
-                                        is AnnotatedString -> {
-                                            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                                                var layoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
-                                                Text(
-                                                    text = segment,
-                                                    style = MaterialTheme.typography.bodyLarge.copy(
-                                                        fontSize = arabicFontSize.sp,
-                                                        fontFamily = quranFontFamily,
-                                                        lineHeight = (arabicFontSize * 2.5f).sp,
-                                                        textAlign = TextAlign.Justify
-                                                    ),
-                                                    onTextLayout = { layoutResult = it },
-                                                    modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .pointerInput(segment) {
-                                                            detectTapGestures { offset ->
-                                                                layoutResult?.let { textLayoutResult ->
-                                                                    val position = textLayoutResult.getOffsetForPosition(offset)
-                                                                    segment.getStringAnnotations(tag = "AYAH_CLICK", start = position, end = position)
-                                                                        .firstOrNull()?.let { annotation ->
-                                                                            val clickedAyahId = annotation.item.toIntOrNull()
-                                                                            if (clickedAyahId != null) {
-                                                                                playbackManager.jumpToAyah(clickedAyahId)
-                                                                                if (currentSurahId != surah.id) {
-                                                                                    playbackManager.playSurah(surah, clickedAyahId)
-                                                                                }
+                                            segments.forEach { segment ->
+                                                when (segment) {
+                                                    is JuzBoundary -> {
+                                                        Spacer(modifier = Modifier.height(8.dp))
+                                                        JuzHeader(segment.juzNumber, goldAccent, isDark)
+                                                        Spacer(modifier = Modifier.height(8.dp))
+                                                    }
+                                                    is AnnotatedString -> {
+                                                        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                                                            var layoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+                                                            Text(
+                                                                text = segment,
+                                                                style = MaterialTheme.typography.bodyLarge.copy(
+                                                                    fontSize = arabicFontSize.sp,
+                                                                    fontFamily = quranFontFamily,
+                                                                    lineHeight = (arabicFontSize * 2.5f).sp,
+                                                                    textAlign = TextAlign.Justify
+                                                                ),
+                                                                onTextLayout = { layoutResult = it },
+                                                                modifier = Modifier
+                                                                    .fillMaxWidth()
+                                                                    .pointerInput(segment) {
+                                                                        detectTapGestures { offset ->
+                                                                            layoutResult?.let { textLayoutResult ->
+                                                                                val position = textLayoutResult.getOffsetForPosition(offset)
+                                                                                segment.getStringAnnotations(tag = "AYAH_CLICK", start = position, end = position)
+                                                                                    .firstOrNull()?.let { annotation ->
+                                                                                        val parts = annotation.item.split("_")
+                                                                                        if (parts.size == 2) {
+                                                                                            val clickedSurahId = parts[0].toIntOrNull()
+                                                                                            val clickedAyahId = parts[1].toIntOrNull()
+                                                                                            if (clickedSurahId != null && clickedAyahId != null) {
+                                                                                                val targetSurah = surahs.firstOrNull { it.id == clickedSurahId }
+                                                                                                if (targetSurah != null) {
+                                                                                                    playbackManager.jumpToAyah(clickedAyahId)
+                                                                                                    if (currentSurahId != clickedSurahId) {
+                                                                                                        playbackManager.playSurah(targetSurah, clickedAyahId)
+                                                                                                    }
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    }
                                                                             }
                                                                         }
-                                                                }
-                                                            }
+                                                                    }
+                                                            )
                                                         }
-                                                )
+                                                    }
+                                                }
                                             }
                                         }
                                     }
                                 }
 
-                                // Sajdah Indicators
-                                pageVerses.filter { QuranHelper.isSajdahVerse(surah.id, it.id) }.forEach { sajdahVerse ->
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    SajdahIndicatorBlock(
-                                        verseId = sajdahVerse.id,
-                                        goldAccent = goldAccent,
-                                        isDark = isDark,
-                                        lang = lang
-                                    )
+                                val pageVerses = remember(pageContent) {
+                                    pageContent.filterIsInstance<PageContent.VerseItem>()
                                 }
 
-                                // Collapsible translation
-                                if (pageVerses.any { it.translation.isNotEmpty() }) {
+                                if (pageVerses.isNotEmpty()) {
                                     var showTranslation by remember { mutableStateOf(false) }
 
                                     Spacer(modifier = Modifier.height(12.dp))
@@ -418,9 +540,11 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                             )
                                             Spacer(modifier = Modifier.height(8.dp))
 
-                                            pageVerses.forEach { verse ->
-                                                val isHighlighted = verse.id == activeAyah
-                                                val isSajdah = QuranHelper.isSajdahVerse(surah.id, verse.id)
+                                            pageVerses.forEach { verseItem ->
+                                                val verse = verseItem.verse
+                                                val surahId = verseItem.surahId
+                                                val isHighlighted = (surahId == currentSurahId && verse.id == currentAyahId) || (surahId == surahNumber && verse.id == activeAyah)
+                                                val isSajdah = QuranHelper.isSajdahVerse(surahId, verse.id)
                                                 val translationText = remember(verse.translation, isSajdah, lang) {
                                                     if (isSajdah) {
                                                         val label = if (lang == "ar") " [سَجْدَة]" else " [Prostration / Sajdah]"
@@ -444,9 +568,14 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                 }
                             }
 
-                            // Page Number ornament
+                            val footerText = if (lang == "ar") {
+                                "الصفحة ${toArabicNumerals(pageIdx + 1)} من ${toArabicNumerals(globalPages.size)}"
+                            } else {
+                                "Page ${pageIdx + 1} of ${globalPages.size}"
+                            }
+
                             Text(
-                                text = "﴾ ${toArabicNumerals(pageIdx + 1)} ﴿",
+                                text = "﴾ $footerText ﴿",
                                 style = MaterialTheme.typography.labelLarge.copy(
                                     fontWeight = FontWeight.Bold,
                                     fontFamily = quranFontFamily,
@@ -463,20 +592,11 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
             }
 
             // Audio player at bottom
-            QuranAudioPlayer(
-                surah = surah,
-                modifier = Modifier.align(Alignment.BottomCenter)
-            )
-        }
-
-        // Mushaf-style header
-        val currentPageVerses = pages.getOrNull(pagerState.currentPage) ?: emptyList()
-        val firstVerseOnPage = currentPageVerses.firstOrNull()
-        val currentJuz = remember(firstVerseOnPage, surah) {
-            if (firstVerseOnPage != null && surah != null) {
-                getJuzNumber(surah.id, firstVerseOnPage.id)
-            } else {
-                1
+            if (currentSurah != null) {
+                QuranAudioPlayer(
+                    surah = currentSurah,
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                )
             }
         }
 
@@ -505,13 +625,13 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                 }
 
                 // Centered Surah and Juz Name
-                if (surah != null) {
+                if (currentSurah != null) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "سُورَةُ ${surah.name}",
+                            text = "سُورَةُ ${currentSurah.name}",
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontWeight = FontWeight.Bold,
                                 fontFamily = quranFontFamily,
@@ -521,9 +641,9 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                             maxLines = 1
                         )
                         val subtitleText = if (lang == "ar") {
-                            "الجزء ${toArabicNumerals(currentJuz)} • ${surah.type.let { if (it.lowercase() == "meccan") "مكية" else "مدنية" }}"
+                            "الجزء ${toArabicNumerals(currentJuz)} • ${currentSurah.type.let { if (it.lowercase() == "meccan") "مكية" else "مدنية" }}"
                         } else {
-                            "Juz $currentJuz • ${surah.transliteration}"
+                            "Juz $currentJuz • ${currentSurah.transliteration}"
                         }
                         Text(
                             text = subtitleText,
@@ -829,4 +949,59 @@ fun SajdahIndicatorBlock(verseId: Int, goldAccent: Color, isDark: Boolean, lang:
             }
         }
     }
+}
+
+fun calculateLines(
+    items: List<PageContent>,
+    widthPx: Float,
+    textMeasurer: TextMeasurer,
+    style: TextStyle
+): Int {
+    var lineCount = 0
+    val currentVerses = mutableListOf<PageContent.VerseItem>()
+    
+    fun flushVerses() {
+        if (currentVerses.isNotEmpty()) {
+            val builder = AnnotatedString.Builder()
+            currentVerses.forEach { verseItem ->
+                builder.append(verseItem.verse.text)
+                builder.append(" ")
+                if (QuranHelper.isSajdahVerse(verseItem.surahId, verseItem.verse.id)) {
+                    builder.append("۩ ")
+                }
+                val ornament = "\u200F﴾${toArabicNumerals(verseItem.verse.id)}﴿\u200F "
+                builder.append(ornament)
+            }
+            val textLayoutResult = textMeasurer.measure(
+                text = builder.toAnnotatedString(),
+                style = style,
+                constraints = androidx.compose.ui.unit.Constraints(maxWidth = widthPx.toInt())
+            )
+            lineCount += textLayoutResult.lineCount
+            currentVerses.clear()
+        }
+    }
+    
+    for (item in items) {
+        when (item) {
+            is PageContent.SurahHeader -> {
+                flushVerses()
+                lineCount += 5
+            }
+            is PageContent.Bismillah -> {
+                flushVerses()
+                lineCount += 2
+            }
+            is PageContent.VerseItem -> {
+                val boundary = juzData.firstOrNull { it.surahNumber == item.surahId && it.verseNumber == item.verse.id }
+                if (boundary != null) {
+                    flushVerses()
+                    lineCount += 2
+                }
+                currentVerses.add(item)
+            }
+        }
+    }
+    flushVerses()
+    return lineCount
 }

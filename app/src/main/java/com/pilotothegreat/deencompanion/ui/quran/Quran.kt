@@ -47,11 +47,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.CompositionLocalProvider
 import com.pilotothegreat.deencompanion.ui.navigation.Navigator
 import com.pilotothegreat.deencompanion.ui.navigation.QuranReaderKey
 import com.pilotothegreat.deencompanion.ui.theme.card
@@ -82,6 +86,12 @@ fun Quran(paddingValues: PaddingValues) {
     }
 
     val surahs = remember { QuranHelper.getSurahs(context) }
+
+    val quranFontFamily = remember(context) {
+        FontFamily(
+            Font("UthmanicHafs.ttf", context.assets)
+        )
+    }
 
     val paddingSide = paddingValues.calculateLeftPadding(LayoutDirection.Ltr)
     val paddingTop = paddingValues.calculateTopPadding()
@@ -151,12 +161,18 @@ fun Quran(paddingValues: PaddingValues) {
                                 color = colorScheme.primary
                             )
                             Spacer(Modifier.height(4.dp))
-                            Text(
-                                text = verse.text,
-                                style = MaterialTheme.typography.bodyLarge,
-                                textAlign = TextAlign.End,
-                                modifier = Modifier.fillMaxWidth()
-                            )
+                            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                                Text(
+                                    text = verse.text,
+                                    style = MaterialTheme.typography.bodyLarge.copy(
+                                        fontFamily = quranFontFamily,
+                                        fontSize = 20.sp,
+                                        lineHeight = 32.sp
+                                    ),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Start
+                                )
+                            }
                             Spacer(Modifier.height(4.dp))
                             Text(
                                 text = verse.translation,
@@ -168,7 +184,7 @@ fun Quran(paddingValues: PaddingValues) {
             }
         } else {
             Box(modifier = Modifier.weight(1f)) {
-                SurahsList(surahs, navigator, paddingBottom)
+                SurahsList(surahs, navigator, paddingBottom, quranFontFamily)
             }
         }
     }
@@ -180,62 +196,67 @@ fun Quran(paddingValues: PaddingValues) {
 fun SurahsList(
     surahs: List<QuranHelper.Surah>,
     navigator: Navigator,
-    bottomPadding: androidx.compose.ui.unit.Dp
+    bottomPadding: androidx.compose.ui.unit.Dp,
+    quranFontFamily: FontFamily
 ) {
     val appPreferenceRepo: AppPreferenceRepo = koinInject()
     val lang by appPreferenceRepo.appLanguage.collectAsState(initial = "en")
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(bottom = bottomPadding + 16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        items(surahs) { surah ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .card()
-                    .clickable { navigator.goTo(QuranReaderKey(surah.id, surah.transliteration)) }
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .background(colorScheme.primaryContainer, shapes.medium),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = if (lang == "ar") toArabicNumerals(surah.id) else surah.id.toString(),
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                            color = colorScheme.onPrimaryContainer
-                        )
-                    }
-                    Column {
-                        Text(
-                            text = if (lang == "ar") surah.name else surah.transliteration,
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                        )
-                        val typeText = if (lang == "ar") {
-                            if (surah.type.lowercase() == "meccan") "مكية" else "مدنية"
-                        } else {
-                            surah.type.replaceFirstChar { it.uppercase() }
+    val direction = if (lang == "ar") LayoutDirection.Rtl else LayoutDirection.Ltr
+    CompositionLocalProvider(LocalLayoutDirection provides direction) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(bottom = bottomPadding + 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(surahs) { surah ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .card()
+                        .clickable { navigator.goTo(QuranReaderKey(surah.id, surah.transliteration)) }
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .background(colorScheme.primaryContainer, shapes.medium),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = if (lang == "ar") toArabicNumerals(surah.id) else surah.id.toString(),
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                color = colorScheme.onPrimaryContainer
+                            )
                         }
-                        val versesLabel = if (lang == "ar") "آياتها" else "Verses"
-                        val versesCountText = if (lang == "ar") toArabicNumerals(surah.totalVerses) else surah.totalVerses.toString()
-                        Text(
-                            text = if (lang == "ar") "$typeText • $versesLabel $versesCountText" else "$typeText • $versesCountText $versesLabel",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = colorScheme.secondary
-                        )
+                        Column {
+                            Text(
+                                text = surah.transliteration,
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                            )
+                            val typeText = if (lang == "ar") {
+                                if (surah.type.lowercase() == "meccan") "مكية" else "مدنية"
+                            } else {
+                                surah.type.replaceFirstChar { it.uppercase() }
+                            }
+                            val versesLabel = if (lang == "ar") "آياتها" else "Verses"
+                            val versesCountText = if (lang == "ar") toArabicNumerals(surah.totalVerses) else surah.totalVerses.toString()
+                            Text(
+                                text = if (lang == "ar") "$typeText • $versesLabel $versesCountText" else "$typeText • $versesCountText $versesLabel",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = colorScheme.secondary
+                            )
+                        }
                     }
-                }
-                if (lang != "ar") {
                     Text(
                         text = surah.name,
-                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = quranFontFamily
+                        ),
                         color = colorScheme.primary
                     )
                 }
