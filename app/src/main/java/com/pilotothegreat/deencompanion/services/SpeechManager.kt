@@ -159,9 +159,14 @@ class SpeechManager(
             val buffer = ShortArray(1024)
             var consecutiveSilenceMs = 0L
             val checkIntervalMs = 100L
+            var lastCheckTime = System.currentTimeMillis()
 
             while (audioInputProvider.isRecording()) {
                 val readSize = audioInputProvider.read(buffer, buffer.size)
+                val nowTime = System.currentTimeMillis()
+                val elapsedMs = nowTime - lastCheckTime
+                lastCheckTime = nowTime
+
                 if (readSize > 0) {
                     var maxAmp = 0
                     for (i in 0 until readSize) {
@@ -172,7 +177,7 @@ class SpeechManager(
                     }
 
                     if (maxAmp < AMPLITUDE_THRESHOLD) {
-                        consecutiveSilenceMs += checkIntervalMs
+                        consecutiveSilenceMs += elapsedMs
                     } else {
                         consecutiveSilenceMs = 0L
                     }
@@ -182,8 +187,9 @@ class SpeechManager(
                         stopAndProcess()
                         break
                     }
+                } else {
+                    delay(checkIntervalMs)
                 }
-                delay(checkIntervalMs)
             }
         }
     }
@@ -202,7 +208,15 @@ class SpeechManager(
                 // In a real device we might run SpeechRecognizer to transcribe.
                 // Since this is local, we simulate transcription or use a fallback.
                 // Let's query our assistant database using a mock speech query like "tell me about patience" or "verse about mercy"
-                val transcription = "tell me about patience" 
+                val fallbackQueries = listOf(
+                    "tell me about patience",
+                    "verse about mercy",
+                    "tell me about charity",
+                    "verse about prayer",
+                    "tell me about forgiveness",
+                    "verse about fasting"
+                )
+                val transcription = fallbackQueries.random() 
                 
                 // Audio Lifecycle sequential async chain:
                 // 1. stop recording (already stopped)
@@ -251,7 +265,11 @@ class SpeechManager(
 
         // Set locale
         if (isArabic) {
-            speechEngine.language = Locale("ar")
+            val checkLanguage = speechEngine.setLanguage(Locale("ar"))
+            if (checkLanguage == TextToSpeech.LANG_MISSING_DATA || checkLanguage == TextToSpeech.LANG_NOT_SUPPORTED) {
+                Timber.w("Arabic TTS is not supported on this device. Falling back to English.")
+                speechEngine.language = Locale.US
+            }
         } else {
             speechEngine.language = Locale.US
         }

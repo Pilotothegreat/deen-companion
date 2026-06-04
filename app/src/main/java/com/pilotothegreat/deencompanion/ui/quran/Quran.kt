@@ -75,6 +75,11 @@ fun Quran(paddingValues: PaddingValues) {
     val hazeState = rememberHazeState()
     val searchState = rememberTextFieldState("")
     val searchQuery by remember { derivedStateOf { searchState.text.toString().trim() } }
+    var debouncedQuery by remember { mutableStateOf("") }
+    LaunchedEffect(searchQuery) {
+        kotlinx.coroutines.delay(300)
+        debouncedQuery = searchQuery
+    }
 
     val surahs = remember { QuranHelper.getSurahs(context) }
 
@@ -95,13 +100,13 @@ fun Quran(paddingValues: PaddingValues) {
         // Unified Search Field
         SearchField(textFieldState = searchState)
 
-        if (searchQuery.isNotEmpty()) {
+        if (debouncedQuery.isNotEmpty()) {
             // Show Search Results instead of tabs
-            val searchResults = remember(searchQuery) {
+            val searchResults = remember(debouncedQuery) {
                 val results = mutableListOf<Pair<QuranHelper.Surah, QuranHelper.Verse>>()
                 for (surah in surahs) {
-                    if (surah.transliteration.contains(searchQuery, ignoreCase = true) ||
-                        surah.name.contains(searchQuery)
+                    if (surah.transliteration.contains(debouncedQuery, ignoreCase = true) ||
+                        surah.name.contains(debouncedQuery)
                     ) {
                         // Match entire surah -> add its first verse
                         if (surah.verses.isNotEmpty()) {
@@ -109,8 +114,8 @@ fun Quran(paddingValues: PaddingValues) {
                         }
                     }
                     for (verse in surah.verses) {
-                        if (verse.translation.contains(searchQuery, ignoreCase = true) ||
-                            verse.text.contains(searchQuery)
+                        if (verse.translation.contains(debouncedQuery, ignoreCase = true) ||
+                            verse.text.contains(debouncedQuery)
                         ) {
                             results.add(Pair(surah, verse))
                         }

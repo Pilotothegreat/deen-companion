@@ -6,6 +6,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -150,7 +153,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
     }
 
     LaunchedEffect(pageIndexForActiveAyah) {
-        if (pageIndexForActiveAyah >= 0 && pagerState.currentPage != pageIndexForActiveAyah) {
+        if (pageIndexForActiveAyah >= 0 && pagerState.currentPage != pageIndexForActiveAyah && !pagerState.isScrollInProgress) {
             pagerState.animateScrollToPage(pageIndexForActiveAyah)
         }
     }
@@ -327,7 +330,8 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                         }
                                         is AnnotatedString -> {
                                             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                                                ClickableText(
+                                                var layoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+                                                Text(
                                                     text = segment,
                                                     style = MaterialTheme.typography.bodyLarge.copy(
                                                         fontSize = arabicFontSize.sp,
@@ -335,19 +339,26 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                         lineHeight = (arabicFontSize * 2.5f).sp,
                                                         textAlign = TextAlign.Justify
                                                     ),
-                                                    onClick = { offset ->
-                                                        segment.getStringAnnotations(tag = "AYAH_CLICK", start = offset, end = offset)
-                                                            .firstOrNull()?.let { annotation ->
-                                                                val clickedAyahId = annotation.item.toIntOrNull()
-                                                                if (clickedAyahId != null) {
-                                                                     playbackManager.jumpToAyah(clickedAyahId)
-                                                                     if (currentSurahId != surah.id) {
-                                                                         playbackManager.playSurah(surah, clickedAyahId)
-                                                                     }
+                                                    onTextLayout = { layoutResult = it },
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .pointerInput(segment) {
+                                                            detectTapGestures { offset ->
+                                                                layoutResult?.let { textLayoutResult ->
+                                                                    val position = textLayoutResult.getOffsetForPosition(offset)
+                                                                    segment.getStringAnnotations(tag = "AYAH_CLICK", start = position, end = position)
+                                                                        .firstOrNull()?.let { annotation ->
+                                                                            val clickedAyahId = annotation.item.toIntOrNull()
+                                                                            if (clickedAyahId != null) {
+                                                                                playbackManager.jumpToAyah(clickedAyahId)
+                                                                                if (currentSurahId != surah.id) {
+                                                                                    playbackManager.playSurah(surah, clickedAyahId)
+                                                                                }
+                                                                            }
+                                                                        }
                                                                 }
                                                             }
-                                                    },
-                                                    modifier = Modifier.fillMaxWidth()
+                                                        }
                                                 )
                                             }
                                         }

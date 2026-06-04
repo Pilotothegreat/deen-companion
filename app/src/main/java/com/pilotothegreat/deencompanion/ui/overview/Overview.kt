@@ -1382,6 +1382,7 @@ fun TasbihDialCard(
 ) {
     val count by viewModel.tasbihCount.collectAsState(initial = 0)
     val dhikr by viewModel.tasbihDhikr.collectAsState(initial = "سبحان الله")
+    val target by viewModel.tasbihTarget.collectAsState(initial = 33)
 
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
@@ -1398,8 +1399,8 @@ fun TasbihDialCard(
         }
     }
 
-    val progress = remember(count) {
-        count.toFloat() / 33f
+    val progress = remember(count, target) {
+        count.toFloat() / target.toFloat().coerceAtLeast(1f)
     }
 
     Card(
@@ -1443,7 +1444,7 @@ fun TasbihDialCard(
                             scale.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
                         }
                         val nextCount = count + 1
-                        if (nextCount >= 33) {
+                        if (nextCount >= target) {
                             val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
                             try {
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

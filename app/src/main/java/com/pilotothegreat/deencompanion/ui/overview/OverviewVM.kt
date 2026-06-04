@@ -175,8 +175,7 @@ class OverviewVM(
 
     fun incrementTasbih() {
         viewModelScope.launch {
-            val current = tasbihCount.first()
-            appPreferenceRepo.setTasbihCount(current + 1)
+            appPreferenceRepo.incrementTasbihCount()
         }
     }
 

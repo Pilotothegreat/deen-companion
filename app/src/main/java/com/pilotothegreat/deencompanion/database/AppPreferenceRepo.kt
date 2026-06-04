@@ -114,6 +114,10 @@ class AppPreferenceRepo(
     // Tasbih Count
     val tasbihCount: Flow<Int> = data.map { it[TASBIH_COUNT] ?: 0 }.distinctUntilChanged()
     suspend fun setTasbihCount(value: Int) = dataStore.edit { it[TASBIH_COUNT] = value }
+    suspend fun incrementTasbihCount() = dataStore.edit { prefs ->
+        val current = prefs[TASBIH_COUNT] ?: 0
+        prefs[TASBIH_COUNT] = current + 1
+    }
 
     // Notifications Enabled
     val notification: Flow<Boolean> = data.map { it[NOTIFICATION_ENABLED] ?: true }.distinctUntilChanged()

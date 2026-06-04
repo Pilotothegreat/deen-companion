@@ -204,13 +204,23 @@ fun QuranAudioPlayer(
                 }
 
                 // Interactive M3 Progress Slider with Labels
-                var sliderPosition by remember(currentAyahId) { mutableStateOf(currentAyahId.toFloat()) }
+                var isDragging by remember { mutableStateOf(false) }
+                var sliderPosition by remember { mutableStateOf(currentAyahId.toFloat()) }
+                LaunchedEffect(currentAyahId) {
+                    if (!isDragging) {
+                        sliderPosition = currentAyahId.toFloat()
+                    }
+                }
                 
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Slider(
                         value = sliderPosition,
-                        onValueChange = { sliderPosition = it },
+                        onValueChange = { 
+                            isDragging = true
+                            sliderPosition = it 
+                        },
                         onValueChangeFinished = {
+                            isDragging = false
                             playbackManager.jumpToAyah(sliderPosition.toInt().coerceIn(1, surah.verses.size))
                         },
                         valueRange = 1f..surah.verses.size.toFloat().coerceAtLeast(2f),

@@ -69,6 +69,7 @@ object LocationHelper {
     }
 
     suspend fun fetchIpLocation(): LocationData? = withContext(Dispatchers.IO) {
+        // Try Provider 1: ipapi.co
         try {
             val url = URL("https://ipapi.co/json/")
             val connection = url.openConnection() as HttpURLConnection
@@ -91,6 +92,57 @@ object LocationHelper {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+
+        // Try Provider 2: ip-api.com
+        try {
+            val url = URL("http://ip-api.com/json/")
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "GET"
+            connection.connectTimeout = 5000
+            connection.readTimeout = 5000
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
+
+            if (connection.responseCode == 200) {
+                val responseText = connection.inputStream.bufferedReader().use { it.readText() }
+                val json = JSONObject(responseText)
+                if (json.optString("status") == "success") {
+                    val lat = json.getDouble("lat")
+                    val lon = json.getDouble("lon")
+                    val city = json.optString("city", "Unknown City")
+                    val country = json.optString("country", "")
+                    val dispName = if (country.isNotEmpty()) "$city, $country" else city
+                    val tz = json.optString("timezone", TimeZone.getDefault().id)
+                    return@withContext LocationData(lat, lon, dispName, tz)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        // Try Provider 3: freeipapi.com
+        try {
+            val url = URL("https://freeipapi.com/api/json")
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "GET"
+            connection.connectTimeout = 5000
+            connection.readTimeout = 5000
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
+
+            if (connection.responseCode == 200) {
+                val responseText = connection.inputStream.bufferedReader().use { it.readText() }
+                val json = JSONObject(responseText)
+                val lat = json.getDouble("latitude")
+                val lon = json.getDouble("longitude")
+                val city = json.optString("cityName", "Unknown City")
+                val country = json.optString("countryName", "")
+                val dispName = if (country.isNotEmpty()) "$city, $country" else city
+                val tz = json.optString("timeZone", TimeZone.getDefault().id)
+                return@withContext LocationData(lat, lon, dispName, tz)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
         return@withContext null
     }
 }
