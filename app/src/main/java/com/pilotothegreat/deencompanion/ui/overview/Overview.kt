@@ -203,7 +203,7 @@ fun calculateQiblaDirection(latitude: Double, longitude: Double): Double {
     val phiK = Math.toRadians(21.4225) // Makkah lat
     val lambdaK = Math.toRadians(39.8262) // Makkah lon
 
-    val y = Math.sin(lambdaK - lambdaVal)
+    val y = Math.sin(lambdaK - lambdaVal) * Math.cos(phiK)
     val x = Math.cos(phiVal) * Math.sin(phiK) - Math.sin(phiVal) * Math.cos(phiK) * Math.cos(lambdaK - lambdaVal)
     var qiblaAngle = Math.toDegrees(Math.atan2(y, x))
     if (qiblaAngle < 0) {
@@ -255,7 +255,6 @@ fun calculateNextPrayer(
 
     val prayers = listOf(
         Pair("Fajr", times.fajr),
-        Pair("Sunrise", times.sunrise),
         Pair("Dhuhr", times.dhuhr),
         Pair("Asr", times.asr),
         Pair("Maghrib", times.maghrib),

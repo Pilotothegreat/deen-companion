@@ -263,10 +263,15 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                         }
 
                                         val start = builder.length
-                                        val verseText = "${verse.text} "
-                                        builder.append(verseText)
+                                        val isSajdah = QuranHelper.isSajdahVerse(surah.id, verse.id)
+                                        builder.append(verse.text)
+                                        builder.append(" ")
+                                        val startSajdah = builder.length
+                                        if (isSajdah) {
+                                            builder.append("۩ ")
+                                        }
 
-                                        // Style the verse text
+                                        // Style the verse text (excluding Sajdah symbol if present)
                                         if (verse.id != activeAyah) {
                                             builder.addStyle(
                                                 style = SpanStyle(
@@ -274,7 +279,19 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                     localeList = androidx.compose.ui.text.intl.LocaleList(androidx.compose.ui.text.intl.Locale("ar"))
                                                 ),
                                                 start = start,
-                                                end = builder.length
+                                                end = startSajdah
+                                            )
+                                        }
+
+                                        // Style the Sajdah symbol itself
+                                        if (isSajdah) {
+                                            builder.addStyle(
+                                                style = SpanStyle(
+                                                    color = goldAccent,
+                                                    fontWeight = FontWeight.Bold
+                                                ),
+                                                start = startSajdah,
+                                                end = startSajdah + 1
                                             )
                                         }
 
@@ -365,6 +382,17 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                     }
                                 }
 
+                                // Sajdah Indicators
+                                pageVerses.filter { QuranHelper.isSajdahVerse(surah.id, it.id) }.forEach { sajdahVerse ->
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    SajdahIndicatorBlock(
+                                        verseId = sajdahVerse.id,
+                                        goldAccent = goldAccent,
+                                        isDark = isDark,
+                                        lang = lang
+                                    )
+                                }
+
                                 // Collapsible translation
                                 if (pageVerses.any { it.translation.isNotEmpty() }) {
                                     var showTranslation by remember { mutableStateOf(false) }
@@ -392,8 +420,17 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
 
                                             pageVerses.forEach { verse ->
                                                 val isHighlighted = verse.id == activeAyah
+                                                val isSajdah = QuranHelper.isSajdahVerse(surah.id, verse.id)
+                                                val translationText = remember(verse.translation, isSajdah, lang) {
+                                                    if (isSajdah) {
+                                                        val label = if (lang == "ar") " [سَجْدَة]" else " [Prostration / Sajdah]"
+                                                        verse.translation + label
+                                                    } else {
+                                                        verse.translation
+                                                    }
+                                                }
                                                 Text(
-                                                    text = stringResource(R.string.verse_number_prefix, verse.id) + verse.translation,
+                                                    text = stringResource(R.string.verse_number_prefix, verse.id) + translationText,
                                                     style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
                                                     color = if (isHighlighted) colorScheme.primary else colorScheme.onSurfaceVariant,
                                                     modifier = Modifier
@@ -746,5 +783,50 @@ fun Modifier.mushafBorder(color: Color): Modifier = this.drawBehind {
             close()
         }
         drawPath(path, color)
+    }
+}
+
+@Composable
+fun SajdahIndicatorBlock(verseId: Int, goldAccent: Color, isDark: Boolean, lang: String) {
+    val frameBg = if (isDark) Color(0xFF231E1A) else Color(0xFFF3EDE0)
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp, horizontal = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = frameBg),
+        border = BorderStroke(1.dp, goldAccent.copy(alpha = 0.6f)),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(10.dp)
+                    .graphicsLayer { rotationZ = 45f }
+                    .background(goldAccent)
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = if (lang == "ar") "سَجْدَةُ تِلَاوَةٍ (الآية ${toArabicNumerals(verseId)})" else "Sajdah / Prostration of Recitation (Verse $verseId)",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    ),
+                    color = goldAccent
+                )
+                Text(
+                    text = if (lang == "ar") {
+                        "يُسنّ السجود لله تعالى عند قراءة أو سماع هذه الآية الكريمة."
+                    } else {
+                        "It is Sunnah to perform prostration to Allah when reading or hearing this verse."
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (isDark) Color(0xFFE8DCC8).copy(alpha = 0.8f) else Color(0xFF2C2724).copy(alpha = 0.8f)
+                )
+            }
+        }
     }
 }

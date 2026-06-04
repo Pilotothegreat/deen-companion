@@ -14,6 +14,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -62,13 +63,34 @@ fun Qibla() {
 
     val qiblaBearing = remember(lat, lon) { calculateQiblaDirection(lat, lon).toFloat() }
 
+    val declination = remember(lat, lon) {
+        try {
+            val geoField = android.hardware.GeomagneticField(
+                lat.toFloat(),
+                lon.toFloat(),
+                0f,
+                System.currentTimeMillis()
+            )
+            geoField.declination
+        } catch (e: Exception) {
+            0f
+        }
+    }
+
+    val hasCompass = remember(context) {
+        val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR) != null ||
+                (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null &&
+                        sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) != null)
+    }
+
     var rawHeading by remember { mutableStateOf(0f) }
     var smoothHeading by remember { mutableStateOf(0f) }
 
     val vibrator = remember(context) { context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator }
 
     // Sensor tracking
-    DisposableEffect(context) {
+    DisposableEffect(context, lat, lon) {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val rotationVectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
         val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
@@ -85,7 +107,7 @@ fun Qibla() {
                     val orientation = FloatArray(3)
                     SensorManager.getOrientation(rMatrix, orientation)
                     val azimuth = Math.toDegrees(orientation[0].toDouble()).toFloat()
-                    val heading = (azimuth + 360f) % 360f
+                    val heading = (azimuth + declination + 360f) % 360f
                     rawHeading = heading
                     smoothHeading = getSmoothRotation(heading, smoothHeading)
                 } else {
@@ -103,7 +125,7 @@ fun Qibla() {
                             val orientation = FloatArray(3)
                             SensorManager.getOrientation(r, orientation)
                             val azimuth = Math.toDegrees(orientation[0].toDouble()).toFloat()
-                            val heading = (azimuth + 360f) % 360f
+                            val heading = (azimuth + declination + 360f) % 360f
                             rawHeading = heading
                             smoothHeading = getSmoothRotation(heading, smoothHeading)
                         }
@@ -216,6 +238,43 @@ fun Qibla() {
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                    }
+                }
+            }
+
+            if (!hasCompass) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CompassCalibration,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                        Column {
+                            Text(
+                                text = if (appLang == "ar") "البوصلة غير متوفرة" else "Compass Sensor Unavailable",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                            Text(
+                                text = if (appLang == "ar") {
+                                    "يفتقر جهازك إلى مستشعر الاتجاه المغناطيسي. البوصلة لن تدور تلقائيًا. يرجى استخدام زاوية اتجاه القبلة لتوجيه جهازك يدويًا."
+                                } else {
+                                    "Your device lacks magnetic/compass sensors. The compass needle cannot rotate automatically. Use the bearing angle value to orient yourself manually."
+                                },
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.8f)
+                            )
+                        }
                     }
                 }
             }

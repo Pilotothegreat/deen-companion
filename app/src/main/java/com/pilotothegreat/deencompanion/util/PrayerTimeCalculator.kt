@@ -79,7 +79,7 @@ class PrayerTimeCalculator {
 
             // Mid Day (Dhuhr)
             val dhuhrLocal = 12.0 + timezoneOffsetHours - (longitude / 15.0) - eqt
-            val dhuhrTime = doubleToTime(dhuhrLocal)
+            val dhuhrTime = doubleToTime(dhuhrLocal + (1.0 / 60.0)) // +1 minute precautionary buffer for Zawal (sun's post-meridian declination)
 
             // Sunrise and Sunset
             val sunriseHA = hourAngle(-0.833, latitude, dd)
@@ -87,7 +87,7 @@ class PrayerTimeCalculator {
             val sunsetLocal = dhuhrLocal + (sunriseHA / 15.0)
 
             val sunriseTime = doubleToTime(sunriseLocal)
-            val maghribTime = doubleToTime(sunsetLocal)
+            val maghribTime = doubleToTime(sunsetLocal + (2.0 / 60.0)) // +2 minutes precautionary buffer to ensure sun disk has completely set
 
             val nightLength = (24.0 - 2.0 * (sunriseHA / 15.0)).coerceIn(4.0, 20.0)
 
@@ -106,7 +106,7 @@ class PrayerTimeCalculator {
 
             // Isha
             val ishaTime = if (method.isIshaInterval) {
-                doubleToTime(sunsetLocal + (method.ishaIntervalMins / 60.0))
+                doubleToTime(sunsetLocal + (2.0 / 60.0) + (method.ishaIntervalMins / 60.0)) // Offset Isha according to the buffered Maghrib time
             } else {
                 val ishaAngle = method.ishaAngle
                 val isIshaImpossible = isAngleImpossible(-ishaAngle, latitude, dd)
