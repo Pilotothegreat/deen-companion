@@ -20,6 +20,15 @@ import android.app.NotificationManager
 
 object IqamaAlarmManager {
 
+    private fun parseFixedTime(timeStr: String): java.time.LocalTime? {
+        val parts = timeStr.trim().split(":")
+        if (parts.size != 2) return null
+        val hour = parts[0].toIntOrNull() ?: return null
+        val minute = parts[1].toIntOrNull() ?: return null
+        if (hour !in 0..23 || minute !in 0..59) return null
+        return java.time.LocalTime.of(hour, minute)
+    }
+
     fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
@@ -29,13 +38,7 @@ object IqamaAlarmManager {
             ).apply {
                 description = "Adhan and Iqama time notifications"
                 enableVibration(true)
-                setSound(
-                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
-                    AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                        .build()
-                )
+                setSound(null, null)
             }
             context.getSystemService(NotificationManager::class.java)
                 .createNotificationChannel(channel)
@@ -92,27 +95,27 @@ object IqamaAlarmManager {
             )
 
             val fajrIqamaTime = if (fajrIsFixed) {
-                try { java.time.LocalTime.parse(fajrIqamaTimeVal) } catch (e: Exception) { times.fajr.plusMinutes(fajrOffset.toLong()) }
+                parseFixedTime(fajrIqamaTimeVal) ?: times.fajr.plusMinutes(fajrOffset.toLong())
             } else {
                 times.fajr.plusMinutes(fajrOffset.toLong())
             }
             val dhuhrIqamaTime = if (dhuhrIsFixed) {
-                try { java.time.LocalTime.parse(dhuhrIqamaTimeVal) } catch (e: Exception) { times.dhuhr.plusMinutes(dhuhrOffset.toLong()) }
+                parseFixedTime(dhuhrIqamaTimeVal) ?: times.dhuhr.plusMinutes(dhuhrOffset.toLong())
             } else {
                 times.dhuhr.plusMinutes(dhuhrOffset.toLong())
             }
             val asrIqamaTime = if (asrIsFixed) {
-                try { java.time.LocalTime.parse(asrIqamaTimeVal) } catch (e: Exception) { times.asr.plusMinutes(asrOffset.toLong()) }
+                parseFixedTime(asrIqamaTimeVal) ?: times.asr.plusMinutes(asrOffset.toLong())
             } else {
                 times.asr.plusMinutes(asrOffset.toLong())
             }
             val maghribIqamaTime = if (maghribIsFixed) {
-                try { java.time.LocalTime.parse(maghribIqamaTimeVal) } catch (e: Exception) { times.maghrib.plusMinutes(maghribOffset.toLong()) }
+                parseFixedTime(maghribIqamaTimeVal) ?: times.maghrib.plusMinutes(maghribOffset.toLong())
             } else {
                 times.maghrib.plusMinutes(maghribOffset.toLong())
             }
             val ishaIqamaTime = if (ishaIsFixed) {
-                try { java.time.LocalTime.parse(ishaIqamaTimeVal) } catch (e: Exception) { times.isha.plusMinutes(ishaOffset.toLong()) }
+                parseFixedTime(ishaIqamaTimeVal) ?: times.isha.plusMinutes(ishaOffset.toLong())
             } else {
                 times.isha.plusMinutes(ishaOffset.toLong())
             }
@@ -141,9 +144,11 @@ object IqamaAlarmManager {
                 val intent = Intent(context, IqamaAlarmReceiver::class.java).apply {
                     putExtra("PRAYER_NAME", nextPrayerName)
                 }
+
+                val requestCode = "Iqama_$nextPrayerName".hashCode()
                 val pendingIntent = PendingIntent.getBroadcast(
                     context,
-                    1001,
+                    requestCode,
                     intent,
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )

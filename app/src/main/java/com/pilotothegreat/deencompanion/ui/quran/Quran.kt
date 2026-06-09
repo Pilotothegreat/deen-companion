@@ -134,50 +134,53 @@ fun Quran(paddingValues: PaddingValues) {
                 results.take(50) // Cap results
             }
 
-            Text(
-                text = if (lang == "ar") "نتائج البحث (${toArabicNumerals(searchResults.size)})" else "Search Results (${searchResults.size})",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
+            val direction = if (lang == "ar") LayoutDirection.Rtl else LayoutDirection.Ltr
+            CompositionLocalProvider(LocalLayoutDirection provides direction) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    Text(
+                        text = if (lang == "ar") "نتائج البحث (${toArabicNumerals(searchResults.size)})" else "Search Results (${searchResults.size})",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
 
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = paddingBottom),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(searchResults) { (surah, verse) ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                navigator.goTo(QuranReaderKey(surah.id, surah.transliteration, scrollToVerse = verse.id))
-                            },
-                        colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainerLow)
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = paddingBottom),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Column(modifier = Modifier.padding(12.dp)) {
-                            Text(
-                                text = if (lang == "ar") "${surah.name} (آية ${toArabicNumerals(verse.id)})" else "${surah.transliteration} (Ayah ${verse.id})",
-                                style = MaterialTheme.typography.titleSmall,
-                                color = colorScheme.primary
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                                Text(
-                                    text = verse.text,
-                                    style = MaterialTheme.typography.bodyLarge.copy(
-                                        fontFamily = quranFontFamily,
-                                        fontSize = 20.sp,
-                                        lineHeight = 32.sp
-                                    ),
-                                    modifier = Modifier.fillMaxWidth(),
-                                    textAlign = TextAlign.Start
-                                )
+                        items(searchResults) { (surah, verse) ->
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        navigator.goTo(QuranReaderKey(surah.id, surah.transliteration, scrollToVerse = verse.id))
+                                    },
+                                colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainerLow)
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Text(
+                                        text = if (lang == "ar") "${surah.name} (آية ${toArabicNumerals(verse.id)})" else "${surah.transliteration} (Ayah ${verse.id})",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = colorScheme.primary
+                                    )
+                                    Spacer(Modifier.height(4.dp))
+                                    Text(
+                                        text = verse.text,
+                                        style = MaterialTheme.typography.bodyLarge.copy(
+                                            fontFamily = quranFontFamily,
+                                            fontSize = 20.sp,
+                                            lineHeight = 32.sp
+                                        ),
+                                        modifier = Modifier.fillMaxWidth(),
+                                        textAlign = TextAlign.Start
+                                    )
+                                    Spacer(Modifier.height(4.dp))
+                                    Text(
+                                        text = verse.translation,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
                             }
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                text = verse.translation,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
                         }
                     }
                 }

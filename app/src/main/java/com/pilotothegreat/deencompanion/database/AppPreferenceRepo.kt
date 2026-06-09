@@ -4,13 +4,23 @@ package com.pilotothegreat.deencompanion.database
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
+import androidx.datastore.preferences.preferencesDataStore
 import com.pilotothegreat.deencompanion.ui.theme.Theme
 import com.pilotothegreat.deencompanion.util.PrayerTimeCalculator
 import com.pilotothegreat.deencompanion.util.valueOfOrNull
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import timber.log.Timber
+
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
+    name = "settings",
+    produceMigrations = { context ->
+        listOf(androidx.datastore.preferences.SharedPreferencesMigration(context, "settings"))
+    }
+)
 
 enum class HijriMethod {
     REGIONAL, UMM_AL_QURA
@@ -18,24 +28,105 @@ enum class HijriMethod {
 
 class AppPreferenceRepo(
     private val context: Context,
+    private val db: AppDatabase
 ) {
-    companion object {
-        @Volatile
-        private var instance: DataStore<Preferences>? = null
+    private val dataStore = context.dataStore
+    private val data get() = dataStore.data
 
-        private fun getDataStore(context: Context): DataStore<Preferences> {
-            val file = context.filesDir.resolve("settings.preferences_pb")
+    init {
+        val scope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO + kotlinx.coroutines.SupervisorJob())
+        scope.launch {
+            try {
+                // Ensure SharedPreferences language matches DataStore language
+                val prefs = dataStore.data.first()
+                val dsLang = prefs[APP_LANGUAGE] ?: "ar"
+                val sp = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+                val spLang = sp.getString("app_language", null)
+                if (spLang != dsLang) {
+                    sp.edit().putString("app_language", dsLang).apply()
+                }
 
-            return instance ?: synchronized(this) {
-                instance ?: PreferenceDataStoreFactory.create(
-                    corruptionHandler = androidx.datastore.core.handlers.ReplaceFileCorruptionHandler { exception ->
-                        Timber.e(exception, "DataStore corrupted, resetting to empty preferences")
-                        emptyPreferences()
-                    },
-                    produceFile = { file }
-                ).also { instance = it }
+                val dbRecord = db.tasbihDao().getRecord()
+                val dsCount = prefs[TASBIH_COUNT]
+                
+                if (dbRecord != null) {
+                    if (dsCount == null) {
+                        dataStore.edit { editPrefs ->
+                            editPrefs[TASBIH_COUNT] = dbRecord.count
+                            editPrefs[TASBIH_HISTORY] = dbRecord.historyJson
+                            editPrefs[TASBIH_DHIKR] = dbRecord.dhikr
+                            editPrefs[TASBIH_TARGET] = dbRecord.target
+                        }
+                        Timber.d("Startup Sync: Restored Tasbih from Room to DataStore")
+                    } else {
+                        val dsHistory = prefs[TASBIH_HISTORY] ?: "[]"
+                        val dsDhikr = prefs[TASBIH_DHIKR] ?: "سبحان الله"
+                        val dsTarget = prefs[TASBIH_TARGET] ?: 33
+                        db.tasbihDao().insertRecord(
+                            TasbihRecord(
+                                id = "default",
+                                count = dsCount,
+                                historyJson = dsHistory,
+                                dhikr = dsDhikr,
+                                target = dsTarget
+                            )
+                        )
+                        Timber.d("Startup Sync: Synchronized DataStore Tasbih to Room")
+                    }
+                } else {
+                    val count = dsCount ?: 0
+                    val history = prefs[TASBIH_HISTORY] ?: "[]"
+                    val dhikr = prefs[TASBIH_DHIKR] ?: "سبحان الله"
+                    val target = prefs[TASBIH_TARGET] ?: 33
+                    db.tasbihDao().insertRecord(
+                        TasbihRecord(
+                            id = "default",
+                            count = count,
+                            historyJson = history,
+                            dhikr = dhikr,
+                            target = target
+                        )
+                    )
+                    Timber.d("Startup Sync: Initialized empty Room with DataStore Tasbih")
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Error performing bidirectional Tasbih startup sync")
             }
         }
+    }
+
+    private suspend fun saveTasbihToRoom() {
+        try {
+            val prefs = dataStore.data.first()
+            val count = prefs[TASBIH_COUNT] ?: 0
+            val history = prefs[TASBIH_HISTORY] ?: "[]"
+            val dhikr = prefs[TASBIH_DHIKR] ?: "سبحان الله"
+            val target = prefs[TASBIH_TARGET] ?: 33
+            
+            db.tasbihDao().insertRecord(
+                TasbihRecord(
+                    id = "default",
+                    count = count,
+                    historyJson = history,
+                    dhikr = dhikr,
+                    target = target
+                )
+            )
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to save Tasbih to Room")
+        }
+    }
+
+    private fun formatAndValidateFixedTime(timeStr: String): String? {
+        val parts = timeStr.trim().split(":")
+        if (parts.size != 2) return null
+        val hour = parts[0].toIntOrNull() ?: return null
+        val minute = parts[1].toIntOrNull() ?: return null
+        if (hour !in 0..23 || minute !in 0..59) return null
+        return String.format(java.util.Locale.US, "%02d:%02d", hour, minute)
+    }
+
+    companion object {
 
         private val LATITUDE = doublePreferencesKey("latitude")
         private val LONGITUDE = doublePreferencesKey("longitude")
@@ -65,7 +156,7 @@ class AppPreferenceRepo(
         private val GITHUB_CHECK_LATEST_VERSION = stringPreferencesKey("github_check_latest_version")
         private val TASBIH_DHIKR = stringPreferencesKey("tasbih_dhikr")
         private val TASBIH_TARGET = intPreferencesKey("tasbih_target")
-        private val TASBIH_HISTORY = stringSetPreferencesKey("tasbih_history")
+        private val TASBIH_HISTORY = stringPreferencesKey("tasbih_history")
         private val HIJRI_OFFSET = intPreferencesKey("hijri_offset")
         private val FAJR_IQAMA_IS_FIXED = booleanPreferencesKey("fajr_iqama_is_fixed")
         private val DHUHR_IQAMA_IS_FIXED = booleanPreferencesKey("dhuhr_iqama_is_fixed")
@@ -79,15 +170,18 @@ class AppPreferenceRepo(
         private val ISHA_IQAMA_TIME = stringPreferencesKey("isha_iqama_time")
     }
 
-    private val dataStore = getDataStore(context)
-    private val data get() = dataStore.data
-
     // Location Settings
-    val latitude: Flow<Double> = data.map { it[LATITUDE] ?: 21.3891 }.distinctUntilChanged() // Default Makkah lat
-    suspend fun setLatitude(value: Double) = dataStore.edit { it[LATITUDE] = value }
+    val latitude: Flow<Double> = data.map { it[LATITUDE] ?: 21.3891 }.distinctUntilChanged()
+    suspend fun setLatitude(value: Double) {
+        val validated = value.coerceIn(-90.0, 90.0)
+        dataStore.edit { it[LATITUDE] = validated }
+    }
 
-    val longitude: Flow<Double> = data.map { it[LONGITUDE] ?: 39.8579 }.distinctUntilChanged() // Default Makkah lon
-    suspend fun setLongitude(value: Double) = dataStore.edit { it[LONGITUDE] = value }
+    val longitude: Flow<Double> = data.map { it[LONGITUDE] ?: 39.8579 }.distinctUntilChanged()
+    suspend fun setLongitude(value: Double) {
+        val validated = value.coerceIn(-180.0, 180.0)
+        dataStore.edit { it[LONGITUDE] = validated }
+    }
 
     val cityName: Flow<String> = data.map { it[CITY_NAME] ?: "Makkah, Saudi Arabia" }.distinctUntilChanged()
     suspend fun setCityName(value: String) = dataStore.edit { it[CITY_NAME] = value }
@@ -138,26 +232,57 @@ class AppPreferenceRepo(
     suspend fun setIshaIqamaIsFixed(value: Boolean) = dataStore.edit { it[ISHA_IQAMA_IS_FIXED] = value }
 
     val fajrIqamaTime: Flow<String> = data.map { it[FAJR_IQAMA_TIME] ?: "05:00" }.distinctUntilChanged()
-    suspend fun setFajrIqamaTime(value: String) = dataStore.edit { it[FAJR_IQAMA_TIME] = value }
+    suspend fun setFajrIqamaTime(value: String) {
+        val formatted = formatAndValidateFixedTime(value)
+        if (formatted != null) {
+            dataStore.edit { it[FAJR_IQAMA_TIME] = formatted }
+        }
+    }
 
     val dhuhrIqamaTime: Flow<String> = data.map { it[DHUHR_IQAMA_TIME] ?: "12:30" }.distinctUntilChanged()
-    suspend fun setDhuhrIqamaTime(value: String) = dataStore.edit { it[DHUHR_IQAMA_TIME] = value }
+    suspend fun setDhuhrIqamaTime(value: String) {
+        val formatted = formatAndValidateFixedTime(value)
+        if (formatted != null) {
+            dataStore.edit { it[DHUHR_IQAMA_TIME] = formatted }
+        }
+    }
 
     val asrIqamaTime: Flow<String> = data.map { it[ASR_IQAMA_TIME] ?: "15:30" }.distinctUntilChanged()
-    suspend fun setAsrIqamaTime(value: String) = dataStore.edit { it[ASR_IQAMA_TIME] = value }
+    suspend fun setAsrIqamaTime(value: String) {
+        val formatted = formatAndValidateFixedTime(value)
+        if (formatted != null) {
+            dataStore.edit { it[ASR_IQAMA_TIME] = formatted }
+        }
+    }
 
     val maghribIqamaTime: Flow<String> = data.map { it[MAGHRIB_IQAMA_TIME] ?: "18:30" }.distinctUntilChanged()
-    suspend fun setMaghribIqamaTime(value: String) = dataStore.edit { it[MAGHRIB_IQAMA_TIME] = value }
+    suspend fun setMaghribIqamaTime(value: String) {
+        val formatted = formatAndValidateFixedTime(value)
+        if (formatted != null) {
+            dataStore.edit { it[MAGHRIB_IQAMA_TIME] = formatted }
+        }
+    }
 
     val ishaIqamaTime: Flow<String> = data.map { it[ISHA_IQAMA_TIME] ?: "20:00" }.distinctUntilChanged()
-    suspend fun setIshaIqamaTime(value: String) = dataStore.edit { it[ISHA_IQAMA_TIME] = value }
+    suspend fun setIshaIqamaTime(value: String) {
+        val formatted = formatAndValidateFixedTime(value)
+        if (formatted != null) {
+            dataStore.edit { it[ISHA_IQAMA_TIME] = formatted }
+        }
+    }
 
     // Tasbih Count
     val tasbihCount: Flow<Int> = data.map { it[TASBIH_COUNT] ?: 0 }.distinctUntilChanged()
-    suspend fun setTasbihCount(value: Int) = dataStore.edit { it[TASBIH_COUNT] = value }
-    suspend fun incrementTasbihCount() = dataStore.edit { prefs ->
-        val current = prefs[TASBIH_COUNT] ?: 0
-        prefs[TASBIH_COUNT] = current + 1
+    suspend fun setTasbihCount(value: Int) {
+        dataStore.edit { it[TASBIH_COUNT] = value }
+        saveTasbihToRoom()
+    }
+    suspend fun incrementTasbihCount() {
+        dataStore.edit { prefs ->
+            val current = prefs[TASBIH_COUNT] ?: 0
+            prefs[TASBIH_COUNT] = current + 1
+        }
+        saveTasbihToRoom()
     }
 
     // Notifications Enabled
@@ -238,15 +363,51 @@ class AppPreferenceRepo(
 
     // Tasbih Settings
     val tasbihDhikr: Flow<String> = data.map { it[TASBIH_DHIKR] ?: "سبحان الله" }.distinctUntilChanged()
-    suspend fun setTasbihDhikr(value: String) = dataStore.edit { it[TASBIH_DHIKR] = value }
+    suspend fun setTasbihDhikr(value: String) {
+        dataStore.edit { it[TASBIH_DHIKR] = value }
+        saveTasbihToRoom()
+    }
 
     val tasbihTarget: Flow<Int> = data.map { it[TASBIH_TARGET] ?: 33 }.distinctUntilChanged()
-    suspend fun setTasbihTarget(value: Int) = dataStore.edit { it[TASBIH_TARGET] = value }
-
-    val tasbihHistory: Flow<Set<String>> = data.map { it[TASBIH_HISTORY] ?: emptySet() }.distinctUntilChanged()
-    suspend fun addTasbihHistoryItem(item: String) = dataStore.edit { prefs ->
-        val current = prefs[TASBIH_HISTORY] ?: emptySet()
-        prefs[TASBIH_HISTORY] = current + item
+    suspend fun setTasbihTarget(value: Int) {
+        dataStore.edit { it[TASBIH_TARGET] = value }
+        saveTasbihToRoom()
     }
-    suspend fun clearTasbihHistory() = dataStore.edit { it[TASBIH_HISTORY] = emptySet() }
+
+    val tasbihHistory: Flow<List<String>> = data.map { prefs ->
+        val json = prefs[TASBIH_HISTORY] ?: "[]"
+        try {
+            val arr = org.json.JSONArray(json)
+            val list = mutableListOf<String>()
+            for (i in 0 until arr.length()) {
+                list.add(arr.getString(i))
+            }
+            list
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }.distinctUntilChanged()
+
+    suspend fun addTasbihHistoryItem(item: String) {
+        val currentJson = dataStore.data.first()[TASBIH_HISTORY] ?: "[]"
+        val newList = try {
+            val arr = org.json.JSONArray(currentJson)
+            val list = mutableListOf<String>()
+            for (i in 0 until arr.length()) {
+                list.add(arr.getString(i))
+            }
+            list.add(item)
+            list
+        } catch (e: Exception) {
+            listOf(item)
+        }
+        val newJson = org.json.JSONArray(newList).toString()
+        dataStore.edit { it[TASBIH_HISTORY] = newJson }
+        saveTasbihToRoom()
+    }
+
+    suspend fun clearTasbihHistory() {
+        dataStore.edit { it[TASBIH_HISTORY] = "[]" }
+        saveTasbihToRoom()
+    }
 }

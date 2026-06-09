@@ -95,8 +95,27 @@ interface HadithDao {
     suspend fun getHadithCount(bookId: String): Int
 }
 
-@Database(entities = [BookmarkedVerse::class, HadithBookEntity::class, HadithEntity::class], version = 5, exportSchema = false)
+@Entity
+data class TasbihRecord(
+    @PrimaryKey val id: String = "default",
+    val count: Int,
+    val historyJson: String,
+    val dhikr: String,
+    val target: Int
+)
+
+@Dao
+interface TasbihDao {
+    @Query("SELECT * FROM TasbihRecord WHERE id = 'default' LIMIT 1")
+    suspend fun getRecord(): TasbihRecord?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertRecord(record: TasbihRecord)
+}
+
+@Database(entities = [BookmarkedVerse::class, HadithBookEntity::class, HadithEntity::class, TasbihRecord::class], version = 6, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun bookmarkedVerseDao(): BookmarkedVerseDao
     abstract fun hadithDao(): HadithDao
+    abstract fun tasbihDao(): TasbihDao
 }

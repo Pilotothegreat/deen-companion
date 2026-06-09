@@ -48,75 +48,78 @@ class AdhanNotificationWorker(
         val now = LocalDateTime.now(zoneId)
         val today = LocalDate.now(zoneId)
 
-        // Calculate today's prayer times
-        val zonedDateTime = today.atStartOfDay(zoneId)
-        val offsetHours = zonedDateTime.offset.totalSeconds / 3600.0
-
-        val times = PrayerTimeCalculator.calculate(
-            date = today,
-            latitude = lat,
-            longitude = lon,
-            timezoneOffsetHours = offsetHours,
-            method = calcMethod,
-            asrSchool = asrSchool
-        )
-
-        val prayers = listOf(
-            Pair("Fajr", times.fajr),
-            Pair("Dhuhr", times.dhuhr),
-            Pair("Asr", times.asr),
-            Pair("Maghrib", times.maghrib),
-            Pair("Isha", times.isha)
-        )
-
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
 
-        for ((name, time) in prayers) {
-            val prayerDateTime = LocalDateTime.of(today, time)
-            if (prayerDateTime.isBefore(now)) {
-                // Already passed for today
-                continue
-            }
+        for (date in listOf(today, today.plusDays(1))) {
+            val zonedDateTime = date.atStartOfDay(zoneId)
+            val offsetHours = zonedDateTime.offset.totalSeconds / 3600.0
 
-            val intent = Intent(context, AdhanAlarmReceiver::class.java).apply {
-                putExtra("PRAYER_NAME", name)
-            }
-            val pendingIntent = PendingIntent.getBroadcast(
-                context,
-                name.hashCode(),
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            val times = PrayerTimeCalculator.calculate(
+                date = date,
+                latitude = lat,
+                longitude = lon,
+                timezoneOffsetHours = offsetHours,
+                method = calcMethod,
+                asrSchool = asrSchool
             )
 
-            val epochMillis = prayerDateTime.atZone(zoneId).toInstant().toEpochMilli()
+            val prayers = listOf(
+                Pair("Fajr", times.fajr),
+                Pair("Dhuhr", times.dhuhr),
+                Pair("Asr", times.asr),
+                Pair("Maghrib", times.maghrib),
+                Pair("Isha", times.isha)
+            )
 
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    if (alarmManager.canScheduleExactAlarms()) {
+            for ((name, time) in prayers) {
+                val prayerDateTime = LocalDateTime.of(date, time)
+                if (prayerDateTime.isBefore(now)) {
+                    // Already passed
+                    continue
+                }
+
+                val intent = Intent(context, AdhanAlarmReceiver::class.java).apply {
+                    putExtra("PRAYER_NAME", name)
+                }
+                
+                val requestCode = "${name}_${date}".hashCode()
+                val pendingIntent = PendingIntent.getBroadcast(
+                    context,
+                    requestCode,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+
+                val epochMillis = prayerDateTime.atZone(zoneId).toInstant().toEpochMilli()
+
+                try {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        if (alarmManager.canScheduleExactAlarms()) {
+                            alarmManager.setExactAndAllowWhileIdle(
+                                AlarmManager.RTC_WAKEUP,
+                                epochMillis,
+                                pendingIntent
+                            )
+                        } else {
+                            alarmManager.setAndAllowWhileIdle(
+                                AlarmManager.RTC_WAKEUP,
+                                epochMillis,
+                                pendingIntent
+                            )
+                        }
+                    } else {
                         alarmManager.setExactAndAllowWhileIdle(
                             AlarmManager.RTC_WAKEUP,
                             epochMillis,
                             pendingIntent
                         )
-                    } else {
-                        alarmManager.setAndAllowWhileIdle(
-                            AlarmManager.RTC_WAKEUP,
-                            epochMillis,
-                            pendingIntent
-                        )
                     }
-                } else {
-                    alarmManager.setExactAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP,
-                        epochMillis,
-                        pendingIntent
-                    )
+                    Timber.d("Batch scheduled Adhan alert for %s at %s on date %s", name, prayerDateTime, date)
+                } catch (e: SecurityException) {
+                    Timber.e(e, "SecurityException: cannot schedule exact alarm for Adhan %s on date %s", name, date)
+                } catch (e: Exception) {
+                    Timber.e(e, "Exception scheduling Adhan %s on date %s", name, date)
                 }
-                Timber.d("Batch scheduled Adhan alert for %s at %s", name, prayerDateTime)
-            } catch (e: SecurityException) {
-                Timber.e(e, "SecurityException: cannot schedule exact alarm for Adhan %s", name)
-            } catch (e: Exception) {
-                Timber.e(e, "Exception scheduling Adhan %s", name)
             }
         }
     }

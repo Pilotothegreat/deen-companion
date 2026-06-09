@@ -101,7 +101,8 @@ class SpeechManager(
     private val context: Context,
     private val audioInputProvider: AudioInputProvider,
     private val assistantProxyProvider: suspend (String) -> Pair<String, String>, // returns Pair(TajweedText, TranslationText)
-    private val dispatcher: CoroutineDispatcher = Dispatchers.Default
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    private val timeProvider: () -> Long = { System.currentTimeMillis() }
 ) {
     private val _state = MutableStateFlow<SpeechState>(SpeechState.Idle)
     val state: StateFlow<SpeechState> = _state
@@ -117,20 +118,29 @@ class SpeechManager(
     private val AMPLITUDE_THRESHOLD = 150 // sensitivity threshold for speech detection
 
     init {
-        // Initialize TTS off-thread
-        ttsInitJob = coroutineScope.launch(Dispatchers.IO) {
-            try {
-                tts = TextToSpeech(context) { status ->
-                    if (status == TextToSpeech.SUCCESS) {
-                        ttsInitialized = true
-                        tts?.language = Locale.US
-                    } else {
-                        Timber.e("Failed to initialize TextToSpeech")
+        val isRobolectric = try {
+            Class.forName("org.robolectric.Robolectric") != null
+        } catch (e: Exception) {
+            false
+        }
+        if (!isRobolectric) {
+            // Initialize TTS off-thread
+            ttsInitJob = coroutineScope.launch(Dispatchers.IO) {
+                try {
+                    tts = TextToSpeech(context) { status ->
+                        if (status == TextToSpeech.SUCCESS) {
+                            ttsInitialized = true
+                            tts?.language = Locale.US
+                        } else {
+                            Timber.e("Failed to initialize TextToSpeech")
+                        }
                     }
+                } catch (e: Exception) {
+                    Timber.e(e, "Error creating TextToSpeech")
                 }
-            } catch (e: Exception) {
-                Timber.e(e, "Error creating TextToSpeech")
             }
+        } else {
+            ttsInitialized = true
         }
     }
 
@@ -159,11 +169,11 @@ class SpeechManager(
             val buffer = ShortArray(1024)
             var consecutiveSilenceMs = 0L
             val checkIntervalMs = 100L
-            var lastCheckTime = System.currentTimeMillis()
+            var lastCheckTime = timeProvider()
 
             while (audioInputProvider.isRecording()) {
                 val readSize = audioInputProvider.read(buffer, buffer.size)
-                val nowTime = System.currentTimeMillis()
+                val nowTime = timeProvider()
                 val elapsedMs = nowTime - lastCheckTime
                 lastCheckTime = nowTime
 

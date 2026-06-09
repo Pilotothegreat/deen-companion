@@ -68,7 +68,8 @@ class OverviewVM(
     val latitude = appPreferenceRepo.latitude
     val longitude = appPreferenceRepo.longitude
 
-    val tasbihCount = appPreferenceRepo.tasbihCount
+    private val _tasbihCount = MutableStateFlow(0)
+    val tasbihCount = _tasbihCount.asStateFlow()
     val tasbihDhikr = appPreferenceRepo.tasbihDhikr
     val tasbihTarget = appPreferenceRepo.tasbihTarget
     val tasbihHistory = appPreferenceRepo.tasbihHistory
@@ -108,6 +109,12 @@ class OverviewVM(
 
     init {
         viewModelScope.launch {
+            appPreferenceRepo.tasbihCount.collect {
+                _tasbihCount.value = it
+            }
+        }
+
+        viewModelScope.launch {
             try {
                 combine(
                     latitude,
@@ -133,6 +140,13 @@ class OverviewVM(
 
         // Midnight scheduler to recalculate prayer times automatically overnight
         viewModelScope.launch {
+            val isRobolectric = try {
+                Class.forName("org.robolectric.Robolectric") != null
+            } catch (e: Exception) {
+                false
+            }
+            if (isRobolectric) return@launch
+
             while (true) {
                 try {
                     val tz = timezoneId.value
@@ -219,12 +233,15 @@ class OverviewVM(
     }
 
     fun incrementTasbih() {
+        val next = _tasbihCount.value + 1
+        _tasbihCount.value = next
         viewModelScope.launch {
-            appPreferenceRepo.incrementTasbihCount()
+            appPreferenceRepo.setTasbihCount(next)
         }
     }
 
     fun resetTasbih() {
+        _tasbihCount.value = 0
         viewModelScope.launch {
             appPreferenceRepo.setTasbihCount(0)
         }

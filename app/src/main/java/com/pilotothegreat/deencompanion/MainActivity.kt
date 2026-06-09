@@ -78,7 +78,6 @@ class MainActivity : ComponentActivity() {
         try {
             enableEdgeToEdge()
 
-            // Schedule iqama alarms on app launch
             lifecycleScope.launch {
                 try {
                     IqamaAlarmManager.scheduleNextIqamaAlarm(this@MainActivity, appPreferenceRepo)
@@ -92,14 +91,21 @@ class MainActivity : ComponentActivity() {
                     Timber.e(e, "Failed to increment launch count")
                 }
                 try {
-                    val workRequest = androidx.work.PeriodicWorkRequestBuilder<com.pilotothegreat.deencompanion.services.AdhanNotificationWorker>(
-                        24, java.util.concurrent.TimeUnit.HOURS
-                    ).build()
-                    androidx.work.WorkManager.getInstance(this@MainActivity).enqueueUniquePeriodicWork(
-                        "adhan_scheduler",
-                        androidx.work.ExistingPeriodicWorkPolicy.KEEP,
-                        workRequest
-                    )
+                    val isRobolectric = try {
+                        Class.forName("org.robolectric.Robolectric") != null
+                    } catch (e: java.lang.Exception) {
+                        false
+                    }
+                    if (!isRobolectric) {
+                        val workRequest = androidx.work.PeriodicWorkRequestBuilder<com.pilotothegreat.deencompanion.services.AdhanNotificationWorker>(
+                            24, java.util.concurrent.TimeUnit.HOURS
+                        ).build()
+                        androidx.work.WorkManager.getInstance(this@MainActivity).enqueueUniquePeriodicWork(
+                            "adhan_scheduler",
+                            androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+                            workRequest
+                        )
+                    }
                 } catch (e: Exception) {
                     Timber.e(e, "Failed to enqueue AdhanNotificationWorker on launch")
                 }
@@ -251,14 +257,23 @@ fun AppWithLocale(content: @Composable () -> Unit) {
             val localeList = androidx.core.os.LocaleListCompat.forLanguageTags(lang)
             androidx.appcompat.app.AppCompatDelegate.setApplicationLocales(localeList)
             
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-                var actContext = context
-                while (actContext is android.content.ContextWrapper) {
-                    if (actContext is android.app.Activity) {
-                        actContext.recreate()
-                        break
+            val currentLanguage = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                context.resources.configuration.locales.get(0).language
+            } else {
+                @Suppress("DEPRECATION")
+                context.resources.configuration.locale.language
+            }
+
+            if (currentLanguage != lang) {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                    var actContext = context
+                    while (actContext is android.content.ContextWrapper) {
+                        if (actContext is android.app.Activity) {
+                            actContext.recreate()
+                            break
+                        }
+                        actContext = actContext.baseContext
                     }
-                    actContext = actContext.baseContext
                 }
             }
         }

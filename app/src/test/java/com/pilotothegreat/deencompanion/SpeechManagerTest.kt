@@ -54,11 +54,17 @@ class SpeechManagerTest {
         }
 
         val testDispatcher = kotlinx.coroutines.test.StandardTestDispatcher(testScheduler)
+        var virtualTime = 0L
         val speechManager = SpeechManager(
             context = context,
             audioInputProvider = mockProvider,
             assistantProxyProvider = { Pair("سورة البقرة", "Al-Baqarah translation") },
-            dispatcher = testDispatcher
+            dispatcher = testDispatcher,
+            timeProvider = {
+                val t = virtualTime
+                virtualTime += 100
+                t
+            }
         )
 
         val states = mutableListOf<SpeechState>()

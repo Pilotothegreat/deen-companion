@@ -34,41 +34,59 @@ class IqamaAlarmReceiver : BroadcastReceiver(), KoinComponent {
             // Play notification sound with custom volume and reschedule next alarm
             val pendingResult = goAsync()
             val scope = CoroutineScope(Dispatchers.Default)
-            scope.launch {
-                try {
-                    val volume = repo.notificationVolume.first()
-                    if (volume > 0) {
-                        try {
-                            val ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-                            val mediaPlayer = android.media.MediaPlayer().apply {
-                                setDataSource(context, ringtoneUri)
-                                setAudioAttributes(
-                                    android.media.AudioAttributes.Builder()
-                                        .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION)
-                                        .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                                        .build()
-                                )
-                                val vol = volume / 100.0f
-                                setVolume(vol, vol)
-                                setOnCompletionListener { mp ->
-                                    mp.release()
+            var launched = false
+            try {
+                scope.launch {
+                    try {
+                        val volume = repo.notificationVolume.first()
+                        if (volume > 0) {
+                            try {
+                                val ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+                                val mediaPlayer = android.media.MediaPlayer().apply {
+                                    setDataSource(context, ringtoneUri)
+                                    setAudioAttributes(
+                                        android.media.AudioAttributes.Builder()
+                                            .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION)
+                                            .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                                            .build()
+                                    )
+                                    val vol = volume / 100.0f
+                                    setVolume(vol, vol)
+                                    setOnCompletionListener { mp ->
+                                        mp.release()
+                                    }
+                                    setOnErrorListener { mp, _, _ ->
+                                        mp.release()
+                                        true
+                                    }
+                                    setOnPreparedListener { mp ->
+                                        mp.start()
+                                    }
+                                    prepareAsync()
                                 }
-                                setOnErrorListener { mp, _, _ ->
-                                    mp.release()
-                                    true
-                                }
-                                prepare()
-                                start()
+                            } catch (e: Exception) {
+                                e.printStackTrace()
                             }
+                        }
+                        IqamaAlarmManager.scheduleNextIqamaAlarm(context, repo)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    } finally {
+                        try {
+                            pendingResult.finish()
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }
                     }
-                    IqamaAlarmManager.scheduleNextIqamaAlarm(context, repo)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                } finally {
-                    pendingResult.finish()
+                }
+                launched = true
+            } finally {
+                if (!launched) {
+                    try {
+                        pendingResult.finish()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
             }
         } catch (e: Exception) {

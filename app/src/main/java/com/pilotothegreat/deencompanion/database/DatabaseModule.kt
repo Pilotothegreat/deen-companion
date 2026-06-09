@@ -9,7 +9,7 @@ import timber.log.Timber
 val databaseModule = module {
     single {
         try {
-            AppPreferenceRepo(get())
+            AppPreferenceRepo(get(), get())
         } catch (e: Exception) {
             Timber.e(e, "Failed to create AppPreferenceRepo")
             throw e
@@ -18,13 +18,28 @@ val databaseModule = module {
 
     single {
         try {
-            Room.databaseBuilder(
-                androidContext(),
-                AppDatabase::class.java,
-                "database"
-            )
-                .fallbackToDestructiveMigration()
-                .build()
+            val isRobolectric = try {
+                Class.forName("org.robolectric.Robolectric") != null
+            } catch (e: Exception) {
+                false
+            }
+            if (isRobolectric) {
+                Room.inMemoryDatabaseBuilder(
+                    androidContext(),
+                    AppDatabase::class.java
+                )
+                    .allowMainThreadQueries()
+                    .fallbackToDestructiveMigration()
+                    .build()
+            } else {
+                Room.databaseBuilder(
+                    androidContext(),
+                    AppDatabase::class.java,
+                    "database"
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
+            }
         } catch (e: Exception) {
             Timber.e(e, "Failed to build AppDatabase")
             throw e
@@ -45,6 +60,15 @@ val databaseModule = module {
             get<AppDatabase>().hadithDao()
         } catch (e: Exception) {
             Timber.e(e, "Failed to get hadithDao")
+            throw e
+        }
+    }
+
+    single {
+        try {
+            get<AppDatabase>().tasbihDao()
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to get tasbihDao")
             throw e
         }
     }

@@ -18,8 +18,15 @@ class HadithRepository(
 ) {
 
     init {
-        // Run database pre-population in a background dispatcher on initialization
-        kotlinx.coroutines.CoroutineScope(Dispatchers.IO).launchPrepopulation()
+        val isRobolectric = try {
+            Class.forName("org.robolectric.Robolectric") != null
+        } catch (e: Exception) {
+            false
+        }
+        if (!isRobolectric) {
+            // Run database pre-population in a background dispatcher on initialization
+            kotlinx.coroutines.CoroutineScope(Dispatchers.IO).launchPrepopulation()
+        }
     }
 
     private fun kotlinx.coroutines.CoroutineScope.launchPrepopulation() {

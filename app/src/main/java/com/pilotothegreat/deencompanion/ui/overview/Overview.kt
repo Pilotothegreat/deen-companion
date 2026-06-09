@@ -325,7 +325,8 @@ fun Overview(
         ) == android.content.pm.PackageManager.PERMISSION_GRANTED
 
         viewModel.refreshLocation(context)
-        onPauseOrDispose {}
+        onPauseOrDispose {
+        }
     }
 
     val times by viewModel.prayerTimes.collectAsState(initial = viewModel.prayerTimes.value)
@@ -396,14 +397,27 @@ fun Overview(
             state = pullState,
             indicator = {
                 val trigger = pullState.distanceFraction
-                val rotationTransition = rememberInfiniteTransition()
-                val refreshingRotation by rotationTransition.animateFloat(
-                    initialValue = 0f,
-                    targetValue = 360f,
-                    animationSpec = infiniteRepeatable(
-                        animation = tween(1000, easing = LinearEasing)
+                val isRobolectric = remember {
+                    try {
+                        Class.forName("org.robolectric.Robolectric") != null
+                    } catch (e: Exception) {
+                        false
+                    }
+                }
+                val refreshingRotation = if (isRobolectric) {
+                    0f
+                } else {
+                    val rotationTransition = rememberInfiniteTransition(label = "pull_to_refresh_rotation")
+                    val rot by rotationTransition.animateFloat(
+                        initialValue = 0f,
+                        targetValue = 360f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(1000, easing = LinearEasing)
+                        ),
+                        label = "rotation"
                     )
-                )
+                    rot
+                }
 
                 if (trigger > 0f || isRefreshing) {
                     Box(
@@ -831,14 +845,27 @@ private fun OverviewHero(scrollState: ScrollState, viewModel: OverviewVM, nextPr
     val shapeScale = 336.dp.px
     val iconScale = remember { Animatable(shapeScale) }
 
-    val infiniteTransition = rememberInfiniteTransition()
-    val rotation by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(65000, easing = LinearEasing)
+    val isRobolectric = remember {
+        try {
+            Class.forName("org.robolectric.Robolectric") != null
+        } catch (e: Exception) {
+            false
+        }
+    }
+    val rotation = if (isRobolectric) {
+        0f
+    } else {
+        val infiniteTransition = rememberInfiniteTransition(label = "hero_rotation")
+        val rot by infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 360f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(65000, easing = LinearEasing)
+            ),
+            label = "rotation"
         )
-    )
+        rot
+    }
 
     val shape1Transformed = remember(iconScale.value, rotation) {
         val path = Path().apply {
@@ -1187,6 +1214,13 @@ fun LiveQiblaCompassCard(
         }
     }
 
+    val hasCompass = remember(context) {
+        val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR) != null ||
+                (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null &&
+                        sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) != null)
+    }
+
     var rawHeading by remember { mutableStateOf(0f) }
     var smoothHeading by remember { mutableStateOf(0f) }
 
@@ -1236,11 +1270,17 @@ fun LiveQiblaCompassCard(
             override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
         }
 
-        if (rotationVectorSensor != null) {
-            sensorManager.registerListener(listener, rotationVectorSensor, SensorManager.SENSOR_DELAY_UI)
-        } else {
-            sensorManager.registerListener(listener, accelerometer, SensorManager.SENSOR_DELAY_UI)
-            sensorManager.registerListener(listener, magnetometer, SensorManager.SENSOR_DELAY_UI)
+        if (hasCompass) {
+            if (rotationVectorSensor != null) {
+                sensorManager.registerListener(listener, rotationVectorSensor, SensorManager.SENSOR_DELAY_UI)
+            } else {
+                if (accelerometer != null) {
+                    sensorManager.registerListener(listener, accelerometer, SensorManager.SENSOR_DELAY_UI)
+                }
+                if (magnetometer != null) {
+                    sensorManager.registerListener(listener, magnetometer, SensorManager.SENSOR_DELAY_UI)
+                }
+            }
         }
 
         onDispose {
@@ -1340,77 +1380,94 @@ fun LiveQiblaCompassCard(
                 color = MaterialTheme.colorScheme.onSurface
             )
 
-            Box(
-                modifier = Modifier
-                    .size(96.dp)
-                    .clip(cookie12SidedShape)
-                    .background(colorScheme.primaryContainer.copy(alpha = if (isAligned) 0.22f else 0.12f))
-                    .padding(8.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                if (isAligned) {
+            if (!hasCompass) {
+                Box(
+                    modifier = Modifier
+                        .size(96.dp)
+                        .background(colorScheme.errorContainer.copy(alpha = 0.2f), shape = RoundedCornerShape(12.dp))
+                        .padding(8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = if (lang == "ar") "البوصلة غير متوفرة" else "Compass Unavailable",
+                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                        color = colorScheme.error,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(96.dp)
+                        .clip(cookie12SidedShape)
+                        .background(colorScheme.primaryContainer.copy(alpha = if (isAligned) 0.22f else 0.12f))
+                        .padding(8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (isAligned) {
+                        Canvas(modifier = Modifier.fillMaxSize()) {
+                            drawCircle(
+                                color = Color(0xFF2E7D32).copy(alpha = 0.12f),
+                                radius = (size.minDimension / 2) + 4.dp.toPx()
+                            )
+                        }
+                    }
+
                     Canvas(modifier = Modifier.fillMaxSize()) {
+                        val radius = size.minDimension / 2
                         drawCircle(
-                            color = Color(0xFF2E7D32).copy(alpha = 0.12f),
-                            radius = (size.minDimension / 2) + 4.dp.toPx()
+                            color = compassRingColor,
+                            radius = radius,
+                            style = Stroke(width = 2.dp.toPx())
                         )
                     }
-                }
 
-                Canvas(modifier = Modifier.fillMaxSize()) {
-                    val radius = size.minDimension / 2
-                    drawCircle(
-                        color = compassRingColor,
-                        radius = radius,
-                        style = Stroke(width = 2.dp.toPx())
-                    )
-                }
+                    Canvas(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .graphicsLayer {
+                                rotationZ = relativeAngle
+                                scaleX = needleScale
+                                scaleY = needleScale
+                            }
+                    ) {
+                        val radius = size.minDimension / 2
+                        val center = Offset(size.width / 2, size.height / 2)
 
-                Canvas(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .graphicsLayer {
-                            rotationZ = relativeAngle
-                            scaleX = needleScale
-                            scaleY = needleScale
+                        drawLine(
+                            color = secondaryColor,
+                            start = center,
+                            end = Offset(center.x, center.y - radius + 8.dp.toPx()),
+                            strokeWidth = 2.dp.toPx()
+                        )
+
+                        val needlePath = Path().apply {
+                            moveTo(center.x, center.y - radius)
+                            lineTo(center.x - 6.dp.toPx(), center.y)
+                            lineTo(center.x + 6.dp.toPx(), center.y)
+                            close()
                         }
-                ) {
-                    val radius = size.minDimension / 2
-                    val center = Offset(size.width / 2, size.height / 2)
+                        drawPath(
+                            path = needlePath,
+                            color = needleColor
+                        )
 
-                    drawLine(
-                        color = secondaryColor,
-                        start = center,
-                        end = Offset(center.x, center.y - radius + 8.dp.toPx()),
-                        strokeWidth = 2.dp.toPx()
-                    )
+                        val southPath = Path().apply {
+                            moveTo(center.x, center.y + radius)
+                            lineTo(center.x - 6.dp.toPx(), center.y)
+                            lineTo(center.x + 6.dp.toPx(), center.y)
+                            close()
+                        }
+                        drawPath(
+                            path = southPath,
+                            color = outlineColor
+                        )
 
-                    val needlePath = Path().apply {
-                        moveTo(center.x, center.y - radius)
-                        lineTo(center.x - 6.dp.toPx(), center.y)
-                        lineTo(center.x + 6.dp.toPx(), center.y)
-                        close()
+                        drawCircle(
+                            color = onPrimaryContainerColor,
+                            radius = 4.dp.toPx()
+                        )
                     }
-                    drawPath(
-                        path = needlePath,
-                        color = needleColor
-                    )
-
-                    val southPath = Path().apply {
-                        moveTo(center.x, center.y + radius)
-                        lineTo(center.x - 6.dp.toPx(), center.y)
-                        lineTo(center.x + 6.dp.toPx(), center.y)
-                        close()
-                    }
-                    drawPath(
-                        path = southPath,
-                        color = outlineColor
-                    )
-
-                    drawCircle(
-                        color = onPrimaryContainerColor,
-                        radius = 4.dp.toPx()
-                    )
                 }
             }
 

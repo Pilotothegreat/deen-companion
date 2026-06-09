@@ -139,8 +139,12 @@ fun Qibla() {
         if (rotationVectorSensor != null) {
             sensorManager.registerListener(listener, rotationVectorSensor, SensorManager.SENSOR_DELAY_UI)
         } else {
-            sensorManager.registerListener(listener, accelerometer, SensorManager.SENSOR_DELAY_UI)
-            sensorManager.registerListener(listener, magnetometer, SensorManager.SENSOR_DELAY_UI)
+            if (accelerometer != null) {
+                sensorManager.registerListener(listener, accelerometer, SensorManager.SENSOR_DELAY_UI)
+            }
+            if (magnetometer != null) {
+                sensorManager.registerListener(listener, magnetometer, SensorManager.SENSOR_DELAY_UI)
+            }
         }
 
         onDispose {

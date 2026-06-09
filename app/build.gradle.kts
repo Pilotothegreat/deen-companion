@@ -25,8 +25,8 @@ android {
         applicationId = "com.pilotothegreat.deencompanion"
         minSdk = 26
         targetSdk = 37
-        versionCode = 134
-        versionName = "1.3.4"
+        versionCode = 135
+        versionName = "1.3.5"
         base.archivesName = "deen-$versionName"
     }
     buildTypes {
@@ -69,6 +69,14 @@ android {
         unitTests {
             isIncludeAndroidResources = true
         }
+    }
+}
+
+tasks.withType<Test> {
+    jvmArgs("-Xmx2g", "-XX:+UseG1GC")
+    testLogging {
+        events("passed", "skipped", "failed", "standardOut", "standardError")
+        showStandardStreams = true
     }
 }
 
