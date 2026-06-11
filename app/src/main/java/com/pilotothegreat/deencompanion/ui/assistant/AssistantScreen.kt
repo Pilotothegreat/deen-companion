@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.text.ClickableText
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -221,7 +223,8 @@ fun MessageBubble(
             if (isArabic) {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     val annotatedString = parseVerseCitations(message.text, colorScheme.primary)
-                    ClickableText(
+                    var layoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+                    Text(
                         text = annotatedString,
                         style = MaterialTheme.typography.bodyLarge.copy(
                             fontFamily = uthmaniFontFamily,
@@ -229,37 +232,50 @@ fun MessageBubble(
                             color = textColor,
                             localeList = androidx.compose.ui.text.intl.LocaleList(androidx.compose.ui.text.intl.Locale("ar"))
                         ),
-                        onClick = { offset ->
-                            annotatedString.getStringAnnotations(tag = "DEEP_LINK", start = offset, end = offset)
-                                .firstOrNull()?.let { annotation ->
-                                    val parts = annotation.item.split(":")
-                                    val surah = parts.getOrNull(0)?.toIntOrNull()
-                                    val verse = parts.getOrNull(1)?.toIntOrNull()
-                                    if (surah != null && verse != null) {
-                                        navigator.goTo(QuranReaderKey(surah, "Surah", scrollToVerse = verse))
-                                    }
+                        onTextLayout = { layoutResult = it },
+                        modifier = Modifier.pointerInput(annotatedString) {
+                            detectTapGestures { offset ->
+                                layoutResult?.let { textLayoutResult ->
+                                    val position = textLayoutResult.getOffsetForPosition(offset)
+                                    annotatedString.getStringAnnotations(tag = "DEEP_LINK", start = position, end = position)
+                                        .firstOrNull()?.let { annotation ->
+                                            val parts = annotation.item.split(":")
+                                            val surah = parts.getOrNull(0)?.toIntOrNull()
+                                            val verse = parts.getOrNull(1)?.toIntOrNull()
+                                            if (surah != null && verse != null) {
+                                                navigator.goTo(QuranReaderKey(surah, "Surah", scrollToVerse = verse))
+                                            }
+                                        }
                                 }
+                            }
                         }
                     )
                 }
             } else {
                 val annotatedString = parseVerseCitations(message.text, colorScheme.primary)
-                ClickableText(
+                var layoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+                Text(
                     text = annotatedString,
                     style = MaterialTheme.typography.bodyMedium.copy(
                         lineHeight = 22.sp,
                         color = textColor
                     ),
-                    onClick = { offset ->
-                        annotatedString.getStringAnnotations(tag = "DEEP_LINK", start = offset, end = offset)
-                            .firstOrNull()?.let { annotation ->
-                                val parts = annotation.item.split(":")
-                                val surah = parts.getOrNull(0)?.toIntOrNull()
-                                val verse = parts.getOrNull(1)?.toIntOrNull()
-                                if (surah != null && verse != null) {
-                                    navigator.goTo(QuranReaderKey(surah, "Surah", scrollToVerse = verse))
-                                }
+                    onTextLayout = { layoutResult = it },
+                    modifier = Modifier.pointerInput(annotatedString) {
+                        detectTapGestures { offset ->
+                            layoutResult?.let { textLayoutResult ->
+                                val position = textLayoutResult.getOffsetForPosition(offset)
+                                annotatedString.getStringAnnotations(tag = "DEEP_LINK", start = position, end = position)
+                                    .firstOrNull()?.let { annotation ->
+                                        val parts = annotation.item.split(":")
+                                        val surah = parts.getOrNull(0)?.toIntOrNull()
+                                        val verse = parts.getOrNull(1)?.toIntOrNull()
+                                        if (surah != null && verse != null) {
+                                            navigator.goTo(QuranReaderKey(surah, "Surah", scrollToVerse = verse))
+                                        }
+                                    }
                             }
+                        }
                     }
                 )
             }

@@ -9,7 +9,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextLayoutResult
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.border
@@ -501,44 +500,24 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                     }
 
                                                     val startOrn = builder.length
-                                                    val ornament = "﴾${toArabicNumerals(verse.id)}﴿ "
-                                                    builder.append(ornament)
-                                                    val endOrn = builder.length
-
-                                                    val start = builder.length
-                                                    val isSajdah = QuranHelper.isSajdahVerse(surahId, verse.id)
+                                                    
+                                                    val startText = builder.length
                                                     builder.append(verse.text)
                                                     builder.append(" ")
+                                                    val endText = builder.length
+                                                    
                                                     val startSajdah = builder.length
+                                                    val isSajdah = QuranHelper.isSajdahVerse(surahId, verse.id)
                                                     if (isSajdah) {
                                                         builder.append("۩ ")
                                                     }
+                                                    val endSajdah = builder.length
 
-                                                    val isCurrentlyPlaying = (surahId == currentSurahId && verse.id == currentAyahId)
-                                                    val isHighlighted = isCurrentlyPlaying || (surahId == surahNumber && verse.id == activeAyah)
-
-                                                    if (!isHighlighted) {
-                                                        builder.addStyle(
-                                                            style = SpanStyle(
-                                                                color = mushafTextColor,
-                                                                localeList = androidx.compose.ui.text.intl.LocaleList(androidx.compose.ui.text.intl.Locale("ar"))
-                                                            ),
-                                                            start = start,
-                                                            end = startSajdah
-                                                        )
-                                                    }
-
-                                                    if (isSajdah) {
-                                                        builder.addStyle(
-                                                            style = SpanStyle(
-                                                                color = goldAccent,
-                                                                fontWeight = FontWeight.Bold
-                                                            ),
-                                                            start = startSajdah,
-                                                            end = startSajdah + 1
-                                                        )
-                                                    }
-
+                                                    val startOrnNum = builder.length
+                                                    val ornament = "\u200F﴾${toArabicNumerals(verse.id)}﴿\u200F "
+                                                    builder.append(ornament)
+                                                    val endOrnNum = builder.length
+                                                    
                                                     val end = builder.length
 
                                                     builder.addStringAnnotation(
@@ -547,6 +526,9 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                         start = startOrn,
                                                         end = end
                                                     )
+
+                                                    val isCurrentlyPlaying = (surahId == currentSurahId && verse.id == currentAyahId)
+                                                    val isHighlighted = isCurrentlyPlaying || (surahId == surahNumber && verse.id == activeAyah)
 
                                                     if (isHighlighted) {
                                                         builder.addStyle(
@@ -558,6 +540,26 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                             start = startOrn,
                                                             end = end
                                                         )
+                                                    } else {
+                                                        builder.addStyle(
+                                                            style = SpanStyle(
+                                                                color = mushafTextColor,
+                                                                localeList = androidx.compose.ui.text.intl.LocaleList(androidx.compose.ui.text.intl.Locale("ar"))
+                                                            ),
+                                                            start = startText,
+                                                            end = endText
+                                                        )
+                                                    }
+
+                                                    if (isSajdah) {
+                                                        builder.addStyle(
+                                                            style = SpanStyle(
+                                                                color = goldAccent,
+                                                                fontWeight = FontWeight.Bold
+                                                            ),
+                                                            start = startSajdah,
+                                                            end = endSajdah - 1
+                                                        )
                                                     }
 
                                                     builder.addStyle(
@@ -565,8 +567,8 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                             color = goldAccent,
                                                             fontWeight = FontWeight.Bold
                                                         ),
-                                                        start = startOrn,
-                                                        end = endOrn
+                                                        start = startOrnNum,
+                                                        end = endOrnNum
                                                     )
                                                 }
                                                 val finalAnnotated = builder.toAnnotatedString()

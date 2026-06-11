@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Job
 import java.time.LocalDate
 import java.time.ZoneId
 
@@ -70,9 +71,17 @@ class OverviewVM(
 
     private val _tasbihCount = MutableStateFlow(0)
     val tasbihCount = _tasbihCount.asStateFlow()
-    val tasbihDhikr = appPreferenceRepo.tasbihDhikr
-    val tasbihTarget = appPreferenceRepo.tasbihTarget
+    
+    private val _tasbihDhikr = MutableStateFlow("سبحان الله")
+    val tasbihDhikr = _tasbihDhikr.asStateFlow()
+
+    val tasbihTarget = appPreferenceRepo.tasbihTarget.stateIn(
+        viewModelScope, SharingStarted.Eagerly, 33
+    )
     val tasbihHistory = appPreferenceRepo.tasbihHistory
+
+    private var writeJob: Job? = null
+    private var isDirty = false
 
     val fajrIqamaOffset = appPreferenceRepo.fajrIqamaOffset
     val dhuhrIqamaOffset = appPreferenceRepo.dhuhrIqamaOffset
@@ -110,7 +119,16 @@ class OverviewVM(
     init {
         viewModelScope.launch {
             appPreferenceRepo.tasbihCount.collect {
-                _tasbihCount.value = it
+                if (!isDirty) {
+                    _tasbihCount.value = it
+                }
+            }
+        }
+        viewModelScope.launch {
+            appPreferenceRepo.tasbihDhikr.collect {
+                if (!isDirty) {
+                    _tasbihDhikr.value = it
+                }
             }
         }
 
@@ -233,19 +251,47 @@ class OverviewVM(
     }
 
     fun incrementTasbih() {
-        viewModelScope.launch {
-            appPreferenceRepo.incrementAndCycleTasbih()
+        isDirty = true
+        val targetVal = tasbihTarget.value
+        val currentDhikr = _tasbihDhikr.value
+        val nextCount = _tasbihCount.value + 1
+        
+        if (nextCount >= targetVal) {
+            _tasbihCount.value = 0
+            val nextDhikr = when (currentDhikr) {
+                "سبحان الله" -> "الحمد لله"
+                "الحمد لله" -> "الله أكبر"
+                else -> "سبحان الله"
+            }
+            _tasbihDhikr.value = nextDhikr
+        } else {
+            _tasbihCount.value = nextCount
+        }
+
+        writeJob?.cancel()
+        writeJob = viewModelScope.launch {
+            kotlinx.coroutines.delay(500)
+            kotlinx.coroutines.withContext(kotlinx.coroutines.NonCancellable) {
+                appPreferenceRepo.setTasbihCount(_tasbihCount.value)
+                appPreferenceRepo.setTasbihDhikr(_tasbihDhikr.value)
+            }
+            isDirty = false
         }
     }
 
     fun resetTasbih() {
+        writeJob?.cancel()
         _tasbihCount.value = 0
+        isDirty = false
         viewModelScope.launch {
             appPreferenceRepo.setTasbihCount(0)
         }
     }
 
     fun setTasbihDhikr(value: String) {
+        writeJob?.cancel()
+        _tasbihDhikr.value = value
+        isDirty = false
         viewModelScope.launch {
             appPreferenceRepo.setTasbihDhikr(value)
         }
