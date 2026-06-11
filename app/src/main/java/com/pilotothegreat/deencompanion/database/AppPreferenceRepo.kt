@@ -210,7 +210,7 @@ class AppPreferenceRepo(
     val asrIqamaOffset: Flow<Int> = data.map { it[ASR_IQAMA] ?: 15 }.distinctUntilChanged()
     suspend fun setAsrIqamaOffset(value: Int) = dataStore.edit { it[ASR_IQAMA] = value }
 
-    val maghribIqamaOffset: Flow<Int> = data.map { it[MAGHRIB_IQAMA] ?: 10 }.distinctUntilChanged()
+    val maghribIqamaOffset: Flow<Int> = data.map { it[MAGHRIB_IQAMA] ?: 5 }.distinctUntilChanged()
     suspend fun setMaghribIqamaOffset(value: Int) = dataStore.edit { it[MAGHRIB_IQAMA] = value }
 
     val ishaIqamaOffset: Flow<Int> = data.map { it[ISHA_IQAMA] ?: 15 }.distinctUntilChanged()
@@ -281,6 +281,26 @@ class AppPreferenceRepo(
         dataStore.edit { prefs ->
             val current = prefs[TASBIH_COUNT] ?: 0
             prefs[TASBIH_COUNT] = current + 1
+        }
+        saveTasbihToRoom()
+    }
+    suspend fun incrementAndCycleTasbih() {
+        dataStore.edit { prefs ->
+            val count = prefs[TASBIH_COUNT] ?: 0
+            val target = prefs[TASBIH_TARGET] ?: 33
+            val dhikr = prefs[TASBIH_DHIKR] ?: "سبحان الله"
+            val nextCount = count + 1
+            if (nextCount >= target) {
+                val nextDhikr = when (dhikr) {
+                    "سبحان الله" -> "الحمد لله"
+                    "الحمد لله" -> "الله أكبر"
+                    else -> "سبحان الله"
+                }
+                prefs[TASBIH_DHIKR] = nextDhikr
+                prefs[TASBIH_COUNT] = 0
+            } else {
+                prefs[TASBIH_COUNT] = nextCount
+            }
         }
         saveTasbihToRoom()
     }

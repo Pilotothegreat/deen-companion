@@ -233,10 +233,8 @@ class OverviewVM(
     }
 
     fun incrementTasbih() {
-        val next = _tasbihCount.value + 1
-        _tasbihCount.value = next
         viewModelScope.launch {
-            appPreferenceRepo.setTasbihCount(next)
+            appPreferenceRepo.incrementAndCycleTasbih()
         }
     }
 

@@ -56,21 +56,21 @@ class HadithVM(
                     _isSearching.value = false
                 } else {
                     _isSearching.value = true
-                    val results = repository.searchHadiths(query)
-                    
-                    // Arabic text normalization matching for enhanced ranking
-                    val normalizedQuery = normalizeArabic(query)
-                    val rankedResults = results.sortedByDescending { entity ->
-                        var score = 0
-                        val normEnglish = entity.english.lowercase()
-                        val normArabic = normalizeArabic(entity.arabic)
-                        val normNarrator = entity.narrator.lowercase()
-                        val lowerQuery = query.lowercase()
+                    val rankedResults = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+                        val results = repository.searchHadiths(query)
+                        val normalizedQuery = normalizeArabic(query)
+                        results.sortedByDescending { entity ->
+                            var score = 0
+                            val normEnglish = entity.english.lowercase()
+                            val normArabic = normalizeArabic(entity.arabic)
+                            val normNarrator = entity.narrator.lowercase()
+                            val lowerQuery = query.lowercase()
 
-                        if (normEnglish.contains(lowerQuery)) score += 3
-                        if (normArabic.contains(normalizedQuery)) score += 5
-                        if (normNarrator.contains(lowerQuery)) score += 2
-                        score
+                            if (normEnglish.contains(lowerQuery)) score += 3
+                            if (normArabic.contains(normalizedQuery)) score += 5
+                            if (normNarrator.contains(lowerQuery)) score += 2
+                            score
+                        }
                     }
                     _searchResults.value = rankedResults
                     _isSearching.value = false

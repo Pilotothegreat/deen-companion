@@ -10,6 +10,10 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.*
@@ -151,56 +155,52 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
         )
     }
 
-    var globalPages by remember { mutableStateOf<List<List<PageContent>>>(emptyList()) }
-    var isPaginating by remember { mutableStateOf(true) }
-
-    LaunchedEffect(surahs, arabicFontSize, screenHeightDp, widthPx) {
-        isPaginating = true
-        withContext(kotlinx.coroutines.Dispatchers.Default) {
-            val cached = QuranHelper.getCachedPages(arabicFontSize, screenHeightDp.toFloat(), widthPx)
-            if (cached != null) {
-                globalPages = cached
-            } else {
-                val pagesList = mutableListOf<List<PageContent>>()
-                var currentPage = mutableListOf<PageContent>()
+    val globalPages = remember(surahs) {
+        val pagesList = mutableListOf<List<PageContent>>()
+        for (pageIdx in 0 until 604) {
+            val startBoundary = QuranHelper.pageBoundaries.getOrNull(pageIdx) ?: break
+            val endBoundary = QuranHelper.pageBoundaries.getOrNull(pageIdx + 1)
+            
+            val items = mutableListOf<PageContent>()
+            for (s in surahs) {
+                if (endBoundary != null && s.id > endBoundary.surahNumber) {
+                    break
+                }
+                if (s.id < startBoundary.surahNumber) {
+                    continue
+                }
                 
-                val availableHeight = (screenHeightDp - 260f).coerceAtLeast(100f)
-                val lineH = arabicFontSize * 2.5f
-                val maxLines = (availableHeight / lineH).toInt().coerceAtLeast(5)
-
-                val allItems = mutableListOf<PageContent>()
-                for (s in surahs) {
-                    allItems.add(PageContent.SurahHeader(s))
-                    if (s.id != 9 && s.id != 1) { // Standalone Bismillah header only suppressed for Surah 9 & 1
-                        allItems.add(PageContent.Bismillah(s.id))
+                for (v in s.verses) {
+                    val isAfterStart = when {
+                        s.id > startBoundary.surahNumber -> true
+                        s.id == startBoundary.surahNumber -> v.id >= startBoundary.verseNumber
+                        else -> false
                     }
-                    for (v in s.verses) {
-                        allItems.add(PageContent.VerseItem(s.id, v))
-                    }
-                }
-
-                var i = 0
-                while (i < allItems.size) {
-                    val item = allItems[i]
-                    currentPage.add(item)
+                    if (!isAfterStart) continue
                     
-                    val lines = calculateLines(currentPage, widthPx, textMeasurer, textStyle)
-                    if (lines > maxLines && currentPage.size > 1) {
-                        currentPage.removeAt(currentPage.size - 1)
-                        pagesList.add(currentPage)
-                        currentPage = mutableListOf()
+                    val isBeforeEnd = if (endBoundary != null) {
+                        when {
+                            s.id < endBoundary.surahNumber -> true
+                            s.id == endBoundary.surahNumber -> v.id < endBoundary.verseNumber
+                            else -> false
+                        }
                     } else {
-                        i++
+                        true
                     }
+                    if (!isBeforeEnd) break
+                    
+                    if (v.id == 1) {
+                        items.add(PageContent.SurahHeader(s))
+                        if (s.id != 9 && s.id != 1) {
+                            items.add(PageContent.Bismillah(s.id))
+                        }
+                    }
+                    items.add(PageContent.VerseItem(s.id, v))
                 }
-                if (currentPage.isNotEmpty()) {
-                    pagesList.add(currentPage)
-                }
-                QuranHelper.cachePages(arabicFontSize, screenHeightDp.toFloat(), widthPx, pagesList)
-                globalPages = pagesList
             }
+            pagesList.add(items)
         }
-        isPaginating = false
+        pagesList
     }
 
     val pagerState = rememberPagerState(pageCount = { globalPages.size })
@@ -231,9 +231,15 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
         }
     }
 
+    var previousActivePage by remember { mutableStateOf(-1) }
     LaunchedEffect(pageIndexForActiveAyah) {
-        if (pageIndexForActiveAyah >= 0 && pagerState.currentPage != pageIndexForActiveAyah && !pagerState.isScrollInProgress && globalPages.isNotEmpty()) {
-            pagerState.animateScrollToPage(pageIndexForActiveAyah)
+        if (pageIndexForActiveAyah >= 0 && globalPages.isNotEmpty()) {
+            if (pagerState.currentPage != pageIndexForActiveAyah && !pagerState.isScrollInProgress) {
+                if (previousActivePage == -1 || pagerState.currentPage == previousActivePage) {
+                    pagerState.animateScrollToPage(pageIndexForActiveAyah)
+                }
+            }
+            previousActivePage = pageIndexForActiveAyah
         }
     }
 
@@ -342,7 +348,8 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                             Column(
                                 modifier = Modifier
                                     .weight(1f)
-                                    .fillMaxWidth(),
+                                    .fillMaxWidth()
+                                    .verticalScroll(rememberScrollState()),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 blocks.forEach { block ->
@@ -627,7 +634,65 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                     pageContent.filterIsInstance<PageContent.VerseItem>()
                                 }
 
-                                if (pageVerses.isNotEmpty()) {
+                                val hasSajdahInPage = remember(pageVerses) {
+                                    pageVerses.any { QuranHelper.isSajdahVerse(it.surahId, it.verse.id) }
+                                }
+
+                                if (hasSajdahInPage) {
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Card(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 4.dp)
+                                            .border(1.dp, Color(0xFFD4AF37), RoundedCornerShape(12.dp)),
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                                        )
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .padding(12.dp)
+                                                .fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(36.dp)
+                                                    .background(Color(0xFFD4AF37).copy(alpha = 0.15f), CircleShape),
+                                                contentAlignment = Alignment.Center
+                                             ) {
+                                                 Text(
+                                                     text = "۩",
+                                                     color = Color(0xFFD4AF37),
+                                                     fontSize = 20.sp,
+                                                     fontWeight = FontWeight.Bold
+                                                 )
+                                             }
+                                             Column(modifier = Modifier.weight(1f)) {
+                                                 Text(
+                                                     text = if (lang == "ar") "سجدة تلاوة" else "Sajdah al-Tilawah",
+                                                     fontWeight = FontWeight.Bold,
+                                                     style = MaterialTheme.typography.titleSmall,
+                                                     color = Color(0xFFD4AF37)
+                                                 )
+                                                 Spacer(modifier = Modifier.height(2.dp))
+                                                 Text(
+                                                     text = if (lang == "ar") {
+                                                         "تحتوي هذه الصفحة على آية سجود. يُسنّ السجود (سجدة تلاوة) عند قراءتها أو سماعها."
+                                                     } else {
+                                                         "This page contains a prostration verse. It is recommended to perform prostration when reading or hearing it."
+                                                     },
+                                                     style = MaterialTheme.typography.bodySmall,
+                                                     color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                 )
+                                             }
+                                        }
+                                    }
+                                }
+
+                                if (pageVerses.isNotEmpty() && lang == "en") {
                                     var showTranslation by remember { mutableStateOf(false) }
 
                                     Spacer(modifier = Modifier.height(12.dp))
@@ -656,23 +721,49 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                 val surahId = verseItem.surahId
                                                 val isHighlighted = (surahId == currentSurahId && verse.id == currentAyahId) || (surahId == surahNumber && verse.id == activeAyah)
                                                 val isSajdah = QuranHelper.isSajdahVerse(surahId, verse.id)
-                                                val translationText = remember(verse.translation, isSajdah, lang) {
-                                                    if (isSajdah) {
-                                                        val label = if (lang == "ar") " [سَجْدَة]" else " [Prostration / Sajdah]"
-                                                        verse.translation + label
-                                                    } else {
-                                                        verse.translation
-                                                    }
-                                                }
-                                                Text(
-                                                    text = stringResource(R.string.verse_number_prefix, verse.id) + translationText,
-                                                    style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
-                                                    color = if (isHighlighted) colorScheme.primary else colorScheme.onSurfaceVariant,
+                                                
+                                                Row(
                                                     modifier = Modifier
                                                         .fillMaxWidth()
-                                                        .padding(vertical = 4.dp),
-                                                    textAlign = TextAlign.Start
-                                                )
+                                                        .padding(vertical = 6.dp),
+                                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                    verticalAlignment = Alignment.Top
+                                                ) {
+                                                    Column(modifier = Modifier.weight(1f)) {
+                                                        Row(
+                                                            verticalAlignment = Alignment.CenterVertically,
+                                                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                                        ) {
+                                                            Text(
+                                                                text = stringResource(R.string.verse_number_prefix, verse.id).trim(),
+                                                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                                                color = if (isHighlighted) colorScheme.primary else colorScheme.onSurfaceVariant
+                                                            )
+                                                            if (isSajdah) {
+                                                                Box(
+                                                                    modifier = Modifier
+                                                                        .background(Color(0xFFD4AF37).copy(alpha = 0.15f), RoundedCornerShape(4.dp))
+                                                                        .border(0.5.dp, Color(0xFFD4AF37), RoundedCornerShape(4.dp))
+                                                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                                                ) {
+                                                                    Text(
+                                                                        text = if (lang == "ar") "سجدة" else "Sajdah",
+                                                                        color = Color(0xFFD4AF37),
+                                                                        style = MaterialTheme.typography.labelSmall,
+                                                                        fontWeight = FontWeight.Bold
+                                                                    )
+                                                                }
+                                                            }
+                                                        }
+                                                        Spacer(modifier = Modifier.height(2.dp))
+                                                        Text(
+                                                            text = verse.translation,
+                                                            style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+                                                            color = if (isHighlighted) colorScheme.primary else colorScheme.onSurfaceVariant,
+                                                            textAlign = TextAlign.Start
+                                                        )
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -913,7 +1004,7 @@ fun SurahStartBanner(
     val typeText = if (lang == "ar") {
         if (surah.type.lowercase() == "meccan") "مكية" else "مدنية"
     } else {
-        surah.type.replaceFirstChar { it.uppercase() }
+        if (surah.type.lowercase() == "meccan") "Meccan" else "Medinan"
     }
     val versesText = if (lang == "ar") {
         "آياتها ${toArabicNumerals(surah.totalVerses)}"

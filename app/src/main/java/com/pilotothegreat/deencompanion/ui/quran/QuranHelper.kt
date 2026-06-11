@@ -685,25 +685,7 @@ object QuranHelper {
         return boundary?.pageNumber ?: 1
     }
 
-    @Volatile
-    private var cachedPages: List<List<PageContent>>? = null
-    private var cachedPagesFontSize: Int = -1
-    private var cachedPagesHeight: Float = -1f
-    private var cachedPagesWidth: Float = -1f
 
-    fun getCachedPages(fontSize: Int, height: Float, width: Float): List<List<PageContent>>? {
-        if (cachedPagesFontSize == fontSize && cachedPagesHeight == height && cachedPagesWidth == width) {
-            return cachedPages
-        }
-        return null
-    }
-
-    fun cachePages(fontSize: Int, height: Float, width: Float, pages: List<List<PageContent>>) {
-        cachedPages = pages
-        cachedPagesFontSize = fontSize
-        cachedPagesHeight = height
-        cachedPagesWidth = width
-    }
 
     @Volatile
     private var cachedSurahs: List<Surah>? = null

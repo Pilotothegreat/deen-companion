@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -87,6 +88,36 @@ fun Quran(paddingValues: PaddingValues) {
 
     val surahs = remember { QuranHelper.getSurahs(context) }
 
+    var searchResults by remember { mutableStateOf<List<Pair<QuranHelper.Surah, QuranHelper.Verse>>>(emptyList()) }
+    var isSearching by remember { mutableStateOf(false) }
+
+    LaunchedEffect(debouncedQuery) {
+        if (debouncedQuery.isNotEmpty()) {
+            isSearching = true
+            searchResults = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+                val results = mutableListOf<Pair<QuranHelper.Surah, QuranHelper.Verse>>()
+                for (surah in surahs) {
+                    val surahMatches = surah.transliteration.contains(debouncedQuery, ignoreCase = true) ||
+                            surah.name.contains(debouncedQuery)
+                    if (surahMatches && surah.verses.isNotEmpty()) {
+                        results.add(Pair(surah, surah.verses.first()))
+                    }
+                    for (verse in surah.verses) {
+                        if (verse.translation.contains(debouncedQuery, ignoreCase = true) ||
+                            verse.text.contains(debouncedQuery)
+                        ) {
+                            results.add(Pair(surah, verse))
+                        }
+                    }
+                }
+                results.take(50)
+            }
+            isSearching = false
+        } else {
+            searchResults = emptyList()
+        }
+    }
+
     val quranFontFamily = remember(context) {
         FontFamily(
             Font("UthmanicHafs.ttf", context.assets)
@@ -111,43 +142,43 @@ fun Quran(paddingValues: PaddingValues) {
         SearchField(textFieldState = searchState)
 
         if (debouncedQuery.isNotEmpty()) {
-            // Show Search Results instead of tabs
-            val searchResults = remember(debouncedQuery) {
-                val results = mutableListOf<Pair<QuranHelper.Surah, QuranHelper.Verse>>()
-                for (surah in surahs) {
-                    if (surah.transliteration.contains(debouncedQuery, ignoreCase = true) ||
-                        surah.name.contains(debouncedQuery)
-                    ) {
-                        // Match entire surah -> add its first verse
-                        if (surah.verses.isNotEmpty()) {
-                            results.add(Pair(surah, surah.verses.first()))
-                        }
-                    }
-                    for (verse in surah.verses) {
-                        if (verse.translation.contains(debouncedQuery, ignoreCase = true) ||
-                            verse.text.contains(debouncedQuery)
-                        ) {
-                            results.add(Pair(surah, verse))
-                        }
-                    }
-                }
-                results.take(50) // Cap results
-            }
-
             val direction = if (lang == "ar") LayoutDirection.Rtl else LayoutDirection.Ltr
             CompositionLocalProvider(LocalLayoutDirection provides direction) {
                 Column(modifier = Modifier.fillMaxSize()) {
-                    Text(
-                        text = if (lang == "ar") "نتائج البحث (${toArabicNumerals(searchResults.size)})" else "Search Results (${searchResults.size})",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    )
-
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = paddingBottom),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
+                    if (isSearching) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(color = colorScheme.primary)
+                        }
+                    } else if (searchResults.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = if (lang == "ar") "لا توجد نتائج" else "No results found",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = colorScheme.onSurfaceVariant
+                            )
+                        }
+                    } else {
+                        Text(
+                            text = if (lang == "ar") "نتائج البحث (${toArabicNumerals(searchResults.size)})" else "Search Results (${searchResults.size})",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(bottom = paddingBottom),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
                         items(searchResults) { (surah, verse) ->
                             Card(
                                 modifier = Modifier
@@ -185,7 +216,8 @@ fun Quran(paddingValues: PaddingValues) {
                     }
                 }
             }
-        } else {
+        }
+    } else {
             Box(modifier = Modifier.weight(1f)) {
                 SurahsList(surahs, navigator, paddingBottom, quranFontFamily)
             }

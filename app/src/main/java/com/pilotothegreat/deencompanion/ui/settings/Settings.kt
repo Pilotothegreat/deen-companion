@@ -94,6 +94,8 @@ fun Settings(paddingValues: PaddingValues) {
     val scope = rememberCoroutineScope()
     val hazeState = rememberHazeState()
 
+    val lang by viewModel.appLanguage.collectAsState()
+
     var showCalcMenu by remember { mutableStateOf(false) }
     var showAsrMenu by remember { mutableStateOf(false) }
 
@@ -237,6 +239,7 @@ fun Settings(paddingValues: PaddingValues) {
                             isFixed = fajrIsFixed,
                             offset = fajrOffset,
                             fixedTime = fajrIqamaTimeVal,
+                            lang = lang,
                             onModeChange = { viewModel.setFajrIqamaIsFixed(it) },
                             onOffsetChange = { viewModel.setFajrIqamaOffset(it) },
                             onTimeChange = { viewModel.setFajrIqamaTime(it) }
@@ -247,6 +250,7 @@ fun Settings(paddingValues: PaddingValues) {
                             isFixed = dhuhrIsFixed,
                             offset = dhuhrOffset,
                             fixedTime = dhuhrIqamaTimeVal,
+                            lang = lang,
                             onModeChange = { viewModel.setDhuhrIqamaIsFixed(it) },
                             onOffsetChange = { viewModel.setDhuhrIqamaOffset(it) },
                             onTimeChange = { viewModel.setDhuhrIqamaTime(it) }
@@ -257,6 +261,7 @@ fun Settings(paddingValues: PaddingValues) {
                             isFixed = asrIsFixed,
                             offset = asrOffset,
                             fixedTime = asrIqamaTimeVal,
+                            lang = lang,
                             onModeChange = { viewModel.setAsrIqamaIsFixed(it) },
                             onOffsetChange = { viewModel.setAsrIqamaOffset(it) },
                             onTimeChange = { viewModel.setAsrIqamaTime(it) }
@@ -267,6 +272,7 @@ fun Settings(paddingValues: PaddingValues) {
                             isFixed = maghribIsFixed,
                             offset = maghribOffset,
                             fixedTime = maghribIqamaTimeVal,
+                            lang = lang,
                             onModeChange = { viewModel.setMaghribIqamaIsFixed(it) },
                             onOffsetChange = { viewModel.setMaghribIqamaOffset(it) },
                             onTimeChange = { viewModel.setMaghribIqamaTime(it) }
@@ -277,6 +283,7 @@ fun Settings(paddingValues: PaddingValues) {
                             isFixed = ishaIsFixed,
                             offset = ishaOffset,
                             fixedTime = ishaIqamaTimeVal,
+                            lang = lang,
                             onModeChange = { viewModel.setIshaIqamaIsFixed(it) },
                             onOffsetChange = { viewModel.setIshaIqamaOffset(it) },
                             onTimeChange = { viewModel.setIshaIqamaTime(it) }
@@ -907,6 +914,7 @@ fun IqamaConfigRow(
     isFixed: Boolean,
     offset: Int,
     fixedTime: String,
+    lang: String,
     onModeChange: (Boolean) -> Unit,
     onOffsetChange: (Int) -> Unit,
     onTimeChange: (String) -> Unit
@@ -931,7 +939,7 @@ fun IqamaConfigRow(
                     modifier = Modifier.height(28.dp)
                 ) {
                     Text(
-                        text = if (context.resources.configuration.locales[0].language == "ar") "نسبية" else "Offset",
+                        text = if (lang == "ar") "نسبية" else "Offset",
                         style = MaterialTheme.typography.labelSmall
                     )
                 }
@@ -942,7 +950,7 @@ fun IqamaConfigRow(
                     modifier = Modifier.height(28.dp)
                 ) {
                     Text(
-                        text = if (context.resources.configuration.locales[0].language == "ar") "ثابتة" else "Fixed",
+                        text = if (lang == "ar") "ثابتة" else "Fixed",
                         style = MaterialTheme.typography.labelSmall
                     )
                 }
@@ -958,7 +966,7 @@ fun IqamaConfigRow(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = if (context.resources.configuration.locales[0].language == "ar") "وقت الإقامة الثابت:" else "Fixed Iqama Time:",
+                    text = if (lang == "ar") "وقت الإقامة الثابت:" else "Fixed Iqama Time:",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.secondary
                 )
@@ -992,7 +1000,7 @@ fun IqamaConfigRow(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = if (context.resources.configuration.locales[0].language == "ar") "بعد الأذان بـ:" else "After Adhan:",
+                    text = if (lang == "ar") "بعد الأذان بـ:" else "After Adhan:",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.secondary
                 )

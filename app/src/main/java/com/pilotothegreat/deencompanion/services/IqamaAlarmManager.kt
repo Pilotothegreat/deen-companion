@@ -1,7 +1,10 @@
-// FIXED: Add canScheduleExactAlarms() check before scheduling exact alarm
+// FIXED v1.4.0: Schedule ALL 5 Iqama alarms per day (today + tomorrow) instead of only the next one.
+// This prevents missed Iqamas when the process dies between prayers.
 package com.pilotothegreat.deencompanion.services
 
 import android.app.AlarmManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -12,11 +15,6 @@ import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
-
-import android.media.AudioAttributes
-import android.media.RingtoneManager
-import android.app.NotificationChannel
-import android.app.NotificationManager
 
 object IqamaAlarmManager {
 
@@ -45,45 +43,45 @@ object IqamaAlarmManager {
         }
     }
 
-    suspend fun scheduleNextIqamaAlarm(context: Context, appPreferenceRepo: AppPreferenceRepo) {
+    /**
+     * Schedules exact alarms for ALL 5 Iqama times for today AND tomorrow.
+     * Past alarms are silently skipped. Future alarms are (re)set atomically.
+     * Call this on: app boot, after settings change, and after each alarm fires.
+     */
+    suspend fun scheduleAllIqamaAlarms(context: Context, appPreferenceRepo: AppPreferenceRepo) {
         val lat = appPreferenceRepo.latitude.first()
         val lon = appPreferenceRepo.longitude.first()
         val tzId = appPreferenceRepo.timezoneId.first()
         val calcMethod = appPreferenceRepo.calcMethod.first()
         val asrSchool = appPreferenceRepo.asrSchool.first()
 
-        // Iqama offsets and modes
-        val fajrOffset = appPreferenceRepo.fajrIqamaOffset.first()
-        val dhuhrOffset = appPreferenceRepo.dhuhrIqamaOffset.first()
-        val asrOffset = appPreferenceRepo.asrIqamaOffset.first()
+        val fajrOffset    = appPreferenceRepo.fajrIqamaOffset.first()
+        val dhuhrOffset   = appPreferenceRepo.dhuhrIqamaOffset.first()
+        val asrOffset     = appPreferenceRepo.asrIqamaOffset.first()
         val maghribOffset = appPreferenceRepo.maghribIqamaOffset.first()
-        val ishaOffset = appPreferenceRepo.ishaIqamaOffset.first()
+        val ishaOffset    = appPreferenceRepo.ishaIqamaOffset.first()
 
-        val fajrIsFixed = appPreferenceRepo.fajrIqamaIsFixed.first()
-        val dhuhrIsFixed = appPreferenceRepo.dhuhrIqamaIsFixed.first()
-        val asrIsFixed = appPreferenceRepo.asrIqamaIsFixed.first()
+        val fajrIsFixed    = appPreferenceRepo.fajrIqamaIsFixed.first()
+        val dhuhrIsFixed   = appPreferenceRepo.dhuhrIqamaIsFixed.first()
+        val asrIsFixed     = appPreferenceRepo.asrIqamaIsFixed.first()
         val maghribIsFixed = appPreferenceRepo.maghribIqamaIsFixed.first()
-        val ishaIsFixed = appPreferenceRepo.ishaIqamaIsFixed.first()
+        val ishaIsFixed    = appPreferenceRepo.ishaIqamaIsFixed.first()
 
-        val fajrIqamaTimeVal = appPreferenceRepo.fajrIqamaTime.first()
-        val dhuhrIqamaTimeVal = appPreferenceRepo.dhuhrIqamaTime.first()
-        val asrIqamaTimeVal = appPreferenceRepo.asrIqamaTime.first()
-        val maghribIqamaTimeVal = appPreferenceRepo.maghribIqamaTime.first()
-        val ishaIqamaTimeVal = appPreferenceRepo.ishaIqamaTime.first()
+        val fajrFixedTimeVal    = appPreferenceRepo.fajrIqamaTime.first()
+        val dhuhrFixedTimeVal   = appPreferenceRepo.dhuhrIqamaTime.first()
+        val asrFixedTimeVal     = appPreferenceRepo.asrIqamaTime.first()
+        val maghribFixedTimeVal = appPreferenceRepo.maghribIqamaTime.first()
+        val ishaFixedTimeVal    = appPreferenceRepo.ishaIqamaTime.first()
 
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
         val zoneId = try { ZoneId.of(tzId) } catch (e: Exception) { ZoneId.systemDefault() }
         val now = LocalDateTime.now(zoneId)
 
-        // Find next prayer time (checking today and tomorrow)
-        var alarmDateTime: LocalDateTime? = null
-        var nextPrayerName = ""
-
-        val daysToCheck = listOf(LocalDate.now(zoneId), LocalDate.now(zoneId).plusDays(1))
-
-        outer@ for (date in daysToCheck) {
-            // Get timezone offset in hours for this date
-            val zonedDateTime = date.atStartOfDay(zoneId)
-            val offsetHours = zonedDateTime.offset.totalSeconds / 3600.0
+        // Schedule today (dayOffset=0) and tomorrow (dayOffset=1)
+        for (dayOffset in 0..1) {
+            val date = LocalDate.now(zoneId).plusDays(dayOffset.toLong())
+            val zonedDate = date.atStartOfDay(zoneId)
+            val offsetHours = zonedDate.offset.totalSeconds / 3600.0
 
             val times = PrayerTimeCalculator.calculate(
                 date = date,
@@ -94,95 +92,68 @@ object IqamaAlarmManager {
                 asrSchool = asrSchool
             )
 
-            val fajrIqamaTime = if (fajrIsFixed) {
-                parseFixedTime(fajrIqamaTimeVal) ?: times.fajr.plusMinutes(fajrOffset.toLong())
-            } else {
-                times.fajr.plusMinutes(fajrOffset.toLong())
-            }
-            val dhuhrIqamaTime = if (dhuhrIsFixed) {
-                parseFixedTime(dhuhrIqamaTimeVal) ?: times.dhuhr.plusMinutes(dhuhrOffset.toLong())
-            } else {
-                times.dhuhr.plusMinutes(dhuhrOffset.toLong())
-            }
-            val asrIqamaTime = if (asrIsFixed) {
-                parseFixedTime(asrIqamaTimeVal) ?: times.asr.plusMinutes(asrOffset.toLong())
-            } else {
-                times.asr.plusMinutes(asrOffset.toLong())
-            }
-            val maghribIqamaTime = if (maghribIsFixed) {
-                parseFixedTime(maghribIqamaTimeVal) ?: times.maghrib.plusMinutes(maghribOffset.toLong())
-            } else {
-                times.maghrib.plusMinutes(maghribOffset.toLong())
-            }
-            val ishaIqamaTime = if (ishaIsFixed) {
-                parseFixedTime(ishaIqamaTimeVal) ?: times.isha.plusMinutes(ishaOffset.toLong())
-            } else {
-                times.isha.plusMinutes(ishaOffset.toLong())
-            }
+            val fajrTime    = if (fajrIsFixed)    parseFixedTime(fajrFixedTimeVal)    ?: times.fajr.plusMinutes(fajrOffset.toLong())    else times.fajr.plusMinutes(fajrOffset.toLong())
+            val dhuhrTime   = if (dhuhrIsFixed)   parseFixedTime(dhuhrFixedTimeVal)   ?: times.dhuhr.plusMinutes(dhuhrOffset.toLong())   else times.dhuhr.plusMinutes(dhuhrOffset.toLong())
+            val asrTime     = if (asrIsFixed)     parseFixedTime(asrFixedTimeVal)     ?: times.asr.plusMinutes(asrOffset.toLong())       else times.asr.plusMinutes(asrOffset.toLong())
+            val maghribTime = if (maghribIsFixed) parseFixedTime(maghribFixedTimeVal) ?: times.maghrib.plusMinutes(maghribOffset.toLong()) else times.maghrib.plusMinutes(maghribOffset.toLong())
+            val ishaTime    = if (ishaIsFixed)    parseFixedTime(ishaFixedTimeVal)    ?: times.isha.plusMinutes(ishaOffset.toLong())     else times.isha.plusMinutes(ishaOffset.toLong())
 
-            val prayerList = listOf(
-                Pair("Fajr", fajrIqamaTime),
-                Pair("Dhuhr", dhuhrIqamaTime),
-                Pair("Asr", asrIqamaTime),
-                Pair("Maghrib", maghribIqamaTime),
-                Pair("Isha", ishaIqamaTime)
+            // Unique request codes: prayer 1001-1005 for today, 1011-1015 for tomorrow
+            val prayers = listOf(
+                Triple("Fajr",    fajrTime,    1001 + dayOffset * 10),
+                Triple("Dhuhr",   dhuhrTime,   1002 + dayOffset * 10),
+                Triple("Asr",     asrTime,     1003 + dayOffset * 10),
+                Triple("Maghrib", maghribTime, 1004 + dayOffset * 10),
+                Triple("Isha",    ishaTime,    1005 + dayOffset * 10)
             )
 
-            for (p in prayerList) {
-                val pDateTime = LocalDateTime.of(date, p.second)
-                if (pDateTime.isAfter(now)) {
-                    alarmDateTime = pDateTime
-                    nextPrayerName = p.first
-                    break@outer
+            for ((name, localTime, requestCode) in prayers) {
+                val alarmDT = LocalDateTime.of(date, localTime)
+                if (alarmDT.isAfter(now)) {
+                    scheduleExactAlarm(context, alarmManager, name, alarmDT, zoneId, requestCode)
                 }
-            }
-        }
-
-        if (alarmDateTime != null) {
-            try {
-                val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
-                val intent = Intent(context, IqamaAlarmReceiver::class.java).apply {
-                    putExtra("PRAYER_NAME", nextPrayerName)
-                }
-
-                val requestCode = "Iqama_$nextPrayerName".hashCode()
-                val pendingIntent = PendingIntent.getBroadcast(
-                    context,
-                    requestCode,
-                    intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-
-                val epochMillis = alarmDateTime.atZone(zoneId).toInstant().toEpochMilli()
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    if (alarmManager.canScheduleExactAlarms()) {
-                        alarmManager.setExactAndAllowWhileIdle(
-                            AlarmManager.RTC_WAKEUP,
-                            epochMillis,
-                            pendingIntent
-                        )
-                    } else {
-                        // Fallback to inexact alarm
-                        alarmManager.setAndAllowWhileIdle(
-                            AlarmManager.RTC_WAKEUP,
-                            epochMillis,
-                            pendingIntent
-                        )
-                    }
-                } else {
-                    alarmManager.setExactAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP,
-                        epochMillis,
-                        pendingIntent
-                    )
-                }
-            } catch (e: SecurityException) {
-                e.printStackTrace()
-            } catch (e: Exception) {
-                e.printStackTrace()
             }
         }
     }
-}
 
+    private fun scheduleExactAlarm(
+        context: Context,
+        alarmManager: AlarmManager,
+        prayerName: String,
+        alarmDT: LocalDateTime,
+        zoneId: ZoneId,
+        requestCode: Int
+    ) {
+        try {
+            val intent = Intent(context, IqamaAlarmReceiver::class.java).apply {
+                putExtra("PRAYER_NAME", prayerName)
+            }
+            val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                requestCode,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            val epochMillis = alarmDT.atZone(zoneId).toInstant().toEpochMilli()
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (alarmManager.canScheduleExactAlarms()) {
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, epochMillis, pendingIntent)
+                } else {
+                    alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, epochMillis, pendingIntent)
+                }
+            } else {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, epochMillis, pendingIntent)
+            }
+        } catch (e: SecurityException) {
+            e.printStackTrace()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    /** Backward-compat alias kept so callers don't break before being updated. */
+    suspend fun scheduleNextIqamaAlarm(context: Context, appPreferenceRepo: AppPreferenceRepo) {
+        scheduleAllIqamaAlarms(context, appPreferenceRepo)
+    }
+}

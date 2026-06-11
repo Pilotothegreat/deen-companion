@@ -244,6 +244,19 @@ fun getLocalizedInspirationRef(ref: String, lang: String): String {
         .replace("0", "٠")
 }
 
+fun String.toArabicNumerals(): String {
+    return this.replace("1", "١")
+        .replace("2", "٢")
+        .replace("3", "٣")
+        .replace("4", "٤")
+        .replace("5", "٥")
+        .replace("6", "٦")
+        .replace("7", "٧")
+        .replace("8", "٨")
+        .replace("9", "٩")
+        .replace("0", "٠")
+}
+
 fun calculateNextPrayer(
     times: PrayerTimeCalculator.PrayerTimes,
     timezoneId: String,
@@ -286,14 +299,18 @@ fun calculateNextPrayer(
     val minutes = duration.toMinutes() % 60
     val seconds = duration.seconds % 60
 
-    val remainingStr = when {
-        hours > 0 -> "${hours}h ${minutes}m"
-        minutes >= 5 -> "${minutes}m ${seconds}s"
-        else -> String.format(Locale.US, "%02d:%02d", minutes, seconds)
+    val sharedPrefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+    val lang = sharedPrefs.getString("app_language", "ar") ?: "ar"
+
+    val remainingStr = if (hours > 0) {
+        String.format(Locale.US, "%02d:%02d:%02d", hours, minutes, seconds)
+    } else {
+        String.format(Locale.US, "%02d:%02d", minutes, seconds)
     }
+    val finalRemainingStr = if (lang == "ar") remainingStr.toArabicNumerals() else remainingStr
 
     val timeStr = nextTime.toLocaleHourString(context)
-    return NextPrayer(nextName, remainingStr, timeStr, totalSeconds)
+    return NextPrayer(nextName, finalRemainingStr, timeStr, totalSeconds)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -1563,18 +1580,8 @@ fun TasbihDialCard(
                                     vibrator?.vibrate(120)
                                 }
                             } catch (e: Exception) {}
-                            
-                            val nextDhikr = when (dhikr) {
-                                "سبحان الله" -> "الحمد لله"
-                                "الحمد لله" -> "الله أكبر"
-                                "الله أكبر" -> "لا إله إلا الله"
-                                else -> "سبحان الله"
-                            }
-                            viewModel.setTasbihDhikr(nextDhikr)
-                            viewModel.resetTasbih()
-                        } else {
-                            viewModel.incrementTasbih()
                         }
+                        viewModel.incrementTasbih()
                     },
                 contentAlignment = Alignment.Center
             ) {
@@ -1605,8 +1612,7 @@ fun TasbihDialCard(
                         val nextDhikr = when (dhikr) {
                             "سبحان الله" -> "الحمد لله"
                             "الحمد لله" -> "الله أكبر"
-                            "الله أكبر" -> "لا إله إلا الله"
-                            else -> "سبحان الله"
+                            else -> "سبحان الله" // AllahuAkbar loops back to SubhanAllah (Sunnah 3-dhikr cycle)
                         }
                         viewModel.setTasbihDhikr(nextDhikr)
                     },

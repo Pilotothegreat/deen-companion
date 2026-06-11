@@ -34,8 +34,7 @@ class TasbihWidgetProvider : AppWidgetProvider(), KoinComponent {
             val scope = CoroutineScope(Dispatchers.Default)
             scope.launch {
                 try {
-                    val currentCount = repo.tasbihCount.first()
-                    repo.setTasbihCount(currentCount + 1)
+                    repo.incrementAndCycleTasbih()
                     
                     // Update widget immediately
                     val appWidgetManager = AppWidgetManager.getInstance(context)

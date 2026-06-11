@@ -285,7 +285,9 @@ fun Hadith(paddingValues: PaddingValues) {
                     .weight(1f)
             ) { page ->
                 when (page) {
-                    0 -> CollectionsTab(books, lang) { viewModel.selectBook(it.id) }
+                    0 -> CollectionsTab(books, lang, isSyncing) {
+                                viewModel.selectBook(it.id)
+                            }
                     1 -> FavoritesTab(favorites, books, viewModel, paddingBottom, lang)
                 }
             }
@@ -299,11 +301,30 @@ fun Hadith(paddingValues: PaddingValues) {
 fun CollectionsTab(
     books: List<HadithBookEntity>,
     lang: String,
+    isSyncing: Boolean = false,
     onBookClick: (HadithBookEntity) -> Unit
 ) {
-    if (books.isEmpty()) {
+    if (isSyncing && books.isEmpty()) {
+        // Actively downloading for the first time
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
+        }
+    } else if (books.isEmpty()) {
+        // Loaded but CDN unreachable — show error + retry hint
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.padding(32.dp)
+            ) {
+                Text(
+                    text = if (lang == "ar") "لم يتم تحميل المجموعات. تحقق من اتصالك بالإنترنت وافتح التطبيق مرة أخرى."
+                             else "Collections could not be loaded. Check your internet connection and reopen the app.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     } else {
         LazyColumn(
@@ -420,6 +441,83 @@ fun HadithCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
+            // Card Header
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Collection + Number
+                val hadithNumText = if (lang == "ar") {
+                    "حديث رقم ${toArabicNumerals(hadith.number)}"
+                } else {
+                    "Hadith #${hadith.number}"
+                }
+                
+                val label = if (showCollectionName) {
+                    "$collectionName • $hadithNumText"
+                } else {
+                    hadithNumText
+                }
+                
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = colorScheme.secondary,
+                    fontWeight = FontWeight.Bold
+                )
+                
+                // Grade Badge
+                if (hadith.grade.isNotEmpty()) {
+                    val gradeText = getLocalizedGrade(hadith.grade, lang)
+                    val isSahih = hadith.grade.contains("Sahih", ignoreCase = true)
+                    val isHasan = hadith.grade.contains("Hasan", ignoreCase = true)
+                    val isDaif = hadith.grade.contains("Da'if", ignoreCase = true) || hadith.grade.contains("Daif", ignoreCase = true)
+                    val isMawdu = hadith.grade.contains("Mawdu", ignoreCase = true)
+                    
+                    val (bg, fg) = when {
+                        isSahih -> Color(0xFFE8F5E9) to Color(0xFF2E7D32)
+                        isHasan -> Color(0xFFE3F2FD) to Color(0xFF1565C0)
+                        isDaif -> Color(0xFFFFEBEE) to Color(0xFFC62828)
+                        isMawdu -> Color(0xFFECEFF1) to Color(0xFF37474F)
+                        else -> colorScheme.surfaceVariant to colorScheme.onSurfaceVariant
+                    }
+                    
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = bg,
+                        modifier = Modifier.padding(start = 8.dp)
+                    ) {
+                        Text(
+                            text = gradeText,
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                            color = fg,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+            }
+
+            // Narrator (if present)
+            if (hadith.narrator.isNotEmpty()) {
+                val localizedNarrator = getLocalizedNarrator(hadith.narrator, lang)
+                val narratorText = if (lang == "ar") {
+                    "عن $localizedNarrator:"
+                } else {
+                    "Narrated by ${hadith.narrator}:"
+                }
+                Text(
+                    text = narratorText,
+                    style = MaterialTheme.typography.labelLarge.copy(fontStyle = FontStyle.Italic, fontWeight = FontWeight.Bold),
+                    color = colorScheme.primary,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                )
+            }
+
             // Arabic Text (always)
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                 Text(
@@ -530,5 +628,22 @@ fun getLocalizedGrade(grade: String, lang: String): String {
         grade.contains("Da'if", ignoreCase = true) || grade.contains("Daif", ignoreCase = true) -> "ضعيف"
         grade.contains("Mawdu", ignoreCase = true) || grade.contains("Fabricated", ignoreCase = true) -> "موضوع"
         else -> grade
+    }
+}
+
+fun getLocalizedNarrator(narrator: String, lang: String): String {
+    if (lang != "ar") return narrator
+    val clean = narrator.trim()
+    return when {
+        clean.contains("Abu Hurairah", ignoreCase = true) || clean.contains("Abu Hurayrah", ignoreCase = true) -> "أبو هريرة رضي الله عنه"
+        clean.contains("Aisha", ignoreCase = true) || clean.contains("Aishah", ignoreCase = true) -> "عائشة رضي الله عنها"
+        clean.contains("Anas bin Malik", ignoreCase = true) || clean.contains("Anas ibn Malik", ignoreCase = true) -> "أنس بن مالك رضي الله عنه"
+        clean.contains("Ibn Umar", ignoreCase = true) || clean.contains("Abdullah bin Umar", ignoreCase = true) -> "عبد الله بن عمر رضي الله عنهما"
+        clean.contains("Jabir bin Abdullah", ignoreCase = true) || clean.contains("Jabir ibn Abdullah", ignoreCase = true) -> "جابر بن عبد الله رضي الله عنه"
+        clean.contains("Abu Said al-Khudri", ignoreCase = true) || clean.contains("Abu Sa'id al-Khudri", ignoreCase = true) -> "أبو سعيد الخدري رضي الله عنه"
+        clean.contains("Umar bin al-Khattab", ignoreCase = true) || clean.contains("Umar ibn al-Khattab", ignoreCase = true) -> "عمر بن الخطاب رضي الله عنه"
+        clean.contains("Ali bin Abi Talib", ignoreCase = true) || clean.contains("Ali ibn Abi Talib", ignoreCase = true) -> "علي بن أبي طالب رضي الله عنه"
+        clean.contains("Ibn Abbas", ignoreCase = true) || clean.contains("Abdullah bin Abbas", ignoreCase = true) -> "عبد الله بن عباس رضي الله عنهما"
+        else -> clean
     }
 }

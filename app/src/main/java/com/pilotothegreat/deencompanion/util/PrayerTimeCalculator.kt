@@ -81,7 +81,7 @@ class PrayerTimeCalculator {
 
             // Mid Day (Dhuhr)
             val dhuhrLocal = 12.0 + timezoneOffsetHours - (longitude / 15.0) - eqt
-            val dhuhrBuffer = method.dhuhrBufferMins / 60.0
+            val dhuhrBuffer = max(1, method.dhuhrBufferMins) / 60.0
             val dhuhrTime = doubleToTime(dhuhrLocal + dhuhrBuffer) // Precautionary buffer for Zawal if applicable
 
             // Sunrise and Sunset

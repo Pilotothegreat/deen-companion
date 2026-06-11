@@ -29,8 +29,6 @@ class IqamaAlarmReceiver : BroadcastReceiver(), KoinComponent {
         try {
             val prayerName = intent.getStringExtra("PRAYER_NAME") ?: "Prayer"
 
-            showPrayerNotification(context, prayerName, isIqama = true)
-
             // Play notification sound with custom volume and reschedule next alarm
             val pendingResult = goAsync()
             val scope = CoroutineScope(Dispatchers.Default)
@@ -38,6 +36,18 @@ class IqamaAlarmReceiver : BroadcastReceiver(), KoinComponent {
             try {
                 scope.launch {
                     try {
+                        val lang = repo.appLanguage.first()
+                        val localizedPrayerName = when (prayerName) {
+                            "Fajr" -> if (lang == "ar") "الفجر" else "Fajr"
+                            "Dhuhr" -> if (lang == "ar") "الظهر" else "Dhuhr"
+                            "Asr" -> if (lang == "ar") "العصر" else "Asr"
+                            "Maghrib" -> if (lang == "ar") "المغرب" else "Maghrib"
+                            "Isha" -> if (lang == "ar") "العشاء" else "Isha"
+                            else -> prayerName
+                        }
+
+                        showPrayerNotification(context, localizedPrayerName, isIqama = true, lang = lang)
+
                         val volume = repo.notificationVolume.first()
                         if (volume > 0) {
                             try {
@@ -59,16 +69,14 @@ class IqamaAlarmReceiver : BroadcastReceiver(), KoinComponent {
                                         mp.release()
                                         true
                                     }
-                                    setOnPreparedListener { mp ->
-                                        mp.start()
-                                    }
-                                    prepareAsync()
+                                    prepare() // synchronous – we are already on Dispatchers.Default
+                                    start()
                                 }
                             } catch (e: Exception) {
                                 e.printStackTrace()
                             }
                         }
-                        IqamaAlarmManager.scheduleNextIqamaAlarm(context, repo)
+                        IqamaAlarmManager.scheduleAllIqamaAlarms(context, repo)
                     } catch (e: Exception) {
                         e.printStackTrace()
                     } finally {
@@ -94,9 +102,18 @@ class IqamaAlarmReceiver : BroadcastReceiver(), KoinComponent {
         }
     }
 
-    private fun showPrayerNotification(context: Context, prayerName: String, isIqama: Boolean) {
-        val title = if (isIqama) "Iqama — $prayerName" else "Prayer Time — $prayerName"
-        val body  = if (isIqama) "Iqama for $prayerName has begun" else "Time for $prayerName prayer"
+    private fun showPrayerNotification(context: Context, prayerName: String, isIqama: Boolean, lang: String) {
+        val title = if (lang == "ar") {
+            if (isIqama) "الإقامة — $prayerName" else "حان وقت صلاة — $prayerName"
+        } else {
+            if (isIqama) "Iqama — $prayerName" else "Prayer Time — $prayerName"
+        }
+
+        val body = if (lang == "ar") {
+            if (isIqama) "إقامة صلاة $prayerName قد بدأت" else "حان الآن وقت صلاة $prayerName"
+        } else {
+            if (isIqama) "Iqama for $prayerName has begun" else "Time for $prayerName prayer"
+        }
 
         // Build notification without default sound so that our MediaPlayer sound plays cleanly at the customized volume
         val notification = NotificationCompat.Builder(context, "prayer_times")

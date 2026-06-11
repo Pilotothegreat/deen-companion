@@ -6,6 +6,8 @@ import android.location.Location
 import android.location.LocationManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
@@ -34,6 +36,10 @@ object LocationHelper {
                 if (bestLocation == null || l.accuracy < bestLocation.accuracy) {
                     bestLocation = l
                 }
+            }
+
+            if (bestLocation == null) {
+                bestLocation = requestFreshLocation(locationManager)
             }
 
             if (bestLocation != null) {
@@ -66,6 +72,55 @@ object LocationHelper {
             }
         }
         return@withContext null
+    }
+
+    @SuppressLint("MissingPermission")
+    private suspend fun requestFreshLocation(locationManager: LocationManager): Location? = suspendCancellableCoroutine { continuation ->
+        val providers = locationManager.getProviders(true)
+        val provider = when {
+            providers.contains(LocationManager.GPS_PROVIDER) -> LocationManager.GPS_PROVIDER
+            providers.contains(LocationManager.NETWORK_PROVIDER) -> LocationManager.NETWORK_PROVIDER
+            providers.isNotEmpty() -> providers[0]
+            else -> null
+        }
+
+        if (provider == null) {
+            continuation.resume(null)
+            return@suspendCancellableCoroutine
+        }
+
+        val listener = object : android.location.LocationListener {
+            override fun onLocationChanged(location: Location) {
+                locationManager.removeUpdates(this)
+                if (continuation.isActive) {
+                    continuation.resume(location)
+                }
+            }
+            @Deprecated("Deprecated in Java")
+            override fun onStatusChanged(provider: String?, status: Int, extras: android.os.Bundle?) {}
+            override fun onProviderEnabled(provider: String) {}
+            override fun onProviderDisabled(provider: String) {}
+        }
+
+        try {
+            locationManager.requestLocationUpdates(
+                provider,
+                0L,
+                0f,
+                listener,
+                android.os.Looper.getMainLooper()
+            )
+        } catch (e: Exception) {
+            if (continuation.isActive) {
+                continuation.resume(null)
+            }
+        }
+
+        continuation.invokeOnCancellation {
+            try {
+                locationManager.removeUpdates(listener)
+            } catch (e: Exception) {}
+        }
     }
 
     suspend fun fetchIpLocation(): LocationData? = withContext(Dispatchers.IO) {

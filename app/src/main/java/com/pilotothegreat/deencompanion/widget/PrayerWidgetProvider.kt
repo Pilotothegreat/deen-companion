@@ -119,8 +119,18 @@ class PrayerWidgetProvider : AppWidgetProvider(), KoinComponent {
                     // Get next prayer in localized context
                     val next = calculateNextPrayer(times, tzId, localizedContext)
 
-                    views.setTextViewText(R.id.widget_prayer_name, next.name)
-                    views.setTextViewText(R.id.widget_countdown, "in ${next.remainingTimeStr}")
+                    val countdownPrefix = if (lang == "ar") "خلال" else "in"
+                    val localizedPrayerName = when (next.name) {
+                        "Fajr" -> localizedContext.getString(R.string.fajr)
+                        "Sunrise" -> localizedContext.getString(R.string.sunrise)
+                        "Dhuhr" -> localizedContext.getString(R.string.dhuhr)
+                        "Asr" -> localizedContext.getString(R.string.asr)
+                        "Maghrib" -> localizedContext.getString(R.string.maghrib)
+                        "Isha" -> localizedContext.getString(R.string.isha)
+                        else -> next.name
+                    }
+                    views.setTextViewText(R.id.widget_prayer_name, localizedPrayerName)
+                    views.setTextViewText(R.id.widget_countdown, "$countdownPrefix ${next.remainingTimeStr}")
                     views.setTextViewText(R.id.widget_prayer_time, next.timeStr)
                 } else {
                     views.setTextViewText(R.id.widget_prayer_name, localizedContext.getString(R.string.app_name))
