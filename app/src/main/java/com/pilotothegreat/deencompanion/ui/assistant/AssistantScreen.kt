@@ -52,6 +52,8 @@ import java.util.Locale
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import android.widget.Toast
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -111,8 +113,45 @@ fun AssistantScreen(
                 .hazeSource(hazeState)
                 .padding(innerPadding)
         ) {
-            
+            // ── Islamic Disclaimer Banner ─────────────────────────────────────────
+            // Islamically required: clarify this is a local keyword search, not fatwa
+            val gold = androidx.compose.ui.graphics.Color(0xFFD4A855)
+            Card(
+                modifier = androidx.compose.ui.Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .semantics { contentDescription = context.getString(R.string.cd_assistant_disclaimer) },
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = colorScheme.surfaceContainerHigh
+                ),
+                border = androidx.compose.foundation.BorderStroke(1.dp, gold.copy(alpha = 0.5f))
+            ) {
+                Row(
+                    modifier = androidx.compose.ui.Modifier.padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Text(text = "ℹ️", fontSize = 18.sp)
+                    Column {
+                        Text(
+                            text = stringResource(R.string.assistant_disclaimer_title),
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = gold
+                            )
+                        )
+                        Text(
+                            text = stringResource(R.string.assistant_disclaimer_body),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
             // Conversation History List
+
             LazyColumn(
                 state = listState,
                 modifier = Modifier

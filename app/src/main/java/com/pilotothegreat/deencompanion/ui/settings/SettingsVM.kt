@@ -89,6 +89,9 @@ class SettingsVM(
     val hijriOffset: StateFlow<Int> = appPreferenceRepo.hijriOffset
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
+    val useIpLocationFallback: StateFlow<Boolean> = appPreferenceRepo.useIpLocationFallback
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
     private val _updateAvailable = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
     val updateAvailable: StateFlow<String?> = _updateAvailable
 
@@ -313,6 +316,12 @@ class SettingsVM(
     fun setHijriOffset(value: Int) {
         viewModelScope.launch {
             appPreferenceRepo.setHijriOffset(value)
+        }
+    }
+
+    fun setUseIpLocationFallback(value: Boolean) {
+        viewModelScope.launch {
+            appPreferenceRepo.setUseIpLocationFallback(value)
         }
     }
 

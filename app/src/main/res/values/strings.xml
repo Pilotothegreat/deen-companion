@@ -200,4 +200,43 @@
     <string name="exact_alarm_permission_required_desc">This app needs exact alarm permission for accurate Iqama reminders.</string>
     <string name="grant">Grant</string>
     <string name="ai_assistant">AI Assistant</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_welcome_title">Assalamu Alaikum 🌙</string>
+    <string name="onboarding_welcome_subtitle">Your private, offline Islamic companion.\nNo accounts. No ads. No tracking.</string>
+    <string name="onboarding_permissions_title">A few permissions needed</string>
+    <string name="onboarding_location_title">📍 Location</string>
+    <string name="onboarding_location_desc">Used only to calculate accurate prayer times and Qibla direction. Never shared or stored remotely.</string>
+    <string name="onboarding_notifications_title">🔔 Notifications</string>
+    <string name="onboarding_notifications_desc">Required to deliver Adhan and Iqama reminders at the correct prayer times.</string>
+    <string name="onboarding_alarm_title">⏰ Exact Alarms</string>
+    <string name="onboarding_alarm_desc">Required so prayer alarms fire at the precise second — not delayed by battery optimization.</string>
+    <string name="onboarding_battery_title">🔋 Battery Optimization</string>
+    <string name="onboarding_battery_desc">Allows the app to reschedule missed alarms after the device wakes. This ensures you never miss a prayer reminder.</string>
+    <string name="onboarding_grant_permissions">Grant Permissions</string>
+    <string name="onboarding_allow_battery">Allow Battery Exception</string>
+    <string name="onboarding_ready_title">You\'re all set!</string>
+    <string name="onboarding_ready_subtitle">Bismillah. May Allah accept your worship.</string>
+    <string name="onboarding_start">Start</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_skip">Skip</string>
+
+    <!-- Assistant disclaimer -->
+    <string name="assistant_disclaimer_title">Local Text Search</string>
+    <string name="assistant_disclaimer_body">This assistant searches verified Quran and Hadith texts stored offline on your device. It is not a fatwa service or scholarly opinion tool. Always consult a qualified scholar for religious rulings.</string>
+
+    <!-- IP Location Toggle -->
+    <string name="ip_location_fallback_title">Internet location fallback</string>
+    <string name="ip_location_fallback_desc">If GPS is unavailable, use IP-based geolocation to estimate your city. Requires internet access. Disable for strict offline mode.</string>
+
+    <!-- Accessibility content descriptions -->
+    <string name="cd_prayer_countdown">Prayer countdown timer showing time remaining until next prayer</string>
+    <string name="cd_tasbih_button">Tasbih counter. Tap to count dhikr</string>
+    <string name="cd_play_quran">Play or pause Quran recitation</string>
+    <string name="cd_next_verse">Skip to next verse</string>
+    <string name="cd_prev_verse">Go to previous verse</string>
+    <string name="cd_qibla_compass">Qibla compass showing direction to Makkah</string>
+    <string name="cd_assistant_disclaimer">Assistant information: local search only, not a fatwa service</string>
+    <string name="cd_mic_button">Microphone button for voice input</string>
 </resources>
+

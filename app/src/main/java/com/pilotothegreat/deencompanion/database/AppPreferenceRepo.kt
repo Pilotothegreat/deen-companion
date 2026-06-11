@@ -168,6 +168,8 @@ class AppPreferenceRepo(
         private val ASR_IQAMA_TIME = stringPreferencesKey("asr_iqama_time")
         private val MAGHRIB_IQAMA_TIME = stringPreferencesKey("maghrib_iqama_time")
         private val ISHA_IQAMA_TIME = stringPreferencesKey("isha_iqama_time")
+        private val IS_ONBOARDING_COMPLETE = booleanPreferencesKey("is_onboarding_complete")
+        private val USE_IP_LOCATION_FALLBACK = booleanPreferencesKey("use_ip_location_fallback")
     }
 
     // Location Settings
@@ -430,4 +432,13 @@ class AppPreferenceRepo(
         dataStore.edit { it[TASBIH_HISTORY] = "[]" }
         saveTasbihToRoom()
     }
+
+    // Onboarding complete flag (replaces SharedPreferences "deen_prefs" first_launch)
+    val isOnboardingComplete: Flow<Boolean> = data.map { it[IS_ONBOARDING_COMPLETE] ?: false }.distinctUntilChanged()
+    suspend fun setOnboardingComplete() = dataStore.edit { it[IS_ONBOARDING_COMPLETE] = true }
+
+    // IP-based location fallback toggle (defaults true for existing installs, user can disable for strict offline mode)
+    val useIpLocationFallback: Flow<Boolean> = data.map { it[USE_IP_LOCATION_FALLBACK] ?: true }.distinctUntilChanged()
+    suspend fun setUseIpLocationFallback(value: Boolean) = dataStore.edit { it[USE_IP_LOCATION_FALLBACK] = value }
 }
+

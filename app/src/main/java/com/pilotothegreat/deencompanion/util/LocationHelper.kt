@@ -24,7 +24,7 @@ object LocationHelper {
     )
 
     @SuppressLint("MissingPermission")
-    suspend fun getDeviceLocation(context: Context): LocationData? = withContext(Dispatchers.IO) {
+    suspend fun getDeviceLocation(context: Context, useIpFallback: Boolean = true): LocationData? = withContext(Dispatchers.IO) {
         val hasCoarsePerm = context.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED
 
         if (hasCoarsePerm) {
@@ -74,8 +74,15 @@ object LocationHelper {
                 )
             }
         }
+
+        // Only attempt IP-based fallback if the user has allowed it
+        if (useIpFallback) {
+            return@withContext fetchIpLocation()
+        }
+
         return@withContext null
     }
+
 
     @SuppressLint("MissingPermission")
     private suspend fun requestFreshLocation(locationManager: LocationManager): Location? = suspendCancellableCoroutine { continuation ->

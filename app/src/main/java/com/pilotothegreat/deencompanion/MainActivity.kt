@@ -1,67 +1,54 @@
-// FIXED: Request SCHEDULE_EXACT_ALARM permission on first launch if Android 12+ and add try-catch wrappers
+// v1.4.5: Consolidated locale management, replaced double-dialog with OnboardingScreen,
+// removed SharedPreferences first-launch flag (now DataStore IS_ONBOARDING_COMPLETE),
+// removed Robolectric checks from production code
 package com.pilotothegreat.deencompanion
 
+import android.app.Activity
 import android.content.Context
-import android.os.Bundle
-import android.app.AlarmManager
+import android.content.ContextWrapper
+import android.content.res.Configuration
 import android.os.Build
-import android.content.Intent
-import android.net.Uri
-import android.provider.Settings
-import android.Manifest
+import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.lifecycle.lifecycleScope
-import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
-import com.pilotothegreat.deencompanion.services.IqamaAlarmManager
-import com.pilotothegreat.deencompanion.ui.app.App
-import com.pilotothegreat.deencompanion.ui.theme.Theme
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import org.koin.android.ext.android.inject
-import timber.log.Timber
-
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.core.os.LocaleListCompat
+import androidx.lifecycle.lifecycleScope
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
+import com.pilotothegreat.deencompanion.services.AdhanNotificationWorker
+import com.pilotothegreat.deencompanion.services.IqamaAlarmManager
+import com.pilotothegreat.deencompanion.ui.app.App
+import com.pilotothegreat.deencompanion.ui.onboarding.OnboardingScreen
+import com.pilotothegreat.deencompanion.ui.theme.Theme
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 import org.koin.compose.koinInject
+import timber.log.Timber
 import java.util.Locale
-import android.content.res.Configuration
-import androidx.compose.material3.Text
+import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
 
     private val appPreferenceRepo: AppPreferenceRepo by inject()
 
-    private val exactAlarmPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        // User granted or denied exact alarm permission
-    }
-
     override fun attachBaseContext(base: Context) {
-        val isRobolectric = try {
-            Class.forName("org.robolectric.Robolectric") != null
-        } catch (e: Exception) {
-            false
-        }
-        if (isRobolectric) {
-            super.attachBaseContext(base)
-            return
-        }
-
+        // attachBaseContext fires before Koin/Compose/DataStore is ready.
+        // The SharedPreferences "settings" store is kept in sync with DataStore
+        // by AppPreferenceRepo.init(), so this read is always consistent.
         val sharedPrefs = base.getSharedPreferences("settings", Context.MODE_PRIVATE)
         val lang = sharedPrefs.getString("app_language", "ar") ?: "ar"
         val locale = Locale(lang)
@@ -74,7 +61,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         try {
             enableEdgeToEdge()
 
@@ -91,21 +77,14 @@ class MainActivity : ComponentActivity() {
                     Timber.e(e, "Failed to increment launch count")
                 }
                 try {
-                    val isRobolectric = try {
-                        Class.forName("org.robolectric.Robolectric") != null
-                    } catch (e: java.lang.Exception) {
-                        false
-                    }
-                    if (!isRobolectric) {
-                        val workRequest = androidx.work.PeriodicWorkRequestBuilder<com.pilotothegreat.deencompanion.services.AdhanNotificationWorker>(
-                            24, java.util.concurrent.TimeUnit.HOURS
-                        ).build()
-                        androidx.work.WorkManager.getInstance(this@MainActivity).enqueueUniquePeriodicWork(
-                            "adhan_scheduler",
-                            androidx.work.ExistingPeriodicWorkPolicy.KEEP,
-                            workRequest
-                        )
-                    }
+                    val workRequest = PeriodicWorkRequestBuilder<AdhanNotificationWorker>(
+                        24, TimeUnit.HOURS
+                    ).build()
+                    WorkManager.getInstance(this@MainActivity).enqueueUniquePeriodicWork(
+                        "adhan_scheduler",
+                        ExistingPeriodicWorkPolicy.KEEP,
+                        workRequest
+                    )
                 } catch (e: Exception) {
                     Timber.e(e, "Failed to enqueue AdhanNotificationWorker on launch")
                 }
@@ -113,100 +92,16 @@ class MainActivity : ComponentActivity() {
 
             setContent {
                 AppWithLocale {
-                    // Request location/notification permissions on first launch
-                    val showRationale = remember { mutableStateOf(false) }
-                    val permissionsLauncher = rememberLauncherForActivityResult(
-                        ActivityResultContracts.RequestMultiplePermissions()
-                    ) { }
-
-                    val permissionsToRequest = remember {
-                        mutableListOf(
-                            Manifest.permission.ACCESS_COARSE_LOCATION
-                        ).apply {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                add(Manifest.permission.POST_NOTIFICATIONS)
-                            }
-                        }.toTypedArray()
-                    }
-
-                    val context = LocalContext.current
-                    LaunchedEffect(Unit) {
-                        val sharedPrefs = context.getSharedPreferences("deen_prefs", Context.MODE_PRIVATE)
-                        val isFirstLaunch = sharedPrefs.getBoolean("first_launch", true)
-                        if (isFirstLaunch) {
-                            sharedPrefs.edit().putBoolean("first_launch", false).apply()
-                            showRationale.value = true
-                        }
-                    }
-
-                    if (showRationale.value) {
-                        androidx.compose.material3.AlertDialog(
-                            onDismissRequest = {
-                                showRationale.value = false
-                                permissionsLauncher.launch(permissionsToRequest)
-                            },
-                            title = { Text(stringResource(R.string.permissions_required)) },
-                            text = { Text(stringResource(R.string.permissions_required_desc)) },
-                            confirmButton = {
-                                androidx.compose.material3.TextButton(onClick = {
-                                    showRationale.value = false
-                                    permissionsLauncher.launch(permissionsToRequest)
-                                }) {
-                                    Text(stringResource(R.string.ok))
-                                }
-                            }
-                        )
-                    }
-
-                    // Android 12+ (API 31+) Exact Alarm Permission Request
-                    var showExactAlarmRationale by remember { mutableStateOf(false) }
-                    LaunchedEffect(Unit) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                            try {
-                                val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
-                                if (alarmManager != null && !alarmManager.canScheduleExactAlarms()) {
-                                    showExactAlarmRationale = true
-                                }
-                            } catch (e: Exception) {
-                                Timber.e(e, "Error checking exact alarm permission")
-                            }
-                        }
-                    }
-
-                    if (showExactAlarmRationale) {
-                        androidx.compose.material3.AlertDialog(
-                            onDismissRequest = { showExactAlarmRationale = false },
-                            title = { Text(stringResource(R.string.exact_alarm_permission_required)) },
-                            text = { Text(stringResource(R.string.exact_alarm_permission_required_desc)) },
-                            confirmButton = {
-                                androidx.compose.material3.TextButton(onClick = {
-                                    showExactAlarmRationale = false
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                        try {
-                                            val intent = Intent(
-                                                Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
-                                                Uri.parse("package:${context.packageName}")
-                                            )
-                                            context.startActivity(intent)
-                                        } catch (e: Exception) {
-                                            // Fallback in case Uri parse or launch throws
-                                            exactAlarmPermissionLauncher.launch(Manifest.permission.SCHEDULE_EXACT_ALARM)
-                                        }
-                                    }
-                                }) {
-                                    Text(stringResource(R.string.grant))
-                                }
-                            },
-                            dismissButton = {
-                                androidx.compose.material3.TextButton(onClick = { showExactAlarmRationale = false }) {
-                                    Text(stringResource(R.string.cancel))
-                                }
-                            }
-                        )
-                    }
+                    val repo: AppPreferenceRepo = koinInject()
+                    // null = DataStore not yet read; false = show onboarding; true = show app
+                    val isOnboardingComplete by repo.isOnboardingComplete.collectAsState(initial = null)
 
                     Theme {
-                        App()
+                        when (isOnboardingComplete) {
+                            null -> { /* Await DataStore first emission — brief blank splash */ }
+                            false -> OnboardingScreen(onComplete = { /* state change triggers recompose */ })
+                            true -> App()
+                        }
                     }
                 }
             }
@@ -217,6 +112,14 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/**
+ * Applies the user's chosen language to the Composition context.
+ * Single source of truth for locale in the Compose tree.
+ *
+ * Note: attachBaseContext handles the *initial* locale at Activity creation time
+ * via SharedPreferences (the only hook available that early). This composable
+ * handles *live* locale changes while the app is running.
+ */
 @Composable
 fun AppWithLocale(content: @Composable () -> Unit) {
     val appPreferenceRepo: AppPreferenceRepo = koinInject()
@@ -224,56 +127,30 @@ fun AppWithLocale(content: @Composable () -> Unit) {
     val context = LocalContext.current
 
     val localizedContext = remember(context, lang) {
-        val isRobolectric = try {
-            Class.forName("org.robolectric.Robolectric") != null
-        } catch (e: Exception) {
-            false
-        }
-
-        if (isRobolectric) {
-            context
-        } else {
-            val locale = Locale(lang)
-            Locale.setDefault(locale)
-            val config = Configuration(context.resources.configuration)
-            config.setLocale(locale)
-            config.setLayoutDirection(locale)
-            val configurationContext = context.createConfigurationContext(config)
-            object : android.content.ContextWrapper(context) {
-                override fun getResources() = configurationContext.resources
-                override fun getAssets() = configurationContext.assets
-                override fun getTheme() = configurationContext.theme
-            }
+        val locale = Locale(lang)
+        val config = Configuration(context.resources.configuration)
+        config.setLocale(locale)
+        config.setLayoutDirection(locale)
+        val configCtx = context.createConfigurationContext(config)
+        object : ContextWrapper(context) {
+            override fun getResources() = configCtx.resources
+            override fun getAssets() = configCtx.assets
+            override fun getTheme() = configCtx.theme
         }
     }
 
+    // Keep Android's per-app locale API in sync (covers Android 13+ system settings)
     LaunchedEffect(lang) {
-        val isRobolectric = try {
-            Class.forName("org.robolectric.Robolectric") != null
-        } catch (e: Exception) {
-            false
-        }
-        if (!isRobolectric) {
-            val localeList = androidx.core.os.LocaleListCompat.forLanguageTags(lang)
-            androidx.appcompat.app.AppCompatDelegate.setApplicationLocales(localeList)
-            
-            val currentLanguage = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                context.resources.configuration.locales.get(0).language
-            } else {
-                @Suppress("DEPRECATION")
-                context.resources.configuration.locale.language
-            }
+        AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(lang))
 
+        // Pre-Android 13: recreate the Activity so resources fully reload
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            val currentLanguage = context.resources.configuration.locales[0].language
             if (currentLanguage != lang) {
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-                    var actContext = context
-                    while (actContext is android.content.ContextWrapper) {
-                        if (actContext is android.app.Activity) {
-                            actContext.recreate()
-                            break
-                        }
-                        actContext = actContext.baseContext
-                    }
+                var ctx = context
+                while (ctx is ContextWrapper) {
+                    if (ctx is Activity) { ctx.recreate(); break }
+                    ctx = ctx.baseContext
                 }
             }
         }

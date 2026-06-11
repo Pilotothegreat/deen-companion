@@ -114,6 +114,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -906,10 +908,12 @@ private fun OverviewHero(scrollState: ScrollState, viewModel: OverviewVM, nextPr
         path
     }
 
+    val cdCountdown = stringResource(R.string.cd_prayer_countdown)
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(1.5f)
+            .semantics { contentDescription = cdCountdown }
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -1213,6 +1217,7 @@ fun LiveQiblaCompassCard(
     val lon by viewModel.longitude.collectAsState(initial = 39.8579)
     val qiblaBearing = remember(lat, lon) { calculateQiblaDirection(lat, lon).toFloat() }
     val cookie12SidedShape = rememberCookie12SidedShape()
+    val cdQibla = stringResource(R.string.cd_qibla_compass)
 
     val declination = remember(lat, lon) {
         try {
@@ -1373,6 +1378,7 @@ fun LiveQiblaCompassCard(
 
     Card(
         modifier = modifier
+            .semantics { contentDescription = cdQibla }
             .graphicsLayer {
                 scaleX = cardScale * alignmentScale
                 scaleY = cardScale * alignmentScale
@@ -1561,6 +1567,7 @@ fun TasbihDialCard(
                     }
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f))
+                    .semantics { contentDescription = context.getString(R.string.cd_tasbih_button) }
                     .clickable {
                         haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
                         scope.launch {

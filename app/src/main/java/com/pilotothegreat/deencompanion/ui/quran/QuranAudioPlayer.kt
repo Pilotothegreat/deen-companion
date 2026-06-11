@@ -95,7 +95,7 @@ fun QuranAudioPlayer(
                             } else {
                                 Icon(
                                     imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                                    contentDescription = stringResource(R.string.play_pause),
+                                    contentDescription = stringResource(R.string.cd_play_quran),
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
@@ -163,7 +163,7 @@ fun QuranAudioPlayer(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.SkipPrevious,
-                                contentDescription = stringResource(R.string.previous_verse),
+                                contentDescription = stringResource(R.string.cd_prev_verse),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(18.dp)
                             )
@@ -179,7 +179,7 @@ fun QuranAudioPlayer(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.SkipNext,
-                                contentDescription = stringResource(R.string.next_verse),
+                                contentDescription = stringResource(R.string.cd_next_verse),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(18.dp)
                             )
@@ -195,7 +195,7 @@ fun QuranAudioPlayer(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Close,
-                                contentDescription = "Close player",
+                                contentDescription = stringResource(R.string.close),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(14.dp)
                             )

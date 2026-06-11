@@ -109,8 +109,40 @@ fun Settings(paddingValues: PaddingValues) {
             .hazeSource(hazeState),
         contentPadding = paddingValues
     ) {
-        // --- Prayer Times calculation settings ---
+        // --- Location Settings ---
         categoryTitleSmall { stringResource(R.string.prayer_calculations) }
+        item {
+            val useIpFallback by viewModel.useIpLocationFallback.collectAsState()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .card()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                    Text(
+                        text = stringResource(R.string.ip_location_fallback_title),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = stringResource(R.string.ip_location_fallback_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colorScheme.onSurfaceVariant
+                    )
+                }
+                Switch(
+                    checked = useIpFallback,
+                    onCheckedChange = { viewModel.setUseIpLocationFallback(it) }
+                )
+            }
+        }
+
+        // --- Prayer Times calculation settings ---
+        categoryTitleSmall { stringResource(R.string.calculation_method) }
+
         item {
             val calcMethod by viewModel.calcMethod.collectAsState()
             Box(modifier = Modifier.fillMaxWidth()) {
