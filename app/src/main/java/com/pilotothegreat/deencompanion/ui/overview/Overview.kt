@@ -255,7 +255,6 @@ fun calculateNextPrayer(
 
     val prayers = listOf(
         Pair("Fajr", times.fajr),
-        Pair("Sunrise", times.sunrise),
         Pair("Dhuhr", times.dhuhr),
         Pair("Asr", times.asr),
         Pair("Maghrib", times.maghrib),
