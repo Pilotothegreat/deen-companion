@@ -390,7 +390,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                             val annotated = remember(block.verseItem, isHighlighted, primaryContainerColor, onPrimaryContainerColor, isDark, goldAccent, mushafTextColor) {
                                                 val builder = AnnotatedString.Builder()
                                                 val startOrn = builder.length
-                                                val ornament = "﴾${toArabicNumerals(block.verseItem.verse.id)}﴿ "
+                                                val ornament = "\u200F﴿${toArabicNumerals(block.verseItem.verse.id)}﴾\u200F "
                                                 builder.append(ornament)
                                                 val endOrn = builder.length
 
@@ -514,7 +514,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                     val endSajdah = builder.length
 
                                                     val startOrnNum = builder.length
-                                                    val ornament = "\u200F﴾${toArabicNumerals(verse.id)}﴿\u200F "
+                                                    val ornament = "\u200F﴿${toArabicNumerals(verse.id)}﴾\u200F "
                                                     builder.append(ornament)
                                                     val endOrnNum = builder.length
                                                     
@@ -779,13 +779,13 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                 1
                             }
                             val footerText = if (lang == "ar") {
-                                "الصفحة ${toArabicNumerals(mushafPageNum)}"
+                                "﴿ الصفحة ${toArabicNumerals(mushafPageNum)} ﴾"
                             } else {
-                                "Page $mushafPageNum"
+                                "﴾ Page $mushafPageNum ﴿"
                             }
 
                             Text(
-                                text = "﴾ $footerText ﴿",
+                                text = footerText,
                                 style = MaterialTheme.typography.labelLarge.copy(
                                     fontWeight = FontWeight.Bold,
                                     fontFamily = quranFontFamily,
@@ -1129,7 +1129,7 @@ fun calculateLines(
         if (currentVerses.isNotEmpty()) {
             val builder = AnnotatedString.Builder()
             currentVerses.forEach { verseItem ->
-                val ornament = "﴾${toArabicNumerals(verseItem.verse.id)}﴿ "
+                val ornament = "\u200F﴿${toArabicNumerals(verseItem.verse.id)}﴾\u200F "
                 builder.append(ornament)
                 builder.append(verseItem.verse.text)
                 builder.append(" ")

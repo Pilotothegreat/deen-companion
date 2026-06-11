@@ -1016,7 +1016,7 @@ fun IqamaConfigRow(
                         Text("-", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
                     }
                     Text(
-                        text = String.format(Locale.US, "%d min", offset),
+                        text = stringResource(R.string.minutes_format, offset),
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                         modifier = Modifier.width(60.dp),
                         textAlign = TextAlign.Center
@@ -1063,7 +1063,7 @@ fun OffsetAdjustmentRow(
                 Text("-", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             }
             Text(
-                text = String.format(Locale.US, "%d min", value),
+                text = stringResource(R.string.minutes_format, value),
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 modifier = Modifier.width(60.dp),
                 textAlign = TextAlign.Center

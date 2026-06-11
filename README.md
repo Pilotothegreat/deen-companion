@@ -40,6 +40,13 @@ To build and compile the application locally:
    ./gradlew assembleDebug
    ```
 
+## Privacy & Local Integrations
+
+Deen Companion is designed to be fully privacy-respecting and run completely offline:
+- **Zero Tracking**: We do not collect or upload telemetry, analytics, or personal profiles.
+- **Microphone**: Used exclusively for local offline searches (voice transcription) in the Assistant tab.
+- **Omani Banking Shortcuts**: The app manifest declares `<queries>` blocks for Omani banking applications. This enables Omani users who wish to support development to quickly deep-link directly to their local mobile banking apps to complete bank transfers securely. Deen Companion never reads or handles any financial credentials or transactions.
+
 ## Attribution & Credits
 
 Deen Companion is an open-source project based on the UI/UX structures and preferences engine of the privacy-centric network usage tracker [Traffic Light](https://github.com/leekleak/traffic-light) by [leekleak](https://github.com/leekleak). For licensing and credits details, please refer to [ATTRIBUTION.md](ATTRIBUTION.md).

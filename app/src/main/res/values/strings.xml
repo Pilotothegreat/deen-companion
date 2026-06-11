@@ -66,6 +66,7 @@
     <string name="update_available">New Update Available: %1$s</string>
     <string name="application_settings">Application Settings</string>
     <string name="minutes_after_adhan_detail">Minutes after Adhan</string>
+    <string name="minutes_format">%1$d min</string>
     <string name="arabic_text_size_sp">Arabic text size in sp</string>
     <string name="volume_percent">Volume: %1$d%%</string>
     <string name="notifications">Notifications</string>

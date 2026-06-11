@@ -24,11 +24,30 @@ android {
     defaultConfig {
         applicationId = "com.pilotothegreat.deencompanion"
         minSdk = 26
-        targetSdk = 37
-        versionCode = 141
-        versionName = "1.4.1"
+        targetSdk = 35
+        versionCode = 143
+        versionName = "1.4.3"
         base.archivesName = "deen-$versionName"
     }
+
+    signingConfigs {
+        create("release") {
+            val keystoreFile = rootProject.file("release.jks")
+            if (keystoreFile.exists()) {
+                storeFile = keystoreFile
+                storePassword = System.getenv("RELEASE_KEYSTORE_PASSWORD") ?: "dummy_pass"
+                keyAlias = System.getenv("RELEASE_KEY_ALIAS") ?: "dummy_alias"
+                keyPassword = System.getenv("RELEASE_KEY_PASSWORD") ?: "dummy_pass"
+            } else {
+                val debugConfig = signingConfigs.getByName("debug")
+                storeFile = debugConfig.storeFile
+                storePassword = debugConfig.storePassword
+                keyAlias = debugConfig.keyAlias
+                keyPassword = debugConfig.keyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -37,7 +56,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
             // ADD this to keep Koin working:
             ndk {
                 // Exclude filters if needed

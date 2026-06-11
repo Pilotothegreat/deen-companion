@@ -63,6 +63,7 @@
     <string name="update_available">يتوفر تحديث جديد: %1$s</string>
     <string name="application_settings">إعدادات التطبيق</string>
     <string name="minutes_after_adhan_detail">دقيقة بعد الأذان</string>
+    <string name="minutes_format">%1$d دقيقة</string>
     <string name="arabic_text_size_sp">حجم الخط العربي بالنقاط (sp)</string>
     <string name="volume_percent">مستوى الصوت: %1$d%%</string>
     <string name="notifications">التنبيهات</string>

@@ -7,6 +7,7 @@ import android.location.LocationManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.coroutines.resume
 import org.json.JSONObject
 import java.net.HttpURLConnection
@@ -39,7 +40,9 @@ object LocationHelper {
             }
 
             if (bestLocation == null) {
-                bestLocation = requestFreshLocation(locationManager)
+                bestLocation = withTimeoutOrNull(10000L) {
+                    requestFreshLocation(locationManager)
+                }
             }
 
             if (bestLocation != null) {
@@ -150,7 +153,7 @@ object LocationHelper {
 
         // Try Provider 2: ip-api.com
         try {
-            val url = URL("http://ip-api.com/json/")
+            val url = URL("https://ip-api.com/json/")
             val connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = "GET"
             connection.connectTimeout = 5000

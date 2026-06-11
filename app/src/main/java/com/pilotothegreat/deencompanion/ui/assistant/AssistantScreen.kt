@@ -49,6 +49,9 @@ import dev.chrisbanes.haze.rememberHazeState
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import java.util.Locale
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import android.widget.Toast
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,6 +66,17 @@ fun AssistantScreen(
     val messages by viewModel.messages.collectAsState()
     val speechState by viewModel.speechState.collectAsState()
     
+    val recordAudioPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            if (isGranted) {
+                viewModel.startListening()
+            } else {
+                Toast.makeText(context, "Microphone permission is required for voice input", Toast.LENGTH_SHORT).show()
+            }
+        }
+    )
+
     var inputText by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
 
@@ -157,7 +171,12 @@ fun AssistantScreen(
                             if (speechState is SpeechState.Recording) {
                                 viewModel.stopListening()
                             } else {
-                                viewModel.startListening()
+                                val hasPermission = context.checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                                if (hasPermission) {
+                                    viewModel.startListening()
+                                } else {
+                                    recordAudioPermissionLauncher.launch(android.Manifest.permission.RECORD_AUDIO)
+                                }
                             }
                         }
                     ) {

@@ -1,34 +1,37 @@
-Privacy Policy for Traffic Light
+# Privacy Policy for Deen Companion
 
-Last Updated: January 18, 2026
+Last Updated: June 12, 2026
 
-Developer: leekleak (GitHub: leekleak/traffic-light)
+At Deen Companion, we prioritize your privacy above all else. This application is designed to function entirely offline, keeping your personal data safe, secure, and under your control.
 
-At Traffic Light, we believe that your data belongs to you. This Privacy Policy explains how our application handles information. The short version: We do not collect, store, or transmit your personal data.
-1. Information Collection and Use
+## 1. Information We Process and How We Use It
 
-Traffic Light is designed to be a local-only utility.
+### Location Data (GPS & Network coordinates)
+* **Purpose**: Used solely to calculate high-precision offline prayer times and to determine Qibla direction relative to your location.
+* **Storage**: Your coordinates are processed on-device and are never transmitted to our servers or third parties.
+* **IP-based Geolocation Backup**: If GPS signals are unavailable, the application can request geolocation details from privacy-friendly, standard HTTP/HTTPS geolocation providers (such as `ipapi.co` and `ip-api.com`). These requests only process your IP address to return latitude and longitude coordinates. This data is handled in memory, is not saved, and is processed locally.
 
-No Personal Data: The app does not require or collect personal identifiers such as your name, email address, phone number, or location.
+### Voice and Microphone Input (`RECORD_AUDIO`)
+* **Purpose**: Used to record short voice queries for search inputs in the offline Assistant/Lookup screens.
+* **Storage**: Voice data is transcribed locally on your device. Audio files or recordings are never stored, saved, or uploaded to any external servers.
 
-Usage Data: While the app monitors your network speed and data usage to provide its core functionality, this data is processed locally on your device and is never uploaded to any external servers.
+### Settings and Personal Preferences
+* **Purpose**: Reminders, settings (dhikr targets, font configurations, calculations preference, and city overrides) are kept to customize your experience.
+* **Storage**: Stored locally on your device using Android Jetpack DataStore and Room Database.
 
-2. Data Storage
+## 2. Third-Party Integrations & App Queries
 
-All data displayed in the app is stored locally.
+### Local Omani Banking Apps
+To allow users in Oman to support developer operations locally, the settings and donation panels provide deep links to launch local banking applications (such as Bank Muscat, bm Wallet, NBO, Bank Dhofar, etc.) on the device.
+* **Data Privacy**: Deen Companion queries if these banking applications are installed to display the shortcut buttons. We do not access, collect, or store any financial details, account credentials, card information, or transaction records. All interactions are handled directly by your installed bank's official security systems.
 
-3. Third-Party Services
+## 3. Third-Party Analytics and Advertising
+Deen Companion is an open-source, non-commercial app.
+* We do not include any tracking software, analytic trackers (e.g., Firebase Analytics), advertising SDKs (e.g., Google AdMob), or marketing frameworks.
+* There are no background analytic processes sending your usage patterns to external entities.
 
-Traffic Light is an open-source project and does not include third-party SDKs for analytics, advertising, or tracking (e.g., no Firebase Analytics, no AdMob).
+## 4. Updates to This Policy
+Since the application operates offline, we do not notify users of privacy updates dynamically. We recommend reviewing the latest policy updates directly in our GitHub repository: [github.com/Pilotothegreat/deen-companion](https://github.com/Pilotothegreat/deen-companion).
 
-4. Security
-
-We prioritize the security of your device. By keeping the app open-source, the community can audit our code at any time to ensure no hidden tracking or malicious behavior exists.
-
-5. Changes to This Policy
-
-We may update our Privacy Policy from time to time. Since the app does not communicate with a server, we recommend checking the GitHub repository for any updates to this document.
-
-6. Contact Us
-
-If you have any questions or suggestions about this Privacy Policy, please feel free to open an issue on our GitHub repository.
+## 5. Contact & Support
+If you have any questions or feedback, please open an issue in our official repository on GitHub.

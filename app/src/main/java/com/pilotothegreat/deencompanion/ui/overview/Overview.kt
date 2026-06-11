@@ -85,8 +85,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.AlertDialog
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.toPath
@@ -307,7 +305,7 @@ fun calculateNextPrayer(
     } else {
         String.format(Locale.US, "%02d:%02d", minutes, seconds)
     }
-    val finalRemainingStr = if (lang == "ar") remainingStr.toArabicNumerals() else remainingStr
+    val finalRemainingStr = remainingStr
 
     val timeStr = nextTime.toLocaleHourString(context)
     return NextPrayer(nextName, finalRemainingStr, timeStr, totalSeconds)
