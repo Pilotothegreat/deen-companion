@@ -776,7 +776,7 @@ object QuranHelper {
         return when (surahId) {
             7 -> verseId == 206
             13 -> verseId == 15
-            16 -> verseId == 49
+            16 -> verseId == 50
             17 -> verseId == 109
             19 -> verseId == 58
             22 -> verseId == 18 || verseId == 77
