@@ -495,7 +495,7 @@ fun Overview(
                 val baseDays = if (hijriMethod == com.pilotothegreat.deencompanion.database.HijriMethod.REGIONAL) 1L else 0L
                 val targetLocalDate = LocalDate.now().plusDays(baseDays)
                 val hijri = HijrahDate.from(targetLocalDate)
-                val formatted = hijri.format(hijriFormatter) + " AH"
+                val formatted = hijri.format(hijriFormatter) + if (locale.language == "ar") " هـ" else " AH"
                 if (hijriMethod == com.pilotothegreat.deencompanion.database.HijriMethod.REGIONAL) {
                     val label = if (locale.language == "ar") " (قد يختلف حسب الرؤية المحلية)" else " (May differ by local sighting)"
                     formatted + label

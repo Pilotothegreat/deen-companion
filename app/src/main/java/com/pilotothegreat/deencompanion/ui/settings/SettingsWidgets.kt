@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -42,6 +43,7 @@ import androidx.compose.ui.graphics.asAndroidPath
 import androidx.compose.ui.graphics.copy
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -49,10 +51,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.pilotothegreat.deencompanion.R
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.asComposePath
+import androidx.core.graphics.PathParser
 import com.pilotothegreat.deencompanion.ui.theme.Theme
 import com.pilotothegreat.deencompanion.ui.theme.card
+import com.pilotothegreat.deencompanion.ui.theme.arabicFontFamily
+import com.pilotothegreat.deencompanion.ui.theme.nunitoFontFamily
 import com.pilotothegreat.deencompanion.util.CategoryTitleSmallText
 import com.pilotothegreat.deencompanion.util.px
 import kotlinx.coroutines.launch
@@ -233,28 +240,15 @@ fun ThemePreferenceContainer(currentTheme: Theme, material: Boolean, onThemeChan
 }
 
 private fun getStarPath(): Path {
-    return Path().apply {
-        moveTo(0.5f, 0f)
-        lineTo(0.6f, 0.35f)
-        lineTo(0.95f, 0.35f)
-        lineTo(0.67f, 0.55f)
-        lineTo(0.78f, 0.9f)
-        lineTo(0.5f, 0.68f)
-        lineTo(0.22f, 0.9f)
-        lineTo(0.33f, 0.55f)
-        lineTo(0.05f, 0.35f)
-        lineTo(0.4f, 0.35f)
-        close()
-    }
+    return PathParser.createPathFromPathData(
+        "M480,600q50,0 85,-35t35,-85q0,-50 -35,-85t-85,-35q-50,0 -85,35t-35,85q0,50 35,85t85,35ZM480,680q-83,0 -141.5,-58.5T280,480q0,-83 58.5,-141.5T480,280q83,0 141.5,58.5T680,480q0,83 -58.5,141.5T480,680ZM80,520q-17,0 -28.5,-11.5T40,480q0,-17 11.5,-28.5T80,440h80q17,0 28.5,11.5T200,480q0,17 -11.5,28.5T160,520L80,520ZM800,520q-17,0 -28.5,-11.5T760,480q0,-17 11.5,-28.5T800,440h80q17,0 28.5,11.5T920,480q0,17 -11.5,28.5T880,520h-80ZM480,200q-17,0 -28.5,-11.5T440,160v-80q0,-17 11.5,-28.5T480,40q17,0 28.5,11.5T520,80v80q0,17 -11.5,28.5T480,200ZM480,920q-17,0 -28.5,-11.5T440,880v-80q0,-17 11.5,-28.5T480,760q17,0 28.5,11.5T520,800v80q0,17 -11.5,28.5T480,920ZM226,282l-43,-42q-12,-11 -11.5,-28t11.5,-29q12,-12 29,-12t28,12l42,43q11,12 11,28t-11,28q-11,12 -27.5,11.5T226,282ZM720,777 L678,734q-11,-12 -11,-28.5t11,-27.5q11,-12 27.5,-11.5T734,678l43,42q12,11 11.5,28T777,777q-12,12 -29,12t-28,-12ZM678,282q-12,-11 -11.5,-27.5T678,226l42,-43q11,-12 28,-11.5t29,11.5q12,12 12,29t-12,28l-43,42q-12,11 -28,11t-28,-11ZM183,777q-12,-12 -12,-29t12,-28l43,-42q12,-11 28.5,-11t27.5,11q12,11 11.5,27.5T282,734l-42,43q-11,12 -28,11.5T183,777ZM480,480Z"
+    ).asComposePath()
 }
 
 private fun getMoonPath(): Path {
-    return Path().apply {
-        moveTo(0.8f, 0.1f)
-        cubicTo(0.2f, 0.1f, 0.2f, 0.9f, 0.8f, 0.9f)
-        cubicTo(0.4f, 0.8f, 0.4f, 0.2f, 0.8f, 0.1f)
-        close()
-    }
+    return PathParser.createPathFromPathData(
+        "M480,840q-151,0 -255.5,-104.5T120,480q0,-138 90,-239.5T440,122q13,-2 23,3.5t16,14.5q6,9 6.5,21t-7.5,23q-17,26 -25.5,55t-8.5,61q0,90 63,153t153,63q31,0 61.5,-9t54.5,-25q11,-7 22.5,-6.5T819,481q10,5 15.5,15t3.5,24q-14,138 -117.5,229T480,840ZM480,760q88,0 158,-48.5T740,585q-20,5 -40,8t-40,3q-123,0 -209.5,-86.5T364,300q0,-20 3,-40t8,-40q-78,32 -126.5,102T200,480q0,116 82,198t198,82ZM470,490Z"
+    ).asComposePath()
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -277,8 +271,8 @@ fun ThemePreference(theme: Theme, enabled: Boolean, onClick: () -> Unit) {
             addPath(shape1)
         }
         val matrix = android.graphics.Matrix().apply {
-            postTranslate(-0.5f, -0.5f)
-            postScale(iconScale.value, iconScale.value)
+            postTranslate(-480f, -480f)
+            postScale(iconScale.value / 960f, iconScale.value / 960f)
             postTranslate(-rotation.value, rotation.value)
         }
         path.asAndroidPath().transform(matrix)
@@ -290,8 +284,8 @@ fun ThemePreference(theme: Theme, enabled: Boolean, onClick: () -> Unit) {
             addPath(shape2)
         }
         val matrix = android.graphics.Matrix().apply {
-            postTranslate(-0.5f, -0.5f)
-            postScale(iconScale.value, iconScale.value)
+            postTranslate(-480f, -480f)
+            postScale(iconScale.value / 960f, iconScale.value / 960f)
             postTranslate(rotation.value, -rotation.value)
         }
         path.asAndroidPath().transform(matrix)
@@ -387,8 +381,8 @@ fun ThemeAutoPreference(theme: Theme, enabled: Boolean, onClick: () -> Unit) {
             addPath(shape1)
         }
         val matrix = android.graphics.Matrix().apply {
-            postTranslate(-0.5f, -0.5f)
-            postScale(iconScale.value, iconScale.value)
+            postTranslate(-480f, -480f)
+            postScale(iconScale.value / 960f, iconScale.value / 960f)
         }
         path.asAndroidPath().transform(matrix)
         path
@@ -399,8 +393,8 @@ fun ThemeAutoPreference(theme: Theme, enabled: Boolean, onClick: () -> Unit) {
             addPath(shape2)
         }
         val matrix = android.graphics.Matrix().apply {
-            postTranslate(-0.5f, -0.5f)
-            postScale(iconScale.value, iconScale.value)
+            postTranslate(-480f, -480f)
+            postScale(iconScale.value / 960f, iconScale.value / 960f)
         }
         path.asAndroidPath().transform(matrix)
         path
@@ -531,5 +525,126 @@ fun PermissionButton(
             icon,
             contentDescription = contentDescription,
         )
+    }
+}
+
+@Composable
+fun LanguagePreferenceContainer(currentLang: String, onLangChanged: (String) -> Unit) {
+    Column {
+        CategoryTitleSmallText(stringResource(R.string.app_language_title))
+        Row(
+            modifier = Modifier
+                .clip(MaterialTheme.shapes.large)
+                .fillMaxWidth()
+                .background(colorScheme.surface)
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            LanguagePreference(
+                langCode = "en",
+                langName = "English",
+                nativeName = "English",
+                selected = currentLang == "en",
+                onClick = { onLangChanged("en") },
+                modifier = Modifier.weight(1f)
+            )
+            LanguagePreference(
+                langCode = "ar",
+                langName = "Arabic",
+                nativeName = "العربية",
+                selected = currentLang == "ar",
+                onClick = { onLangChanged("ar") },
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+fun LanguagePreference(
+    langCode: String,
+    langName: String,
+    nativeName: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val scope = rememberCoroutineScope()
+    val haptic = LocalHapticFeedback.current
+    val radiusSmall = 12.dp.px
+    val radiusBig = 38.dp.px
+    val cornerRadius = remember { Animatable(radiusSmall) }
+    val textScale = remember { Animatable(1.0f) }
+
+    LaunchedEffect(selected) {
+        if (selected) {
+            launch { cornerRadius.animateTo(radiusBig) }
+            launch { textScale.animateTo(1.15f) }
+        } else {
+            launch { cornerRadius.animateTo(radiusSmall) }
+            launch { textScale.animateTo(1.0f) }
+        }
+    }
+
+    val primaryColor = colorScheme.primary
+    val surfaceColor = colorScheme.surface
+
+    Column(
+        modifier = modifier
+            .card()
+            .clickable(onClick = {
+                scope.launch { haptic.performHapticFeedback(HapticFeedbackType.ToggleOn) }
+                onClick()
+            })
+            .background(if (selected) colorScheme.surfaceVariant else colorScheme.surfaceContainer)
+            .padding(4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .padding(4.dp)
+                .fillMaxWidth()
+                .height(70.dp)
+                .drawBehind {
+                    drawRoundRect(
+                        color = if (selected) primaryColor.copy(alpha = 0.1f) else surfaceColor,
+                        cornerRadius = CornerRadius(cornerRadius.value)
+                    )
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = if (langCode == "en") "A" else "ع",
+                fontFamily = if (langCode == "en") nunitoFontFamily else arabicFontFamily,
+                fontSize = if (langCode == "en") 36.sp else 42.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (selected) colorScheme.primary else colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                modifier = Modifier.graphicsLayer {
+                    scaleX = textScale.value
+                    scaleY = textScale.value
+                }
+            )
+        }
+        
+        Row(
+            modifier = Modifier.padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (selected) {
+                Icon(
+                    painter = painterResource(R.drawable.checkmark),
+                    contentDescription = null,
+                    tint = colorScheme.primary,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+            Text(
+                text = nativeName,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                color = if (selected) colorScheme.onSurface else colorScheme.onSurface.copy(alpha = 0.8f)
+            )
+        }
     }
 }

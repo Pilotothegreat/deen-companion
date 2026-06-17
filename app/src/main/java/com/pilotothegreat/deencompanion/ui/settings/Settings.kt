@@ -416,39 +416,12 @@ fun Settings(paddingValues: PaddingValues) {
         }
 
         // --- Language settings ---
-        categoryTitleSmall { stringResource(R.string.app_language_title) }
         item {
             val lang by viewModel.appLanguage.collectAsState()
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)
-                    .card()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(stringResource(R.string.app_language_title), style = MaterialTheme.typography.titleMedium)
-                    Text("لغة التطبيق", style = MaterialTheme.typography.bodySmall, color = colorScheme.secondary)
-                }
-                SingleChoiceSegmentedButtonRow {
-                    SegmentedButton(
-                        selected = lang == "en",
-                        onClick = {
-                            viewModel.setAppLanguage("en")
-                        },
-                        shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
-                    ) { Text("EN") }
-                    SegmentedButton(
-                        selected = lang == "ar",
-                        onClick = {
-                            viewModel.setAppLanguage("ar")
-                        },
-                        shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
-                    ) { Text("AR") }
-                }
-            }
+            LanguagePreferenceContainer(
+                currentLang = lang,
+                onLangChanged = { viewModel.setAppLanguage(it) }
+            )
         }
 
         // --- UI / Theme settings ---

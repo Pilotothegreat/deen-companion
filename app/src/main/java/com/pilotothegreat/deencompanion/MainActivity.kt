@@ -35,6 +35,10 @@ import com.pilotothegreat.deencompanion.ui.theme.Theme
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import org.koin.compose.koinInject
 import timber.log.Timber
 import java.util.Locale
@@ -43,6 +47,21 @@ import java.util.concurrent.TimeUnit
 class MainActivity : ComponentActivity() {
 
     private val appPreferenceRepo: AppPreferenceRepo by inject()
+
+    private val requestPermissionsLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val locationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
+        if (locationGranted) {
+            lifecycleScope.launch {
+                try {
+                    IqamaAlarmManager.scheduleNextIqamaAlarm(this@MainActivity, appPreferenceRepo)
+                } catch (e: Exception) {
+                    Timber.e(e, "Failed to schedule iqama alarms on permission grant")
+                }
+            }
+        }
+    }
 
     override fun attachBaseContext(base: Context) {
         // attachBaseContext fires before Koin/Compose/DataStore is ready.
@@ -62,6 +81,32 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         try {
             enableEdgeToEdge()
+
+            val needsLocation = ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+
+            val needsNotifications = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            } else {
+                false
+            }
+
+            if (needsLocation || needsNotifications) {
+                val list = mutableListOf<String>()
+                if (needsLocation) {
+                    list.add(Manifest.permission.ACCESS_FINE_LOCATION)
+                    list.add(Manifest.permission.ACCESS_COARSE_LOCATION)
+                }
+                if (needsNotifications) {
+                    list.add(Manifest.permission.POST_NOTIFICATIONS)
+                }
+                requestPermissionsLauncher.launch(list.toTypedArray())
+            }
 
             lifecycleScope.launch {
                 try {
@@ -119,6 +164,7 @@ fun AppWithLocale(content: @Composable () -> Unit) {
 
     val localizedContext = remember(context, lang) {
         val locale = Locale(lang)
+        Locale.setDefault(locale)
         val config = Configuration(context.resources.configuration)
         config.setLocale(locale)
         config.setLayoutDirection(locale)
@@ -132,6 +178,8 @@ fun AppWithLocale(content: @Composable () -> Unit) {
 
     // Keep Android's per-app locale API in sync (covers Android 13+ system settings)
     LaunchedEffect(lang) {
+        val locale = Locale(lang)
+        Locale.setDefault(locale)
         AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(lang))
 
         // Pre-Android 13: recreate the Activity so resources fully reload
