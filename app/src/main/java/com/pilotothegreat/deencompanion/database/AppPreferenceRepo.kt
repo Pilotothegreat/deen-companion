@@ -157,7 +157,6 @@ class AppPreferenceRepo(
         private val TASBIH_DHIKR = stringPreferencesKey("tasbih_dhikr")
         private val TASBIH_TARGET = intPreferencesKey("tasbih_target")
         private val TASBIH_HISTORY = stringPreferencesKey("tasbih_history")
-        private val HIJRI_OFFSET = intPreferencesKey("hijri_offset")
         private val FAJR_IQAMA_IS_FIXED = booleanPreferencesKey("fajr_iqama_is_fixed")
         private val DHUHR_IQAMA_IS_FIXED = booleanPreferencesKey("dhuhr_iqama_is_fixed")
         private val ASR_IQAMA_IS_FIXED = booleanPreferencesKey("asr_iqama_is_fixed")
@@ -168,7 +167,6 @@ class AppPreferenceRepo(
         private val ASR_IQAMA_TIME = stringPreferencesKey("asr_iqama_time")
         private val MAGHRIB_IQAMA_TIME = stringPreferencesKey("maghrib_iqama_time")
         private val ISHA_IQAMA_TIME = stringPreferencesKey("isha_iqama_time")
-        private val IS_ONBOARDING_COMPLETE = booleanPreferencesKey("is_onboarding_complete")
         private val USE_IP_LOCATION_FALLBACK = booleanPreferencesKey("use_ip_location_fallback")
     }
 
@@ -348,9 +346,6 @@ class AppPreferenceRepo(
     }.distinctUntilChanged()
     suspend fun setHijriCalendarMethod(value: HijriMethod) = dataStore.edit { it[HIJRI_METHOD] = value.name }
 
-    // Hijri Offset Correction
-    val hijriOffset: Flow<Int> = data.map { it[HIJRI_OFFSET] ?: 0 }.distinctUntilChanged()
-    suspend fun setHijriOffset(value: Int) = dataStore.edit { it[HIJRI_OFFSET] = value }
 
     // Notification Volume (0-100)
     val notificationVolume: Flow<Int> = data.map { it[NOTIFICATION_VOLUME] ?: 80 }.distinctUntilChanged()
@@ -433,9 +428,6 @@ class AppPreferenceRepo(
         saveTasbihToRoom()
     }
 
-    // Onboarding complete flag (replaces SharedPreferences "deen_prefs" first_launch)
-    val isOnboardingComplete: Flow<Boolean> = data.map { it[IS_ONBOARDING_COMPLETE] ?: false }.distinctUntilChanged()
-    suspend fun setOnboardingComplete() = dataStore.edit { it[IS_ONBOARDING_COMPLETE] = true }
 
     // IP-based location fallback toggle (defaults true for existing installs, user can disable for strict offline mode)
     val useIpLocationFallback: Flow<Boolean> = data.map { it[USE_IP_LOCATION_FALLBACK] ?: true }.distinctUntilChanged()

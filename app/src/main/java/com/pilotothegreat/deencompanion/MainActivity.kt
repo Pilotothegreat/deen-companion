@@ -31,7 +31,6 @@ import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
 import com.pilotothegreat.deencompanion.services.AdhanNotificationWorker
 import com.pilotothegreat.deencompanion.services.IqamaAlarmManager
 import com.pilotothegreat.deencompanion.ui.app.App
-import com.pilotothegreat.deencompanion.ui.onboarding.OnboardingScreen
 import com.pilotothegreat.deencompanion.ui.theme.Theme
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -92,16 +91,8 @@ class MainActivity : ComponentActivity() {
 
             setContent {
                 AppWithLocale {
-                    val repo: AppPreferenceRepo = koinInject()
-                    // null = DataStore not yet read; false = show onboarding; true = show app
-                    val isOnboardingComplete by repo.isOnboardingComplete.collectAsState(initial = null)
-
                     Theme {
-                        when (isOnboardingComplete) {
-                            null -> { /* Await DataStore first emission — brief blank splash */ }
-                            false -> OnboardingScreen(onComplete = { /* state change triggers recompose */ })
-                            true -> App()
-                        }
+                        App()
                     }
                 }
             }

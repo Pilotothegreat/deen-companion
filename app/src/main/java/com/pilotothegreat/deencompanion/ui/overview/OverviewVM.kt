@@ -102,7 +102,6 @@ class OverviewVM(
     val ishaIqamaTime = appPreferenceRepo.ishaIqamaTime
 
     val lastPrayerTimeUpdate = appPreferenceRepo.lastPrayerTimeUpdate
-    val hijriOffset = appPreferenceRepo.hijriOffset
 
     private val _prayerTimes = MutableStateFlow(
         PrayerTimeCalculator.calculate(
@@ -315,9 +314,5 @@ class OverviewVM(
         }
     }
 
-    fun setHijriOffset(value: Int) {
-        viewModelScope.launch {
-            appPreferenceRepo.setHijriOffset(value)
-        }
-    }
+
 }

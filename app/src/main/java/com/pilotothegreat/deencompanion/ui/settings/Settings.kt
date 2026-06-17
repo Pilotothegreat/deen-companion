@@ -386,39 +386,7 @@ fun Settings(paddingValues: PaddingValues) {
                 }
             )
         }
-        item {
-            val hijriOffset by viewModel.hijriOffset.collectAsState()
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)
-                    .card()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(stringResource(R.string.hijri_correction), style = MaterialTheme.typography.titleMedium)
-                    Text(stringResource(R.string.hijri_correction_summary), style = MaterialTheme.typography.bodySmall, color = colorScheme.secondary)
-                }
-                Spacer(Modifier.width(8.dp))
-                val options = listOf(-2, -1, 0, 1, 2)
-                SingleChoiceSegmentedButtonRow {
-                    options.forEachIndexed { index, value ->
-                        val label = if (value > 0) "+$value" else value.toString()
-                        SegmentedButton(
-                            selected = hijriOffset == value,
-                            onClick = {
-                                viewModel.setHijriOffset(value)
-                            },
-                            shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size)
-                        ) {
-                            Text(label, style = MaterialTheme.typography.labelSmall)
-                        }
-                    }
-                }
-            }
-        }
+
 
         // --- Quran Font Size settings ---
         categoryTitleSmall { stringResource(R.string.quran_customization) }

@@ -86,8 +86,6 @@ class SettingsVM(
     val appLanguage: StateFlow<String> = appPreferenceRepo.appLanguage
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "ar")
 
-    val hijriOffset: StateFlow<Int> = appPreferenceRepo.hijriOffset
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     val useIpLocationFallback: StateFlow<Boolean> = appPreferenceRepo.useIpLocationFallback
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
@@ -313,11 +311,6 @@ class SettingsVM(
         }
     }
 
-    fun setHijriOffset(value: Int) {
-        viewModelScope.launch {
-            appPreferenceRepo.setHijriOffset(value)
-        }
-    }
 
     fun setUseIpLocationFallback(value: Boolean) {
         viewModelScope.launch {

@@ -350,7 +350,6 @@ fun Overview(
     val city by viewModel.cityName.collectAsState(initial = "")
     val lat by viewModel.latitude.collectAsState(initial = 21.3891)
     val lon by viewModel.longitude.collectAsState(initial = 39.8579)
-    val hijriOffset by viewModel.hijriOffset.collectAsState(initial = 0)
     var nextPrayer by remember { mutableStateOf(NextPrayer("Fajr", "--", "--", 0L)) }
 
     var shownThisSession by remember { mutableStateOf(false) }
@@ -491,11 +490,10 @@ fun Overview(
         val hijriFormatter = remember(locale) { java.time.format.DateTimeFormatter.ofPattern("d MMMM yyyy", locale) }
         val gregDateStr = remember(locale) { LocalDate.now().format(gregFormatter) }
         val hijriMethod by appPreferenceRepo.hijriCalendarMethod.collectAsState(initial = com.pilotothegreat.deencompanion.database.HijriMethod.UMM_AL_QURA)
-        val hijriDateStr = remember(locale, hijriMethod, hijriOffset) { 
+        val hijriDateStr = remember(locale, hijriMethod) { 
             try {
                 val baseDays = if (hijriMethod == com.pilotothegreat.deencompanion.database.HijriMethod.REGIONAL) 1L else 0L
-                val totalOffset = baseDays + hijriOffset
-                val targetLocalDate = LocalDate.now().plusDays(totalOffset)
+                val targetLocalDate = LocalDate.now().plusDays(baseDays)
                 val hijri = HijrahDate.from(targetLocalDate)
                 val formatted = hijri.format(hijriFormatter) + " AH"
                 if (hijriMethod == com.pilotothegreat.deencompanion.database.HijriMethod.REGIONAL) {
@@ -581,11 +579,10 @@ fun Overview(
 
         // Ramadan Hilal Card
         val dismissedYear by appPreferenceRepo.dismissedRamadanHilalYear.collectAsState(initial = 0)
-        val currentHijri = remember(hijriMethod, hijriOffset) {
+        val currentHijri = remember(hijriMethod) {
             try {
                 val baseDays = if (hijriMethod == com.pilotothegreat.deencompanion.database.HijriMethod.REGIONAL) 1L else 0L
-                val totalOffset = baseDays + hijriOffset
-                val targetLocalDate = LocalDate.now().plusDays(totalOffset)
+                val targetLocalDate = LocalDate.now().plusDays(baseDays)
                 HijrahDate.from(targetLocalDate)
             } catch (e: Exception) {
                 null
