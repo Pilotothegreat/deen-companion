@@ -158,6 +158,22 @@ class QuranPlaybackManager(private val context: Context) {
         }
     }
 
+    fun playOrJumpToAyah(surah: QuranHelper.Surah, ayahId: Int) {
+        val player = controller ?: return
+        val expectedMediaPrefix = "${surah.id}_"
+        val isLoaded = player.mediaItemCount > 0 && player.currentMediaItem?.mediaId?.startsWith(expectedMediaPrefix) == true
+        if (isLoaded) {
+            val index = ayahId - 1
+            if (index in 0 until player.mediaItemCount) {
+                player.seekTo(index, 0L)
+                player.play()
+                _isPlaying.value = true
+            }
+        } else {
+            playSurah(surah, ayahId)
+        }
+    }
+
     fun togglePlayPause() {
         val player = controller ?: return
         if (player.isPlaying) {

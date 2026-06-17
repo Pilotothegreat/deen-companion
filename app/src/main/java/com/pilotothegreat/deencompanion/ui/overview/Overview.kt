@@ -987,23 +987,23 @@ fun OverviewItems(viewModel: OverviewVM, nextPrayerName: String, navigator: Navi
     val appPreferenceRepo: AppPreferenceRepo = koinInject()
     val lang by appPreferenceRepo.appLanguage.collectAsState(initial = "en")
 
-    val fajrOffset by viewModel.fajrIqamaOffset.collectAsState(initial = 15)
-    val dhuhrOffset by viewModel.dhuhrIqamaOffset.collectAsState(initial = 15)
-    val asrOffset by viewModel.asrIqamaOffset.collectAsState(initial = 15)
+    val fajrOffset by viewModel.fajrIqamaOffset.collectAsState(initial = 25)
+    val dhuhrOffset by viewModel.dhuhrIqamaOffset.collectAsState(initial = 25)
+    val asrOffset by viewModel.asrIqamaOffset.collectAsState(initial = 20)
     val maghribOffset by viewModel.maghribIqamaOffset.collectAsState(initial = 10)
-    val ishaOffset by viewModel.ishaIqamaOffset.collectAsState(initial = 15)
+    val ishaOffset by viewModel.ishaIqamaOffset.collectAsState(initial = 20)
 
     val fajrIsFixed by viewModel.fajrIqamaIsFixed.collectAsState(initial = false)
-    val dhuhrIsFixed by viewModel.dhuhrIqamaIsFixed.collectAsState(initial = false)
+    val dhuhrIsFixed by viewModel.dhuhrIqamaIsFixed.collectAsState(initial = true)
     val asrIsFixed by viewModel.asrIqamaIsFixed.collectAsState(initial = false)
     val maghribIsFixed by viewModel.maghribIqamaIsFixed.collectAsState(initial = false)
     val ishaIsFixed by viewModel.ishaIqamaIsFixed.collectAsState(initial = false)
 
-    val fajrIqamaTimeVal by viewModel.fajrIqamaTime.collectAsState(initial = "05:00")
-    val dhuhrIqamaTimeVal by viewModel.dhuhrIqamaTime.collectAsState(initial = "12:30")
-    val asrIqamaTimeVal by viewModel.asrIqamaTime.collectAsState(initial = "15:30")
-    val maghribIqamaTimeVal by viewModel.maghribIqamaTime.collectAsState(initial = "18:30")
-    val ishaIqamaTimeVal by viewModel.ishaIqamaTime.collectAsState(initial = "20:00")
+    val fajrIqamaTimeVal by viewModel.fajrIqamaTime.collectAsState(initial = "05:15")
+    val dhuhrIqamaTimeVal by viewModel.dhuhrIqamaTime.collectAsState(initial = "12:50")
+    val asrIqamaTimeVal by viewModel.asrIqamaTime.collectAsState(initial = "15:45")
+    val maghribIqamaTimeVal by viewModel.maghribIqamaTime.collectAsState(initial = "18:45")
+    val ishaIqamaTimeVal by viewModel.ishaIqamaTime.collectAsState(initial = "20:15")
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         CategoryTitleText(stringResource(R.string.prayer_times))

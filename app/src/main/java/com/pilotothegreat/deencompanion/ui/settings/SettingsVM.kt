@@ -36,25 +36,25 @@ class SettingsVM(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), PrayerTimeCalculator.AsrSchool.STANDARD)
 
     val fajrIqamaOffset: StateFlow<Int> = appPreferenceRepo.fajrIqamaOffset
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 15)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 25)
 
     val dhuhrIqamaOffset: StateFlow<Int> = appPreferenceRepo.dhuhrIqamaOffset
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 15)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 25)
 
     val asrIqamaOffset: StateFlow<Int> = appPreferenceRepo.asrIqamaOffset
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 15)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 20)
 
     val maghribIqamaOffset: StateFlow<Int> = appPreferenceRepo.maghribIqamaOffset
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 10)
 
     val ishaIqamaOffset: StateFlow<Int> = appPreferenceRepo.ishaIqamaOffset
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 15)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 20)
 
     val fajrIqamaIsFixed: StateFlow<Boolean> = appPreferenceRepo.fajrIqamaIsFixed
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     val dhuhrIqamaIsFixed: StateFlow<Boolean> = appPreferenceRepo.dhuhrIqamaIsFixed
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
     val asrIqamaIsFixed: StateFlow<Boolean> = appPreferenceRepo.asrIqamaIsFixed
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
@@ -66,19 +66,19 @@ class SettingsVM(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     val fajrIqamaTime: StateFlow<String> = appPreferenceRepo.fajrIqamaTime
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "05:00")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "05:15")
 
     val dhuhrIqamaTime: StateFlow<String> = appPreferenceRepo.dhuhrIqamaTime
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "12:30")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "12:50")
 
     val asrIqamaTime: StateFlow<String> = appPreferenceRepo.asrIqamaTime
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "15:30")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "15:45")
 
     val maghribIqamaTime: StateFlow<String> = appPreferenceRepo.maghribIqamaTime
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "18:30")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "18:45")
 
     val ishaIqamaTime: StateFlow<String> = appPreferenceRepo.ishaIqamaTime
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "20:00")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "20:15")
 
     val quranArabicFontSize: StateFlow<Int> = appPreferenceRepo.quranArabicFontSize
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 24)

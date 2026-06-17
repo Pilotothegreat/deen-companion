@@ -201,25 +201,25 @@ class AppPreferenceRepo(
     suspend fun setAsrSchool(value: PrayerTimeCalculator.AsrSchool) = dataStore.edit { it[ASR_SCHOOL] = value.name }
 
     // Iqama Offsets (Minutes)
-    val fajrIqamaOffset: Flow<Int> = data.map { it[FAJR_IQAMA] ?: 15 }.distinctUntilChanged()
+    val fajrIqamaOffset: Flow<Int> = data.map { it[FAJR_IQAMA] ?: 25 }.distinctUntilChanged()
     suspend fun setFajrIqamaOffset(value: Int) = dataStore.edit { it[FAJR_IQAMA] = value }
 
-    val dhuhrIqamaOffset: Flow<Int> = data.map { it[DHUHR_IQAMA] ?: 15 }.distinctUntilChanged()
+    val dhuhrIqamaOffset: Flow<Int> = data.map { it[DHUHR_IQAMA] ?: 25 }.distinctUntilChanged()
     suspend fun setDhuhrIqamaOffset(value: Int) = dataStore.edit { it[DHUHR_IQAMA] = value }
 
-    val asrIqamaOffset: Flow<Int> = data.map { it[ASR_IQAMA] ?: 15 }.distinctUntilChanged()
+    val asrIqamaOffset: Flow<Int> = data.map { it[ASR_IQAMA] ?: 20 }.distinctUntilChanged()
     suspend fun setAsrIqamaOffset(value: Int) = dataStore.edit { it[ASR_IQAMA] = value }
 
-    val maghribIqamaOffset: Flow<Int> = data.map { it[MAGHRIB_IQAMA] ?: 5 }.distinctUntilChanged()
+    val maghribIqamaOffset: Flow<Int> = data.map { it[MAGHRIB_IQAMA] ?: 10 }.distinctUntilChanged()
     suspend fun setMaghribIqamaOffset(value: Int) = dataStore.edit { it[MAGHRIB_IQAMA] = value }
 
-    val ishaIqamaOffset: Flow<Int> = data.map { it[ISHA_IQAMA] ?: 15 }.distinctUntilChanged()
+    val ishaIqamaOffset: Flow<Int> = data.map { it[ISHA_IQAMA] ?: 20 }.distinctUntilChanged()
     suspend fun setIshaIqamaOffset(value: Int) = dataStore.edit { it[ISHA_IQAMA] = value }
 
     val fajrIqamaIsFixed: Flow<Boolean> = data.map { it[FAJR_IQAMA_IS_FIXED] ?: false }.distinctUntilChanged()
     suspend fun setFajrIqamaIsFixed(value: Boolean) = dataStore.edit { it[FAJR_IQAMA_IS_FIXED] = value }
 
-    val dhuhrIqamaIsFixed: Flow<Boolean> = data.map { it[DHUHR_IQAMA_IS_FIXED] ?: false }.distinctUntilChanged()
+    val dhuhrIqamaIsFixed: Flow<Boolean> = data.map { it[DHUHR_IQAMA_IS_FIXED] ?: true }.distinctUntilChanged()
     suspend fun setDhuhrIqamaIsFixed(value: Boolean) = dataStore.edit { it[DHUHR_IQAMA_IS_FIXED] = value }
 
     val asrIqamaIsFixed: Flow<Boolean> = data.map { it[ASR_IQAMA_IS_FIXED] ?: false }.distinctUntilChanged()
@@ -231,7 +231,7 @@ class AppPreferenceRepo(
     val ishaIqamaIsFixed: Flow<Boolean> = data.map { it[ISHA_IQAMA_IS_FIXED] ?: false }.distinctUntilChanged()
     suspend fun setIshaIqamaIsFixed(value: Boolean) = dataStore.edit { it[ISHA_IQAMA_IS_FIXED] = value }
 
-    val fajrIqamaTime: Flow<String> = data.map { it[FAJR_IQAMA_TIME] ?: "05:00" }.distinctUntilChanged()
+    val fajrIqamaTime: Flow<String> = data.map { it[FAJR_IQAMA_TIME] ?: "05:15" }.distinctUntilChanged()
     suspend fun setFajrIqamaTime(value: String) {
         val formatted = formatAndValidateFixedTime(value)
         if (formatted != null) {
@@ -239,7 +239,7 @@ class AppPreferenceRepo(
         }
     }
 
-    val dhuhrIqamaTime: Flow<String> = data.map { it[DHUHR_IQAMA_TIME] ?: "12:30" }.distinctUntilChanged()
+    val dhuhrIqamaTime: Flow<String> = data.map { it[DHUHR_IQAMA_TIME] ?: "12:50" }.distinctUntilChanged()
     suspend fun setDhuhrIqamaTime(value: String) {
         val formatted = formatAndValidateFixedTime(value)
         if (formatted != null) {
@@ -247,7 +247,7 @@ class AppPreferenceRepo(
         }
     }
 
-    val asrIqamaTime: Flow<String> = data.map { it[ASR_IQAMA_TIME] ?: "15:30" }.distinctUntilChanged()
+    val asrIqamaTime: Flow<String> = data.map { it[ASR_IQAMA_TIME] ?: "15:45" }.distinctUntilChanged()
     suspend fun setAsrIqamaTime(value: String) {
         val formatted = formatAndValidateFixedTime(value)
         if (formatted != null) {
@@ -255,7 +255,7 @@ class AppPreferenceRepo(
         }
     }
 
-    val maghribIqamaTime: Flow<String> = data.map { it[MAGHRIB_IQAMA_TIME] ?: "18:30" }.distinctUntilChanged()
+    val maghribIqamaTime: Flow<String> = data.map { it[MAGHRIB_IQAMA_TIME] ?: "18:45" }.distinctUntilChanged()
     suspend fun setMaghribIqamaTime(value: String) {
         val formatted = formatAndValidateFixedTime(value)
         if (formatted != null) {
@@ -263,7 +263,7 @@ class AppPreferenceRepo(
         }
     }
 
-    val ishaIqamaTime: Flow<String> = data.map { it[ISHA_IQAMA_TIME] ?: "20:00" }.distinctUntilChanged()
+    val ishaIqamaTime: Flow<String> = data.map { it[ISHA_IQAMA_TIME] ?: "20:15" }.distinctUntilChanged()
     suspend fun setIshaIqamaTime(value: String) {
         val formatted = formatAndValidateFixedTime(value)
         if (formatted != null) {
