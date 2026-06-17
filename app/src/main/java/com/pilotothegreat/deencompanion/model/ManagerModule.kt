@@ -27,36 +27,4 @@ val managerModule = module {
             throw e
         }
     }
-
-    single<com.pilotothegreat.deencompanion.services.AudioInputProvider> {
-        try {
-            com.pilotothegreat.deencompanion.services.DefaultAudioInputProvider(get())
-        } catch (e: Exception) {
-            Timber.e(e, "Failed to create DefaultAudioInputProvider")
-            throw e
-        }
-    }
-
-    single {
-        try {
-            com.pilotothegreat.deencompanion.services.AssistantProxyService(get(), get())
-        } catch (e: Exception) {
-            Timber.e(e, "Failed to create AssistantProxyService")
-            throw e
-        }
-    }
-
-    single {
-        try {
-            val proxy: com.pilotothegreat.deencompanion.services.AssistantProxyService = get()
-            com.pilotothegreat.deencompanion.services.SpeechManager(
-                context = get(),
-                audioInputProvider = get(),
-                assistantProxyProvider = { query -> proxy.query(query) }
-            )
-        } catch (e: Exception) {
-            Timber.e(e, "Failed to create SpeechManager")
-            throw e
-        }
-    }
 }

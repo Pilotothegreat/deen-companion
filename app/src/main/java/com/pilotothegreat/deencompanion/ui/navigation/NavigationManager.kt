@@ -62,7 +62,6 @@ import com.pilotothegreat.deencompanion.ui.qibla.Qibla
 import com.pilotothegreat.deencompanion.ui.quran.Quran
 import com.pilotothegreat.deencompanion.ui.quran.QuranReader
 import com.pilotothegreat.deencompanion.ui.settings.Settings
-import com.pilotothegreat.deencompanion.ui.assistant.AssistantScreen
 import com.pilotothegreat.deencompanion.ui.theme.navBarShadow
 import com.pilotothegreat.deencompanion.util.TOP_BAR_HEIGHT
 import org.koin.compose.koinInject
@@ -134,7 +133,6 @@ fun NavigationManager() {
                 entry<SettingsKey> { Settings(paddingValues) }
                 entry<QuranReaderKey> { QuranReader(it.surahNumber, it.surahName, it.scrollToVerse, it.autoPlay) }
                 entry<QiblaKey> { Qibla() }
-                entry<AssistantKey> { AssistantScreen(paddingValues) }
             },
             transitionSpec = {
                 if (backStack.size == 1) fadeIn(spring(dampingRatio = Spring.DampingRatioMediumBouncy)) togetherWith fadeOut(spring(dampingRatio = Spring.DampingRatioMediumBouncy))

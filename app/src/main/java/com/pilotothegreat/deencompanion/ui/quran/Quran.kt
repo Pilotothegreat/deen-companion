@@ -62,6 +62,7 @@ import com.pilotothegreat.deencompanion.ui.navigation.QuranReaderKey
 import com.pilotothegreat.deencompanion.ui.theme.card
 import com.pilotothegreat.deencompanion.util.PageTitle
 import com.pilotothegreat.deencompanion.util.SearchField
+import com.pilotothegreat.deencompanion.util.normalizeArabic
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
@@ -96,15 +97,18 @@ fun Quran(paddingValues: PaddingValues) {
             isSearching = true
             searchResults = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
                 val results = mutableListOf<Pair<QuranHelper.Surah, QuranHelper.Verse>>()
+                val normalizedQuery = normalizeArabic(debouncedQuery)
                 for (surah in surahs) {
+                    val normalizedSurahName = normalizeArabic(surah.name)
                     val surahMatches = surah.transliteration.contains(debouncedQuery, ignoreCase = true) ||
-                            surah.name.contains(debouncedQuery)
+                            normalizedSurahName.contains(normalizedQuery, ignoreCase = true)
                     if (surahMatches && surah.verses.isNotEmpty()) {
                         results.add(Pair(surah, surah.verses.first()))
                     }
                     for (verse in surah.verses) {
+                        val normalizedVerseText = normalizeArabic(verse.text)
                         if (verse.translation.contains(debouncedQuery, ignoreCase = true) ||
-                            verse.text.contains(debouncedQuery)
+                            normalizedVerseText.contains(normalizedQuery, ignoreCase = true)
                         ) {
                             results.add(Pair(surah, verse))
                         }
@@ -269,7 +273,7 @@ fun SurahsList(
                         }
                         Column {
                             Text(
-                                text = surah.transliteration,
+                                text = if (lang == "ar") surah.name else surah.transliteration,
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                             )
                             val typeText = if (lang == "ar") {
@@ -286,14 +290,16 @@ fun SurahsList(
                             )
                         }
                     }
-                    Text(
-                        text = surah.name,
-                        style = MaterialTheme.typography.headlineSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = quranFontFamily
-                        ),
-                        color = colorScheme.primary
-                    )
+                    if (lang != "ar") {
+                        Text(
+                            text = surah.name,
+                            style = MaterialTheme.typography.headlineSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = quranFontFamily
+                            ),
+                            color = colorScheme.primary
+                        )
+                    }
                 }
             }
         }

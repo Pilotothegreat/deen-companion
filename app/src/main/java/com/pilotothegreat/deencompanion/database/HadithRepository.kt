@@ -116,7 +116,24 @@ class HadithRepository(
     }
 
     suspend fun searchHadiths(query: String, bookId: String? = null): List<HadithEntity> {
-        val cleanQuery = "%${query.trim()}%"
+        val hasArabic = query.any { it in '\u0600'..'\u06FF' }
+        val cleanQuery = if (hasArabic) {
+            val normalized = com.pilotothegreat.deencompanion.util.normalizeArabic(query)
+            val sb = java.lang.StringBuilder("%")
+            for (char in normalized) {
+                if (char == 'ا') {
+                    sb.append("_%")
+                } else if (char == 'ه' || char == 'ي') {
+                    sb.append("_%")
+                } else {
+                    sb.append(char).append("%")
+                }
+            }
+            sb.toString()
+        } else {
+            "%${query.trim()}%"
+        }
+
         return if (bookId != null) {
             hadithDao.searchHadithsInBook(bookId, cleanQuery)
         } else {

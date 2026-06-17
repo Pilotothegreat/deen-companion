@@ -30,6 +30,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.runtime.*
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,6 +53,7 @@ import com.pilotothegreat.deencompanion.database.HadithBookEntity
 import com.pilotothegreat.deencompanion.database.HadithEntity
 import com.pilotothegreat.deencompanion.util.PageTitle
 import com.pilotothegreat.deencompanion.util.SearchField
+import com.pilotothegreat.deencompanion.ui.theme.card
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
@@ -91,151 +93,51 @@ fun Hadith(paddingValues: PaddingValues) {
     val paddingTop = paddingValues.calculateTopPadding()
     val paddingBottom = paddingValues.calculateBottomPadding()
 
-    Column(
-        modifier = Modifier
-            .background(colorScheme.surface)
-            .fillMaxSize()
-            .hazeSource(hazeState)
-            .padding(horizontal = paddingSide),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Box(Modifier.height(paddingTop - 8.dp))
+    val direction = if (lang == "ar") LayoutDirection.Rtl else LayoutDirection.Ltr
+    CompositionLocalProvider(LocalLayoutDirection provides direction) {
+        Column(
+            modifier = Modifier
+                .background(colorScheme.surface)
+                .fillMaxSize()
+                .hazeSource(hazeState)
+                .padding(horizontal = paddingSide),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Box(Modifier.height(paddingTop - 8.dp))
 
-        // Unified M3 Search Field
-        SearchField(textFieldState = searchState)
+            // Unified M3 Search Field
+            SearchField(textFieldState = searchState)
 
-        if (searchQueryText.trim().isNotEmpty()) {
-            // Show Search Results
-            Text(
-                text = stringResource(R.string.search_results_count, searchResults.size),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
+            if (searchQueryText.trim().isNotEmpty()) {
+                // Show Search Results
+                Text(
+                    text = stringResource(R.string.search_results_count, searchResults.size),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
 
-            if (isSearching) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            } else if (searchResults.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = stringResource(R.string.search_empty_state),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = colorScheme.outline
-                    )
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = paddingBottom + 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(searchResults, key = { it.id }) { hadith ->
-                        val bookName = books.firstOrNull { it.id == hadith.bookId }?.name ?: hadith.bookId
-                        HadithCard(
-                            collectionName = getLocalizedBookName(hadith.bookId, bookName, lang),
-                            hadith = hadith,
-                            isFavorite = hadith.isFavorite,
-                            onFavoriteToggle = {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                viewModel.toggleFavorite(hadith.id, hadith.isFavorite)
-                            },
-                            lang = lang,
-                            showCollectionName = true
-                        )
+                if (isSearching) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
                     }
-                }
-            }
-        } else if (activeBookId != null) {
-            // Active collection with paged/infinite scroll
-            val book = remember(activeBookId, books) { books.firstOrNull { it.id == activeBookId } }
-            
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = { viewModel.selectBook(null) }) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = stringResource(R.string.go_back))
-                    }
-                    Column(modifier = Modifier.padding(start = 8.dp)) {
+                } else if (searchResults.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
-                            text = getLocalizedBookName(book?.id ?: "", book?.name ?: "", lang),
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                        )
-                        Text(
-                            text = getLocalizedCompiler(book?.id ?: "", book?.compiler ?: "", lang),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = colorScheme.secondary
-                        )
-                    }
-                }
-
-                // Manual pull/download full book
-                IconButton(onClick = { book?.id?.let { viewModel.forceSyncBook(it) } }) {
-                    Icon(imageVector = Icons.Default.Refresh, contentDescription = stringResource(R.string.sync_full_book), tint = colorScheme.primary)
-                }
-            }
-
-            var isRefreshing by remember { mutableStateOf(false) }
-
-            val listState = rememberLazyListState()
-            val shouldLoadMore = remember {
-                derivedStateOf {
-                    val totalItemsCount = listState.layoutInfo.totalItemsCount
-                    val lastVisibleItemIndex = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-                    lastVisibleItemIndex >= totalItemsCount - 5
-                }
-            }
-
-            LaunchedEffect(shouldLoadMore.value) {
-                if (shouldLoadMore.value && viewModel.hasMoreToLoad) {
-                    viewModel.loadNextPage()
-                }
-            }
-
-            if (isSyncing) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        CircularProgressIndicator(color = colorScheme.primary)
-                        Text(
-                            text = if (lang == "ar") "جاري تحميل المجموعة كاملة..." else "Downloading entire collection...",
+                            text = stringResource(R.string.search_empty_state),
                             style = MaterialTheme.typography.bodyMedium,
                             color = colorScheme.outline
                         )
                     }
-                }
-            } else {
-                PullToRefreshBox(
-                    isRefreshing = isRefreshing,
-                    onRefresh = {
-                        isRefreshing = true
-                        scope.launch {
-                            book?.id?.let { viewModel.forceSyncBook(it) }
-                            kotlinx.coroutines.delay(1200)
-                            isRefreshing = false
-                        }
-                    },
-                    modifier = Modifier.fillMaxSize()
-                ) {
+                } else {
                     LazyColumn(
-                        state = listState,
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(bottom = paddingBottom + 16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        items(loadedHadiths, key = { it.id }) { hadith ->
+                        items(searchResults, key = { it.id }) { hadith ->
+                            val bookName = books.firstOrNull { it.id == hadith.bookId }?.name ?: hadith.bookId
                             HadithCard(
-                                collectionName = getLocalizedBookName(hadith.bookId, book?.name ?: "", lang),
+                                collectionName = getLocalizedBookName(hadith.bookId, bookName, lang),
                                 hadith = hadith,
                                 isFavorite = hadith.isFavorite,
                                 onFavoriteToggle = {
@@ -243,52 +145,155 @@ fun Hadith(paddingValues: PaddingValues) {
                                     viewModel.toggleFavorite(hadith.id, hadith.isFavorite)
                                 },
                                 lang = lang,
-                                showCollectionName = false
+                                showCollectionName = true
                             )
                         }
+                    }
+                }
+            } else if (activeBookId != null) {
+                // Active collection with paged/infinite scroll
+                val book = remember(activeBookId, books) { books.firstOrNull { it.id == activeBookId } }
 
-                        if (viewModel.hasMoreToLoad) {
-                            item {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(onClick = { viewModel.selectBook(null) }) {
+                            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = stringResource(R.string.go_back))
+                        }
+                        Column(modifier = Modifier.padding(start = 8.dp)) {
+                            Text(
+                                text = getLocalizedBookName(book?.id ?: "", book?.name ?: "", lang),
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                            )
+                            Text(
+                                text = getLocalizedCompiler(book?.id ?: "", book?.compiler ?: "", lang),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = colorScheme.secondary
+                            )
+                        }
+                    }
+
+                    // Manual pull/download full book
+                    IconButton(onClick = { book?.id?.let { viewModel.forceSyncBook(it) } }) {
+                        Icon(imageVector = Icons.Default.Refresh, contentDescription = stringResource(R.string.sync_full_book), tint = colorScheme.primary)
+                    }
+                }
+
+                var isRefreshing by remember { mutableStateOf(false) }
+
+                val listState = rememberLazyListState()
+                val shouldLoadMore = remember {
+                    derivedStateOf {
+                        val totalItemsCount = listState.layoutInfo.totalItemsCount
+                        val lastVisibleItemIndex = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                        lastVisibleItemIndex >= totalItemsCount - 5
+                    }
+                }
+
+                LaunchedEffect(shouldLoadMore.value) {
+                    if (shouldLoadMore.value && viewModel.hasMoreToLoad) {
+                        viewModel.loadNextPage()
+                    }
+                }
+
+                if (isSyncing) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            CircularProgressIndicator(color = colorScheme.primary)
+                            Text(
+                                text = if (lang == "ar") "جاري تحميل المجموعة كاملة..." else "Downloading entire collection...",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = colorScheme.outline
+                            )
+                        }
+                    }
+                } else {
+                    PullToRefreshBox(
+                        isRefreshing = isRefreshing,
+                        onRefresh = {
+                            isRefreshing = true
+                            scope.launch {
+                                book?.id?.let { viewModel.forceSyncBook(it) }
+                                kotlinx.coroutines.delay(1200)
+                                isRefreshing = false
+                            }
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        LazyColumn(
+                            state = listState,
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(bottom = paddingBottom + 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(loadedHadiths, key = { it.id }) { hadith ->
+                                HadithCard(
+                                    collectionName = getLocalizedBookName(hadith.bookId, book?.name ?: "", lang),
+                                    hadith = hadith,
+                                    isFavorite = hadith.isFavorite,
+                                    onFavoriteToggle = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        viewModel.toggleFavorite(hadith.id, hadith.isFavorite)
+                                    },
+                                    lang = lang,
+                                    showCollectionName = false
+                               )
+                            }
+
+                            if (viewModel.hasMoreToLoad) {
+                                item {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
-        } else {
-            // Book list / favorites tabs
-            PrimaryTabRow(
-                selectedTabIndex = pagerState.currentPage,
-                containerColor = Color.Transparent,
-                contentColor = colorScheme.primary
-            ) {
-                tabs.forEachIndexed { index, title ->
-                    Tab(
-                        selected = pagerState.currentPage == index,
-                        onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
-                        text = { Text(title) }
-                    )
+            } else {
+                // Book list / favorites tabs
+                PrimaryTabRow(
+                    selectedTabIndex = pagerState.currentPage,
+                    containerColor = Color.Transparent,
+                    contentColor = colorScheme.primary
+                ) {
+                    tabs.forEachIndexed { index, title ->
+                        Tab(
+                            selected = pagerState.currentPage == index,
+                            onClick = { scope.launch { pagerState.animateScrollToPage(index) } },
+                            text = { Text(title) }
+                        )
+                    }
                 }
-            }
 
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-            ) { page ->
-                when (page) {
-                    0 -> CollectionsTab(books, lang, isSyncing) {
-                                viewModel.selectBook(it.id)
-                            }
-                    1 -> FavoritesTab(favorites, books, viewModel, paddingBottom, lang)
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                ) { page ->
+                    when (page) {
+                        0 -> CollectionsTab(books, lang, isSyncing) {
+                                    viewModel.selectBook(it.id)
+                                }
+                        1 -> FavoritesTab(favorites, books, viewModel, paddingBottom, lang)
+                    }
                 }
             }
         }
@@ -333,11 +338,11 @@ fun CollectionsTab(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(books, key = { it.id }) { book ->
-                Card(
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onBookClick(book) },
-                    colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainerLow)
+                        .card()
+                        .clickable { onBookClick(book) }
                 ) {
                     Row(
                         modifier = Modifier
@@ -433,12 +438,10 @@ fun HadithCard(
     val favScale = remember { Animatable(1f) }
     val scope = rememberCoroutineScope()
 
-    Card(
+    Box(
         modifier = Modifier
-            .fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainerLow),
-        shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            .fillMaxWidth()
+            .card()
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             // Card Header
@@ -510,7 +513,10 @@ fun HadithCard(
                 }
                 Text(
                     text = narratorText,
-                    style = MaterialTheme.typography.labelLarge.copy(fontStyle = FontStyle.Italic, fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.labelLarge.copy(
+                        fontStyle = if (lang == "ar") FontStyle.Normal else FontStyle.Italic,
+                        fontWeight = FontWeight.Bold
+                    ),
                     color = colorScheme.primary,
                     modifier = Modifier
                         .fillMaxWidth()

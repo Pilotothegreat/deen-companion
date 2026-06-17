@@ -140,7 +140,8 @@ import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
 import com.pilotothegreat.deencompanion.ui.navigation.Navigator
 import com.pilotothegreat.deencompanion.ui.navigation.SettingsKey
 import com.pilotothegreat.deencompanion.ui.navigation.QiblaKey
-import com.pilotothegreat.deencompanion.ui.navigation.AssistantKey
+import androidx.compose.ui.text.style.TextOverflow
+import com.pilotothegreat.deencompanion.util.TOP_BAR_HEIGHT
 import com.pilotothegreat.deencompanion.ui.theme.card
 import com.pilotothegreat.deencompanion.ui.theme.googleSans
 import com.pilotothegreat.deencompanion.util.CategoryTitleText
@@ -329,6 +330,29 @@ fun Overview(
     val hazeState = rememberHazeState()
     val scrollState = rememberScrollState()
 
+    // Date Header setup moved to top-level scope
+    val locale = remember(lang) { Locale(lang) }
+    val gregFormatter = remember(locale) { java.time.format.DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", locale) }
+    val hijriFormatter = remember(locale) { java.time.format.DateTimeFormatter.ofPattern("d MMMM yyyy", locale) }
+    val gregDateStr = remember(locale) { LocalDate.now().format(gregFormatter) }
+    val hijriMethod by appPreferenceRepo.hijriCalendarMethod.collectAsState(initial = com.pilotothegreat.deencompanion.database.HijriMethod.UMM_AL_QURA)
+    val hijriDateStr = remember(locale, hijriMethod) { 
+        try {
+            val baseDays = if (hijriMethod == com.pilotothegreat.deencompanion.database.HijriMethod.REGIONAL) 1L else 0L
+            val targetLocalDate = LocalDate.now().plusDays(baseDays)
+            val hijri = HijrahDate.from(targetLocalDate)
+            val formatted = hijri.format(hijriFormatter) + if (locale.language == "ar") " هـ" else " AH"
+            if (hijriMethod == com.pilotothegreat.deencompanion.database.HijriMethod.REGIONAL) {
+                val label = if (locale.language == "ar") " (قد يختلف حسب الرؤية المحلية)" else " (May differ by local sighting)"
+                formatted + label
+            } else {
+                formatted
+            }
+        } catch (e: Exception) {
+            ""
+        }
+    }
+
     var hasLocationPermission by remember { mutableStateOf(false) }
     LifecycleResumeEffect(Unit) {
         hasLocationPermission = androidx.core.content.ContextCompat.checkSelfPermission(
@@ -484,56 +508,7 @@ fun Overview(
         ) {
         Box(Modifier.height(paddingTop - 8.dp))
 
-        // Date Header
-        val locale = remember(lang) { Locale(lang) }
-        val gregFormatter = remember(locale) { java.time.format.DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", locale) }
-        val hijriFormatter = remember(locale) { java.time.format.DateTimeFormatter.ofPattern("d MMMM yyyy", locale) }
-        val gregDateStr = remember(locale) { LocalDate.now().format(gregFormatter) }
-        val hijriMethod by appPreferenceRepo.hijriCalendarMethod.collectAsState(initial = com.pilotothegreat.deencompanion.database.HijriMethod.UMM_AL_QURA)
-        val hijriDateStr = remember(locale, hijriMethod) { 
-            try {
-                val baseDays = if (hijriMethod == com.pilotothegreat.deencompanion.database.HijriMethod.REGIONAL) 1L else 0L
-                val targetLocalDate = LocalDate.now().plusDays(baseDays)
-                val hijri = HijrahDate.from(targetLocalDate)
-                val formatted = hijri.format(hijriFormatter) + if (locale.language == "ar") " هـ" else " AH"
-                if (hijriMethod == com.pilotothegreat.deencompanion.database.HijriMethod.REGIONAL) {
-                    val label = if (locale.language == "ar") " (قد يختلف حسب الرؤية المحلية)" else " (May differ by local sighting)"
-                    formatted + label
-                } else {
-                    formatted
-                }
-            } catch (e: Exception) {
-                ""
-            }
-        }
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.dp),
-            horizontalAlignment = Alignment.Start
-        ) {
-            Text(
-                text = gregDateStr,
-                style = MaterialTheme.typography.bodyMedium,
-                color = colorScheme.secondary
-            )
-            if (hijriDateStr.isNotEmpty()) {
-                Text(
-                    text = hijriDateStr,
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = colorScheme.primary
-                )
-            }
-            if (city.isNotEmpty()) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.LocationOn, contentDescription = null,
-                        modifier = Modifier.size(12.dp), tint = colorScheme.secondary)
-                    Spacer(Modifier.width(4.dp))
-                    Text(city, style = MaterialTheme.typography.labelSmall, color = colorScheme.secondary)
-                }
-            }
-        }
 
         // Location Not Detected Warning Card
         val locationWarningDismissed by viewModel.locationWarningDismissed.collectAsState()
@@ -711,18 +686,39 @@ fun Overview(
         Box(Modifier.height(paddingBottom - 8.dp))
     }
 }
-    PageTitle(false, hazeState, stringResource(R.string.app_name)) {
+    PageTitle(false, hazeState, "") {
         Row(
-            modifier = Modifier.align(Alignment.CenterEnd),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.fillMaxWidth().height(TOP_BAR_HEIGHT),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            IconButton(
-                onClick = { navigator.goTo(AssistantKey) }
-            ) {
-                Icon(
-                    imageVector = androidx.compose.material.icons.Icons.Default.Mic,
-                    contentDescription = stringResource(R.string.ai_assistant)
+            Column(modifier = Modifier.weight(1f).padding(vertical = 4.dp)) {
+                Text(
+                    text = hijriDateStr,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = colorScheme.primary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
+                if (city.isNotEmpty()) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = null,
+                            modifier = Modifier.size(12.dp),
+                            tint = colorScheme.secondary
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            text = city,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = colorScheme.secondary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
             }
             IconButton(
                 onClick = { navigator.goTo(SettingsKey) }
@@ -909,7 +905,7 @@ private fun OverviewHero(scrollState: ScrollState, viewModel: OverviewVM, nextPr
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(1.5f)
+            .aspectRatio(1.3f)
             .semantics { contentDescription = cdCountdown }
             .clickable(
                 interactionSource = interactionSource,
@@ -964,14 +960,14 @@ private fun OverviewHero(scrollState: ScrollState, viewModel: OverviewVM, nextPr
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
                 text = buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontFamily = fontFamily1, fontSize = 68.sp)) {
+                    withStyle(style = SpanStyle(fontFamily = fontFamily1, fontSize = 82.sp)) {
                         append(nextPrayer.remainingTimeStr)
                     }
-                    withStyle(style = SpanStyle(fontFamily = fontFamily1, fontSize = 24.sp)) {
+                    withStyle(style = SpanStyle(fontFamily = fontFamily1, fontSize = 26.sp)) {
                         appendLine()
                         append(nextPrayerText)
                     }
-                    withStyle(style = SpanStyle(fontFamily = fontFamily2, fontSize = 16.sp)) {
+                    withStyle(style = SpanStyle(fontFamily = fontFamily2, fontSize = 18.sp)) {
                         append(nextAtText)
                     }
                 }

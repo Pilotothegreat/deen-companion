@@ -35,6 +35,7 @@ fun Theme(
 ) {
     val appPreferenceRepo: AppPreferenceRepo = koinInject()
     val theme by appPreferenceRepo.theme.collectAsState(Theme.AutoMaterial)
+    val amoledBlackMode by appPreferenceRepo.amoledBlackMode.collectAsState(false)
     val isDark = theme.isDark()
 
     val view = LocalView.current
@@ -55,8 +56,29 @@ fun Theme(
         }
     }
 
+    val baseColors = theme.getColors()
+    val colors = if (isDark && amoledBlackMode) {
+        baseColors.copy(
+            background = Color.Black,
+            surface = Color.Black,
+            surfaceDim = Color.Black,
+            surfaceBright = Color.Black,
+            surfaceContainerLowest = Color.Black,
+            surfaceContainerLow = Color.Black,
+            surfaceContainer = Color.Black,
+            surfaceContainerHigh = Color.Black,
+            surfaceContainerHighest = Color.Black,
+            scrim = Color.Black,
+            surfaceVariant = Color.Black,
+            outline = Color(0xFF303030),
+            outlineVariant = Color(0xFF303030)
+        )
+    } else {
+        baseColors
+    }
+
     MaterialTheme(
-        colorScheme = theme.getColors(),
+        colorScheme = colors,
         typography = AppTypography
     ) { content() }
 }
@@ -67,8 +89,7 @@ enum class Theme {
     DarkMaterial,
     Auto,
     Light,
-    Dark,
-    Amoled;
+    Dark;
 
     @Composable
     fun getColors(): ColorScheme {
@@ -82,7 +103,6 @@ enum class Theme {
                 Auto -> if (darkTheme) darkScheme else lightScheme
                 Light -> lightScheme
                 Dark -> darkScheme
-                Amoled -> amoledScheme
             }
         }
 
@@ -93,7 +113,6 @@ enum class Theme {
             Auto -> if (darkTheme) darkScheme else lightScheme
             Light -> lightScheme
             Dark -> darkScheme
-            Amoled -> amoledScheme
         }
     }
 
@@ -103,7 +122,6 @@ enum class Theme {
             AutoMaterial, Auto -> stringResource(R.string.auto)
             LightMaterial, Light -> stringResource(R.string.light)
             DarkMaterial, Dark -> stringResource(R.string.dark)
-            Amoled -> "أسود - AMOLED"
         }
     }
 
@@ -114,8 +132,7 @@ enum class Theme {
             darkTheme && this == AutoMaterial ||
             darkTheme && this == Auto ||
             this == DarkMaterial ||
-            this == Dark ||
-            this == Amoled
+            this == Dark
         )
     }
 }

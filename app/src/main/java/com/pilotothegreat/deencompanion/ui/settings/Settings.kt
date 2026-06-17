@@ -428,6 +428,7 @@ fun Settings(paddingValues: PaddingValues) {
         categoryTitleSmall { stringResource(R.string.app_theme) }
         item {
             val currentTheme by viewModel.theme.collectAsState()
+            val amoledBlackMode by viewModel.amoledBlackMode.collectAsState()
             val scroll = rememberScrollState(0)
             val panelWidth = 272.dp.px.toInt()
             LaunchedEffect(currentTheme) {
@@ -436,17 +437,46 @@ fun Settings(paddingValues: PaddingValues) {
                     spring(dampingRatio = Spring.DampingRatioMediumBouncy)
                 )
             }
-            Row(
-                modifier = Modifier
-                    .padding(vertical = 4.dp)
-                    .fillMaxWidth()
-                    .card()
-                    .horizontalScroll(scroll)
-                    .padding(start = 8.dp, end = 8.dp, bottom = 8.dp, top = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                ThemePreferenceContainer(currentTheme, true) { viewModel.setTheme(it) }
-                ThemePreferenceContainer(currentTheme, false) { viewModel.setTheme(it) }
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    modifier = Modifier
+                        .padding(vertical = 4.dp)
+                        .fillMaxWidth()
+                        .card()
+                        .horizontalScroll(scroll)
+                        .padding(start = 8.dp, end = 8.dp, bottom = 8.dp, top = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    ThemePreferenceContainer(currentTheme, true) { viewModel.setTheme(it) }
+                    ThemePreferenceContainer(currentTheme, false) { viewModel.setTheme(it) }
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .card()
+                        .clickable { viewModel.setAmoledBlackMode(!amoledBlackMode) }
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                        Text(
+                            text = stringResource(R.string.amoled_black_mode_title),
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            text = stringResource(R.string.amoled_black_mode_desc),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = amoledBlackMode,
+                        onCheckedChange = { viewModel.setAmoledBlackMode(it) }
+                    )
+                }
             }
         }
 

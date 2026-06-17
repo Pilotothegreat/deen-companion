@@ -194,6 +194,15 @@ inline fun <reified T : Enum<T>> valueOfOrNull(name: String): T? {
     return enumEntries<T>().find { it.name.equals(name, ignoreCase = true) }
 }
 
+fun normalizeArabic(text: String): String {
+    if (text.isEmpty()) return text
+    var normalized = text.replace(Regex("[\\u064B-\\u065F\\u0640\\u0670]"), "")
+    normalized = normalized.replace(Regex("[أإآٱ]"), "ا")
+    normalized = normalized.replace(Regex("ة"), "ه")
+    normalized = normalized.replace(Regex("ى"), "ي")
+    return normalized.trim()
+}
+
 fun currentTimezone(): ZoneOffset = ZoneId.systemDefault().rules.getOffset(Instant.now())
 
 fun openLink(activity: Activity?, link: String) {

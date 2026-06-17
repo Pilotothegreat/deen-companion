@@ -72,10 +72,12 @@ object HadithHelper {
         val collections = getCollections(context)
         val result = mutableListOf<Pair<String, Hadith>>()
         val lowerQuery = query.trim().lowercase()
+        val normalizedQuery = com.pilotothegreat.deencompanion.util.normalizeArabic(query)
         for (col in collections) {
             for (hadith in col.hadiths) {
+                val normalizedArabic = com.pilotothegreat.deencompanion.util.normalizeArabic(hadith.arabic)
                 if (hadith.english.lowercase().contains(lowerQuery) ||
-                    hadith.arabic.contains(query) ||
+                    normalizedArabic.contains(normalizedQuery, ignoreCase = true) ||
                     hadith.narrator.lowercase().contains(lowerQuery)
                 ) {
                     result.add(Pair(col.name, hadith))

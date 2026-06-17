@@ -168,6 +168,7 @@ class AppPreferenceRepo(
         private val MAGHRIB_IQAMA_TIME = stringPreferencesKey("maghrib_iqama_time")
         private val ISHA_IQAMA_TIME = stringPreferencesKey("isha_iqama_time")
         private val USE_IP_LOCATION_FALLBACK = booleanPreferencesKey("use_ip_location_fallback")
+        private val AMOLED_BLACK_MODE = booleanPreferencesKey("amoled_black_mode")
     }
 
     // Location Settings
@@ -318,6 +319,9 @@ class AppPreferenceRepo(
         prefs[THEME]?.let { valueOfOrNull<Theme>(it) } ?: Theme.AutoMaterial
     }.distinctUntilChanged()
     suspend fun setTheme(value: Theme) = dataStore.edit { it[THEME] = value.name }
+
+    val amoledBlackMode: Flow<Boolean> = data.map { it[AMOLED_BLACK_MODE] ?: false }.distinctUntilChanged()
+    suspend fun setAmoledBlackMode(value: Boolean) = dataStore.edit { it[AMOLED_BLACK_MODE] = value }
 
     // Hadith Favorites
     val favoritedHadiths: Flow<Set<String>> = data.map { it[FAVORITED_HADITHS] ?: emptySet() }.distinctUntilChanged()

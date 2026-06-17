@@ -90,6 +90,9 @@ class SettingsVM(
     val useIpLocationFallback: StateFlow<Boolean> = appPreferenceRepo.useIpLocationFallback
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
+    val amoledBlackMode: StateFlow<Boolean> = appPreferenceRepo.amoledBlackMode
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
     private val _updateAvailable = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
     val updateAvailable: StateFlow<String?> = _updateAvailable
 
@@ -173,6 +176,12 @@ class SettingsVM(
     fun setTheme(value: Theme) {
         viewModelScope.launch {
             appPreferenceRepo.setTheme(value)
+        }
+    }
+
+    fun setAmoledBlackMode(value: Boolean) {
+        viewModelScope.launch {
+            appPreferenceRepo.setAmoledBlackMode(value)
         }
     }
 

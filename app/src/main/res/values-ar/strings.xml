@@ -164,7 +164,8 @@
     <string name="app_language_subtitle">لغة التطبيق</string>
     <string name="installed_status">جاهز</string>
     <string name="not_installed_status">غير مثبت</string>
-    <string name="theme_amoled">أسود - AMOLED</string>
+    <string name="amoled_black_mode_title">وضع AMOLED الأسود</string>
+    <string name="amoled_black_mode_desc">استخدام خلفية سوداء داكنة في الوضع الليلي لتوفير الطاقة القصوى</string>
     <string name="previous_verse">الآية السابقة</string>
     <string name="next_verse">الآية التالية</string>
     <string name="play_pause">تشغيل / إيقاف مؤقت</string>
@@ -198,7 +199,6 @@
     <string name="exact_alarm_permission_required">صلاحية التنبيه الدقيق مطلوبة</string>
     <string name="exact_alarm_permission_required_desc">يحتاج هذا التطبيق إلى صلاحية التنبيه الدقيق لإرسال تنبيهات الإقامة في وقتها.</string>
     <string name="grant">منح الصلاحية</string>
-    <string name="ai_assistant">المساعد الذكي</string>
 
     <!-- Onboarding -->
     <string name="onboarding_welcome_title">السلام عليكم 🌙</string>
@@ -220,9 +220,6 @@
     <string name="onboarding_next">التالي</string>
     <string name="onboarding_skip">تخطي</string>
 
-    <!-- Assistant disclaimer -->
-    <string name="assistant_disclaimer_title">بحث محلي في النصوص</string>
-    <string name="assistant_disclaimer_body">يُجري هذا المساعد بحثاً في نصوص القرآن الكريم والحديث الشريف الموثقة والمخزنة على جهازك دون اتصال. وليس خدمةً للإفتاء أو للرأي الشرعي. استشر عالماً مؤهلاً دائماً.</string>
 
     <!-- IP Location Toggle -->
     <string name="ip_location_fallback_title">تحديد الموقع عبر الإنترنت</string>
@@ -235,7 +232,5 @@
     <string name="cd_next_verse">الانتقال إلى الآية التالية</string>
     <string name="cd_prev_verse">الرجوع إلى الآية السابقة</string>
     <string name="cd_qibla_compass">بوصلة القبلة تُظهر اتجاه مكة المكرمة</string>
-    <string name="cd_assistant_disclaimer">معلومات المساعد: بحث محلي فقط، ليس خدمة إفتاء</string>
-    <string name="cd_mic_button">زر الميكروفون للإدخال الصوتي</string>
 </resources>
 

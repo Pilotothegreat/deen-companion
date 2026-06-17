@@ -167,7 +167,8 @@
     <string name="app_language_subtitle">Application Language</string>
     <string name="installed_status">Installed</string>
     <string name="not_installed_status">Not Installed</string>
-    <string name="theme_amoled">AMOLED</string>
+    <string name="amoled_black_mode_title">AMOLED Black Mode</string>
+    <string name="amoled_black_mode_desc">Use pure black backgrounds in dark themes for maximum power saving</string>
     <string name="previous_verse">Previous Verse</string>
     <string name="next_verse">Next Verse</string>
     <string name="play_pause">Play or Pause</string>
@@ -199,7 +200,6 @@
     <string name="exact_alarm_permission_required">Exact Alarm Permission Required</string>
     <string name="exact_alarm_permission_required_desc">This app needs exact alarm permission for accurate Iqama reminders.</string>
     <string name="grant">Grant</string>
-    <string name="ai_assistant">AI Assistant</string>
 
     <!-- Onboarding -->
     <string name="onboarding_welcome_title">Assalamu Alaikum 🌙</string>
@@ -221,9 +221,6 @@
     <string name="onboarding_next">Next</string>
     <string name="onboarding_skip">Skip</string>
 
-    <!-- Assistant disclaimer -->
-    <string name="assistant_disclaimer_title">Local Text Search</string>
-    <string name="assistant_disclaimer_body">This assistant searches verified Quran and Hadith texts stored offline on your device. It is not a fatwa service or scholarly opinion tool. Always consult a qualified scholar for religious rulings.</string>
 
     <!-- IP Location Toggle -->
     <string name="ip_location_fallback_title">Internet location fallback</string>
@@ -236,7 +233,5 @@
     <string name="cd_next_verse">Skip to next verse</string>
     <string name="cd_prev_verse">Go to previous verse</string>
     <string name="cd_qibla_compass">Qibla compass showing direction to Makkah</string>
-    <string name="cd_assistant_disclaimer">Assistant information: local search only, not a fatwa service</string>
-    <string name="cd_mic_button">Microphone button for voice input</string>
 </resources>
 

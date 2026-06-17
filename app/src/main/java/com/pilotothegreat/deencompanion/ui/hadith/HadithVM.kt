@@ -59,18 +59,20 @@ class HadithVM(
                     val rankedResults = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
                         val results = repository.searchHadiths(query)
                         val normalizedQuery = normalizeArabic(query)
-                        results.sortedByDescending { entity ->
+                        val lowerQuery = query.lowercase().trim()
+
+                        results.mapNotNull { entity ->
                             var score = 0
                             val normEnglish = entity.english.lowercase()
                             val normArabic = normalizeArabic(entity.arabic)
                             val normNarrator = entity.narrator.lowercase()
-                            val lowerQuery = query.lowercase()
 
-                            if (normEnglish.contains(lowerQuery)) score += 3
                             if (normArabic.contains(normalizedQuery)) score += 5
+                            if (normEnglish.contains(lowerQuery)) score += 3
                             if (normNarrator.contains(lowerQuery)) score += 2
-                            score
-                        }
+
+                            if (score > 0) Pair(entity, score) else null
+                        }.sortedByDescending { it.second }.map { it.first }
                     }
                     _searchResults.value = rankedResults
                     _isSearching.value = false
