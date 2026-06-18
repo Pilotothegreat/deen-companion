@@ -145,6 +145,8 @@ class HadithRepository(
      * Async task to download and cache the entire collection from the CDN API
      */
     suspend fun syncFullBook(bookId: String): Boolean = withContext(Dispatchers.IO) {
+        var araConnection: java.net.HttpURLConnection? = null
+        var engConnection: java.net.HttpURLConnection? = null
         try {
             val book = hadithDao.getHadithBook(bookId) ?: return@withContext false
             Timber.i("Syncing full book: ${book.name} from Fawaz Ahmed Hadith API...")
@@ -152,13 +154,13 @@ class HadithRepository(
             val araUrl = "https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/ara-$bookId.json"
             val engUrl = "https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/eng-$bookId.json"
 
-            val araConnection = URL(araUrl).openConnection() as java.net.HttpURLConnection
+            araConnection = URL(araUrl).openConnection() as java.net.HttpURLConnection
             araConnection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
             araConnection.connectTimeout = 15000
             araConnection.readTimeout = 15000
             val araJson = araConnection.inputStream.bufferedReader().use { it.readText() }
 
-            val engConnection = URL(engUrl).openConnection() as java.net.HttpURLConnection
+            engConnection = URL(engUrl).openConnection() as java.net.HttpURLConnection
             engConnection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
             engConnection.connectTimeout = 15000
             engConnection.readTimeout = 15000
@@ -189,7 +191,7 @@ class HadithRepository(
                         arabic = arabText,
                         english = engText,
                         narrator = "", // Fawaz Ahmed's API embeds the narrator inside english text
-                        grade = "Sahih" // Default grade for canonical collections
+                        grade = "" // Grade unknown for CDN-synced hadiths; badge hidden when empty
                     )
                 )
             }
@@ -212,6 +214,9 @@ class HadithRepository(
         } catch (e: Exception) {
             Timber.e(e, "Failed to sync full book: $bookId")
             false
+        } finally {
+            araConnection?.disconnect()
+            engConnection?.disconnect()
         }
     }
 }

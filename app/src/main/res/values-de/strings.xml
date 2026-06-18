@@ -109,9 +109,6 @@
     <string name="unsafe">Unsicher</string>
     <string name="budget">Budget</string>
     <string name="daily">Täglich</string>
-    <string name="notes">Anmerkungen</string>
-    <string name="color">Farbe</string>
-    <string name="plans">Pläne</string>
     <plurals name="resets_in_hours">
         <item quantity="one">Zurücksetzung in %d Stunde</item>
         <item quantity="other">Zurücksetzung in %d Stunden</item>

@@ -30,7 +30,7 @@ class SettingsVM(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
     val calcMethod: StateFlow<PrayerTimeCalculator.CalculationMethod> = appPreferenceRepo.calcMethod
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), PrayerTimeCalculator.CalculationMethod.MWL)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), PrayerTimeCalculator.CalculationMethod.OMAN)
 
     val asrSchool: StateFlow<PrayerTimeCalculator.AsrSchool> = appPreferenceRepo.asrSchool
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), PrayerTimeCalculator.AsrSchool.STANDARD)

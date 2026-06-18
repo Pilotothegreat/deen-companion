@@ -108,9 +108,6 @@
     <string name="unsafe">Güvensiz</string>
     <string name="budget">Bütçe</string>
     <string name="daily">Günlük</string>
-    <string name="notes">Notlar</string>
-    <string name="color">Renk</string>
-    <string name="plans">Planlar</string>
     <plurals name="resets_in_hours">
         <item quantity="one">%d saat içinde sıfırlanacak</item>
         <item quantity="other">%d saat içinde sıfırlanacak</item>

@@ -149,6 +149,7 @@ fun Settings(paddingValues: PaddingValues) {
                 Preference(
                     title = stringResource(R.string.calculation_method),
                     summary = when (calcMethod) {
+                        PrayerTimeCalculator.CalculationMethod.OMAN -> stringResource(R.string.calc_oman)
                         PrayerTimeCalculator.CalculationMethod.MWL -> stringResource(R.string.calc_mwl)
                         PrayerTimeCalculator.CalculationMethod.ISNA -> stringResource(R.string.calc_isna)
                         PrayerTimeCalculator.CalculationMethod.EGYPT -> stringResource(R.string.calc_egypt)
@@ -168,6 +169,7 @@ fun Settings(paddingValues: PaddingValues) {
                         DropdownMenuItem(
                             text = {
                                 val label = when (method) {
+                                    PrayerTimeCalculator.CalculationMethod.OMAN -> stringResource(R.string.calc_oman)
                                     PrayerTimeCalculator.CalculationMethod.MWL -> stringResource(R.string.calc_mwl)
                                     PrayerTimeCalculator.CalculationMethod.ISNA -> stringResource(R.string.calc_isna)
                                     PrayerTimeCalculator.CalculationMethod.EGYPT -> stringResource(R.string.calc_egypt)

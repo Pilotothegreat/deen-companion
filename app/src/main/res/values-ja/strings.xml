@@ -107,9 +107,6 @@
     <string name="unsafe">危険</string>
     <string name="budget">予算</string>
     <string name="daily">毎日</string>
-    <string name="notes">注記</string>
-    <string name="color">カラー</string>
-    <string name="plans">プラン</string>
     <plurals name="resets_in_hours">
         <item quantity="other">%d時間後にリセットされます</item>
     </plurals>

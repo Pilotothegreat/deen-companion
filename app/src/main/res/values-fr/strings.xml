@@ -109,9 +109,6 @@
     <string name="unsafe">Dangereuse</string>
     <string name="budget">Budget</string>
     <string name="daily">Quotidien</string>
-    <string name="notes">Notes</string>
-    <string name="color">Couleur</string>
-    <string name="plans">Forfaits</string>
     <plurals name="resets_in_hours">
         <item quantity="one">Réinitialisation dans %d heure</item>
         <item quantity="many">Réinitialisation dans %d heures</item>

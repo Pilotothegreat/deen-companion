@@ -78,6 +78,7 @@
     <string name="calc_isna">Islamic Society of North America</string>
     <string name="calc_egypt">Egyptian General Authority of Survey</string>
     <string name="calc_makkah">Umm al-Qura University, Makkah</string>
+    <string name="calc_oman">Oman (Ministry of Endowments &amp; Religious Affairs)</string>
     <string name="calc_karachi">University of Islamic Sciences, Karachi</string>
     <string name="calc_jafari">Shia Ithna Ashari (Ja\'fari)</string>
     <string name="calc_tehran">Institute of Geophysics, University of Tehran</string>
@@ -233,5 +234,8 @@
     <string name="cd_next_verse">Skip to next verse</string>
     <string name="cd_prev_verse">Go to previous verse</string>
     <string name="cd_qibla_compass">Qibla compass showing direction to Makkah</string>
+
+    <string name="syncing_full_collection">Downloading entire collection...</string>
+    <string name="collections_load_error">Collections could not be loaded. Check your internet connection and reopen the app.</string>
 </resources>
 

@@ -13,6 +13,7 @@ class PrayerTimeCalculator {
         val ishaIntervalMins: Long = 0,
         val dhuhrBufferMins: Int = 0
     ) {
+        OMAN(18.0, 90.0, true, 90, 1), // Oman Ministry of Endowments & Religious Affairs
         MWL(18.0, 17.0, false, 0, 1),
         ISNA(15.0, 15.0, false, 0, 1),
         EGYPT(19.5, 17.5, false, 0, 0),
@@ -42,7 +43,7 @@ class PrayerTimeCalculator {
             latitude: Double,
             longitude: Double,
             timezoneOffsetHours: Double,
-            method: CalculationMethod = CalculationMethod.MWL,
+            method: CalculationMethod = CalculationMethod.OMAN,
             asrSchool: AsrSchool = AsrSchool.STANDARD,
             hijriMonth: Int? = null
         ): PrayerTimes {
@@ -114,7 +115,7 @@ class PrayerTimeCalculator {
                 } catch (e: Exception) {
                     1
                 }
-                val intervalMins = if (method == CalculationMethod.MAKKAH && actualHijriMonth == 9) 120L else method.ishaIntervalMins
+                val intervalMins = if ((method == CalculationMethod.MAKKAH || method == CalculationMethod.OMAN) && actualHijriMonth == 9) 120L else method.ishaIntervalMins
                 doubleToTime(sunsetLocal + (2.0 / 60.0) + (intervalMins / 60.0)) // Offset Isha according to the buffered Maghrib time
             } else {
                 val ishaAngle = method.ishaAngle

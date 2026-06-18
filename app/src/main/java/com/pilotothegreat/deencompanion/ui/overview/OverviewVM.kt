@@ -56,7 +56,7 @@ class OverviewVM(
     }
 
     val calcMethod = appPreferenceRepo.calcMethod.stateIn(
-        viewModelScope, SharingStarted.Eagerly, PrayerTimeCalculator.CalculationMethod.MWL
+        viewModelScope, SharingStarted.Eagerly, PrayerTimeCalculator.CalculationMethod.OMAN
     )
     val asrSchool = appPreferenceRepo.asrSchool.stateIn(
         viewModelScope, SharingStarted.Eagerly, PrayerTimeCalculator.AsrSchool.STANDARD
@@ -109,7 +109,7 @@ class OverviewVM(
             21.3891,
             39.8579,
             3.0,
-            PrayerTimeCalculator.CalculationMethod.MWL,
+            PrayerTimeCalculator.CalculationMethod.OMAN,
             PrayerTimeCalculator.AsrSchool.STANDARD
         )
     )

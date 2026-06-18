@@ -108,9 +108,6 @@
     <string name="unsafe">网络连接不安全</string>
     <string name="budget">预算</string>
     <string name="daily">每日</string>
-    <string name="notes">注释</string>
-    <string name="color">颜色</string>
-    <string name="plans">套餐</string>
     <plurals name="resets_in_hours">
         <item quantity="other">%d小时后重置</item>
     </plurals>

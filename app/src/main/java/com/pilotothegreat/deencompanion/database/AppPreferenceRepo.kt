@@ -192,7 +192,7 @@ class AppPreferenceRepo(
 
     // Prayer Time Settings
     val calcMethod: Flow<PrayerTimeCalculator.CalculationMethod> = data.map { prefs ->
-        prefs[CALC_METHOD]?.let { valueOfOrNull<PrayerTimeCalculator.CalculationMethod>(it) } ?: PrayerTimeCalculator.CalculationMethod.MWL
+        prefs[CALC_METHOD]?.let { valueOfOrNull<PrayerTimeCalculator.CalculationMethod>(it) } ?: PrayerTimeCalculator.CalculationMethod.OMAN
     }.distinctUntilChanged()
     suspend fun setCalcMethod(value: PrayerTimeCalculator.CalculationMethod) = dataStore.edit { it[CALC_METHOD] = value.name }
 

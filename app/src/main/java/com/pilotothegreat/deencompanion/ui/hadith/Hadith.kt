@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
 import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
 import org.koin.compose.koinInject
@@ -212,7 +213,7 @@ fun Hadith(paddingValues: PaddingValues) {
                         ) {
                             CircularProgressIndicator(color = colorScheme.primary)
                             Text(
-                                text = if (lang == "ar") "جاري تحميل المجموعة كاملة..." else "Downloading entire collection...",
+                                text = stringResource(R.string.syncing_full_collection),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = colorScheme.outline
                             )
@@ -323,8 +324,7 @@ fun CollectionsTab(
                 modifier = Modifier.padding(32.dp)
             ) {
                 Text(
-                    text = if (lang == "ar") "لم يتم تحميل المجموعات. تحقق من اتصالك بالإنترنت وافتح التطبيق مرة أخرى."
-                             else "Collections could not be loaded. Check your internet connection and reopen the app.",
+                    text = stringResource(R.string.collections_load_error),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -480,11 +480,16 @@ fun HadithCard(
                     val isDaif = hadith.grade.contains("Da'if", ignoreCase = true) || hadith.grade.contains("Daif", ignoreCase = true)
                     val isMawdu = hadith.grade.contains("Mawdu", ignoreCase = true)
                     
+                    val isDark = isSystemInDarkTheme()
                     val (bg, fg) = when {
-                        isSahih -> Color(0xFFE8F5E9) to Color(0xFF2E7D32)
-                        isHasan -> Color(0xFFE3F2FD) to Color(0xFF1565C0)
-                        isDaif -> Color(0xFFFFEBEE) to Color(0xFFC62828)
-                        isMawdu -> Color(0xFFECEFF1) to Color(0xFF37474F)
+                        isSahih -> if (isDark) Color(0xFF1B3A1F) to Color(0xFF81C784)
+                                   else Color(0xFFE8F5E9) to Color(0xFF2E7D32)
+                        isHasan -> if (isDark) Color(0xFF0D2A47) to Color(0xFF64B5F6)
+                                   else Color(0xFFE3F2FD) to Color(0xFF1565C0)
+                        isDaif ->  if (isDark) Color(0xFF3B1010) to Color(0xFFEF9A9A)
+                                   else Color(0xFFFFEBEE) to Color(0xFFC62828)
+                        isMawdu -> if (isDark) Color(0xFF1C1F20) to Color(0xFF90A4AE)
+                                   else Color(0xFFECEFF1) to Color(0xFF37474F)
                         else -> colorScheme.surfaceVariant to colorScheme.onSurfaceVariant
                     }
                     

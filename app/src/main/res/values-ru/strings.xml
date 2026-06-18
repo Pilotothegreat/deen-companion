@@ -109,9 +109,6 @@
     <string name="unsafe">Небезопасный</string>
     <string name="budget">Бюджет</string>
     <string name="daily">Ежедневно</string>
-    <string name="notes">Заметки</string>
-    <string name="color">Цвет</string>
-    <string name="plans">Планы</string>
     <plurals name="resets_in_hours">
         <item quantity="one">Сбрасывается в течение %d часа</item>
         <item quantity="few">Сбрасывается в течение %d часов</item>

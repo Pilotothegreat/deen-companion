@@ -75,6 +75,7 @@
     <string name="calc_isna">الجمعية الإسلامية لأمريكا الشمالية</string>
     <string name="calc_egypt">الهيئة المصرية العامة للمساحة</string>
     <string name="calc_makkah">جامعة أم القرى، مكة</string>
+    <string name="calc_oman">سلطنة عمان (وزارة الأوقاف والشؤون الدينية)</string>
     <string name="calc_karachi">جامعة العلوم الإسلامية، كراتشي</string>
     <string name="calc_jafari">شيعة إثنا عشرية (جعفري)</string>
     <string name="calc_tehran">مؤسسة الجيوفيزياء، جامعة طهران</string>
@@ -232,5 +233,8 @@
     <string name="cd_next_verse">الانتقال إلى الآية التالية</string>
     <string name="cd_prev_verse">الرجوع إلى الآية السابقة</string>
     <string name="cd_qibla_compass">بوصلة القبلة تُظهر اتجاه مكة المكرمة</string>
+
+    <string name="syncing_full_collection">جاري تحميل المجموعة كاملة...</string>
+    <string name="collections_load_error">لم يتم تحميل المجموعات. تحقق من اتصالك بالإنترنت وافتح التطبيق مرة أخرى.</string>
 </resources>
 
