@@ -152,6 +152,7 @@ class AppPreferenceRepo(
         private val APP_LAUNCH_COUNT = intPreferencesKey("app_launch_count")
         private val DONATION_PROMPT_DISMISSED = booleanPreferencesKey("donation_prompt_dismissed")
         private val LAST_DONATION_PROMPT_SHOW_TIME = longPreferencesKey("last_donation_prompt_show_time")
+        private val DONATION_PROMPT_SHOW_COUNT = intPreferencesKey("donation_prompt_show_count")
         private val GITHUB_CHECK_TIMESTAMP = longPreferencesKey("github_check_timestamp")
         private val GITHUB_CHECK_LATEST_VERSION = stringPreferencesKey("github_check_latest_version")
         private val TASBIH_DHIKR = stringPreferencesKey("tasbih_dhikr")
@@ -374,6 +375,16 @@ class AppPreferenceRepo(
     // Last time donation prompt was shown
     val lastDonationPromptShowTime: Flow<Long> = data.map { it[LAST_DONATION_PROMPT_SHOW_TIME] ?: 0L }.distinctUntilChanged()
     suspend fun setLastDonationPromptShowTime(value: Long) = dataStore.edit { it[LAST_DONATION_PROMPT_SHOW_TIME] = value }
+
+    // Donation prompt show count
+    val donationPromptShowCount: Flow<Int> = data.map { it[DONATION_PROMPT_SHOW_COUNT] ?: 0 }.distinctUntilChanged()
+    suspend fun setDonationPromptShowCount(value: Int) = dataStore.edit { it[DONATION_PROMPT_SHOW_COUNT] = value }
+    suspend fun incrementDonationPromptShowCount() {
+        dataStore.edit { prefs ->
+            val current = prefs[DONATION_PROMPT_SHOW_COUNT] ?: 0
+            prefs[DONATION_PROMPT_SHOW_COUNT] = current + 1
+        }
+    }
 
     // GitHub update cache
     val githubCheckTimestamp: Flow<Long> = data.map { it[GITHUB_CHECK_TIMESTAMP] ?: 0L }.distinctUntilChanged()

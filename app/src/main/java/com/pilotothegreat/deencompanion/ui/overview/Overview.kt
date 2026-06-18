@@ -137,6 +137,9 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
+import com.pilotothegreat.deencompanion.ui.settings.omaniBankApps
+import com.pilotothegreat.deencompanion.ui.settings.isPackageInstalled
+import androidx.compose.material.icons.filled.ContentCopy
 import com.pilotothegreat.deencompanion.ui.navigation.Navigator
 import com.pilotothegreat.deencompanion.ui.navigation.SettingsKey
 import com.pilotothegreat.deencompanion.ui.navigation.QiblaKey
@@ -378,7 +381,7 @@ fun Overview(
 
     var shownThisSession by remember { mutableStateOf(false) }
     var showDonationDialog by remember { mutableStateOf(false) }
-    var showDonationBottomSheet by remember { mutableStateOf(false) }
+    val showCount by appPreferenceRepo.donationPromptShowCount.collectAsState(initial = 0)
 
     LaunchedEffect(Unit) {
         if (!shownThisSession) {
@@ -386,11 +389,12 @@ fun Overview(
             val dismissed = appPreferenceRepo.donationPromptDismissed.first()
             val lastShow = appPreferenceRepo.lastDonationPromptShowTime.first()
             val now = System.currentTimeMillis()
-            val sevenDaysInMillis = 7L * 24 * 60 * 60 * 1000
+            val twoDaysInMillis = 2L * 24 * 60 * 60 * 1000
 
-            if (count >= 5 && !dismissed && (now - lastShow >= sevenDaysInMillis)) {
+            if (count >= 2 && !dismissed && (now - lastShow >= twoDaysInMillis)) {
                 showDonationDialog = true
                 shownThisSession = true
+                appPreferenceRepo.incrementDonationPromptShowCount()
             }
         }
     }
@@ -761,53 +765,140 @@ fun Overview(
                 }
             },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(text = stringResource(R.string.donation_dialog_desc))
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color(0xFF556B2F).copy(alpha = 0.12f)
-                        )
+                val supportText = if (lang == "ar") {
+                    "أخي العزيز اختي العزيزة انا مطور مستقل و طالب جامعي، التطبيق مجاني بالكامل بالرغم من تكلفته العالية اذا عجبك فكر انك تدعم تطويره عشان يستمر، جزء من المبلغ راح يروح لدعم القضية الفلسطينية."
+                } else {
+                    "Dear brothers and sisters,\n\nI'm an indie developer and university student. The application is completely free despite its high cost. If you like it, please consider donating to its development so I can continue maintaining it. Part of the donation will go to support the Palestinian cause."
+                }
+                val installedBanks = remember(context) {
+                    omaniBankApps.filter { 
+                        isPackageInstalled(context, it.packageName) 
+                    }
+                }
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(text = supportText, style = MaterialTheme.typography.bodyMedium)
+                    
+                    // Phone Number Card
+                    val phoneInteractionSource = remember { MutableInteractionSource() }
+                    val phonePressed by phoneInteractionSource.collectIsPressedAsState()
+                    val phoneScale by animateFloatAsState(
+                        targetValue = if (phonePressed) 0.96f else 1f,
+                        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .graphicsLayer {
+                                scaleX = phoneScale
+                                scaleY = phoneScale
+                            }
+                            .background(colorScheme.tertiary.copy(alpha = 0.15f), MaterialTheme.shapes.medium)
+                            .clickable(
+                                interactionSource = phoneInteractionSource,
+                                indication = androidx.compose.foundation.LocalIndication.current
+                            ) {
+                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                                val clip = android.content.ClipData.newPlainText("Phone", "91904926")
+                                clipboard.setPrimaryClip(clip)
+                                android.widget.Toast.makeText(context, context.getString(R.string.copied_to_clipboard), android.widget.Toast.LENGTH_SHORT).show()
+                            }
+                            .padding(12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = stringResource(R.string.palestine_cause_support),
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(12.dp),
-                            color = Color(0xFF556B2F),
-                            fontWeight = FontWeight.SemiBold
-                        )
+                        Column {
+                            Text(stringResource(R.string.bank_transfer_phone_pay),
+                                style = MaterialTheme.typography.labelMedium, color = colorScheme.onTertiaryContainer)
+                            Text("91904926",
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = colorScheme.onTertiaryContainer)
+                            Text(stringResource(R.string.payment_tap_hint),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = colorScheme.onTertiaryContainer.copy(alpha = 0.7f))
+                        }
+                        Icon(Icons.Default.ContentCopy, contentDescription = "Copy",
+                            tint = colorScheme.onTertiaryContainer)
+                    }
+
+                    // Direct Open Bank buttons
+                    if (installedBanks.isNotEmpty()) {
+                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text(
+                                text = if (lang == "ar") "افتح تطبيق البنك مباشرة:" else "Open Bank App directly:",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = colorScheme.onSurfaceVariant
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                installedBanks.forEach { bank ->
+                                    val bankInteractionSource = remember { MutableInteractionSource() }
+                                    val bankPressed by bankInteractionSource.collectIsPressedAsState()
+                                    val bankScale by animateFloatAsState(
+                                        targetValue = if (bankPressed) 0.94f else 1f,
+                                        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+                                    )
+                                    Button(
+                                        onClick = {
+                                            val launchIntent = context.packageManager.getLaunchIntentForPackage(bank.packageName)
+                                            if (launchIntent != null) {
+                                                context.startActivity(launchIntent)
+                                            }
+                                        },
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = bank.color,
+                                            contentColor = Color.White
+                                        ),
+                                        contentPadding = PaddingValues(horizontal = 10.dp),
+                                        modifier = Modifier
+                                            .height(32.dp)
+                                            .graphicsLayer {
+                                                scaleX = bankScale
+                                                scaleY = bankScale
+                                            },
+                                        interactionSource = bankInteractionSource,
+                                        shape = RoundedCornerShape(16.dp)
+                                    ) {
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = bank.initials,
+                                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
+                                            )
+                                            Icon(
+                                                imageVector = Icons.Default.Launch,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(12.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             },
             confirmButton = {
                 Button(
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF556B2F)
+                        containerColor = colorScheme.primary
                     ),
                     onClick = {
-                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                        val clip = android.content.ClipData.newPlainText("Phone", "91904926")
-                        clipboard.setPrimaryClip(clip)
-                        android.widget.Toast.makeText(context, context.getString(R.string.copied_to_clipboard), android.widget.Toast.LENGTH_SHORT).show()
-                        
                         showDonationDialog = false
-                        showDonationBottomSheet = true
+                        coroutineScope.launch {
+                            appPreferenceRepo.setLastDonationPromptShowTime(System.currentTimeMillis())
+                        }
                     }
                 ) {
-                    Text(stringResource(R.string.donate_now), color = Color.White)
+                    Text(stringResource(R.string.dismiss))
                 }
             },
             dismissButton = {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TextButton(
-                        onClick = {
-                            showDonationDialog = false
-                            coroutineScope.launch {
-                                appPreferenceRepo.setLastDonationPromptShowTime(System.currentTimeMillis())
-                            }
-                        }
-                    ) {
-                        Text(stringResource(R.string.later))
-                    }
+                if (showCount >= 3) {
                     TextButton(
                         onClick = {
                             showDonationDialog = false
@@ -821,18 +912,6 @@ fun Overview(
                 }
             }
         )
-    }
-
-    if (showDonationBottomSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showDonationBottomSheet = false },
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
-        ) {
-            com.pilotothegreat.deencompanion.ui.settings.PaymentBottomSheetContent(
-                context = context,
-                onDismiss = { showDonationBottomSheet = false }
-            )
-        }
     }
     }
 }

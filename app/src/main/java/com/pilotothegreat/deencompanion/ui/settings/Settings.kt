@@ -28,6 +28,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ExpandLess
@@ -99,16 +100,186 @@ fun Settings(paddingValues: PaddingValues) {
     var showCalcMenu by remember { mutableStateOf(false) }
     var showAsrMenu by remember { mutableStateOf(false) }
 
-    // Payment Bottom Sheet state
-    var showPaymentSheet by remember { mutableStateOf(false) }
-    val paymentSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
     LazyColumn(
         Modifier
             .background(MaterialTheme.colorScheme.surface)
             .hazeSource(hazeState),
         contentPadding = paddingValues
     ) {
+        categoryTitleSmall { stringResource(R.string.support_developer) }
+        item {
+            val interactionSource = remember { MutableInteractionSource() }
+            val isPressed by interactionSource.collectIsPressedAsState()
+            val scale by animateFloatAsState(
+                targetValue = if (isPressed) 0.96f else 1f,
+                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+            )
+            val installedBanks = remember(context) {
+                omaniBankApps.filter { isPackageInstalled(context, it.packageName) }
+            }
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .graphicsLayer {
+                        scaleX = scale
+                        scaleY = scale
+                    }
+                    .padding(vertical = 4.dp)
+                    .drawBehind {
+                        // Kufiya pattern background
+                        val step = 16.dp.toPx()
+                        val strokeWidth = 1.dp.toPx()
+                        val lineColor = Color.LightGray.copy(alpha = 0.08f)
+                        var offset = 0f
+                        while (offset < size.width + size.height) {
+                            drawLine(
+                                color = lineColor,
+                                start = Offset(offset, 0f),
+                                end = Offset(0f, offset),
+                                strokeWidth = strokeWidth
+                            )
+                            drawLine(
+                                color = lineColor,
+                                start = Offset(size.width - offset, 0f),
+                                end = Offset(size.width, offset),
+                                strokeWidth = strokeWidth
+                            )
+                            offset += step
+                        }
+                    },
+                colors = CardDefaults.cardColors(containerColor = colorScheme.tertiaryContainer)
+            ) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Icon(Icons.Default.Favorite, contentDescription = null, tint = Color(0xFFC8102E))
+                            Text(stringResource(R.string.support_deen_companion),
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                color = colorScheme.onTertiaryContainer)
+                        }
+                        
+                        Surface(
+                            shape = MaterialTheme.shapes.small,
+                            color = Color(0xFF556B2F).copy(alpha = 0.2f),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF556B2F).copy(alpha = 0.4f))
+                        ) {
+                            Text(
+                                text = stringResource(R.string.palestine_badge),
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                color = Color(0xFF556B2F)
+                            )
+                        }
+                    }
+                    val supportText = if (lang == "ar") {
+                        "أخي العزيز اختي العزيزة انا مطور مستقل و طالب جامعي، التطبيق مجاني بالكامل بالرغم من تكلفته العالية اذا عجبك فكر انك تدعم تطويره عشان يستمر، جزء من المبلغ راح يروح لدعم القضية الفلسطينية."
+                    } else {
+                        "Dear brothers and sisters,\n\nI'm an indie developer and university student. The application is completely free despite its high cost. If you like it, please consider donating to its development so I can continue maintaining it. Part of the donation will go to support the Palestinian cause."
+                    }
+                    Text(
+                        text = supportText,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colorScheme.onTertiaryContainer.copy(alpha = 0.9f)
+                    )
+
+                    Spacer(Modifier.height(4.dp))
+                    // Phone number card with click-to-copy
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(colorScheme.tertiary.copy(alpha = 0.15f), MaterialTheme.shapes.medium)
+                            .clickable(
+                                interactionSource = interactionSource,
+                                indication = androidx.compose.foundation.LocalIndication.current
+                            ) {
+                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                clipboard.setPrimaryClip(ClipData.newPlainText("Phone", "91904926"))
+                                Toast.makeText(context, context.getString(R.string.copied_to_clipboard), Toast.LENGTH_SHORT).show()
+                            }
+                            .padding(12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(stringResource(R.string.bank_transfer_phone_pay),
+                                style = MaterialTheme.typography.labelMedium, color = colorScheme.onTertiaryContainer)
+                            Text("91904926",
+                                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                                color = colorScheme.onTertiaryContainer)
+                            Text(stringResource(R.string.payment_tap_hint),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = colorScheme.onTertiaryContainer.copy(alpha = 0.7f))
+                        }
+                        Icon(Icons.Default.ContentCopy, contentDescription = "Copy",
+                            tint = colorScheme.onTertiaryContainer)
+                    }
+
+                    // Direct Omani Bank launch buttons
+                    if (installedBanks.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = if (lang == "ar") "افتح تطبيق البنك:" else "Open Bank App:",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = colorScheme.onTertiaryContainer.copy(alpha = 0.8f)
+                            )
+                            installedBanks.forEach { bank ->
+                                val bankInteractionSource = remember { MutableInteractionSource() }
+                                val bankPressed by bankInteractionSource.collectIsPressedAsState()
+                                val bankScale by animateFloatAsState(
+                                    targetValue = if (bankPressed) 0.94f else 1f,
+                                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+                                )
+                                Button(
+                                    onClick = {
+                                        val launchIntent = context.packageManager.getLaunchIntentForPackage(bank.packageName)
+                                        if (launchIntent != null) {
+                                            context.startActivity(launchIntent)
+                                        }
+                                    },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = bank.color,
+                                        contentColor = Color.White
+                                    ),
+                                    contentPadding = PaddingValues(horizontal = 10.dp),
+                                    modifier = Modifier
+                                        .height(32.dp)
+                                        .graphicsLayer {
+                                            scaleX = bankScale
+                                            scaleY = bankScale
+                                        },
+                                    interactionSource = bankInteractionSource,
+                                    shape = RoundedCornerShape(16.dp)
+                                ) {
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = bank.initials,
+                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
+                                        )
+                                        Icon(
+                                            imageVector = Icons.Default.Launch,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(12.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         // --- Location Settings ---
         categoryTitleSmall { stringResource(R.string.prayer_calculations) }
         item {
@@ -552,128 +723,7 @@ fun Settings(paddingValues: PaddingValues) {
                 }
             )
         }
-        categoryTitleSmall { stringResource(R.string.support_developer) }
-        item {
-            val interactionSource = remember { MutableInteractionSource() }
-            val isPressed by interactionSource.collectIsPressedAsState()
-            val scale by animateFloatAsState(
-                targetValue = if (isPressed) 0.96f else 1f,
-                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
-            )
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .graphicsLayer {
-                        scaleX = scale
-                        scaleY = scale
-                    }
-                    .padding(vertical = 4.dp)
-                    .drawBehind {
-                        // Kufiya pattern background
-                        val step = 16.dp.toPx()
-                        val strokeWidth = 1.dp.toPx()
-                        val lineColor = Color.LightGray.copy(alpha = 0.08f)
-                        var offset = 0f
-                        while (offset < size.width + size.height) {
-                            drawLine(
-                                color = lineColor,
-                                start = Offset(offset, 0f),
-                                end = Offset(0f, offset),
-                                strokeWidth = strokeWidth
-                            )
-                            drawLine(
-                                color = lineColor,
-                                start = Offset(size.width - offset, 0f),
-                                end = Offset(size.width, offset),
-                                strokeWidth = strokeWidth
-                            )
-                            offset += step
-                        }
-                    },
-                colors = CardDefaults.cardColors(containerColor = colorScheme.tertiaryContainer)
-            ) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Icon(Icons.Default.Favorite, contentDescription = null, tint = Color(0xFFC8102E))
-                            Text(stringResource(R.string.support_deen_companion),
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                color = colorScheme.onTertiaryContainer)
-                        }
-                        
-                        Surface(
-                            shape = MaterialTheme.shapes.small,
-                            color = Color(0xFF556B2F).copy(alpha = 0.2f),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF556B2F).copy(alpha = 0.4f))
-                        ) {
-                            Text(
-                                text = stringResource(R.string.palestine_badge),
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                color = Color(0xFF556B2F)
-                            )
-                        }
-                    }
-                    Text(
-                        text = stringResource(R.string.support_deen_summary),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = colorScheme.onTertiaryContainer.copy(alpha = 0.8f)
-                    )
 
-                    // Palestine cause note
-                    Card(
-                        colors = CardDefaults.cardColors(containerColor = colorScheme.surface.copy(alpha = 0.4f))
-                    ) {
-                        Text(
-                            text = stringResource(R.string.palestine_cause_support),
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(12.dp),
-                            color = Color(0xFF556B2F),
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-
-                    Spacer(Modifier.height(4.dp))
-                    // Phone number card with bottom sheet flow
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(colorScheme.tertiary.copy(alpha = 0.15f), MaterialTheme.shapes.medium)
-                            .clickable(
-                                interactionSource = interactionSource,
-                                indication = androidx.compose.foundation.LocalIndication.current
-                            ) {
-                                // 1. Copy mobile number to clipboard
-                                val clipboard = context.getSystemService(ClipboardManager::class.java)
-                                clipboard.setPrimaryClip(ClipData.newPlainText("Phone", "91904926"))
-                                Toast.makeText(context, context.getString(R.string.copied_to_clipboard), Toast.LENGTH_SHORT).show()
-                                // 2. Trigger bottom sheet
-                                showPaymentSheet = true
-                            }
-                            .padding(12.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column {
-                            Text(stringResource(R.string.bank_transfer_phone_pay),
-                                style = MaterialTheme.typography.labelMedium, color = colorScheme.onTertiaryContainer)
-                            Text("91904926",
-                                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                                color = colorScheme.onTertiaryContainer)
-                            Text(stringResource(R.string.payment_tap_hint),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = colorScheme.onTertiaryContainer.copy(alpha = 0.7f))
-                        }
-                        Icon(Icons.Default.ContentCopy, contentDescription = "Copy",
-                            tint = colorScheme.onTertiaryContainer)
-                    }
-                }
-            }
-        }
         item {
             NavigatePreference(
                 title = stringResource(R.string.github_repository),
@@ -695,221 +745,12 @@ fun Settings(paddingValues: PaddingValues) {
         }
     }
 
-    // Modal Bottom Sheet Overlay
-    if (showPaymentSheet) {
-        ModalBottomSheet(
-            onDismissRequest = { showPaymentSheet = false },
-            sheetState = paymentSheetState,
-            containerColor = colorScheme.surfaceContainer,
-            dragHandle = { BottomSheetDefaults.DragHandle() }
-        ) {
-            PaymentBottomSheetContent(
-                context = context,
-                onDismiss = { showPaymentSheet = false }
-            )
-        }
-    }
+
 
     PageTitle(true, hazeState, stringResource(R.string.settings))
 }
 
-@Composable
-fun PaymentBottomSheetContent(
-    context: Context,
-    onDismiss: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .navigationBarsPadding()
-            .drawBehind {
-                // Kufiya pattern background
-                val step = 20.dp.toPx()
-                val strokeWidth = 1.dp.toPx()
-                val lineColor = Color.LightGray.copy(alpha = 0.05f)
-                var offset = 0f
-                while (offset < size.width + size.height) {
-                    drawLine(
-                        color = lineColor,
-                        start = Offset(offset, 0f),
-                        end = Offset(0f, offset),
-                        strokeWidth = strokeWidth
-                    )
-                    drawLine(
-                        color = lineColor,
-                        start = Offset(size.width - offset, 0f),
-                        end = Offset(size.width, offset),
-                        strokeWidth = strokeWidth
-                    )
-                    offset += step
-                }
-            }
-            .padding(start = 24.dp, end = 24.dp, bottom = 32.dp, top = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.payment_sheet_title),
-                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                color = colorScheme.primary
-            )
-            
-            Surface(
-                shape = MaterialTheme.shapes.small,
-                color = Color(0xFFC8102E).copy(alpha = 0.15f),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFC8102E).copy(alpha = 0.3f))
-            ) {
-                Text(
-                    text = stringResource(R.string.palestine_badge),
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                    color = Color(0xFFC8102E)
-                )
-            }
-        }
-
-        Text(
-            text = stringResource(R.string.payment_sheet_desc),
-            style = MaterialTheme.typography.bodyMedium,
-            color = colorScheme.onSurfaceVariant
-        )
-
-        // Palestine warning card
-        Card(
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF556B2F).copy(alpha = 0.12f))
-        ) {
-            Row(
-                modifier = Modifier.padding(12.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Favorite,
-                    contentDescription = null,
-                    tint = Color(0xFFC8102E),
-                    modifier = Modifier.size(16.dp)
-                )
-                Text(
-                    text = stringResource(R.string.palestine_cause_support),
-                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
-                    color = Color(0xFF556B2F)
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Column(
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            omaniBankApps.forEach { bank ->
-                val isInstalled = remember(bank.packageName) { isPackageInstalled(context, bank.packageName) }
-                val bankInteractionSource = remember { MutableInteractionSource() }
-                val bankPressed by bankInteractionSource.collectIsPressedAsState()
-                val bankScale by animateFloatAsState(
-                    targetValue = if (bankPressed) 0.96f else 1f,
-                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
-                )
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .graphicsLayer {
-                            scaleX = bankScale
-                            scaleY = bankScale
-                        }
-                        .clickable(
-                            interactionSource = bankInteractionSource,
-                            indication = androidx.compose.foundation.LocalIndication.current
-                        ) {
-                            if (isInstalled) {
-                                val launchIntent = context.packageManager.getLaunchIntentForPackage(bank.packageName)
-                                if (launchIntent != null) {
-                                    context.startActivity(launchIntent)
-                                }
-                            } else {
-                                val fallbackMsg = context.getString(R.string.bank_not_installed, bank.name)
-                                Toast.makeText(context, fallbackMsg, Toast.LENGTH_LONG).show()
-                            }
-                            onDismiss()
-                        },
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (isInstalled) colorScheme.surfaceContainerHigh else colorScheme.surfaceContainerLow.copy(alpha = 0.5f)
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = if (isInstalled) 1.dp else 0.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            // Circular Initials Badge
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .background(
-                                        color = if (isInstalled) bank.color else Color.Gray.copy(alpha = 0.4f),
-                                        shape = CircleShape
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = bank.initials,
-                                    color = Color.White,
-                                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
-                                )
-                            }
-
-                            // Bank name & installation status subtitle
-                            Column {
-                                Text(
-                                    text = bank.name,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = if (isInstalled) colorScheme.onSurface else colorScheme.onSurface.copy(alpha = 0.5f),
-                                    fontWeight = if (isInstalled) FontWeight.Bold else FontWeight.Normal
-                                )
-                                Text(
-                                    text = if (isInstalled) "Installed • جاهز" else "Not Installed • غير مثبت",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = if (isInstalled) colorScheme.primary else colorScheme.outline
-                                )
-                            }
-                        }
-
-                        // Icon action
-                        if (isInstalled) {
-                            Icon(
-                                imageVector = Icons.Default.Launch,
-                                contentDescription = stringResource(R.string.open_bank_app, bank.name),
-                                tint = colorScheme.primary,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Default.ContentCopy,
-                                contentDescription = "Copy number",
-                                tint = colorScheme.outline.copy(alpha = 0.5f),
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-private fun isPackageInstalled(context: Context, packageName: String): Boolean {
+fun isPackageInstalled(context: Context, packageName: String): Boolean {
     return try {
         context.packageManager.getLaunchIntentForPackage(packageName) != null
     } catch (e: Exception) {
