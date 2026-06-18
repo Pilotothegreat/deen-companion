@@ -57,6 +57,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.pilotothegreat.deencompanion.ui.hadith.Hadith
+import com.pilotothegreat.deencompanion.ui.hadith.HadithBookReader
 import com.pilotothegreat.deencompanion.ui.overview.Overview
 import com.pilotothegreat.deencompanion.ui.qibla.Qibla
 import com.pilotothegreat.deencompanion.ui.quran.Quran
@@ -132,6 +133,7 @@ fun NavigationManager() {
                 entry<HadithKey> { Hadith(paddingValues) }
                 entry<SettingsKey> { Settings(paddingValues) }
                 entry<QuranReaderKey> { QuranReader(it.surahNumber, it.surahName, it.scrollToVerse, it.autoPlay) }
+                entry<HadithReaderKey> { HadithBookReader(it.bookId) }
                 entry<QiblaKey> { Qibla() }
             },
             transitionSpec = {
@@ -182,7 +184,17 @@ fun NavigationButton(navigator: Navigator, route: NavKey, name: String, icon: Im
             },
         onClick = {
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-            navigator.setTo(route)
+            if (navigator.current != route) {
+                if (route == OverviewKey) {
+                    navigator.setTo(OverviewKey)
+                } else {
+                    androidx.compose.runtime.snapshots.Snapshot.withMutableSnapshot {
+                        navigator.backStack.clear()
+                        navigator.backStack.add(OverviewKey)
+                        navigator.backStack.add(route)
+                    }
+                }
+            }
         },
         contentPadding = PaddingValues(vertical = 8.dp, horizontal = horizontalPadding),
         modifier = Modifier.graphicsLayer {

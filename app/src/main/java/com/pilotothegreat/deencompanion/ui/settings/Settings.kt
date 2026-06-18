@@ -512,6 +512,7 @@ fun Settings(paddingValues: PaddingValues) {
             }
         }
         item {
+            val activity = LocalActivity.current
             val updateAvailable by viewModel.updateAvailable.collectAsState()
             val updateState by viewModel.updateState.collectAsState()
             val lastChecked by viewModel.lastCheckedTimestamp.collectAsState()
@@ -539,8 +540,12 @@ fun Settings(paddingValues: PaddingValues) {
                 icon = painterResource(R.drawable.version),
                 onClick = {
                     if (updateState == SettingsVM.UpdateState.UPDATE_AVAILABLE) {
-                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://github.com/Pilotothegreat/deen-companion/releases/latest"))
-                        context.startActivity(intent)
+                        if (viewModel.isPlayStoreInstall) {
+                            activity?.let { viewModel.startPlayStoreUpdate(it) }
+                        } else {
+                            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://github.com/Pilotothegreat/deen-companion/releases/latest"))
+                            context.startActivity(intent)
+                        }
                     } else {
                         viewModel.checkForUpdates(force = true)
                     }

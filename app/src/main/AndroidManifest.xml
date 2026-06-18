@@ -34,6 +34,7 @@
         android:icon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.DeenCompanion"
+        android:enableOnBackInvokedCallback="true"
         >
         <activity
             android:name=".MainActivity"

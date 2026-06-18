@@ -80,11 +80,6 @@ fun Quran(paddingValues: PaddingValues) {
     val navigator: Navigator = koinInject()
     val appPreferenceRepo: AppPreferenceRepo = koinInject()
     val lang by appPreferenceRepo.appLanguage.collectAsState(initial = "en")
-    
-    BackHandler {
-        navigator.setTo(OverviewKey)
-    }
-
     val hazeState = rememberHazeState()
     val searchState = rememberTextFieldState("")
     val searchQuery by remember { derivedStateOf { searchState.text.toString().trim() } }
@@ -213,8 +208,8 @@ fun Quran(paddingValues: PaddingValues) {
                                         text = verse.text,
                                         style = MaterialTheme.typography.bodyLarge.copy(
                                             fontFamily = quranFontFamily,
-                                            fontSize = 20.sp,
-                                            lineHeight = 32.sp
+                                            fontSize = 26.sp,
+                                            lineHeight = 38.sp
                                         ),
                                         modifier = Modifier.fillMaxWidth(),
                                         textAlign = TextAlign.Start

@@ -35,6 +35,7 @@ fun Theme(
 ) {
     val appPreferenceRepo: AppPreferenceRepo = koinInject()
     val theme by appPreferenceRepo.theme.collectAsState(Theme.AutoMaterial)
+    val appLang by appPreferenceRepo.appLanguage.collectAsState(initial = "en")
     val amoledBlackMode by appPreferenceRepo.amoledBlackMode.collectAsState(false)
     val isDark = theme.isDark()
 
@@ -79,7 +80,7 @@ fun Theme(
 
     MaterialTheme(
         colorScheme = colors,
-        typography = AppTypography
+        typography = if (appLang.startsWith("ar")) ArabicTypography else AppTypography
     ) { content() }
 }
 

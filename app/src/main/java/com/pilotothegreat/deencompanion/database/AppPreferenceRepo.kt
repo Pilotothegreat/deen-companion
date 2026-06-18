@@ -311,7 +311,7 @@ class AppPreferenceRepo(
     suspend fun setNotification(value: Boolean) = dataStore.edit { it[NOTIFICATION_ENABLED] = value }
 
     // Quran Arabic Font Size
-    val quranArabicFontSize: Flow<Int> = data.map { it[QURAN_ARABIC_FONT_SIZE] ?: 24 }.distinctUntilChanged()
+    val quranArabicFontSize: Flow<Int> = data.map { it[QURAN_ARABIC_FONT_SIZE] ?: 32 }.distinctUntilChanged()
     suspend fun setQuranArabicFontSize(value: Int) = dataStore.edit { it[QURAN_ARABIC_FONT_SIZE] = value }
 
     // Theme Settings

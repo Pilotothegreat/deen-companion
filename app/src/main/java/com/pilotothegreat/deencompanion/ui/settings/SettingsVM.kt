@@ -17,6 +17,10 @@ import kotlinx.coroutines.flow.first
 import com.pilotothegreat.deencompanion.services.AdhanAlarmManager
 import com.pilotothegreat.deencompanion.services.IqamaAlarmManager
 import kotlinx.coroutines.launch
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.UpdateAvailability
 
 class SettingsVM(
     private val context: Context,
@@ -104,11 +108,71 @@ class SettingsVM(
     val lastCheckedTimestamp: StateFlow<Long> = appPreferenceRepo.githubCheckTimestamp
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0L)
 
+    private val appUpdateManager: AppUpdateManager by lazy {
+        AppUpdateManagerFactory.create(context)
+    }
+
+    private fun getInstallSource(context: Context): String? {
+        return try {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                context.packageManager.getInstallSourceInfo(context.packageName).installingPackageName
+            } else {
+                @Suppress("DEPRECATION")
+                context.packageManager.getInstallerPackageName(context.packageName)
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    val isPlayStoreInstall: Boolean by lazy {
+        getInstallSource(context) == "com.android.vending"
+    }
+
+    fun startPlayStoreUpdate(activity: Activity) {
+        appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+                && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
+            ) {
+                @Suppress("DEPRECATION")
+                appUpdateManager.startUpdateFlowForResult(
+                    appUpdateInfo,
+                    AppUpdateType.IMMEDIATE,
+                    activity,
+                    999
+                )
+            }
+        }
+    }
+
     init {
         checkForUpdates(force = false)
     }
 
     fun checkForUpdates(force: Boolean = false) {
+        if (isPlayStoreInstall) {
+            _updateState.value = UpdateState.CHECKING
+            appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
+                val now = System.currentTimeMillis()
+                viewModelScope.launch {
+                    appPreferenceRepo.setGithubCheckTimestamp(now)
+                }
+                if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+                    && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
+                ) {
+                    _updateAvailable.value = "Google Play"
+                    _updateState.value = UpdateState.UPDATE_AVAILABLE
+                } else {
+                    _updateAvailable.value = null
+                    _updateState.value = UpdateState.UP_TO_DATE
+                }
+            }.addOnFailureListener { e ->
+                e.printStackTrace()
+                _updateState.value = UpdateState.FAILED
+            }
+            return
+        }
+
         viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             val now = System.currentTimeMillis()
             val lastChecked = appPreferenceRepo.githubCheckTimestamp.first()

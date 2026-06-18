@@ -233,7 +233,10 @@ fun Qibla() {
                     )
                     Column {
                         Text(
-                            text = if (cityName.isNotEmpty()) cityName else stringResource(R.string.default_location),
+                            text = com.pilotothegreat.deencompanion.util.localizeCityName(
+                                if (cityName.isNotEmpty()) cityName else stringResource(R.string.default_location),
+                                appLang
+                            ),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )

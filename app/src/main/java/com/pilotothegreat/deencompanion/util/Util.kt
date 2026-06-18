@@ -339,3 +339,35 @@ inline val shelfShape: RoundedCornerShape
         bottomStart = CornerSize(0.dp)
     )
 
+fun localizeCityName(cityName: String, lang: String): String {
+    if (!lang.startsWith("ar")) return cityName
+    var result = cityName
+    val translationMap = mapOf(
+        "Alawabi" to "العوابي",
+        "Al Awabi" to "العوابي",
+        "Al-Awabi" to "العوابي",
+        "Awabi" to "العوابي",
+        "Muscat" to "مسقط",
+        "Salalah" to "صلالة",
+        "Sohar" to "صحار",
+        "Nizwa" to "نزوى",
+        "Sur" to "صور",
+        "Ibri" to "عبري",
+        "Rustaq" to "الرستاق",
+        "Buraimi" to "البريمي",
+        "Khasab" to "خصب",
+        "Barka" to "بركاء",
+        "Seeb" to "السيب",
+        "Bawshar" to "بوشر",
+        "Muttrah" to "مطرح",
+        "Oman" to "عمان",
+        "Saudi Arabia" to "المملكة العربية السعودية",
+        "Makkah" to "مكة المكرمة",
+        "Riyadh" to "الرياض"
+    )
+    for ((english, arabic) in translationMap) {
+        result = result.replace(english, arabic, ignoreCase = true)
+    }
+    return result
+}
+

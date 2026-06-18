@@ -715,7 +715,7 @@ fun Overview(
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = displayedCity,
+                        text = com.pilotothegreat.deencompanion.util.localizeCityName(displayedCity, lang),
                         style = MaterialTheme.typography.bodySmall,
                         color = colorScheme.secondary,
                         maxLines = 1,
@@ -1073,20 +1073,20 @@ fun OverviewItems(viewModel: OverviewVM, nextPrayerName: String, navigator: Navi
                     ) {
                         Text(
                             text = name,
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.headlineSmall,
                             color = if (isNext) colorScheme.onPrimaryContainer else colorScheme.onSurface,
-                            fontWeight = if (isNext) FontWeight.Bold else FontWeight.Normal
+                            fontWeight = if (isNext) FontWeight.Bold else FontWeight.Bold
                         )
                         Column(horizontalAlignment = Alignment.End) {
                             Text(
                                 text = time.toLocaleHourString(context),
-                                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                                 color = if (isNext) colorScheme.onPrimaryContainer else colorScheme.primary
                             )
                             if (offset != null) {
                                 Text(
                                     text = stringResource(R.string.iqama_time, offset.toLocaleHourString(context)),
-                                    style = MaterialTheme.typography.labelMedium,
+                                    style = MaterialTheme.typography.titleMedium,
                                     color = if (isNext) colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                                             else colorScheme.secondary
                                 )

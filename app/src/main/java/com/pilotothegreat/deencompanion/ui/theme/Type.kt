@@ -20,15 +20,13 @@ val nunitoFont = GoogleFont("Nunito")
 val amiriFont = GoogleFont("Amiri")
 
 val arabicFontFamily = FontFamily(
-    Font(googleFont = amiriFont, fontProvider = provider, weight = FontWeight.Normal),
-    Font(googleFont = amiriFont, fontProvider = provider, weight = FontWeight.Bold),
-    androidx.compose.ui.text.font.Font(R.font.amiri_regular, weight = FontWeight.Normal),
-    androidx.compose.ui.text.font.Font(R.font.amiri_bold, weight = FontWeight.Bold),
+    androidx.compose.ui.text.font.Font(R.font.lalezar, weight = FontWeight.Normal),
+    androidx.compose.ui.text.font.Font(R.font.lalezar, weight = FontWeight.Bold),
 )
 
 val uthmaniFontFamily = FontFamily(
-    androidx.compose.ui.text.font.Font(R.font.scheherazade_new, weight = FontWeight.Normal),
-    androidx.compose.ui.text.font.Font(R.font.scheherazade_new, weight = FontWeight.Bold),
+    androidx.compose.ui.text.font.Font(R.font.lalezar, weight = FontWeight.Normal),
+    androidx.compose.ui.text.font.Font(R.font.lalezar, weight = FontWeight.Bold),
 )
 
 val nunitoFontFamily = FontFamily(
@@ -42,8 +40,8 @@ val nunitoFontFamily = FontFamily(
     androidx.compose.ui.text.font.Font(R.font.nunito_semibold, weight = FontWeight.SemiBold),
     androidx.compose.ui.text.font.Font(R.font.nunito_bold, weight = FontWeight.Bold),
     // Arabic fallbacks:
-    androidx.compose.ui.text.font.Font(R.font.scheherazade_new, weight = FontWeight.Normal),
-    androidx.compose.ui.text.font.Font(R.font.scheherazade_new, weight = FontWeight.Bold),
+    androidx.compose.ui.text.font.Font(R.font.lalezar, weight = FontWeight.Normal),
+    androidx.compose.ui.text.font.Font(R.font.lalezar, weight = FontWeight.Bold),
 )
 
 val AppTypography = Typography(

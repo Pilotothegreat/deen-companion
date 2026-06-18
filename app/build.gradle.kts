@@ -25,8 +25,8 @@ android {
         applicationId = "com.pilotothegreat.deencompanion"
         minSdk = 26
         targetSdk = 35
-        versionCode = 150
-        versionName = "1.5.0"
+        versionCode = 151
+        versionName = "1.5.1"
         base.archivesName = "deen-$versionName"
     }
 
@@ -132,6 +132,9 @@ dependencies {
     implementation(libs.timber)
 
     implementation(libs.coil.compose)
+
+    implementation(libs.play.app.update)
+    implementation(libs.play.app.update.ktx)
 
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
