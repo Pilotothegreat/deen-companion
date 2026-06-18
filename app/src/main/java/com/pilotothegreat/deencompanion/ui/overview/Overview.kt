@@ -413,7 +413,7 @@ fun Overview(
                     calculateNextPrayer(currentTimes, currentTz, currentContext)
                 }
                 if (isRobolectric) break
-                val delayMs = if (nextPrayer.durationSeconds < 3600) 1000L else 10000L
+                val delayMs = 1000L
                 kotlinx.coroutines.delay(delayMs)
             }
         }
@@ -701,23 +701,26 @@ fun Overview(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                if (city.isNotEmpty()) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.LocationOn,
-                            contentDescription = null,
-                            modifier = Modifier.size(12.dp),
-                            tint = colorScheme.secondary
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text(
-                            text = city,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = colorScheme.secondary,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
+                val displayedCity = if (city == "Makkah, Saudi Arabia" || city.isEmpty()) {
+                    stringResource(R.string.default_location)
+                } else {
+                    city
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.LocationOn,
+                        contentDescription = null,
+                        modifier = Modifier.size(12.dp),
+                        tint = colorScheme.secondary
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = displayedCity,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colorScheme.secondary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
             }
             IconButton(

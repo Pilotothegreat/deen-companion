@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.first
+import com.pilotothegreat.deencompanion.services.AdhanAlarmManager
+import com.pilotothegreat.deencompanion.services.IqamaAlarmManager
 import kotlinx.coroutines.launch
 
 class SettingsVM(
@@ -194,12 +196,16 @@ class SettingsVM(
     fun setCalcMethod(value: PrayerTimeCalculator.CalculationMethod) {
         viewModelScope.launch {
             appPreferenceRepo.setCalcMethod(value)
+            AdhanAlarmManager.scheduleAllAdhanAlarms(context, appPreferenceRepo)
+            IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
         }
     }
 
     fun setAsrSchool(value: PrayerTimeCalculator.AsrSchool) {
         viewModelScope.launch {
             appPreferenceRepo.setAsrSchool(value)
+            AdhanAlarmManager.scheduleAllAdhanAlarms(context, appPreferenceRepo)
+            IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
         }
     }
 

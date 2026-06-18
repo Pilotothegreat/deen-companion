@@ -110,11 +110,18 @@
     <string name="search_results_count">Search Results (%1$d)</string>
     <string name="search_empty_state">No results found</string>
     <string name="compiled_by_prefix">Compiled by: %1$s</string>
-    <string name="hadiths_count_suffix">%1$d Selected Hadiths</string>
+    <string name="hadiths_count_suffix">%1$d Hadiths</string>
     <string name="favorites_empty_state">No favorite hadiths yet.\nTap the heart icon on any hadith to save it here.</string>
     <string name="hadith_number_prefix">Hadith #%1$d</string>
     <string name="narrated_by_prefix">Narrated by: %1$s</string>
     <string name="hadith_library_title">Hadith Library</string>
+    <string name="adhan_notification_title">Adhan — %1$s</string>
+    <string name="adhan_notification_body">It is time for the %1$s prayer</string>
+    <string name="iqama_notification_title">Iqama — %1$s</string>
+    <string name="iqama_notification_body">Iqama for %1$s has begun</string>
+    <string name="search_quran_hint">Search Quran (surah or verse)...</string>
+    <string name="search_hadith_hint">Search Hadith...</string>
+    <string name="search_hint">Search...</string>
 
     <!-- Quran Reader & Player -->
     <string name="surah_not_found">Surah not found</string>

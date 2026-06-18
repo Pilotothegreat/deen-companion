@@ -222,11 +222,15 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
         }
     }
 
-    val pageIndexForActiveAyah = remember(currentSurahId, currentAyahId, globalPages) {
-        globalPages.indexOfFirst { page ->
-            page.any { item ->
-                item is PageContent.VerseItem && item.surahId == currentSurahId && item.verse.id == currentAyahId
+    val pageIndexForActiveAyah = remember(currentSurahId, currentAyahId, globalPages, surahNumber) {
+        if (currentSurahId == surahNumber) {
+            globalPages.indexOfFirst { page ->
+                page.any { item ->
+                    item is PageContent.VerseItem && item.surahId == currentSurahId && item.verse.id == currentAyahId
+                }
             }
+        } else {
+            -1
         }
     }
 

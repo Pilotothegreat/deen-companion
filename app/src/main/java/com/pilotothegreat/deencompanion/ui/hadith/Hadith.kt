@@ -55,6 +55,9 @@ import com.pilotothegreat.deencompanion.database.HadithEntity
 import com.pilotothegreat.deencompanion.util.PageTitle
 import com.pilotothegreat.deencompanion.util.SearchField
 import com.pilotothegreat.deencompanion.ui.theme.card
+import com.pilotothegreat.deencompanion.ui.navigation.Navigator
+import com.pilotothegreat.deencompanion.ui.navigation.OverviewKey
+import androidx.activity.compose.BackHandler
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
@@ -64,11 +67,22 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun Hadith(paddingValues: PaddingValues) {
     val viewModel: HadithVM = koinViewModel()
+    val navigator: Navigator = koinInject()
     val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
 
     val appPreferenceRepo: AppPreferenceRepo = koinInject()
     val lang by appPreferenceRepo.appLanguage.collectAsState(initial = "en")
+
+    val activeBookId by viewModel.activeBookId.collectAsState()
+
+    BackHandler {
+        if (activeBookId != null) {
+            viewModel.selectBook(null)
+        } else {
+            navigator.setTo(OverviewKey)
+        }
+    }
 
     val hazeState = rememberHazeState()
     val searchState = rememberTextFieldState("")
@@ -81,7 +95,6 @@ fun Hadith(paddingValues: PaddingValues) {
 
     val books by viewModel.books.collectAsState()
     val loadedHadiths by viewModel.loadedHadiths.collectAsState()
-    val activeBookId by viewModel.activeBookId.collectAsState()
     val searchResults by viewModel.searchResults.collectAsState()
     val isSearching by viewModel.isSearching.collectAsState()
     val favorites by viewModel.favorites.collectAsState()
@@ -107,7 +120,10 @@ fun Hadith(paddingValues: PaddingValues) {
             Box(Modifier.height(paddingTop - 8.dp))
 
             // Unified M3 Search Field
-            SearchField(textFieldState = searchState)
+            SearchField(
+                textFieldState = searchState,
+                placeholderText = stringResource(R.string.search_hadith_hint)
+            )
 
             if (searchQueryText.trim().isNotEmpty()) {
                 // Show Search Results
@@ -185,6 +201,13 @@ fun Hadith(paddingValues: PaddingValues) {
                     }
                 }
 
+                if (isSyncing) {
+                    LinearProgressIndicator(
+                        modifier = Modifier.fillMaxWidth().height(2.dp),
+                        color = colorScheme.primary
+                    )
+                }
+
                 var isRefreshing by remember { mutableStateOf(false) }
 
                 val listState = rememberLazyListState()
@@ -202,66 +225,47 @@ fun Hadith(paddingValues: PaddingValues) {
                     }
                 }
 
-                if (isSyncing) {
-                    Box(
+                PullToRefreshBox(
+                    isRefreshing = isRefreshing,
+                    onRefresh = {
+                        isRefreshing = true
+                        scope.launch {
+                            book?.id?.let { viewModel.forceSyncBook(it) }
+                            kotlinx.coroutines.delay(1200)
+                            isRefreshing = false
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    LazyColumn(
+                        state = listState,
                         modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
+                        contentPadding = PaddingValues(bottom = paddingBottom + 16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            CircularProgressIndicator(color = colorScheme.primary)
-                            Text(
-                                text = stringResource(R.string.syncing_full_collection),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = colorScheme.outline
+                        items(loadedHadiths, key = { it.id }) { hadith ->
+                            HadithCard(
+                                collectionName = getLocalizedBookName(hadith.bookId, book?.name ?: "", lang),
+                                hadith = hadith,
+                                isFavorite = hadith.isFavorite,
+                                onFavoriteToggle = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    viewModel.toggleFavorite(hadith.id, hadith.isFavorite)
+                                },
+                                lang = lang,
+                                showCollectionName = false
                             )
                         }
-                    }
-                } else {
-                    PullToRefreshBox(
-                        isRefreshing = isRefreshing,
-                        onRefresh = {
-                            isRefreshing = true
-                            scope.launch {
-                                book?.id?.let { viewModel.forceSyncBook(it) }
-                                kotlinx.coroutines.delay(1200)
-                                isRefreshing = false
-                            }
-                        },
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        LazyColumn(
-                            state = listState,
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(bottom = paddingBottom + 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            items(loadedHadiths, key = { it.id }) { hadith ->
-                                HadithCard(
-                                    collectionName = getLocalizedBookName(hadith.bookId, book?.name ?: "", lang),
-                                    hadith = hadith,
-                                    isFavorite = hadith.isFavorite,
-                                    onFavoriteToggle = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        viewModel.toggleFavorite(hadith.id, hadith.isFavorite)
-                                    },
-                                    lang = lang,
-                                    showCollectionName = false
-                               )
-                            }
 
-                            if (viewModel.hasMoreToLoad) {
-                                item {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(16.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                                    }
+                        if (viewModel.hasMoreToLoad) {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
                                 }
                             }
                         }
@@ -310,12 +314,20 @@ fun CollectionsTab(
     isSyncing: Boolean = false,
     onBookClick: (HadithBookEntity) -> Unit
 ) {
-    if (isSyncing && books.isEmpty()) {
+    val sortedBooks = remember(books) {
+        val bookPriority = listOf("bukhari", "muslim", "tirmidhi", "abudawud", "nasai", "ibnmajah")
+        books.sortedBy { book ->
+            val index = bookPriority.indexOf(book.id)
+            if (index != -1) index else Int.MAX_VALUE
+        }
+    }
+
+    if (isSyncing && sortedBooks.isEmpty()) {
         // Actively downloading for the first time
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
-    } else if (books.isEmpty()) {
+    } else if (sortedBooks.isEmpty()) {
         // Loaded but CDN unreachable — show error + retry hint
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Column(
@@ -337,7 +349,7 @@ fun CollectionsTab(
             contentPadding = PaddingValues(bottom = 80.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(books, key = { it.id }) { book ->
+            items(sortedBooks, key = { it.id }) { book ->
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()

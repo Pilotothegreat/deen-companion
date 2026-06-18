@@ -6,8 +6,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
 import com.pilotothegreat.deencompanion.services.IqamaAlarmManager
+import com.pilotothegreat.deencompanion.services.AdhanAlarmManager
 import com.pilotothegreat.deencompanion.util.LocationHelper
 import com.pilotothegreat.deencompanion.util.PrayerTimeCalculator
+import java.util.Locale
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -208,6 +210,7 @@ class OverviewVM(
         viewModelScope.launch {
             try {
                 appPreferenceRepo.setLastPrayerTimeUpdate(System.currentTimeMillis())
+                AdhanAlarmManager.scheduleAllAdhanAlarms(context, appPreferenceRepo)
                 IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -228,17 +231,42 @@ class OverviewVM(
             _isRefreshingLocation.value = true
             _locationWarningDismissed.value = false
             try {
+                val appLang = appPreferenceRepo.appLanguage.first()
+                val locale = Locale(appLang)
                 var loc = LocationHelper.getDeviceLocation(context)
                 if (loc == null) {
                     loc = LocationHelper.fetchIpLocation()
                 }
 
                 if (loc != null) {
+                    // Try to resolve localized city name using Geocoder with app locale
+                    var finalCityName = loc.cityName
+                    try {
+                        val geocoder = android.location.Geocoder(context, locale)
+                        val addresses = geocoder.getFromLocation(loc.latitude, loc.longitude, 1)
+                        if (!addresses.isNullOrEmpty()) {
+                            val address = addresses[0]
+                            val locality = address.locality ?: address.subAdminArea
+                            val adminArea = address.adminArea
+                            val country = address.countryName
+                            finalCityName = when {
+                                locality != null && country != null -> "$locality, $country"
+                                locality != null -> locality
+                                adminArea != null && country != null -> "$adminArea, $country"
+                                country != null -> country
+                                else -> finalCityName
+                            }
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+
                     appPreferenceRepo.setLatitude(loc.latitude)
                     appPreferenceRepo.setLongitude(loc.longitude)
-                    appPreferenceRepo.setCityName(loc.cityName)
+                    appPreferenceRepo.setCityName(finalCityName)
                     appPreferenceRepo.setTimezoneId(loc.timezoneId)
 
+                    AdhanAlarmManager.scheduleAllAdhanAlarms(context, appPreferenceRepo)
                     IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
                 }
             } catch (e: Exception) {

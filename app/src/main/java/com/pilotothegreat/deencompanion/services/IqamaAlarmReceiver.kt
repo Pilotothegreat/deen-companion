@@ -37,16 +37,20 @@ class IqamaAlarmReceiver : BroadcastReceiver(), KoinComponent {
                 scope.launch {
                     try {
                         val lang = repo.appLanguage.first()
+                        val config = android.content.res.Configuration(context.resources.configuration).apply {
+                            setLocale(java.util.Locale(lang))
+                        }
+                        val localizedContext = context.createConfigurationContext(config)
                         val localizedPrayerName = when (prayerName) {
-                            "Fajr" -> if (lang == "ar") "الفجر" else "Fajr"
-                            "Dhuhr" -> if (lang == "ar") "الظهر" else "Dhuhr"
-                            "Asr" -> if (lang == "ar") "العصر" else "Asr"
-                            "Maghrib" -> if (lang == "ar") "المغرب" else "Maghrib"
-                            "Isha" -> if (lang == "ar") "العشاء" else "Isha"
+                            "Fajr" -> localizedContext.getString(R.string.fajr)
+                            "Dhuhr" -> localizedContext.getString(R.string.dhuhr)
+                            "Asr" -> localizedContext.getString(R.string.asr)
+                            "Maghrib" -> localizedContext.getString(R.string.maghrib)
+                            "Isha" -> localizedContext.getString(R.string.isha)
                             else -> prayerName
                         }
 
-                        showPrayerNotification(context, localizedPrayerName, isIqama = true, lang = lang)
+                        showPrayerNotification(localizedContext, localizedPrayerName, isIqama = true)
 
                         val volume = repo.notificationVolume.first()
                         if (volume > 0) {
@@ -102,17 +106,17 @@ class IqamaAlarmReceiver : BroadcastReceiver(), KoinComponent {
         }
     }
 
-    private fun showPrayerNotification(context: Context, prayerName: String, isIqama: Boolean, lang: String) {
-        val title = if (lang == "ar") {
-            if (isIqama) "الإقامة — $prayerName" else "حان وقت صلاة — $prayerName"
+    private fun showPrayerNotification(context: Context, prayerName: String, isIqama: Boolean) {
+        val title = if (isIqama) {
+            context.getString(R.string.iqama_notification_title, prayerName)
         } else {
-            if (isIqama) "Iqama — $prayerName" else "Prayer Time — $prayerName"
+            context.getString(R.string.adhan_notification_title, prayerName)
         }
 
-        val body = if (lang == "ar") {
-            if (isIqama) "إقامة صلاة $prayerName قد بدأت" else "حان الآن وقت صلاة $prayerName"
+        val body = if (isIqama) {
+            context.getString(R.string.iqama_notification_body, prayerName)
         } else {
-            if (isIqama) "Iqama for $prayerName has begun" else "Time for $prayerName prayer"
+            context.getString(R.string.adhan_notification_body, prayerName)
         }
 
         // Build notification without default sound so that our MediaPlayer sound plays cleanly at the customized volume

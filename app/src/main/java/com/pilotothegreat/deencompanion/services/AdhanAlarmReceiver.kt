@@ -28,15 +28,19 @@ class AdhanAlarmReceiver : BroadcastReceiver(), KoinComponent {
             CoroutineScope(Dispatchers.Default).launch {
                 try {
                     val lang = repo.appLanguage.first()
+                    val config = android.content.res.Configuration(context.resources.configuration).apply {
+                        setLocale(java.util.Locale(lang))
+                    }
+                    val localizedContext = context.createConfigurationContext(config)
                     val localizedPrayerName = when (prayerName) {
-                        "Fajr" -> if (lang == "ar") "الفجر" else "Fajr"
-                        "Dhuhr" -> if (lang == "ar") "الظهر" else "Dhuhr"
-                        "Asr" -> if (lang == "ar") "العصر" else "Asr"
-                        "Maghrib" -> if (lang == "ar") "المغرب" else "Maghrib"
-                        "Isha" -> if (lang == "ar") "العشاء" else "Isha"
+                        "Fajr" -> localizedContext.getString(R.string.fajr)
+                        "Dhuhr" -> localizedContext.getString(R.string.dhuhr)
+                        "Asr" -> localizedContext.getString(R.string.asr)
+                        "Maghrib" -> localizedContext.getString(R.string.maghrib)
+                        "Isha" -> localizedContext.getString(R.string.isha)
                         else -> prayerName
                     }
-                    showAdhanNotification(context, localizedPrayerName, lang)
+                    showAdhanNotification(localizedContext, localizedPrayerName)
                 } catch (e: Exception) {
                     Timber.e(e, "Error displaying Adhan notification")
                 } finally {
@@ -48,9 +52,9 @@ class AdhanAlarmReceiver : BroadcastReceiver(), KoinComponent {
         }
     }
 
-    private fun showAdhanNotification(context: Context, prayerName: String, lang: String) {
-        val title = if (lang == "ar") "الأذان — $prayerName" else "Adhan — $prayerName"
-        val body = if (lang == "ar") "حان الآن وقت صلاة $prayerName" else "It is time for the $prayerName prayer"
+    private fun showAdhanNotification(context: Context, prayerName: String) {
+        val title = context.getString(R.string.adhan_notification_title, prayerName)
+        val body = context.getString(R.string.adhan_notification_body, prayerName)
 
         val notification = NotificationCompat.Builder(context, "prayer_times")
             .setSmallIcon(R.drawable.notification)

@@ -59,6 +59,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.CompositionLocalProvider
 import com.pilotothegreat.deencompanion.ui.navigation.Navigator
 import com.pilotothegreat.deencompanion.ui.navigation.QuranReaderKey
+import com.pilotothegreat.deencompanion.ui.navigation.OverviewKey
+import androidx.activity.compose.BackHandler
 import com.pilotothegreat.deencompanion.ui.theme.card
 import com.pilotothegreat.deencompanion.util.PageTitle
 import com.pilotothegreat.deencompanion.util.SearchField
@@ -70,7 +72,7 @@ import org.koin.compose.koinInject
 import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
 import androidx.compose.ui.res.stringResource
 import com.pilotothegreat.deencompanion.R
-
+ 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun Quran(paddingValues: PaddingValues) {
@@ -78,6 +80,11 @@ fun Quran(paddingValues: PaddingValues) {
     val navigator: Navigator = koinInject()
     val appPreferenceRepo: AppPreferenceRepo = koinInject()
     val lang by appPreferenceRepo.appLanguage.collectAsState(initial = "en")
+    
+    BackHandler {
+        navigator.setTo(OverviewKey)
+    }
+
     val hazeState = rememberHazeState()
     val searchState = rememberTextFieldState("")
     val searchQuery by remember { derivedStateOf { searchState.text.toString().trim() } }
@@ -143,7 +150,10 @@ fun Quran(paddingValues: PaddingValues) {
         Box(Modifier.height(paddingTop - 8.dp))
 
         // Unified Search Field
-        SearchField(textFieldState = searchState)
+        SearchField(
+            textFieldState = searchState,
+            placeholderText = stringResource(R.string.search_quran_hint)
+        )
 
         if (debouncedQuery.isNotEmpty()) {
             val direction = if (lang == "ar") LayoutDirection.Rtl else LayoutDirection.Ltr

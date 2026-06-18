@@ -29,6 +29,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
 import com.pilotothegreat.deencompanion.services.AdhanNotificationWorker
+import com.pilotothegreat.deencompanion.services.AdhanAlarmManager
 import com.pilotothegreat.deencompanion.services.IqamaAlarmManager
 import com.pilotothegreat.deencompanion.ui.app.App
 import com.pilotothegreat.deencompanion.ui.theme.Theme
@@ -55,9 +56,10 @@ class MainActivity : ComponentActivity() {
         if (locationGranted) {
             lifecycleScope.launch {
                 try {
+                    AdhanAlarmManager.scheduleAllAdhanAlarms(this@MainActivity, appPreferenceRepo)
                     IqamaAlarmManager.scheduleNextIqamaAlarm(this@MainActivity, appPreferenceRepo)
                 } catch (e: Exception) {
-                    Timber.e(e, "Failed to schedule iqama alarms on permission grant")
+                    Timber.e(e, "Failed to schedule alarms on permission grant")
                 }
             }
         }
@@ -110,9 +112,10 @@ class MainActivity : ComponentActivity() {
 
             lifecycleScope.launch {
                 try {
+                    AdhanAlarmManager.scheduleAllAdhanAlarms(this@MainActivity, appPreferenceRepo)
                     IqamaAlarmManager.scheduleNextIqamaAlarm(this@MainActivity, appPreferenceRepo)
                 } catch (e: Exception) {
-                    Timber.e(e, "Failed to schedule iqama alarms on launch")
+                    Timber.e(e, "Failed to schedule alarms on launch")
                 }
                 try {
                     val count = appPreferenceRepo.appLaunchCount.first()
@@ -131,6 +134,31 @@ class MainActivity : ComponentActivity() {
                     )
                 } catch (e: Exception) {
                     Timber.e(e, "Failed to enqueue AdhanNotificationWorker on launch")
+                }
+                // Background Hadith Syncing to pre-download them sequentially
+                try {
+                    val hadithRepo: com.pilotothegreat.deencompanion.database.HadithRepository by inject()
+                    val booksList = hadithRepo.getHadithBooks().first()
+                    val bookPriority = listOf("bukhari", "muslim", "tirmidhi", "abudawud", "nasai", "ibnmajah")
+                    val booksToSync = booksList.sortedBy { book ->
+                        val index = bookPriority.indexOf(book.id)
+                        if (index != -1) index else Int.MAX_VALUE
+                    }
+                    launch(kotlinx.coroutines.Dispatchers.IO) {
+                        for (book in booksToSync) {
+                            try {
+                                val count = hadithRepo.getHadithCount(book.id)
+                                if (count <= 20) {
+                                    Timber.i("Background auto-syncing book on launch: ${book.id}")
+                                    hadithRepo.syncFullBook(book.id)
+                                }
+                            } catch (e: Exception) {
+                                Timber.e(e, "Failed background sync of book: ${book.id}")
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    Timber.e(e, "Failed to initialize background Hadith syncing")
                 }
             }
 

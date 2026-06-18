@@ -17,6 +17,8 @@ class HadithRepository(
     private val hadithDao: HadithDao
 ) {
 
+    private val activeSyncs = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
+
     init {
         val isRobolectric = try {
             Class.forName("org.robolectric.Robolectric") != null
@@ -145,6 +147,10 @@ class HadithRepository(
      * Async task to download and cache the entire collection from the CDN API
      */
     suspend fun syncFullBook(bookId: String): Boolean = withContext(Dispatchers.IO) {
+        if (!activeSyncs.add(bookId)) {
+            Timber.i("Book $bookId is already syncing, skipping concurrent trigger.")
+            return@withContext false
+        }
         var araConnection: java.net.HttpURLConnection? = null
         var engConnection: java.net.HttpURLConnection? = null
         try {
@@ -217,6 +223,7 @@ class HadithRepository(
         } finally {
             araConnection?.disconnect()
             engConnection?.disconnect()
+            activeSyncs.remove(bookId)
         }
     }
 }

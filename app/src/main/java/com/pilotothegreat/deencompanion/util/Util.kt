@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -167,13 +168,16 @@ fun LazyListScope.categoryTitleSmall(textProvider: @Composable () -> String) {
 }
 
 @Composable
-fun SearchField(textFieldState: TextFieldState) {
+fun SearchField(
+    textFieldState: TextFieldState,
+    placeholderText: String = stringResource(R.string.search_hint)
+) {
     Row(
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
             .background(colorScheme.surfaceContainerHigh, shapes.extraLarge)
-            .padding(16.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -181,12 +185,37 @@ fun SearchField(textFieldState: TextFieldState) {
             painter = painterResource(R.drawable.search),
             contentDescription = null
         )
-        BasicTextField(
-            modifier = Modifier.fillMaxWidth(),
-            state = textFieldState,
-            textStyle = MaterialTheme.typography.titleMedium.copy(color = colorScheme.onSurface),
-            cursorBrush = SolidColor(colorScheme.onSurface)
-        )
+        Box(modifier = Modifier.weight(1f)) {
+            if (textFieldState.text.isEmpty()) {
+                Text(
+                    text = placeholderText,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = colorScheme.outline
+                )
+            }
+            BasicTextField(
+                modifier = Modifier.fillMaxWidth(),
+                state = textFieldState,
+                textStyle = MaterialTheme.typography.titleMedium.copy(color = colorScheme.onSurface),
+                cursorBrush = SolidColor(colorScheme.onSurface)
+            )
+        }
+        if (textFieldState.text.isNotEmpty()) {
+            IconButton(
+                onClick = {
+                    textFieldState.edit {
+                        replace(0, length, "")
+                    }
+                },
+                modifier = Modifier.size(24.dp)
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.close),
+                    contentDescription = stringResource(R.string.close),
+                    tint = colorScheme.onSurfaceVariant
+                )
+            }
+        }
     }
 }
 

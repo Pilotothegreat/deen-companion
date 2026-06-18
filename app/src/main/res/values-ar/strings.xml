@@ -107,11 +107,18 @@
     <string name="search_results_count">نتائج البحث (%1$d)</string>
     <string name="search_empty_state">لم يتم العثور على نتائج</string>
     <string name="compiled_by_prefix">جمع وإعداد: %1$s</string>
-    <string name="hadiths_count_suffix">%1$d أحاديث مختارة</string>
+    <string name="hadiths_count_suffix">%1$d حديثاً</string>
     <string name="favorites_empty_state">لا توجد أحاديث مفضلة بعد.\nاضغط على أيقونة القلب في أي حديث لحفظه هنا.</string>
     <string name="hadith_number_prefix">حديث رقم %1$d</string>
     <string name="narrated_by_prefix">راوي الحديث: %1$s</string>
     <string name="hadith_library_title">مكتبة الحديث</string>
+    <string name="adhan_notification_title">الأذان — %1$s</string>
+    <string name="adhan_notification_body">حان الآن وقت صلاة %1$s</string>
+    <string name="iqama_notification_title">الإقامة — %1$s</string>
+    <string name="iqama_notification_body">إقامة صلاة %1$s قد بدأت</string>
+    <string name="search_quran_hint">البحث في القرآن (سورة أو آية)...</string>
+    <string name="search_hadith_hint">البحث في الأحاديث...</string>
+    <string name="search_hint">بحث...</string>
 
     <!-- Quran Reader & Player -->
     <string name="surah_not_found">السورة غير موجودة</string>

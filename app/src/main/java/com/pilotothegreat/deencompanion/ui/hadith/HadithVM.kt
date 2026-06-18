@@ -92,17 +92,32 @@ class HadithVM(
         hasMoreToLoad = true
         if (bookId != null) {
             viewModelScope.launch {
+                // 1. Load the preloaded content instantly
+                loadNextPage()
+
+                // 2. Check if we need to sync the full collection
                 try {
                     val count = repository.getHadithCount(bookId)
                     if (count <= 20) {
                         _isSyncing.value = true
-                        repository.syncFullBook(bookId)
+                        // Launch sync as a background job so we don't block the UI
+                        val job = launch(kotlinx.coroutines.Dispatchers.IO) {
+                            val success = repository.syncFullBook(bookId)
+                            if (success) {
+                                // Reset pagination and reload the full synced list
+                                currentPage = 0
+                                hasMoreToLoad = true
+                                _loadedHadiths.value = emptyList()
+                                loadNextPage()
+                            }
+                        }
+                        job.invokeOnCompletion {
+                            _isSyncing.value = false
+                        }
                     }
                 } catch (e: Exception) {
-                    Timber.e(e, "Error checking sync requirements for book: $bookId")
-                } finally {
+                    Timber.e(e, "Error during selectBook background sync: $bookId")
                     _isSyncing.value = false
-                    loadNextPage()
                 }
             }
         }
@@ -144,6 +159,16 @@ class HadithVM(
     fun toggleFavorite(hadithId: String, currentFav: Boolean) {
         viewModelScope.launch {
             repository.toggleFavorite(hadithId, !currentFav)
+            
+            // Map over _loadedHadiths and replace the toggled item in place
+            _loadedHadiths.value = _loadedHadiths.value.map {
+                if (it.id == hadithId) it.copy(isFavorite = !currentFav) else it
+            }
+            
+            // Map over _searchResults and replace the toggled item in place
+            _searchResults.value = _searchResults.value.map {
+                if (it.id == hadithId) it.copy(isFavorite = !currentFav) else it
+            }
         }
     }
 
