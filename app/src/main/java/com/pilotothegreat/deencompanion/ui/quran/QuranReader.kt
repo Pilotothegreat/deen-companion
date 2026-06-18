@@ -53,6 +53,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -300,7 +301,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                         pageContent.filterIsInstance<PageContent.VerseItem>()
                     }
                     var showTranslation by remember { mutableStateOf(false) }
-                    val isScrollable = (lang == "en" && showTranslation)
+                    val isScrollable = true
 
                     val blocks = remember(pageContent) {
                         val result = mutableListOf<RenderBlock>()
@@ -1081,7 +1082,9 @@ fun SurahStartBanner(
     fontFamily: FontFamily,
     lang: String
 ) {
-    val frameBg = if (isDark) Color(0xFF231E1A) else Color(0xFFF3EDE0)
+    val earsBgColor = if (isDark) Color(0xFF0F2620) else Color(0xFF144B3E)
+    val middleBgColor = if (isDark) Color(0xFF22201C) else Color(0xFFFAF5E8)
+
     val typeText = if (lang == "ar") {
         if (surah.type.lowercase() == "meccan") "مكية" else "مدنية"
     } else {
@@ -1093,38 +1096,142 @@ fun SurahStartBanner(
         "${surah.totalVerses} Verses"
     }
 
-    Card(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 4.dp, vertical = 8.dp),
-        colors = CardDefaults.cardColors(containerColor = frameBg),
-        border = BorderStroke(1.5.dp, goldAccent),
-        shape = RoundedCornerShape(0.dp)
+            .height(100.dp)
+            .padding(horizontal = 4.dp, vertical = 8.dp)
+            .drawBehind {
+                val size = this.size
+                // 1. Draw whole middle background
+                drawRect(middleBgColor, topLeft = Offset.Zero, size = size)
+                
+                // 2. Define left ear path
+                val leftEarPath = Path().apply {
+                    moveTo(0f, 0f)
+                    lineTo(size.width * 0.18f, 0f)
+                    cubicTo(
+                        size.width * 0.18f, 0f,
+                        size.width * 0.15f, size.height * 0.15f,
+                        size.width * 0.15f, size.height * 0.25f
+                    )
+                    lineTo(size.width * 0.15f, size.height * 0.38f)
+                    cubicTo(
+                        size.width * 0.15f, size.height * 0.38f,
+                        size.width * 0.12f, size.height * 0.5f,
+                        size.width * 0.15f, size.height * 0.62f
+                    )
+                    lineTo(size.width * 0.15f, size.height * 0.75f)
+                    cubicTo(
+                        size.width * 0.15f, size.height * 0.75f,
+                        size.width * 0.15f, size.height * 0.85f,
+                        size.width * 0.18f, size.height
+                    )
+                    lineTo(0f, size.height)
+                    close()
+                }
+
+                // 3. Define right ear path
+                val rightEarPath = Path().apply {
+                    moveTo(size.width, 0f)
+                    lineTo(size.width * 0.82f, 0f)
+                    cubicTo(
+                        size.width * 0.82f, 0f,
+                        size.width * 0.85f, size.height * 0.15f,
+                        size.width * 0.85f, size.height * 0.25f
+                    )
+                    lineTo(size.width * 0.85f, size.height * 0.38f)
+                    cubicTo(
+                        size.width * 0.85f, size.height * 0.38f,
+                        size.width * 0.88f, size.height * 0.5f,
+                        size.width * 0.85f, size.height * 0.62f
+                    )
+                    lineTo(size.width * 0.85f, size.height * 0.75f)
+                    cubicTo(
+                        size.width * 0.85f, size.height * 0.75f,
+                        size.width * 0.85f, size.height * 0.85f,
+                        size.width * 0.82f, size.height
+                    )
+                    lineTo(size.width, size.height)
+                    close()
+                }
+
+                // 4. Fill ears
+                drawPath(leftEarPath, earsBgColor)
+                drawPath(rightEarPath, earsBgColor)
+
+                // 5. Draw scalloped inner borders
+                val leftBorderPath = Path().apply {
+                    moveTo(size.width * 0.18f, 0f)
+                    cubicTo(
+                        size.width * 0.18f, 0f,
+                        size.width * 0.15f, size.height * 0.15f,
+                        size.width * 0.15f, size.height * 0.25f
+                    )
+                    lineTo(size.width * 0.15f, size.height * 0.38f)
+                    cubicTo(
+                        size.width * 0.15f, size.height * 0.38f,
+                        size.width * 0.12f, size.height * 0.5f,
+                        size.width * 0.15f, size.height * 0.62f
+                    )
+                    lineTo(size.width * 0.15f, size.height * 0.75f)
+                    cubicTo(
+                        size.width * 0.15f, size.height * 0.75f,
+                        size.width * 0.15f, size.height * 0.85f,
+                        size.width * 0.18f, size.height
+                    )
+                }
+                val rightBorderPath = Path().apply {
+                    moveTo(size.width * 0.82f, 0f)
+                    cubicTo(
+                        size.width * 0.82f, 0f,
+                        size.width * 0.85f, size.height * 0.15f,
+                        size.width * 0.85f, size.height * 0.25f
+                    )
+                    lineTo(size.width * 0.85f, size.height * 0.38f)
+                    cubicTo(
+                        size.width * 0.85f, size.height * 0.38f,
+                        size.width * 0.88f, size.height * 0.5f,
+                        size.width * 0.85f, size.height * 0.62f
+                    )
+                    lineTo(size.width * 0.85f, size.height * 0.75f)
+                    cubicTo(
+                        size.width * 0.85f, size.height * 0.75f,
+                        size.width * 0.85f, size.height * 0.85f,
+                        size.width * 0.82f, size.height
+                    )
+                }
+                drawPath(leftBorderPath, goldAccent, style = Stroke(width = 1.5.dp.toPx()))
+                drawPath(rightBorderPath, goldAccent, style = Stroke(width = 1.5.dp.toPx()))
+
+                // 6. Draw outer rectangular border
+                drawRect(goldAccent, topLeft = Offset.Zero, size = size, style = Stroke(width = 1.5.dp.toPx()))
+
+                // 7. Draw Islamic stars and dots on ears
+                val starSize = size.height * 0.35f
+                drawIslamicStar(Offset(size.width * 0.08f, size.height / 2), starSize, goldAccent)
+                drawIslamicStar(Offset(size.width * 0.92f, size.height / 2), starSize, goldAccent)
+
+                drawCircle(goldAccent, radius = 2.5.dp.toPx(), center = Offset(size.width * 0.08f, size.height * 0.22f))
+                drawCircle(goldAccent, radius = 2.5.dp.toPx(), center = Offset(size.width * 0.08f, size.height * 0.78f))
+                drawCircle(goldAccent, radius = 2.5.dp.toPx(), center = Offset(size.width * 0.92f, size.height * 0.22f))
+                drawCircle(goldAccent, radius = 2.5.dp.toPx(), center = Offset(size.width * 0.92f, size.height * 0.78f))
+            },
+        contentAlignment = Alignment.Center
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 12.dp, horizontal = 16.dp),
+                .fillMaxWidth(0.6f)
+                .wrapContentHeight(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(modifier = Modifier.size(4.dp).graphicsLayer { rotationZ = 45f }.background(goldAccent))
-                HorizontalDivider(modifier = Modifier.width(40.dp), thickness = 0.5.dp, color = goldAccent.copy(alpha = 0.5f))
-                Box(modifier = Modifier.size(6.dp).graphicsLayer { rotationZ = 45f }.background(goldAccent))
-                HorizontalDivider(modifier = Modifier.width(40.dp), thickness = 0.5.dp, color = goldAccent.copy(alpha = 0.5f))
-                Box(modifier = Modifier.size(4.dp).graphicsLayer { rotationZ = 45f }.background(goldAccent))
-            }
-
             Text(
                 text = "سُورَةُ ${surah.name}",
                 style = MaterialTheme.typography.headlineMedium.copy(
                     fontWeight = FontWeight.Bold,
                     fontFamily = fontFamily,
-                    fontSize = 32.sp
+                    fontSize = 24.sp
                 ),
                 color = goldAccent,
                 textAlign = TextAlign.Center
@@ -1132,23 +1239,37 @@ fun SurahStartBanner(
 
             Text(
                 text = "$typeText • $versesText",
-                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
-                color = textColor.copy(alpha = 0.7f),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = fontFamily,
+                    fontSize = 11.sp
+                ),
+                color = textColor.copy(alpha = 0.8f),
                 textAlign = TextAlign.Center
             )
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(modifier = Modifier.size(4.dp).graphicsLayer { rotationZ = 45f }.background(goldAccent))
-                HorizontalDivider(modifier = Modifier.width(40.dp), thickness = 0.5.dp, color = goldAccent.copy(alpha = 0.5f))
-                Box(modifier = Modifier.size(6.dp).graphicsLayer { rotationZ = 45f }.background(goldAccent))
-                HorizontalDivider(modifier = Modifier.width(40.dp), thickness = 0.5.dp, color = goldAccent.copy(alpha = 0.5f))
-                Box(modifier = Modifier.size(4.dp).graphicsLayer { rotationZ = 45f }.background(goldAccent))
-            }
         }
     }
+}
+
+private fun DrawScope.drawIslamicStar(center: Offset, size: Float, color: Color) {
+    val r = size / 2
+    val path = Path().apply {
+        // First square
+        moveTo(center.x - r, center.y)
+        lineTo(center.x, center.y - r)
+        lineTo(center.x + r, center.y)
+        lineTo(center.x, center.y + r)
+        close()
+        // Second square rotated 45 degrees
+        val rRot = r * 0.7071f
+        moveTo(center.x - rRot, center.y - rRot)
+        lineTo(center.x + rRot, center.y - rRot)
+        lineTo(center.x + rRot, center.y + rRot)
+        lineTo(center.x - rRot, center.y + rRot)
+        close()
+    }
+    drawPath(path, color, style = Stroke(width = 1.5.dp.toPx()))
+    drawCircle(color, radius = r * 0.3f, center = center)
 }
 
 fun Modifier.mushafBorder(color: Color): Modifier = this.drawBehind {
@@ -1176,34 +1297,48 @@ fun Modifier.mushafBorder(color: Color): Modifier = this.drawBehind {
     )
     
     // Diagonal lines at the four corners connecting outer and inner corners
-    // Top-left
     drawLine(
         color = color,
         start = Offset.Zero,
         end = Offset(innerOffset, innerOffset),
         strokeWidth = strokeWidth * 0.5f
     )
-    // Top-right
     drawLine(
         color = color,
         start = Offset(size.width, 0f),
         end = Offset(size.width - innerOffset, innerOffset),
         strokeWidth = strokeWidth * 0.5f
     )
-    // Bottom-left
     drawLine(
         color = color,
         start = Offset(0f, size.height),
         end = Offset(innerOffset, size.height - innerOffset),
         strokeWidth = strokeWidth * 0.5f
     )
-    // Bottom-right
     drawLine(
         color = color,
         start = Offset(size.width, size.height),
         end = Offset(size.width - innerOffset, size.height - innerOffset),
         strokeWidth = strokeWidth * 0.5f
     )
+
+    // Draw solid diamonds at the four inner corners
+    val dSize = 4.dp.toPx()
+    drawDiamond(Offset(innerOffset, innerOffset), dSize, color)
+    drawDiamond(Offset(size.width - innerOffset, innerOffset), dSize, color)
+    drawDiamond(Offset(innerOffset, size.height - innerOffset), dSize, color)
+    drawDiamond(Offset(size.width - innerOffset, size.height - innerOffset), dSize, color)
+}
+
+private fun DrawScope.drawDiamond(center: Offset, size: Float, color: Color) {
+    val path = Path().apply {
+        moveTo(center.x, center.y - size)
+        lineTo(center.x + size, center.y)
+        lineTo(center.x, center.y + size)
+        lineTo(center.x - size, center.y)
+        close()
+    }
+    drawPath(path, color)
 }
 
 fun calculatePageHeight(
