@@ -190,8 +190,7 @@ class OverviewVM(
     }
 
     private fun recalculatePrayerTimes(lat: Double, lon: Double) {
-        val tz = timezoneId.value
-        val zoneId = try { ZoneId.of(tz) } catch (e: Exception) { ZoneId.systemDefault() }
+        val zoneId = ZoneId.systemDefault()
         val date = LocalDate.now(zoneId)
         val zonedDateTime = date.atStartOfDay(zoneId)
         val offsetHours = zonedDateTime.offset.totalSeconds / 3600.0

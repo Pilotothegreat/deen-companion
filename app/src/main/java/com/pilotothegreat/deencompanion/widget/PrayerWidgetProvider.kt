@@ -102,7 +102,7 @@ class PrayerWidgetProvider : AppWidgetProvider(), KoinComponent {
                     val calcMethod = repo.calcMethod.first()
                     val asrSchool = repo.asrSchool.first()
 
-                    val zoneId = try { ZoneId.of(tzId) } catch (e: Exception) { ZoneId.systemDefault() }
+                    val zoneId = ZoneId.systemDefault()
                     val today = LocalDate.now(zoneId)
                     val zonedDateTime = today.atStartOfDay(zoneId)
                     val offsetHours = zonedDateTime.offset.totalSeconds / 3600.0

@@ -263,7 +263,7 @@ fun calculateNextPrayer(
     timezoneId: String,
     context: Context
 ): NextPrayer {
-    val zoneId = try { ZoneId.of(timezoneId) } catch (e: Exception) { ZoneId.systemDefault() }
+    val zoneId = ZoneId.systemDefault()
     val now = LocalDateTime.now(zoneId)
     val localTime = now.toLocalTime()
 

@@ -220,7 +220,7 @@ class AppPreferenceRepo(
     val fajrIqamaIsFixed: Flow<Boolean> = data.map { it[FAJR_IQAMA_IS_FIXED] ?: false }.distinctUntilChanged()
     suspend fun setFajrIqamaIsFixed(value: Boolean) = dataStore.edit { it[FAJR_IQAMA_IS_FIXED] = value }
 
-    val dhuhrIqamaIsFixed: Flow<Boolean> = data.map { it[DHUHR_IQAMA_IS_FIXED] ?: true }.distinctUntilChanged()
+    val dhuhrIqamaIsFixed: Flow<Boolean> = data.map { it[DHUHR_IQAMA_IS_FIXED] ?: false }.distinctUntilChanged()
     suspend fun setDhuhrIqamaIsFixed(value: Boolean) = dataStore.edit { it[DHUHR_IQAMA_IS_FIXED] = value }
 
     val asrIqamaIsFixed: Flow<Boolean> = data.map { it[ASR_IQAMA_IS_FIXED] ?: false }.distinctUntilChanged()

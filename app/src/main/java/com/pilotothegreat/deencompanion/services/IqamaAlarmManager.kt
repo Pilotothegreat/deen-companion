@@ -74,8 +74,28 @@ object IqamaAlarmManager {
         val ishaFixedTimeVal    = appPreferenceRepo.ishaIqamaTime.first()
 
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
-        val zoneId = try { ZoneId.of(tzId) } catch (e: Exception) { ZoneId.systemDefault() }
+        val zoneId = ZoneId.systemDefault()
         val now = LocalDateTime.now(zoneId)
+
+        // Cancel legacy hardcoded alarms (1001-1005, 1011-1015) to prevent duplicates upon app update
+        val legacyCodes = listOf(1001, 1002, 1003, 1004, 1005, 1011, 1012, 1013, 1014, 1015)
+        for (code in legacyCodes) {
+            try {
+                val intent = Intent(context, IqamaAlarmReceiver::class.java)
+                val pendingIntent = PendingIntent.getBroadcast(
+                    context,
+                    code,
+                    intent,
+                    PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+                )
+                if (pendingIntent != null) {
+                    alarmManager.cancel(pendingIntent)
+                    pendingIntent.cancel()
+                }
+            } catch (e: Exception) {
+                // Ignore
+            }
+        }
 
         // Schedule today (dayOffset=0) and tomorrow (dayOffset=1)
         for (dayOffset in 0..1) {
@@ -98,18 +118,18 @@ object IqamaAlarmManager {
             val maghribTime = if (maghribIsFixed) parseFixedTime(maghribFixedTimeVal) ?: times.maghrib.plusMinutes(maghribOffset.toLong()) else times.maghrib.plusMinutes(maghribOffset.toLong())
             val ishaTime    = if (ishaIsFixed)    parseFixedTime(ishaFixedTimeVal)    ?: times.isha.plusMinutes(ishaOffset.toLong())     else times.isha.plusMinutes(ishaOffset.toLong())
 
-            // Unique request codes: prayer 1001-1005 for today, 1011-1015 for tomorrow
             val prayers = listOf(
-                Triple("Fajr",    fajrTime,    1001 + dayOffset * 10),
-                Triple("Dhuhr",   dhuhrTime,   1002 + dayOffset * 10),
-                Triple("Asr",     asrTime,     1003 + dayOffset * 10),
-                Triple("Maghrib", maghribTime, 1004 + dayOffset * 10),
-                Triple("Isha",    ishaTime,    1005 + dayOffset * 10)
+                Pair("Fajr",    fajrTime),
+                Pair("Dhuhr",   dhuhrTime),
+                Pair("Asr",     asrTime),
+                Pair("Maghrib", maghribTime),
+                Pair("Isha",    ishaTime)
             )
 
-            for ((name, localTime, requestCode) in prayers) {
+            for ((name, localTime) in prayers) {
                 val alarmDT = LocalDateTime.of(date, localTime)
                 if (alarmDT.isAfter(now)) {
+                    val requestCode = "Iqama_${name}_${date}".hashCode()
                     scheduleExactAlarm(context, alarmManager, name, alarmDT, zoneId, requestCode)
                 }
             }

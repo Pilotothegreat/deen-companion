@@ -41,6 +41,8 @@ class AdhanAlarmReceiver : BroadcastReceiver(), KoinComponent {
                         else -> prayerName
                     }
                     showAdhanNotification(localizedContext, localizedPrayerName)
+                    // Reschedule to maintain the rolling 2-day queue
+                    AdhanAlarmManager.scheduleAllAdhanAlarms(context, repo)
                 } catch (e: Exception) {
                     Timber.e(e, "Error displaying Adhan notification")
                 } finally {

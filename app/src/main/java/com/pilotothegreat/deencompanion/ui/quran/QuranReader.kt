@@ -301,7 +301,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                         pageContent.filterIsInstance<PageContent.VerseItem>()
                     }
                     var showTranslation by remember { mutableStateOf(false) }
-                    val isScrollable = true
+                    val isScrollable = showTranslation
 
                     val blocks = remember(pageContent) {
                         val result = mutableListOf<RenderBlock>()
@@ -1358,8 +1358,8 @@ fun calculatePageHeight(
     blocks.forEach { block ->
         when (block) {
             is RenderBlock.Header -> {
-                // SurahStartBanner: ~90.dp
-                totalHeightPx += with(density) { 90.dp.toPx() }
+                // SurahStartBanner: ~100.dp
+                totalHeightPx += with(density) { 100.dp.toPx() }
             }
             is RenderBlock.BismillahText -> {
                 val bFontSize = fontSizeSp * 1.3f
@@ -1420,7 +1420,7 @@ fun calculatePageHeight(
         totalHeightPx += with(density) { 90.dp.toPx() }
     }
     
-    totalHeightPx += with(density) { 60.dp.toPx() }
+    totalHeightPx += with(density) { 68.dp.toPx() }
     
     return totalHeightPx
 }
