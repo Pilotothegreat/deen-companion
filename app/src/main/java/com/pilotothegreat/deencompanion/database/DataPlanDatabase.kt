@@ -73,25 +73,25 @@ interface HadithDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertHadiths(hadiths: List<HadithEntity>)
 
-    @Query("SELECT * FROM HadithEntity WHERE bookId = :bookId ORDER BY number ASC LIMIT :limit OFFSET :offset")
+    @Query("SELECT * FROM HadithEntity WHERE bookId = :bookId AND (arabic != '' OR english != '') ORDER BY number ASC LIMIT :limit OFFSET :offset")
     suspend fun getHadithsPaged(bookId: String, limit: Int, offset: Int): List<HadithEntity>
 
-    @Query("SELECT * FROM HadithEntity WHERE bookId = :bookId ORDER BY number ASC")
+    @Query("SELECT * FROM HadithEntity WHERE bookId = :bookId AND (arabic != '' OR english != '') ORDER BY number ASC")
     fun getHadithsFlow(bookId: String): Flow<List<HadithEntity>>
 
-    @Query("SELECT * FROM HadithEntity WHERE isFavorite = 1")
+    @Query("SELECT * FROM HadithEntity WHERE isFavorite = 1 AND (arabic != '' OR english != '')")
     fun getFavoritesFlow(): Flow<List<HadithEntity>>
 
     @Query("UPDATE HadithEntity SET isFavorite = :isFav WHERE id = :id")
     suspend fun updateFavorite(id: String, isFav: Boolean)
 
-    @Query("SELECT * FROM HadithEntity WHERE bookId = :bookId AND (english LIKE :q OR arabic LIKE :q OR narrator LIKE :q)")
+    @Query("SELECT * FROM HadithEntity WHERE bookId = :bookId AND (arabic != '' OR english != '') AND (english LIKE :q OR arabic LIKE :q OR narrator LIKE :q)")
     suspend fun searchHadithsInBook(bookId: String, q: String): List<HadithEntity>
 
-    @Query("SELECT * FROM HadithEntity WHERE english LIKE :q OR arabic LIKE :q OR narrator LIKE :q LIMIT 100")
+    @Query("SELECT * FROM HadithEntity WHERE (arabic != '' OR english != '') AND (english LIKE :q OR arabic LIKE :q OR narrator LIKE :q) LIMIT 100")
     suspend fun searchHadithsGlobal(q: String): List<HadithEntity>
 
-    @Query("SELECT COUNT(*) FROM HadithEntity WHERE bookId = :bookId")
+    @Query("SELECT COUNT(*) FROM HadithEntity WHERE bookId = :bookId AND (arabic != '' OR english != '')")
     suspend fun getHadithCount(bookId: String): Int
 }
 

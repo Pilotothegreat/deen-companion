@@ -54,7 +54,7 @@ fun HadithBookReader(bookId: String) {
     val book = remember(bookId, books) { books.firstOrNull { it.id == bookId } }
     val hazeState = rememberHazeState()
 
-    val paddingTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    val paddingTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 52.dp
     val paddingBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
     val direction = if (lang == "ar") LayoutDirection.Rtl else LayoutDirection.Ltr
@@ -76,24 +76,16 @@ fun HadithBookReader(bookId: String) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = { navigator.goBack() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.go_back)
-                        )
-                    }
-                    Column(modifier = Modifier.padding(start = 8.dp)) {
-                        Text(
-                            text = getLocalizedBookName(book?.id ?: "", book?.name ?: "", lang),
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                        )
-                        Text(
-                            text = getLocalizedCompiler(book?.id ?: "", book?.compiler ?: "", lang),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = colorScheme.secondary
-                        )
-                    }
+                Column(modifier = Modifier.padding(horizontal = 8.dp)) {
+                    Text(
+                        text = getLocalizedBookName(book?.id ?: "", book?.name ?: "", lang),
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                    )
+                    Text(
+                        text = getLocalizedCompiler(book?.id ?: "", book?.compiler ?: "", lang),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colorScheme.secondary
+                    )
                 }
 
                 IconButton(onClick = { book?.id?.let { viewModel.forceSyncBook(it) } }) {

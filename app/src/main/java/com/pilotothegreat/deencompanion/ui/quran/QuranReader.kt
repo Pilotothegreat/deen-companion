@@ -146,7 +146,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
     
     val textMeasurer = rememberTextMeasurer()
     val widthPx = remember(screenWidthDp, density) {
-        with(density) { (screenWidthDp - 28f).dp.toPx() }
+        with(density) { (screenWidthDp - 12f).dp.toPx() }
     }
     
     val textStyle = remember(arabicFontSize, quranFontFamily) {
@@ -299,7 +299,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                     state = pagerState,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(top = 84.dp, bottom = 104.dp)
+                        .padding(top = 84.dp, bottom = if (currentSurahId == surah.id) 116.dp else 40.dp)
                 ) { pageIdx ->
                     val pageContent = globalPages.getOrNull(pageIdx) ?: emptyList()
                     val pageVerses = remember(pageContent) {
@@ -394,7 +394,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(horizontal = 6.dp, vertical = 4.dp)
+                            .padding(horizontal = 2.dp, vertical = 2.dp)
                             .pointerInput(Unit) {
                                 awaitEachGesture {
                                     var zoom = 1f
@@ -418,7 +418,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(horizontal = 8.dp, vertical = 6.dp),
+                                .padding(horizontal = 4.dp, vertical = 4.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             // Top Header inside the Mus'haf border frame
@@ -1138,34 +1138,36 @@ fun SurahStartBanner(
 
     Box(
         modifier = Modifier
-            .width(260.dp)
-            .height(64.dp)
-            .padding(vertical = 4.dp)
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 4.dp)
+            .height(48.dp)
             .drawBehind {
                 val size = this.size
                 // 1. Draw whole middle background
                 drawRect(middleBgColor, topLeft = Offset.Zero, size = size)
                 
+                val earWidth = 44.dp.toPx()
+                
                 // 2. Define left ear path
                 val leftEarPath = Path().apply {
                     moveTo(0f, 0f)
-                    lineTo(size.width * 0.18f, 0f)
+                    lineTo(earWidth, 0f)
                     cubicTo(
-                        size.width * 0.18f, 0f,
-                        size.width * 0.15f, size.height * 0.15f,
-                        size.width * 0.15f, size.height * 0.25f
+                        earWidth, 0f,
+                        earWidth - 6.dp.toPx(), size.height * 0.15f,
+                        earWidth - 6.dp.toPx(), size.height * 0.25f
                     )
-                    lineTo(size.width * 0.15f, size.height * 0.38f)
+                    lineTo(earWidth - 6.dp.toPx(), size.height * 0.38f)
                     cubicTo(
-                        size.width * 0.15f, size.height * 0.38f,
-                        size.width * 0.12f, size.height * 0.5f,
-                        size.width * 0.15f, size.height * 0.62f
+                        earWidth - 6.dp.toPx(), size.height * 0.38f,
+                        earWidth - 12.dp.toPx(), size.height * 0.5f,
+                        earWidth - 6.dp.toPx(), size.height * 0.62f
                     )
-                    lineTo(size.width * 0.15f, size.height * 0.75f)
+                    lineTo(earWidth - 6.dp.toPx(), size.height * 0.75f)
                     cubicTo(
-                        size.width * 0.15f, size.height * 0.75f,
-                        size.width * 0.15f, size.height * 0.85f,
-                        size.width * 0.18f, size.height
+                        earWidth - 6.dp.toPx(), size.height * 0.75f,
+                        earWidth - 6.dp.toPx(), size.height * 0.85f,
+                        earWidth, size.height
                     )
                     lineTo(0f, size.height)
                     close()
@@ -1174,23 +1176,23 @@ fun SurahStartBanner(
                 // 3. Define right ear path
                 val rightEarPath = Path().apply {
                     moveTo(size.width, 0f)
-                    lineTo(size.width * 0.82f, 0f)
+                    lineTo(size.width - earWidth, 0f)
                     cubicTo(
-                        size.width * 0.82f, 0f,
-                        size.width * 0.85f, size.height * 0.15f,
-                        size.width * 0.85f, size.height * 0.25f
+                        size.width - earWidth, 0f,
+                        size.width - earWidth + 6.dp.toPx(), size.height * 0.15f,
+                        size.width - earWidth + 6.dp.toPx(), size.height * 0.25f
                     )
-                    lineTo(size.width * 0.85f, size.height * 0.38f)
+                    lineTo(size.width - earWidth + 6.dp.toPx(), size.height * 0.38f)
                     cubicTo(
-                        size.width * 0.85f, size.height * 0.38f,
-                        size.width * 0.88f, size.height * 0.5f,
-                        size.width * 0.85f, size.height * 0.62f
+                        size.width - earWidth + 6.dp.toPx(), size.height * 0.38f,
+                        size.width - earWidth + 12.dp.toPx(), size.height * 0.5f,
+                        size.width - earWidth + 6.dp.toPx(), size.height * 0.62f
                     )
-                    lineTo(size.width * 0.85f, size.height * 0.75f)
+                    lineTo(size.width - earWidth + 6.dp.toPx(), size.height * 0.75f)
                     cubicTo(
-                        size.width * 0.85f, size.height * 0.75f,
-                        size.width * 0.85f, size.height * 0.85f,
-                        size.width * 0.82f, size.height
+                        size.width - earWidth + 6.dp.toPx(), size.height * 0.75f,
+                        size.width - earWidth + 6.dp.toPx(), size.height * 0.85f,
+                        size.width - earWidth, size.height
                     )
                     lineTo(size.width, size.height)
                     close()
@@ -1202,43 +1204,43 @@ fun SurahStartBanner(
 
                 // 5. Draw scalloped inner borders
                 val leftBorderPath = Path().apply {
-                    moveTo(size.width * 0.18f, 0f)
+                    moveTo(earWidth, 0f)
                     cubicTo(
-                        size.width * 0.18f, 0f,
-                        size.width * 0.15f, size.height * 0.15f,
-                        size.width * 0.15f, size.height * 0.25f
+                        earWidth, 0f,
+                        earWidth - 6.dp.toPx(), size.height * 0.15f,
+                        earWidth - 6.dp.toPx(), size.height * 0.25f
                     )
-                    lineTo(size.width * 0.15f, size.height * 0.38f)
+                    lineTo(earWidth - 6.dp.toPx(), size.height * 0.38f)
                     cubicTo(
-                        size.width * 0.15f, size.height * 0.38f,
-                        size.width * 0.12f, size.height * 0.5f,
-                        size.width * 0.15f, size.height * 0.62f
+                        earWidth - 6.dp.toPx(), size.height * 0.38f,
+                        earWidth - 12.dp.toPx(), size.height * 0.5f,
+                        earWidth - 6.dp.toPx(), size.height * 0.62f
                     )
-                    lineTo(size.width * 0.15f, size.height * 0.75f)
+                    lineTo(earWidth - 6.dp.toPx(), size.height * 0.75f)
                     cubicTo(
-                        size.width * 0.15f, size.height * 0.75f,
-                        size.width * 0.15f, size.height * 0.85f,
-                        size.width * 0.18f, size.height
+                        earWidth - 6.dp.toPx(), size.height * 0.75f,
+                        earWidth - 6.dp.toPx(), size.height * 0.85f,
+                        earWidth, size.height
                     )
                 }
                 val rightBorderPath = Path().apply {
-                    moveTo(size.width * 0.82f, 0f)
+                    moveTo(size.width - earWidth, 0f)
                     cubicTo(
-                        size.width * 0.82f, 0f,
-                        size.width * 0.85f, size.height * 0.15f,
-                        size.width * 0.85f, size.height * 0.25f
+                        size.width - earWidth, 0f,
+                        size.width - earWidth + 6.dp.toPx(), size.height * 0.15f,
+                        size.width - earWidth + 6.dp.toPx(), size.height * 0.25f
                     )
-                    lineTo(size.width * 0.85f, size.height * 0.38f)
+                    lineTo(size.width - earWidth + 6.dp.toPx(), size.height * 0.38f)
                     cubicTo(
-                        size.width * 0.85f, size.height * 0.38f,
-                        size.width * 0.88f, size.height * 0.5f,
-                        size.width * 0.85f, size.height * 0.62f
+                        size.width - earWidth + 6.dp.toPx(), size.height * 0.38f,
+                        size.width - earWidth + 12.dp.toPx(), size.height * 0.5f,
+                        size.width - earWidth + 6.dp.toPx(), size.height * 0.62f
                     )
-                    lineTo(size.width * 0.85f, size.height * 0.75f)
+                    lineTo(size.width - earWidth + 6.dp.toPx(), size.height * 0.75f)
                     cubicTo(
-                        size.width * 0.85f, size.height * 0.75f,
-                        size.width * 0.85f, size.height * 0.85f,
-                        size.width * 0.82f, size.height
+                        size.width - earWidth + 6.dp.toPx(), size.height * 0.75f,
+                        size.width - earWidth + 6.dp.toPx(), size.height * 0.85f,
+                        size.width - earWidth, size.height
                     )
                 }
                 drawPath(leftBorderPath, goldAccent, style = Stroke(width = 1.5.dp.toPx()))
@@ -1248,30 +1250,30 @@ fun SurahStartBanner(
                 drawRect(goldAccent, topLeft = Offset.Zero, size = size, style = Stroke(width = 1.5.dp.toPx()))
 
                 // 7. Draw Islamic stars and dots on ears
-                val starSize = size.height * 0.35f
-                drawIslamicStar(Offset(size.width * 0.08f, size.height / 2), starSize, goldAccent)
-                drawIslamicStar(Offset(size.width * 0.92f, size.height / 2), starSize, goldAccent)
+                val starSize = size.height * 0.4f
+                drawIslamicStar(Offset(earWidth / 2, size.height / 2), starSize, goldAccent)
+                drawIslamicStar(Offset(size.width - earWidth / 2, size.height / 2), starSize, goldAccent)
 
-                drawCircle(goldAccent, radius = 2.5.dp.toPx(), center = Offset(size.width * 0.08f, size.height * 0.22f))
-                drawCircle(goldAccent, radius = 2.5.dp.toPx(), center = Offset(size.width * 0.08f, size.height * 0.78f))
-                drawCircle(goldAccent, radius = 2.5.dp.toPx(), center = Offset(size.width * 0.92f, size.height * 0.22f))
-                drawCircle(goldAccent, radius = 2.5.dp.toPx(), center = Offset(size.width * 0.92f, size.height * 0.78f))
+                drawCircle(goldAccent, radius = 2.dp.toPx(), center = Offset(earWidth / 2, size.height * 0.2f))
+                drawCircle(goldAccent, radius = 2.dp.toPx(), center = Offset(earWidth / 2, size.height * 0.8f))
+                drawCircle(goldAccent, radius = 2.dp.toPx(), center = Offset(size.width - earWidth / 2, size.height * 0.2f))
+                drawCircle(goldAccent, radius = 2.dp.toPx(), center = Offset(size.width - earWidth / 2, size.height * 0.8f))
             },
         contentAlignment = Alignment.Center
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth(0.6f)
+                .fillMaxWidth(0.7f)
                 .wrapContentHeight(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+            verticalArrangement = Arrangement.spacedBy(1.dp)
         ) {
             Text(
                 text = "سُورة ${surah.name}",
                 style = MaterialTheme.typography.headlineMedium.copy(
                     fontWeight = FontWeight.Bold,
                     fontFamily = fontFamily,
-                    fontSize = 16.sp
+                    fontSize = 14.sp
                 ),
                 color = goldAccent,
                 textAlign = TextAlign.Center
@@ -1282,7 +1284,7 @@ fun SurahStartBanner(
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Bold,
                     fontFamily = fontFamily,
-                    fontSize = 9.sp
+                    fontSize = 8.sp
                 ),
                 color = textColor.copy(alpha = 0.8f),
                 textAlign = TextAlign.Center
@@ -1398,8 +1400,8 @@ fun calculatePageHeight(
     blocks.forEach { block ->
         when (block) {
             is RenderBlock.Header -> {
-                // SurahStartBanner: ~64.dp
-                totalHeightPx += with(density) { 64.dp.toPx() }
+                // SurahStartBanner: ~48.dp
+                totalHeightPx += with(density) { 48.dp.toPx() }
             }
             is RenderBlock.BismillahText -> {
                 val bFontSize = fontSizeSp * 1.3f

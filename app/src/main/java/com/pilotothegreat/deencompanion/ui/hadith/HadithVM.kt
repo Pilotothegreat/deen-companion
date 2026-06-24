@@ -18,6 +18,10 @@ class HadithVM(
     val books: StateFlow<List<HadithBookEntity>> = repository.getHadithBooks()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
+    val undownloadedBooks: StateFlow<List<HadithBookEntity>> = repository.getHadithBooks()
+        .map { list -> list.filter { it.hadithCount <= 20 } }
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
     val favorites: StateFlow<List<HadithEntity>> = repository.getFavorites()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
@@ -185,6 +189,22 @@ class HadithVM(
                 currentPage = 0
                 hasMoreToLoad = true
                 loadNextPage()
+            }
+        }
+    }
+
+    fun syncAllUndownloaded() {
+        viewModelScope.launch {
+            _isSyncing.value = true
+            try {
+                val list = undownloadedBooks.value
+                for (book in list) {
+                    repository.syncFullBook(book.id)
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Error syncing all undownloaded books")
+            } finally {
+                _isSyncing.value = false
             }
         }
     }

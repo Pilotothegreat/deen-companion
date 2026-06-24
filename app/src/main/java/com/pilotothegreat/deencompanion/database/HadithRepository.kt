@@ -186,8 +186,12 @@ class HadithRepository(
                 val engObj = engArray.getJSONObject(i)
 
                 val num = araObj.optInt("hadithnumber", i + 1)
-                val arabText = araObj.optString("text", "")
-                val engText = engObj.optString("text", "")
+                val arabText = araObj.optString("text", "").trim()
+                val engText = engObj.optString("text", "").trim()
+
+                if (arabText.isEmpty() && engText.isEmpty()) {
+                    continue
+                }
 
                 entities.add(
                     HadithEntity(

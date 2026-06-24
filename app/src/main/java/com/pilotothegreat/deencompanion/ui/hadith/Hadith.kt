@@ -124,6 +124,46 @@ fun Hadith(paddingValues: PaddingValues) {
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
 
+                val undownloaded by viewModel.undownloadedBooks.collectAsState()
+                if (undownloaded.isNotEmpty()) {
+                    val bookNames = undownloaded.map { getLocalizedBookName(it.id, it.name, lang) }.joinToString(if (lang == "ar") "، " else ", ")
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = colorScheme.secondaryContainer.copy(alpha = 0.5f)
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = if (lang == "ar") "البحث غير مكتمل" else "Search is Incomplete",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = colorScheme.onSecondaryContainer
+                                )
+                                Text(
+                                    text = if (lang == "ar") "بعض الكتب لم تُحمّل بعد ($bookNames). حمّلها لتتمكن من البحث فيها."
+                                           else "Some books are not downloaded yet ($bookNames). Download them to search their content.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = colorScheme.onSecondaryContainer.copy(alpha = 0.8f)
+                                )
+                            }
+                            Button(
+                                onClick = { viewModel.syncAllUndownloaded() },
+                                colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
+                            ) {
+                                Text(if (lang == "ar") "تحميل الكل" else "Download All")
+                            }
+                        }
+                    }
+                }
+
                 if (isSearching) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
