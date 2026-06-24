@@ -67,7 +67,7 @@ fun HadithBookReader(bookId: String) {
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Box(Modifier.height(paddingTop - 8.dp))
+            Box(Modifier.height(paddingTop + 8.dp))
 
             Row(
                 modifier = Modifier

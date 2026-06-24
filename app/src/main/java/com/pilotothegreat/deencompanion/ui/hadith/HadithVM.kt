@@ -49,6 +49,34 @@ class HadithVM(
     var hasMoreToLoad = true
         private set
 
+    private suspend fun executeSearch(query: String) {
+        if (query.isBlank()) {
+            _searchResults.value = emptyList()
+            _isSearching.value = false
+            return
+        }
+        val rankedResults = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+            val results = repository.searchHadiths(query)
+            val normalizedQuery = normalizeArabic(query)
+            val lowerQuery = query.lowercase().trim()
+
+            results.mapNotNull { entity ->
+                var score = 0
+                val normEnglish = entity.english.lowercase()
+                val normArabic = normalizeArabic(entity.arabic)
+                val normNarrator = entity.narrator.lowercase()
+
+                if (normArabic.contains(normalizedQuery)) score += 5
+                if (normEnglish.contains(lowerQuery)) score += 3
+                if (normNarrator.contains(lowerQuery)) score += 2
+
+                if (score > 0) Pair(entity, score) else null
+            }.sortedByDescending { it.second }.map { it.first }
+        }
+        _searchResults.value = rankedResults
+        _isSearching.value = false
+    }
+
     init {
         // Debounced search with cancellation of stale queries
         _searchQuery
@@ -60,26 +88,7 @@ class HadithVM(
                     _isSearching.value = false
                 } else {
                     _isSearching.value = true
-                    val rankedResults = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
-                        val results = repository.searchHadiths(query)
-                        val normalizedQuery = normalizeArabic(query)
-                        val lowerQuery = query.lowercase().trim()
-
-                        results.mapNotNull { entity ->
-                            var score = 0
-                            val normEnglish = entity.english.lowercase()
-                            val normArabic = normalizeArabic(entity.arabic)
-                            val normNarrator = entity.narrator.lowercase()
-
-                            if (normArabic.contains(normalizedQuery)) score += 5
-                            if (normEnglish.contains(lowerQuery)) score += 3
-                            if (normNarrator.contains(lowerQuery)) score += 2
-
-                            if (score > 0) Pair(entity, score) else null
-                        }.sortedByDescending { it.second }.map { it.first }
-                    }
-                    _searchResults.value = rankedResults
-                    _isSearching.value = false
+                    executeSearch(query)
                 }
             }
             .launchIn(viewModelScope)
@@ -199,7 +208,13 @@ class HadithVM(
             try {
                 val list = undownloadedBooks.value
                 for (book in list) {
-                    repository.syncFullBook(book.id)
+                    val success = repository.syncFullBook(book.id)
+                    if (success) {
+                        val currentQuery = _searchQuery.value
+                        if (currentQuery.isNotBlank()) {
+                            executeSearch(currentQuery)
+                        }
+                    }
                 }
             } catch (e: Exception) {
                 Timber.e(e, "Error syncing all undownloaded books")

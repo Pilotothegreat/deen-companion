@@ -294,12 +294,16 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                 Text(stringResource(R.string.surah_not_found), color = colorScheme.error)
             }
         } else {
+            val statusBarHeightDp = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+            val pagerBottomPaddingDp = if (currentSurahId == surah.id) 116.dp else 40.dp
+            val pagerTopPaddingDp = statusBarHeightDp + 64.dp
+
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                 HorizontalPager(
                     state = pagerState,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(top = 84.dp, bottom = if (currentSurahId == surah.id) 116.dp else 40.dp)
+                        .padding(top = pagerTopPaddingDp, bottom = pagerBottomPaddingDp)
                 ) { pageIdx ->
                     val pageContent = globalPages.getOrNull(pageIdx) ?: emptyList()
                     val pageVerses = remember(pageContent) {
@@ -346,10 +350,13 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                         result
                     }
 
+                    val maxContentHeightPx = remember(screenHeightDp, pagerTopPaddingDp, pagerBottomPaddingDp) {
+                        with(density) { (screenHeightDp.dp - pagerTopPaddingDp - pagerBottomPaddingDp).coerceAtLeast(300.dp).toPx() }
+                    }
+
                     // Dynamically calculate adjusted font size (try to downscale to 18f to fit within screen)
-                    val adjustedFontSize = remember(pageContent, arabicFontSize, screenHeightDp, widthPx) {
+                    val adjustedFontSize = remember(pageContent, arabicFontSize, maxContentHeightPx, widthPx) {
                         var size = arabicFontSize.toFloat()
-                        val maxContentHeightPx = with(density) { (screenHeightDp - 228f).coerceAtLeast(300f).dp.toPx() }
                         val hasSajdah = pageVerses.any { QuranHelper.isSajdahVerse(it.surahId, it.verse.id) }
                         
                         while (size > 18f) {
@@ -383,10 +390,6 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                             lang = lang,
                             hasSajdah = hasSajdah
                         )
-                    }
-
-                    val maxContentHeightPx = remember(screenHeightDp) {
-                        with(density) { (screenHeightDp - 228f).coerceAtLeast(300f).dp.toPx() }
                     }
 
                     val isScrollable = showTranslation || (estimatedHeight > maxContentHeightPx) || (zoomFactor > 1.0f)
@@ -1400,8 +1403,8 @@ fun calculatePageHeight(
     blocks.forEach { block ->
         when (block) {
             is RenderBlock.Header -> {
-                // SurahStartBanner: ~48.dp
-                totalHeightPx += with(density) { 48.dp.toPx() }
+                // SurahStartBanner: 48.dp height + 8.dp vertical padding = 56.dp
+                totalHeightPx += with(density) { 56.dp.toPx() }
             }
             is RenderBlock.BismillahText -> {
                 val bFontSize = fontSizeSp * 1.3f

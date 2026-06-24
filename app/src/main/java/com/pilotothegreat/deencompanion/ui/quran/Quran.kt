@@ -142,7 +142,7 @@ fun Quran(paddingValues: PaddingValues) {
             .padding(horizontal = paddingSide),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Box(Modifier.height(paddingTop - 8.dp))
+        Box(Modifier.height(paddingTop + 8.dp))
 
         // Unified Search Field
         SearchField(
