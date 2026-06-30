@@ -1,3 +1,4 @@
+// FIXED: Use saved timezoneId instead of ZoneId.systemDefault() in widget update
 package com.pilotothegreat.deencompanion.widget
 
 import android.app.AlarmManager
@@ -102,7 +103,8 @@ class PrayerWidgetProvider : AppWidgetProvider(), KoinComponent {
                     val calcMethod = repo.calcMethod.first()
                     val asrSchool = repo.asrSchool.first()
 
-                    val zoneId = ZoneId.systemDefault()
+                    // Use saved timezone instead of system default
+                    val zoneId = try { ZoneId.of(tzId) } catch (e: Exception) { ZoneId.systemDefault() }
                     val today = LocalDate.now(zoneId)
                     val zonedDateTime = today.atStartOfDay(zoneId)
                     val offsetHours = zonedDateTime.offset.totalSeconds / 3600.0
