@@ -30,6 +30,9 @@ import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
 import org.koin.compose.koinInject
 
 
+import androidx.compose.material3.MotionScheme
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun Theme(
     content: @Composable () -> Unit
@@ -81,7 +84,8 @@ fun Theme(
 
     MaterialTheme(
         colorScheme = colors,
-        typography = if (appLang.startsWith("ar")) ArabicTypography else AppTypography
+        typography = if (appLang.startsWith("ar")) ArabicTypography else AppTypography,
+        motionScheme = MotionScheme.expressive()
     ) { content() }
 }
 

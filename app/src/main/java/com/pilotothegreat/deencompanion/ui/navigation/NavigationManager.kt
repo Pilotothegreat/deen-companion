@@ -39,6 +39,9 @@ import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Badge
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.pilotothegreat.deencompanion.R
@@ -75,6 +78,9 @@ fun NavigationManager() {
     val navigator: Navigator = koinInject()
     val backStack = navigator.backStack
 
+    val motionScheme = MaterialTheme.motionScheme
+    val effectsSpec = remember(motionScheme) { motionScheme.defaultEffectsSpec<Float>() }
+
     var showBottomBar by remember { mutableStateOf(false) }
     val currentEntry = navigator.backStack.lastOrNull()
 
@@ -108,8 +114,8 @@ fun NavigationManager() {
             ) {
                 AnimatedVisibility(
                     visible = showBottomBar,
-                    enter = slideInVertically {it} + fadeIn(spring(dampingRatio = Spring.DampingRatioMediumBouncy)),
-                    exit = slideOutVertically {it} + fadeOut(spring(dampingRatio = Spring.DampingRatioMediumBouncy))
+                    enter = slideInVertically {it} + fadeIn(effectsSpec),
+                    exit = slideOutVertically {it} + fadeOut(effectsSpec)
                 ) {
                     HorizontalFloatingToolbar(
                         modifier = Modifier.navBarShadow(),
@@ -137,18 +143,18 @@ fun NavigationManager() {
                 entry<QiblaKey> { Qibla() }
             },
             transitionSpec = {
-                if (backStack.size == 1) fadeIn(spring(dampingRatio = Spring.DampingRatioMediumBouncy)) togetherWith fadeOut(spring(dampingRatio = Spring.DampingRatioMediumBouncy))
+                if (backStack.size == 1) fadeIn(effectsSpec) togetherWith fadeOut(effectsSpec)
                 else {
                     slideInHorizontally { it } togetherWith
                     slideOutHorizontally { -it / 2 } + scaleOut(targetScale = 0.7f) + fadeOut()
                 }
             },
             popTransitionSpec = {
-                slideInHorizontally { -it / 2 } + scaleIn(initialScale = 0.7f) + fadeIn(spring(dampingRatio = Spring.DampingRatioMediumBouncy)) togetherWith
+                slideInHorizontally { -it / 2 } + scaleIn(initialScale = 0.7f) + fadeIn(effectsSpec) togetherWith
                 slideOutHorizontally { it }
             },
             predictivePopTransitionSpec = {
-                slideInHorizontally { -it/2 } + scaleIn(initialScale = 0.7f) + fadeIn(spring(dampingRatio = Spring.DampingRatioMediumBouncy)) togetherWith
+                slideInHorizontally { -it/2 } + scaleIn(initialScale = 0.7f) + fadeIn(effectsSpec) togetherWith
                 slideOutHorizontally { it }
             }
         )
@@ -162,15 +168,17 @@ fun NavigationButton(navigator: Navigator, route: NavKey, name: String, icon: Im
     val haptic = LocalHapticFeedback.current
     val scale = remember { Animatable(1f) }
 
+    val spatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
+
     LaunchedEffect(selected) {
         if (selected) {
             scale.animateTo(
                 targetValue = 1.15f,
-                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+                animationSpec = spatialSpec
             )
             scale.animateTo(
                 targetValue = 1f,
-                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+                animationSpec = spatialSpec
             )
         }
     }
@@ -203,10 +211,18 @@ fun NavigationButton(navigator: Navigator, route: NavKey, name: String, icon: Im
         }
     ) {
         Row {
-            Icon(
-                imageVector = icon,
-                contentDescription = route.toString()
-            )
+            BadgedBox(
+                badge = {
+                    if (route == HadithKey) {
+                        Badge(containerColor = MaterialTheme.colorScheme.error)
+                    }
+                }
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = route.toString()
+                )
+            }
             AnimatedVisibility(navigator.current == route) {
                 Text(
                     modifier = Modifier.padding(start = 4.dp),

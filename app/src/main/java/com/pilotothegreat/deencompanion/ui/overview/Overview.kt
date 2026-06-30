@@ -84,8 +84,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.ButtonGroup
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.foundation.layout.width
@@ -529,6 +528,7 @@ fun Overview(
                         viewModel.refreshLocation(context)
                         viewModel.dismissLocationWarning()
                     },
+                shape = ExpressiveCardShape,
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
             ) {
                 Row(
@@ -582,7 +582,8 @@ fun Overview(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 4.dp),
-                shape = MaterialTheme.shapes.large,
+                shape = ExpressiveCardShape,
+                colors = CardDefaults.cardColors(containerColor = colorScheme.secondaryContainer),
                 elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
             ) {
                 Box(
@@ -591,9 +592,8 @@ fun Overview(
                         .background(
                             Brush.linearGradient(
                                 colors = listOf(
-                                    Color(0xFF1A1B41), // Deep Indigo
-                                    Color(0xFF2C2F75), // Mid Indigo
-                                    Color(0xFF4C1C5C)  // Dark Purple/Indigo
+                                    colorScheme.secondaryContainer,
+                                    colorScheme.primaryContainer.copy(alpha = 0.8f)
                                 )
                             )
                         )
@@ -609,13 +609,13 @@ fun Overview(
                                 Text(
                                     text = stringResource(R.string.ramadan_approaching),
                                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = Color(0xFFC5A059) // Warm gold primary
+                                    color = colorScheme.primary
                                 )
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     text = stringResource(R.string.days_until_ramadan, daysUntilRamadan),
                                     style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
-                                    color = Color.White
+                                    color = colorScheme.onSecondaryContainer
                                 )
                             }
                             IconButton(
@@ -629,7 +629,7 @@ fun Overview(
                                 Icon(
                                     imageVector = Icons.Default.Close,
                                     contentDescription = "Dismiss",
-                                    tint = Color.White.copy(alpha = 0.7f)
+                                    tint = colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
                                 )
                             }
                         }
@@ -637,7 +637,7 @@ fun Overview(
                         Text(
                             text = stringResource(R.string.ramadan_hilal_sighting_subtitle),
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color.White.copy(alpha = 0.85f)
+                            color = colorScheme.onSecondaryContainer.copy(alpha = 0.85f)
                         )
                         
                         Spacer(modifier = Modifier.height(4.dp))
@@ -648,7 +648,7 @@ fun Overview(
                                     val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://mara.gov.om"))
                                     context.startActivity(intent)
                                 }
-                                .background(Color(0xFFC5A059).copy(alpha = 0.2f), MaterialTheme.shapes.small)
+                                .background(colorScheme.primary.copy(alpha = 0.2f), MaterialTheme.shapes.small)
                                 .padding(horizontal = 12.dp, vertical = 6.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -657,12 +657,12 @@ fun Overview(
                                 imageVector = Icons.Default.Launch,
                                 contentDescription = null,
                                 modifier = Modifier.size(14.dp),
-                                tint = Color(0xFFFFD700)
+                                tint = colorScheme.primary
                             )
                             Text(
                                 text = "mara.gov.om",
                                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                color = Color(0xFFFFD700)
+                                color = colorScheme.primary
                             )
                         }
                     }
@@ -1583,6 +1583,7 @@ fun LiveQiblaCompassCard(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun TasbihDialCard(
     viewModel: OverviewVM,
@@ -1682,11 +1683,10 @@ fun TasbihDialCard(
                 )
             }
 
-            // Controls Row (Cycle Dhikr, Reset Count)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
+            // Controls Group (Cycle Dhikr, Reset Count)
+            @Suppress("DEPRECATION")
+            ButtonGroup(
+                modifier = Modifier.padding(top = 8.dp)
             ) {
                 // Cycle Dhikr Button
                 IconButton(
@@ -1694,7 +1694,7 @@ fun TasbihDialCard(
                         val nextDhikr = when (dhikr) {
                             "سبحان الله" -> "الحمد لله"
                             "الحمد لله" -> "الله أكبر"
-                            else -> "سبحان الله" // AllahuAkbar loops back to SubhanAllah (Sunnah 3-dhikr cycle)
+                            else -> "سبحان الله" // loops back (Sunnah 3-dhikr cycle)
                         }
                         viewModel.setTasbihDhikr(nextDhikr)
                     },

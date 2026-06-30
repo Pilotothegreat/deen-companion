@@ -36,6 +36,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.material3.Text
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.DockedSearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -144,8 +147,7 @@ fun CategoryTitleText(text: String, backButton: Boolean = false) {
         }
         Text(
             modifier = Modifier.padding(8.dp),
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
             text = text
         )
     }
@@ -167,56 +169,64 @@ fun LazyListScope.categoryTitleSmall(textProvider: @Composable () -> String) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchField(
     textFieldState: TextFieldState,
     placeholderText: String = stringResource(R.string.search_hint)
 ) {
-    Row(
-        modifier = Modifier
-            .padding(8.dp)
-            .fillMaxWidth()
-            .background(colorScheme.surfaceContainerHigh, shapes.extraLarge)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Icon(
-            painter = painterResource(R.drawable.search),
-            contentDescription = null
-        )
-        Box(modifier = Modifier.weight(1f)) {
-            if (textFieldState.text.isEmpty()) {
-                Text(
-                    text = placeholderText,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = colorScheme.outline
-                )
-            }
-            BasicTextField(
-                modifier = Modifier.fillMaxWidth(),
-                state = textFieldState,
-                textStyle = MaterialTheme.typography.titleMedium.copy(color = colorScheme.onSurface),
-                cursorBrush = SolidColor(colorScheme.onSurface)
-            )
-        }
-        if (textFieldState.text.isNotEmpty()) {
-            IconButton(
-                onClick = {
+    DockedSearchBar(
+        inputField = {
+            SearchBarDefaults.InputField(
+                query = textFieldState.text.toString(),
+                onQueryChange = { newQuery ->
                     textFieldState.edit {
-                        replace(0, length, "")
+                        replace(0, length, newQuery)
                     }
                 },
-                modifier = Modifier.size(24.dp)
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.close),
-                    contentDescription = stringResource(R.string.close),
-                    tint = colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    }
+                onSearch = {},
+                expanded = false,
+                onExpandedChange = {},
+                placeholder = {
+                    Text(
+                        text = placeholderText,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = colorScheme.outline
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(R.drawable.search),
+                        contentDescription = null
+                    )
+                },
+                trailingIcon = {
+                    if (textFieldState.text.isNotEmpty()) {
+                        IconButton(
+                            onClick = {
+                                textFieldState.edit {
+                                    replace(0, length, "")
+                                }
+                            },
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.close),
+                                contentDescription = stringResource(R.string.close),
+                                tint = colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            )
+        },
+        expanded = false,
+        onExpandedChange = {},
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth(),
+        content = {}
+    )
 }
 
 inline fun <reified T : Enum<T>> valueOfOrNull(name: String): T? {
@@ -332,12 +342,10 @@ fun RowScope.MiniCard(
 }
 
 inline val shelfShape: RoundedCornerShape
-    @Composable get() = RoundedCornerShape(
-        topStart = shapes.large.topStart,
-        topEnd = shapes.large.topEnd,
+    @Composable get() = shapes.large.copy(
         bottomEnd = CornerSize(0.dp),
         bottomStart = CornerSize(0.dp)
-    )
+    ) as RoundedCornerShape
 
 fun localizeCityName(cityName: String, lang: String): String {
     if (!lang.startsWith("ar")) return cityName
