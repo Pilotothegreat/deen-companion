@@ -184,6 +184,7 @@ fun Qibla() {
     }
 
     val primaryColor = MaterialTheme.colorScheme.primary
+    val onPrimaryColor = MaterialTheme.colorScheme.onPrimary
     val compassRingColor by animateColorAsState(
         targetValue = if (isAligned) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
     )
@@ -414,15 +415,25 @@ fun Qibla() {
                     val radius = size.minDimension / 2
                     val center = Offset(size.width / 2, size.height / 2)
 
-                    // Draw a prominent Qibla Arrow
+                    // Draw a prominent Qibla Arrow (curved wind-style chevron)
                     val path = Path().apply {
-                        moveTo(center.x, center.y - radius + 10.dp.toPx()) // Tip of arrow
-                        lineTo(center.x - 14.dp.toPx(), center.y - radius + 35.dp.toPx())
-                        lineTo(center.x - 4.dp.toPx(), center.y - radius + 30.dp.toPx())
-                        lineTo(center.x - 4.dp.toPx(), center.y - 15.dp.toPx())
-                        lineTo(center.x + 4.dp.toPx(), center.y - 15.dp.toPx())
-                        lineTo(center.x + 4.dp.toPx(), center.y - radius + 30.dp.toPx())
-                        lineTo(center.x + 14.dp.toPx(), center.y - radius + 35.dp.toPx())
+                        // Top tip
+                        moveTo(center.x, center.y - radius + 12.dp.toPx())
+                        // Right side curve to right wing tip
+                        quadraticTo(
+                            center.x + 24.dp.toPx(), center.y - radius / 4,
+                            center.x + 40.dp.toPx(), center.y + 30.dp.toPx()
+                        )
+                        // Bottom-inward curve to left wing tip
+                        quadraticTo(
+                            center.x, center.y + 12.dp.toPx(),
+                            center.x - 40.dp.toPx(), center.y + 30.dp.toPx()
+                        )
+                        // Left side curve back to top tip
+                        quadraticTo(
+                            center.x - 24.dp.toPx(), center.y - radius / 4,
+                            center.x, center.y - radius + 12.dp.toPx()
+                        )
                         close()
                     }
                     drawPath(
@@ -430,10 +441,10 @@ fun Qibla() {
                         color = centerArrowColor
                     )
 
-                    // Small circle at the bottom of the arrow representing Kaaba/Makkah direction
+                    // Small circle at the center representing Kaaba/Makkah direction
                     drawCircle(
-                        color = centerArrowColor,
-                        radius = 8.dp.toPx(),
+                        color = onPrimaryColor,
+                        radius = 6.dp.toPx(),
                         center = center
                     )
                 }

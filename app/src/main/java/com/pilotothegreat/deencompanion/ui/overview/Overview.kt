@@ -138,6 +138,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import com.pilotothegreat.deencompanion.R
+import kotlin.math.sin
 import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
 import com.pilotothegreat.deencompanion.ui.settings.omaniBankApps
 import com.pilotothegreat.deencompanion.ui.settings.isPackageInstalled
@@ -1532,38 +1533,35 @@ fun LiveQiblaCompassCard(
                         val radius = size.minDimension / 2
                         val center = Offset(size.width / 2, size.height / 2)
 
-                        drawLine(
-                            color = secondaryColor,
-                            start = center,
-                            end = Offset(center.x, center.y - radius + 8.dp.toPx()),
-                            strokeWidth = 2.dp.toPx()
-                        )
-
-                        val needlePath = Path().apply {
-                            moveTo(center.x, center.y - radius)
-                            lineTo(center.x - 6.dp.toPx(), center.y)
-                            lineTo(center.x + 6.dp.toPx(), center.y)
+                        val arrowPath = Path().apply {
+                            // Top tip of the arrow
+                            moveTo(center.x, center.y - radius + 6.dp.toPx())
+                            // Right side curve to right wing tip
+                            quadraticTo(
+                                center.x + 10.dp.toPx(), center.y - radius / 3,
+                                center.x + 20.dp.toPx(), center.y + 16.dp.toPx()
+                            )
+                            // Bottom-inward curve to left wing tip
+                            quadraticTo(
+                                center.x, center.y + 6.dp.toPx(),
+                                center.x - 20.dp.toPx(), center.y + 16.dp.toPx()
+                            )
+                            // Left side curve back to top tip
+                            quadraticTo(
+                                center.x - 10.dp.toPx(), center.y - radius / 3,
+                                center.x, center.y - radius + 6.dp.toPx()
+                            )
                             close()
                         }
                         drawPath(
-                            path = needlePath,
+                            path = arrowPath,
                             color = needleColor
-                        )
-
-                        val southPath = Path().apply {
-                            moveTo(center.x, center.y + radius)
-                            lineTo(center.x - 6.dp.toPx(), center.y)
-                            lineTo(center.x + 6.dp.toPx(), center.y)
-                            close()
-                        }
-                        drawPath(
-                            path = southPath,
-                            color = outlineColor
                         )
 
                         drawCircle(
                             color = onPrimaryContainerColor,
-                            radius = 4.dp.toPx()
+                            radius = 3.dp.toPx(),
+                            center = center
                         )
                     }
                 }
@@ -1612,6 +1610,16 @@ fun TasbihDialCard(
         count.toFloat() / target.toFloat().coerceAtLeast(1f)
     }
 
+    val infiniteTransition = rememberInfiniteTransition(label = "tasbihWave")
+    val wavePhase by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 2f * Math.PI.toFloat(),
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 2500, easing = LinearEasing)
+        ),
+        label = "phase"
+    )
+
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
@@ -1645,7 +1653,7 @@ fun TasbihDialCard(
                         scaleY = scale.value
                     }
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f))
+                    .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f))
                     .semantics { contentDescription = context.getString(R.string.cd_tasbih_button) }
                     .clickable {
                         haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
@@ -1669,11 +1677,49 @@ fun TasbihDialCard(
                     },
                 contentAlignment = Alignment.Center
             ) {
+                // Wave Canvas inside the Circle
+                val waveColor = MaterialTheme.colorScheme.primary
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val baseHeight = size.height * progress
+                    val waveAmplitude = 4.dp.toPx()
+                    val waveFrequency = 2f * Math.PI.toFloat() / size.width
+
+                    // Back Wave
+                    val backPath = Path().apply {
+                        moveTo(0f, size.height)
+                        for (x in 0..size.width.toInt()) {
+                            val y = size.height - baseHeight + waveAmplitude * sin(x * waveFrequency + wavePhase)
+                            lineTo(x.toFloat(), y)
+                        }
+                        lineTo(size.width, size.height)
+                        close()
+                    }
+                    drawPath(
+                        path = backPath,
+                        color = waveColor.copy(alpha = 0.2f)
+                    )
+
+                    // Front Wave
+                    val frontPath = Path().apply {
+                        moveTo(0f, size.height)
+                        for (x in 0..size.width.toInt()) {
+                            val y = size.height - baseHeight + waveAmplitude * sin(x * waveFrequency + wavePhase + Math.PI.toFloat())
+                            lineTo(x.toFloat(), y)
+                        }
+                        lineTo(size.width, size.height)
+                        close()
+                    }
+                    drawPath(
+                        path = frontPath,
+                        color = waveColor.copy(alpha = 0.35f)
+                    )
+                }
+
                 CircularWavyProgressIndicator(
                     progress = { progress },
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.outlineVariant
+                    trackColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
                 )
                 Text(
                     text = count.toString(),
