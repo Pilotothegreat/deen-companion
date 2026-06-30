@@ -1,21 +1,22 @@
-// FIXED: Confirm try-catch and KoinComponent implementation
+// FIXED: Add tap contentIntent + AudioFocus request before MediaPlayer playback
 package com.pilotothegreat.deencompanion.services
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.media.RingtoneManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import com.pilotothegreat.deencompanion.MainActivity
 import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import org.koin.core.context.GlobalContext
 import androidx.core.app.NotificationManagerCompat
 import com.pilotothegreat.deencompanion.R
 import org.koin.core.component.KoinComponent
@@ -29,7 +30,6 @@ class IqamaAlarmReceiver : BroadcastReceiver(), KoinComponent {
         try {
             val prayerName = intent.getStringExtra("PRAYER_NAME") ?: "Prayer"
 
-            // Play notification sound with custom volume and reschedule next alarm
             val pendingResult = goAsync()
             val scope = CoroutineScope(Dispatchers.Default)
             var launched = false
@@ -50,30 +50,69 @@ class IqamaAlarmReceiver : BroadcastReceiver(), KoinComponent {
                             else -> prayerName
                         }
 
-                        showPrayerNotification(localizedContext, localizedPrayerName, isIqama = true)
+                        showPrayerNotification(context, localizedContext, localizedPrayerName, isIqama = true)
 
                         val volume = repo.notificationVolume.first()
                         if (volume > 0) {
                             try {
+                                val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+                                var focusGranted = false
+                                var focusRequest: AudioFocusRequest? = null
+
+                                if (audioManager != null) {
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                        val playbackAttrs = AudioAttributes.Builder()
+                                            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                                            .build()
+                                        focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
+                                            .setAudioAttributes(playbackAttrs)
+                                            .setAcceptsDelayedFocusGain(false)
+                                            .build()
+                                        val result = audioManager.requestAudioFocus(focusRequest)
+                                        focusGranted = result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+                                    } else {
+                                        @Suppress("DEPRECATION")
+                                        val result = audioManager.requestAudioFocus(
+                                            null,
+                                            AudioManager.STREAM_NOTIFICATION,
+                                            AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
+                                        )
+                                        focusGranted = result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+                                    }
+                                }
+
                                 val ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
                                 val mediaPlayer = android.media.MediaPlayer().apply {
                                     setDataSource(context, ringtoneUri)
                                     setAudioAttributes(
-                                        android.media.AudioAttributes.Builder()
-                                            .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION)
-                                            .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                                        AudioAttributes.Builder()
+                                            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                                             .build()
                                     )
                                     val vol = volume / 100.0f
                                     setVolume(vol, vol)
                                     setOnCompletionListener { mp ->
                                         mp.release()
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                            focusRequest?.let { audioManager?.abandonAudioFocusRequest(it) }
+                                        } else {
+                                            @Suppress("DEPRECATION")
+                                            audioManager?.abandonAudioFocus(null)
+                                        }
                                     }
                                     setOnErrorListener { mp, _, _ ->
                                         mp.release()
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                            focusRequest?.let { audioManager?.abandonAudioFocusRequest(it) }
+                                        } else {
+                                            @Suppress("DEPRECATION")
+                                            audioManager?.abandonAudioFocus(null)
+                                        }
                                         true
                                     }
-                                    prepare() // synchronous – we are already on Dispatchers.Default
+                                    prepare()
                                     start()
                                 }
                             } catch (e: Exception) {
@@ -106,27 +145,37 @@ class IqamaAlarmReceiver : BroadcastReceiver(), KoinComponent {
         }
     }
 
-    private fun showPrayerNotification(context: Context, prayerName: String, isIqama: Boolean) {
+    private fun showPrayerNotification(context: Context, localizedContext: Context, prayerName: String, isIqama: Boolean) {
         val title = if (isIqama) {
-            context.getString(R.string.iqama_notification_title, prayerName)
+            localizedContext.getString(R.string.iqama_notification_title, prayerName)
         } else {
-            context.getString(R.string.adhan_notification_title, prayerName)
+            localizedContext.getString(R.string.adhan_notification_title, prayerName)
         }
 
         val body = if (isIqama) {
-            context.getString(R.string.iqama_notification_body, prayerName)
+            localizedContext.getString(R.string.iqama_notification_body, prayerName)
         } else {
-            context.getString(R.string.adhan_notification_body, prayerName)
+            localizedContext.getString(R.string.adhan_notification_body, prayerName)
         }
 
-        // Build notification without default sound so that our MediaPlayer sound plays cleanly at the customized volume
+        val tapIntent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val tapPendingIntent = PendingIntent.getActivity(
+            context,
+            prayerName.hashCode(),
+            tapIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         val notification = NotificationCompat.Builder(context, "prayer_times")
             .setSmallIcon(R.drawable.notification)
             .setContentTitle(title)
             .setContentText(body)
+            .setContentIntent(tapPendingIntent)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setSound(null) // Silent notification builder sound to avoid double play
+            .setSound(null)
             .setAutoCancel(true)
             .build()
 
@@ -138,4 +187,3 @@ class IqamaAlarmReceiver : BroadcastReceiver(), KoinComponent {
         }
     }
 }
-

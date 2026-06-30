@@ -1,10 +1,13 @@
+// FIXED: Add tap contentIntent to open MainActivity on Adhan notification
 package com.pilotothegreat.deencompanion.services
 
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.pilotothegreat.deencompanion.MainActivity
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
 import kotlinx.coroutines.CoroutineScope
@@ -40,7 +43,7 @@ class AdhanAlarmReceiver : BroadcastReceiver(), KoinComponent {
                         "Isha" -> localizedContext.getString(R.string.isha)
                         else -> prayerName
                     }
-                    showAdhanNotification(localizedContext, localizedPrayerName)
+                    showAdhanNotification(context, localizedContext, localizedPrayerName)
                     // Reschedule to maintain the rolling 2-day queue
                     AdhanAlarmManager.scheduleAllAdhanAlarms(context, repo)
                 } catch (e: Exception) {
@@ -54,14 +57,25 @@ class AdhanAlarmReceiver : BroadcastReceiver(), KoinComponent {
         }
     }
 
-    private fun showAdhanNotification(context: Context, prayerName: String) {
-        val title = context.getString(R.string.adhan_notification_title, prayerName)
-        val body = context.getString(R.string.adhan_notification_body, prayerName)
+    private fun showAdhanNotification(context: Context, localizedContext: Context, prayerName: String) {
+        val title = localizedContext.getString(R.string.adhan_notification_title, prayerName)
+        val body = localizedContext.getString(R.string.adhan_notification_body, prayerName)
+
+        val tapIntent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val tapPendingIntent = PendingIntent.getActivity(
+            context,
+            prayerName.hashCode() + 20000,
+            tapIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
 
         val notification = NotificationCompat.Builder(context, "prayer_times")
             .setSmallIcon(R.drawable.notification)
             .setContentTitle(title)
             .setContentText(body)
+            .setContentIntent(tapPendingIntent)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setAutoCancel(true)

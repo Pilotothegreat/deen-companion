@@ -1,4 +1,4 @@
-// FIXED: Record lastPrayerTimeUpdate in recalculatePrayerTimes
+// FIXED: Use saved timezoneId in recalculatePrayerTimes; AllahuAkbar target=34 in incrementTasbih
 package com.pilotothegreat.deencompanion.ui.overview
 
 import android.content.Context
@@ -147,7 +147,7 @@ class OverviewVM(
                 .distinctUntilChanged()
                 .collect { state ->
                     try {
-                        recalculatePrayerTimes(state.lat, state.lon)
+                        recalculatePrayerTimes(state.lat, state.lon, state.tz)
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -179,7 +179,8 @@ class OverviewVM(
                     
                     val currentLat = latitude.first()
                     val currentLon = longitude.first()
-                    recalculatePrayerTimes(currentLat, currentLon)
+                    val currentTz = timezoneId.first()
+                    recalculatePrayerTimes(currentLat, currentLon, currentTz)
                 } catch (e: Exception) {
                     e.printStackTrace()
                     // Fallback delay in case of exception to avoid infinite busy loop
@@ -189,8 +190,8 @@ class OverviewVM(
         }
     }
 
-    private fun recalculatePrayerTimes(lat: Double, lon: Double) {
-        val zoneId = ZoneId.systemDefault()
+    private fun recalculatePrayerTimes(lat: Double, lon: Double, tzId: String) {
+        val zoneId = try { ZoneId.of(tzId) } catch (e: Exception) { ZoneId.systemDefault() }
         val date = LocalDate.now(zoneId)
         val zonedDateTime = date.atStartOfDay(zoneId)
         val offsetHours = zonedDateTime.offset.totalSeconds / 3600.0
@@ -281,8 +282,13 @@ class OverviewVM(
         val targetVal = tasbihTarget.value
         val currentDhikr = _tasbihDhikr.value
         val nextCount = _tasbihCount.value + 1
+
+        // AllahuAkbar (الله أكبر) is the 3rd dhikr in the post-prayer set.
+        // Per Sahih Muslim (Hadith 596): SubhanAllah×33, Alhamdulillah×33, AllahuAkbar×34.
+        // Use 34 as the cycle target when the user's base target is the standard 33.
+        val effectiveTarget = if (currentDhikr == "الله أكبر" && targetVal == 33) 34 else targetVal
         
-        if (nextCount >= targetVal) {
+        if (nextCount >= effectiveTarget) {
             _tasbihCount.value = 0
             val nextDhikr = when (currentDhikr) {
                 "سبحان الله" -> "الحمد لله"
