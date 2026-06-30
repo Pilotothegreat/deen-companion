@@ -24,6 +24,8 @@ import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.CircularWavyProgressIndicator
 import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
 import org.koin.compose.koinInject
 import com.pilotothegreat.deencompanion.ui.quran.toArabicNumerals
@@ -64,7 +66,7 @@ import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun Hadith(paddingValues: PaddingValues) {
     val viewModel: HadithVM = koinViewModel()
@@ -166,7 +168,7 @@ fun Hadith(paddingValues: PaddingValues) {
 
                 if (isSearching) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
+                        CircularWavyProgressIndicator(color = colorScheme.primary)
                     }
                 } else if (searchResults.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -234,6 +236,7 @@ fun Hadith(paddingValues: PaddingValues) {
     PageTitle(false, hazeState, stringResource(R.string.hadith_library_title))
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CollectionsTab(
     books: List<HadithBookEntity>,
@@ -252,7 +255,7 @@ fun CollectionsTab(
     if (isSyncing && sortedBooks.isEmpty()) {
         // Actively downloading for the first time
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
+            CircularWavyProgressIndicator(color = colorScheme.primary)
         }
     } else if (sortedBooks.isEmpty()) {
         // Loaded but CDN unreachable — show error + retry hint

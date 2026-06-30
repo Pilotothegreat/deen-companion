@@ -3,6 +3,7 @@ package com.pilotothegreat.deencompanion.ui.theme
 import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
@@ -139,17 +140,20 @@ enum class Theme {
 }
 
 
+val ExpressiveCardShape = RoundedCornerShape(topStart = 32.dp, topEnd = 8.dp, bottomEnd = 32.dp, bottomStart = 8.dp)
+val ExpressiveContainerShape = RoundedCornerShape(24.dp)
+
 @Composable
 fun Modifier.card(): Modifier {
     return this
         .shadow(
             elevation = 6.dp,
-            shape = MaterialTheme.shapes.large,
+            shape = ExpressiveCardShape,
             clip = false,
             ambientColor = Color(0x44C5A028),
             spotColor = Color(0x44C5A028)
         )
-        .clip(MaterialTheme.shapes.large)
+        .clip(ExpressiveCardShape)
         .background(colorScheme.surfaceContainer)
 }
 

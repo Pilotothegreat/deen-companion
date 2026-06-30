@@ -55,6 +55,7 @@ import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
 import com.pilotothegreat.deencompanion.ui.theme.Theme
 import com.pilotothegreat.deencompanion.ui.theme.card
+import com.pilotothegreat.deencompanion.ui.theme.ExpressiveCardShape
 import com.pilotothegreat.deencompanion.util.CategoryTitleSmallText
 import com.pilotothegreat.deencompanion.util.PageTitle
 import com.pilotothegreat.deencompanion.util.PrayerTimeCalculator
@@ -147,6 +148,7 @@ fun Settings(paddingValues: PaddingValues) {
                             offset += step
                         }
                     },
+                shape = ExpressiveCardShape,
                 colors = CardDefaults.cardColors(containerColor = colorScheme.tertiaryContainer)
             ) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -660,6 +662,7 @@ fun Settings(paddingValues: PaddingValues) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp),
+                shape = ExpressiveCardShape,
                 colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainerLow)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {

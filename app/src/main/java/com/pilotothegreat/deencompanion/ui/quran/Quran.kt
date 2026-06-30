@@ -27,8 +27,9 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -73,7 +74,7 @@ import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
 import androidx.compose.ui.res.stringResource
 import com.pilotothegreat.deencompanion.R
  
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun Quran(paddingValues: PaddingValues) {
     val context = LocalContext.current
@@ -161,7 +162,7 @@ fun Quran(paddingValues: PaddingValues) {
                                 .weight(1f),
                             contentAlignment = Alignment.Center
                         ) {
-                            CircularProgressIndicator(color = colorScheme.primary)
+                            CircularWavyProgressIndicator(color = colorScheme.primary)
                         }
                     } else if (searchResults.isEmpty()) {
                         Box(

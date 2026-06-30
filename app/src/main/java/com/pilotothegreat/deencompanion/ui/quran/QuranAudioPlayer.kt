@@ -13,6 +13,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,6 +30,7 @@ import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
 import com.pilotothegreat.deencompanion.services.QuranPlaybackManager
 import org.koin.compose.koinInject
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun QuranAudioPlayer(
     surah: QuranHelper.Surah,
@@ -87,10 +90,9 @@ fun QuranAudioPlayer(
                             )
                         ) {
                             if (isBuffering) {
-                                CircularProgressIndicator(
+                                CircularWavyProgressIndicator(
                                     color = MaterialTheme.colorScheme.onPrimary,
-                                    modifier = Modifier.size(20.dp),
-                                    strokeWidth = 2.dp
+                                    modifier = Modifier.size(20.dp)
                                 )
                             } else {
                                 Icon(

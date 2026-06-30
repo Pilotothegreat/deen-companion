@@ -69,6 +69,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.animation.core.Spring
+import androidx.compose.material3.CircularWavyProgressIndicator
+import com.pilotothegreat.deencompanion.ui.theme.ExpressiveCardShape
+import com.pilotothegreat.deencompanion.ui.theme.ExpressiveContainerShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -483,10 +486,9 @@ fun Overview(
                         contentAlignment = Alignment.Center
                     ) {
                         if (isRefreshing) {
-                            CircularProgressIndicator(
+                            CircularWavyProgressIndicator(
                                 color = colorScheme.onPrimaryContainer,
-                                modifier = Modifier.size(24.dp),
-                                strokeWidth = 2.5.dp
+                                modifier = Modifier.size(24.dp)
                             )
                         } else {
                             Icon(
@@ -1133,6 +1135,7 @@ fun OverviewItems(viewModel: OverviewVM, nextPrayerName: String, navigator: Navi
 
         Card(
             modifier = Modifier.fillMaxWidth(),
+            shape = ExpressiveCardShape,
             colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainerLow),
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
@@ -1459,7 +1462,7 @@ fun LiveQiblaCompassCard(
                 scaleY = cardScale * alignmentScale
             },
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-        shape = RoundedCornerShape(24.dp)
+        shape = ExpressiveCardShape
     ) {
         Column(
             modifier = Modifier
@@ -1611,7 +1614,7 @@ fun TasbihDialCard(
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-        shape = RoundedCornerShape(24.dp)
+        shape = ExpressiveCardShape
     ) {
         Column(
             modifier = Modifier
@@ -1665,12 +1668,11 @@ fun TasbihDialCard(
                     },
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator(
+                CircularWavyProgressIndicator(
                     progress = { progress },
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.outlineVariant,
-                    strokeWidth = 6.dp
+                    trackColor = MaterialTheme.colorScheme.outlineVariant
                 )
                 Text(
                     text = count.toString(),
