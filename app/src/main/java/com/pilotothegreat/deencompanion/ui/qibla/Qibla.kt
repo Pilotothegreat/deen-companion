@@ -45,6 +45,7 @@ import com.pilotothegreat.deencompanion.ui.navigation.Navigator
 import com.pilotothegreat.deencompanion.ui.overview.calculateQiblaDirection
 import org.koin.compose.koinInject
 import java.util.Locale
+import androidx.compose.foundation.shape.CircleShape
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
@@ -87,6 +88,8 @@ fun Qibla() {
     var rawHeading by remember { mutableStateOf(0f) }
     var smoothHeading by remember { mutableStateOf(0f) }
 
+    var sensorAccuracy by remember { mutableStateOf(SensorManager.SENSOR_STATUS_ACCURACY_HIGH) }
+
     val vibrator = remember(context) { context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator }
 
     // Sensor tracking
@@ -94,7 +97,7 @@ fun Qibla() {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val rotationVectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
         val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        val magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
+        val geomagneticFieldSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
 
         var gravity: FloatArray? = null
         var geomagnetic: FloatArray? = null
@@ -133,7 +136,11 @@ fun Qibla() {
                 }
             }
 
-            override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
+            override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
+                if (sensor.type == Sensor.TYPE_MAGNETIC_FIELD || sensor.type == Sensor.TYPE_ROTATION_VECTOR) {
+                    sensorAccuracy = accuracy
+                }
+            }
         }
 
         if (rotationVectorSensor != null) {
@@ -142,8 +149,8 @@ fun Qibla() {
             if (accelerometer != null) {
                 sensorManager.registerListener(listener, accelerometer, SensorManager.SENSOR_DELAY_UI)
             }
-            if (magnetometer != null) {
-                sensorManager.registerListener(listener, magnetometer, SensorManager.SENSOR_DELAY_UI)
+            if (geomagneticFieldSensor != null) {
+                sensorManager.registerListener(listener, geomagneticFieldSensor, SensorManager.SENSOR_DELAY_UI)
             }
         }
 
@@ -185,6 +192,8 @@ fun Qibla() {
 
     val primaryColor = MaterialTheme.colorScheme.primary
     val onPrimaryColor = MaterialTheme.colorScheme.onPrimary
+    val dialFaceColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f)
+    val surfaceColor = MaterialTheme.colorScheme.surface
     val compassRingColor by animateColorAsState(
         targetValue = if (isAligned) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
     )
@@ -288,32 +297,64 @@ fun Qibla() {
             }
 
             // Calibration & guidance text
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f))
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+            val showCalibrationWarning = hasCompass && (sensorAccuracy == SensorManager.SENSOR_STATUS_UNRELIABLE || sensorAccuracy == SensorManager.SENSOR_STATUS_ACCURACY_LOW)
+            if (showCalibrationWarning) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.2f)),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f))
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.CompassCalibration,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.secondary
-                    )
-                    Column {
-                        Text(
-                            text = stringResource(R.string.compass_calibration_title),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CompassCalibration,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error
                         )
-                        Text(
-                            text = stringResource(R.string.compass_calibration_desc),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
+                        Column {
+                            Text(
+                                text = if (appLang == "ar") "دقة البوصلة منخفضة" else "Low Compass Accuracy",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                            Text(
+                                text = if (appLang == "ar") {
+                                    "يرجى تحريك الهاتف في مسار يشبه الرقم (8) لمعايرة مستشعر الاتجاه."
+                                } else {
+                                    "Please move your phone in a figure-8 motion to calibrate the compass sensor."
+                                },
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
+                }
+            } else if (hasCompass) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    SuggestionChip(
+                        onClick = {},
+                        label = {
+                            Text(
+                                text = if (appLang == "ar") "دقة البوصلة: ممتازة" else "Compass Accuracy: Calibrated",
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        },
+                        icon = {
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .background(MaterialTheme.colorScheme.tertiary, CircleShape)
+                            )
+                        }
+                    )
                 }
             }
 
@@ -347,6 +388,12 @@ fun Qibla() {
                     val radius = size.minDimension / 2
                     val center = Offset(size.width / 2, size.height / 2)
 
+                    // Draw dial face background
+                    drawCircle(
+                        color = dialFaceColor,
+                        radius = radius
+                    )
+
                     // Draw outer border ring
                     drawCircle(
                         color = compassRingColor,
@@ -355,29 +402,13 @@ fun Qibla() {
                     )
 
                     // Draw Cardinal Ticks & Labels
-                    val textPaint = android.graphics.Paint().apply {
-                        color = android.graphics.Color.WHITE
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                            // Fetch color from theme programmatically if desired, but white or primary works
-                        }
-                        textSize = 16.sp.toPx()
-                        isFakeBoldText = true
-                        textAlign = android.graphics.Paint.Align.CENTER
-                    }
-                    
-                    // Force the color to match current theme
-                    textPaint.color = if (android.graphics.Color.valueOf(0f,0f,0f).hashCode() == 0) {
-                        // placeholder
-                        0xFF4A4A4A.toInt()
-                    } else 0
-
                     val ticks = 72 // ticks every 5 degrees
                     for (t in 0 until ticks) {
                         val angleDeg = t * 5f
                         val angleRad = Math.toRadians(angleDeg.toDouble())
-                        val isMajor = t % 6 == 0 // every 30 degrees
                         val isCardinal = t % 18 == 0 // N, E, S, W
-                        val tickLen = if (isCardinal) 15.dp.toPx() else if (isMajor) 10.dp.toPx() else 5.dp.toPx()
+                        val isMajor = t % 6 == 0 // every 30 degrees
+                        val tickLen = if (isCardinal) 14.dp.toPx() else if (isMajor) 9.dp.toPx() else 5.dp.toPx()
                         val strokeW = if (isMajor) 2.dp.toPx() else 1.dp.toPx()
 
                         val startX = (center.x + (radius - tickLen) * sin(angleRad)).toFloat()
@@ -394,17 +425,30 @@ fun Qibla() {
                     }
 
                     // N, E, S, W text
-                    val labelRadius = radius - 25.dp.toPx()
+                    val labelRadius = radius - 24.dp.toPx()
                     drawCardinalLabel("N", center.x, center.y - labelRadius, primaryColor)
                     drawCardinalLabel("E", center.x + labelRadius, center.y, primaryColor.copy(alpha = 0.7f))
                     drawCardinalLabel("S", center.x, center.y + labelRadius, primaryColor.copy(alpha = 0.7f))
                     drawCardinalLabel("W", center.x - labelRadius, center.y, primaryColor.copy(alpha = 0.7f))
+
+                    // Draw Qibla marker on the rotating dial itself (Gold marker pointing to Qibla relative to N)
+                    val qiblaAngleRad = Math.toRadians(qiblaBearing.toDouble())
+                    val qiblaMarkerRadius = radius - 7.dp.toPx()
+                    val qiblaMarkerX = (center.x + qiblaMarkerRadius * sin(qiblaAngleRad)).toFloat()
+                    val qiblaMarkerY = (center.y - qiblaMarkerRadius * cos(qiblaAngleRad)).toFloat()
+                    drawCircle(
+                        color = Color(0xFFD4AF37), // Gold accent
+                        radius = 6.dp.toPx(),
+                        center = Offset(qiblaMarkerX, qiblaMarkerY)
+                    )
+                    drawCircle(
+                        color = Color.White,
+                        radius = 2.dp.toPx(),
+                        center = Offset(qiblaMarkerX, qiblaMarkerY)
+                    )
                 }
 
                 // Qibla Needle (rotates with qiblaBearing - animatedHeading relative to phone)
-                // We draw it separately or on top of the dial so it remains pointed to Makkah.
-                // If it is on the dial, it points to the qiblaBearing on the dial. Since the dial rotates by -animatedHeading,
-                // the needle rotates relative to the phone by (qiblaBearing - animatedHeading).
                 Canvas(
                     modifier = Modifier
                         .size(260.dp)
@@ -415,36 +459,50 @@ fun Qibla() {
                     val radius = size.minDimension / 2
                     val center = Offset(size.width / 2, size.height / 2)
 
-                    // Draw a prominent Qibla Arrow (curved wind-style chevron)
-                    val path = Path().apply {
-                        // Top tip
-                        moveTo(center.x, center.y - radius + 12.dp.toPx())
-                        // Right side curve to right wing tip
+                    // Draw chiseled 3D needle (Left wing lighter, Right wing darker shadow)
+                    val leftWing = Path().apply {
+                        moveTo(center.x, center.y - radius + 15.dp.toPx())
                         quadraticTo(
-                            center.x + 24.dp.toPx(), center.y - radius / 4,
-                            center.x + 40.dp.toPx(), center.y + 30.dp.toPx()
+                            center.x - 12.dp.toPx(), center.y - radius / 3,
+                            center.x - 22.dp.toPx(), center.y + 24.dp.toPx()
                         )
-                        // Bottom-inward curve to left wing tip
                         quadraticTo(
-                            center.x, center.y + 12.dp.toPx(),
-                            center.x - 40.dp.toPx(), center.y + 30.dp.toPx()
-                        )
-                        // Left side curve back to top tip
-                        quadraticTo(
-                            center.x - 24.dp.toPx(), center.y - radius / 4,
-                            center.x, center.y - radius + 12.dp.toPx()
+                            center.x, center.y + 8.dp.toPx(),
+                            center.x, center.y - radius + 15.dp.toPx()
                         )
                         close()
                     }
+                    val rightWing = Path().apply {
+                        moveTo(center.x, center.y - radius + 15.dp.toPx())
+                        quadraticTo(
+                            center.x + 12.dp.toPx(), center.y - radius / 3,
+                            center.x + 22.dp.toPx(), center.y + 24.dp.toPx()
+                        )
+                        quadraticTo(
+                            center.x, center.y + 8.dp.toPx(),
+                            center.x, center.y - radius + 15.dp.toPx()
+                        )
+                        close()
+                    }
+
                     drawPath(
-                        path = path,
+                        path = leftWing,
                         color = centerArrowColor
                     )
+                    drawPath(
+                        path = rightWing,
+                        color = centerArrowColor.copy(alpha = 0.75f)
+                    )
 
-                    // Small circle at the center representing Kaaba/Makkah direction
+                    // Draw center pivot hub
                     drawCircle(
-                        color = onPrimaryColor,
-                        radius = 6.dp.toPx(),
+                        color = surfaceColor,
+                        radius = 8.dp.toPx(),
+                        center = center
+                    )
+                    drawCircle(
+                        color = centerArrowColor,
+                        radius = 4.dp.toPx(),
                         center = center
                     )
                 }

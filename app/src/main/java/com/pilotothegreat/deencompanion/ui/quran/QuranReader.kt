@@ -128,7 +128,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
     val arabicFontSize by appPreferenceRepo.quranArabicFontSize.collectAsState(initial = 32)
     val quranFontFamily = remember {
         FontFamily(
-            Font(R.font.amiri_regular)
+            Font(R.font.uthmanic_hafs)
         )
     }
 
@@ -474,7 +474,8 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                     fontWeight = FontWeight.Bold,
                                                     fontFamily = quranFontFamily,
                                                     fontSize = bFontSize.sp,
-                                                    lineHeight = bLineHeight.sp
+                                                    lineHeight = bLineHeight.sp,
+                                                    fontFeatureSettings = "rlig 1, calt 1"
                                                 ),
                                                 textAlign = TextAlign.Center,
                                                 modifier = Modifier
@@ -547,7 +548,8 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                     fontWeight = FontWeight.Bold,
                                                     fontFamily = quranFontFamily,
                                                     fontSize = (adjustedFontSize * 1.3f * zoomFactor).sp,
-                                                    lineHeight = ((adjustedFontSize * 1.3f * zoomFactor) * 1.5f).sp
+                                                    lineHeight = ((adjustedFontSize * 1.3f * zoomFactor) * 1.5f).sp,
+                                                    fontFeatureSettings = "rlig 1, calt 1"
                                                 ),
                                                 textAlign = TextAlign.Center,
                                                 onTextLayout = { layoutResult = it },
@@ -695,7 +697,8 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                                         fontSize = (adjustedFontSize * zoomFactor).sp,
                                                                         fontFamily = quranFontFamily,
                                                                         lineHeight = ((adjustedFontSize * zoomFactor) * 1.8f).sp,
-                                                                        textAlign = TextAlign.Justify
+                                                                        textAlign = TextAlign.Justify,
+                                                                        fontFeatureSettings = "rlig 1, calt 1"
                                                                     ),
                                                                     onTextLayout = { layoutResult = it },
                                                                     modifier = Modifier

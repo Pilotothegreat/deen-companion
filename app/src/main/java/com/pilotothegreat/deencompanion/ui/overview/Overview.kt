@@ -143,6 +143,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import com.pilotothegreat.deencompanion.R
 import kotlin.math.sin
+import kotlin.math.cos
 import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
 import com.pilotothegreat.deencompanion.ui.settings.omaniBankApps
 import com.pilotothegreat.deencompanion.ui.settings.isPackageInstalled
@@ -168,6 +169,11 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Switch
 import androidx.compose.material.icons.filled.CompassCalibration
 import java.time.chrono.HijrahDate
 import java.util.Locale
@@ -1517,15 +1523,58 @@ fun LiveQiblaCompassCard(
                         }
                     }
 
-                    Canvas(modifier = Modifier.fillMaxSize()) {
+                    // Rotating dial (ticks + N label + Qibla marker)
+                    Canvas(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .graphicsLayer { rotationZ = -relativeAngle + qiblaBearing }
+                    ) {
                         val radius = size.minDimension / 2
+                        val center = Offset(size.width / 2, size.height / 2)
+
+                        // Outer ring
                         drawCircle(
                             color = compassRingColor,
                             radius = radius,
                             style = Stroke(width = 2.dp.toPx())
                         )
+
+                        // 8 cardinal/intercardinal ticks every 45°
+                        for (t in 0 until 8) {
+                            val angleRad = Math.toRadians((t * 45).toDouble())
+                            val isMain = t % 2 == 0
+                            val tickLen = if (isMain) 7.dp.toPx() else 4.dp.toPx()
+                            drawLine(
+                                color = compassRingColor.copy(alpha = if (isMain) 0.8f else 0.4f),
+                                start = Offset(
+                                    (center.x + (radius - tickLen) * sin(angleRad)).toFloat(),
+                                    (center.y - (radius - tickLen) * cos(angleRad)).toFloat()
+                                ),
+                                end = Offset(
+                                    (center.x + radius * sin(angleRad)).toFloat(),
+                                    (center.y - radius * cos(angleRad)).toFloat()
+                                ),
+                                strokeWidth = if (isMain) 2.dp.toPx() else 1.dp.toPx()
+                            )
+                        }
+
+                        // Qibla gold marker on the ring edge
+                        val qMarkerRadius = radius - 6.dp.toPx()
+                        val qMarkerX = center.x
+                        val qMarkerY = center.y - qMarkerRadius
+                        drawCircle(
+                            color = Color(0xFFD4AF37),
+                            radius = 5.dp.toPx(),
+                            center = Offset(qMarkerX, qMarkerY)
+                        )
+                        drawCircle(
+                            color = Color.White,
+                            radius = 2.dp.toPx(),
+                            center = Offset(qMarkerX, qMarkerY)
+                        )
                     }
 
+                    // Chiseled needle (stays pointing to Qibla)
                     Canvas(
                         modifier = Modifier
                             .fillMaxSize()
@@ -1538,36 +1587,37 @@ fun LiveQiblaCompassCard(
                         val radius = size.minDimension / 2
                         val center = Offset(size.width / 2, size.height / 2)
 
-                        val arrowPath = Path().apply {
-                            // Top tip of the arrow
-                            moveTo(center.x, center.y - radius + 6.dp.toPx())
-                            // Right side curve to right wing tip
+                        val leftWing = Path().apply {
+                            moveTo(center.x, center.y - radius + 8.dp.toPx())
                             quadraticTo(
-                                center.x + 10.dp.toPx(), center.y - radius / 3,
-                                center.x + 20.dp.toPx(), center.y + 16.dp.toPx()
+                                center.x - 8.dp.toPx(), center.y - radius / 3,
+                                center.x - 14.dp.toPx(), center.y + 12.dp.toPx()
                             )
-                            // Bottom-inward curve to left wing tip
                             quadraticTo(
-                                center.x, center.y + 6.dp.toPx(),
-                                center.x - 20.dp.toPx(), center.y + 16.dp.toPx()
-                            )
-                            // Left side curve back to top tip
-                            quadraticTo(
-                                center.x - 10.dp.toPx(), center.y - radius / 3,
-                                center.x, center.y - radius + 6.dp.toPx()
+                                center.x, center.y + 4.dp.toPx(),
+                                center.x, center.y - radius + 8.dp.toPx()
                             )
                             close()
                         }
-                        drawPath(
-                            path = arrowPath,
-                            color = needleColor
-                        )
+                        val rightWing = Path().apply {
+                            moveTo(center.x, center.y - radius + 8.dp.toPx())
+                            quadraticTo(
+                                center.x + 8.dp.toPx(), center.y - radius / 3,
+                                center.x + 14.dp.toPx(), center.y + 12.dp.toPx()
+                            )
+                            quadraticTo(
+                                center.x, center.y + 4.dp.toPx(),
+                                center.x, center.y - radius + 8.dp.toPx()
+                            )
+                            close()
+                        }
 
-                        drawCircle(
-                            color = onPrimaryContainerColor,
-                            radius = 3.dp.toPx(),
-                            center = center
-                        )
+                        drawPath(path = leftWing, color = needleColor)
+                        drawPath(path = rightWing, color = needleColor.copy(alpha = 0.75f))
+
+                        // Pivot hub
+                        drawCircle(color = onPrimaryContainerColor, radius = 5.dp.toPx(), center = center)
+                        drawCircle(color = needleColor, radius = 2.5.dp.toPx(), center = center)
                     }
                 }
             }
@@ -1586,7 +1636,7 @@ fun LiveQiblaCompassCard(
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun TasbihDialCard(
     viewModel: OverviewVM,
@@ -1600,6 +1650,11 @@ fun TasbihDialCard(
     val haptic = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
     val scale = remember { Animatable(1f) }
+
+    var showSettings by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var vibrationEnabled by remember { mutableStateOf(true) }
+    var customTarget by remember(target) { mutableStateOf(target.toFloat()) }
 
     val localizedDhikr = remember(dhikr) {
         when (dhikr) {
@@ -1660,26 +1715,32 @@ fun TasbihDialCard(
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f))
                     .semantics { contentDescription = context.getString(R.string.cd_tasbih_button) }
-                    .clickable {
-                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                        scope.launch {
-                            scale.animateTo(0.85f, spring(stiffness = Spring.StiffnessHigh))
-                            scale.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
+                    .combinedClickable(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                            scope.launch {
+                                scale.animateTo(0.85f, spring(stiffness = Spring.StiffnessHigh))
+                                scale.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
+                            }
+                            val nextCount = count + 1
+                            if (nextCount >= target && vibrationEnabled) {
+                                val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+                                try {
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                        vibrator?.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 60, 40, 120), -1))
+                                    } else {
+                                        @Suppress("DEPRECATION")
+                                        vibrator?.vibrate(120)
+                                    }
+                                } catch (e: Exception) {}
+                            }
+                            viewModel.incrementTasbih()
+                        },
+                        onLongClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            showSettings = true
                         }
-                        val nextCount = count + 1
-                        if (nextCount >= target) {
-                            val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
-                            try {
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                    vibrator?.vibrate(VibrationEffect.createOneShot(120, VibrationEffect.DEFAULT_AMPLITUDE))
-                                } else {
-                                    @Suppress("DEPRECATION")
-                                    vibrator?.vibrate(120)
-                                }
-                            } catch (e: Exception) {}
-                        }
-                        viewModel.incrementTasbih()
-                    },
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 // Wave Canvas inside the Circle
@@ -1773,6 +1834,98 @@ fun TasbihDialCard(
                         modifier = Modifier.size(20.dp)
                     )
                 }
+            }
+        }
+    }
+
+    // Tasbih Settings Bottom Sheet (long-press)
+    if (showSettings) {
+        ModalBottomSheet(
+            onDismissRequest = { showSettings = false },
+            sheetState = sheetState,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(horizontal = 24.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                Text(
+                    text = "Tasbih Settings",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+
+                // Target Presets
+                Text(
+                    text = "Count Target",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                @Suppress("DEPRECATION")
+                ButtonGroup {
+                    listOf(33, 99, 100).forEach { preset ->
+                        FilledTonalIconButton(
+                            onClick = {
+                                viewModel.setTasbihTarget(preset)
+                                customTarget = preset.toFloat()
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(40.dp),
+                            colors = if (target == preset)
+                                IconButtonDefaults.filledIconButtonColors()
+                            else
+                                IconButtonDefaults.filledTonalIconButtonColors()
+                        ) {
+                            Text(
+                                text = preset.toString(),
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                        }
+                    }
+                }
+
+                // Custom Target Slider
+                Text(
+                    text = "Custom: ${customTarget.toInt()}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Slider(
+                    value = customTarget,
+                    onValueChange = { customTarget = it },
+                    onValueChangeFinished = { viewModel.setTasbihTarget(customTarget.toInt()) },
+                    valueRange = 1f..200f,
+                    steps = 198
+                )
+
+                HorizontalDivider()
+
+                // Vibration Toggle
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "Vibrate on completion",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Text(
+                            text = "Pulse when target is reached",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = vibrationEnabled,
+                        onCheckedChange = { vibrationEnabled = it }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }

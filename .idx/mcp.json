@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "Perplexity": {
-      "command": "node",
+      "command": "C:\\Users\\king\\AppData\\Local\\ms-playwright-go\\1.57.0\\node.exe",
       "args": [
         "C:\\Users\\king\\.perplexity-mcp\\start.mjs"
       ],
