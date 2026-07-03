@@ -75,6 +75,10 @@ import com.pilotothegreat.deencompanion.ui.theme.ExpressiveContainerShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.MaterialShapes.Companion.Cookie12Sided
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -1447,12 +1451,13 @@ fun LiveQiblaCompassCard(
     val primaryColor = colorScheme.primary
     val outlineColor = colorScheme.outline
     val onPrimaryContainerColor = colorScheme.onPrimaryContainer
+    val tertiaryColor = colorScheme.tertiary
 
     val compassRingColor by animateColorAsState(
-        targetValue = if (isAligned) Color(0xFF2E7D32) else outlineVariantColor
+        targetValue = if (isAligned) colorScheme.tertiary else outlineVariantColor
     )
     val needleColor by animateColorAsState(
-        targetValue = if (isAligned) Color(0xFF2E7D32) else primaryColor
+        targetValue = if (isAligned) colorScheme.tertiary else primaryColor
     )
 
     Card(
@@ -1482,7 +1487,7 @@ fun LiveQiblaCompassCard(
             if (!hasCompass) {
                 Box(
                     modifier = Modifier
-                        .size(96.dp)
+                        .size(120.dp)
                         .background(colorScheme.errorContainer.copy(alpha = 0.2f), shape = RoundedCornerShape(12.dp))
                         .padding(8.dp),
                     contentAlignment = Alignment.Center
@@ -1497,7 +1502,7 @@ fun LiveQiblaCompassCard(
             } else {
                 Box(
                     modifier = Modifier
-                        .size(96.dp)
+                        .size(120.dp)
                         .clip(cookie12SidedShape)
                         .background(colorScheme.primaryContainer.copy(alpha = if (isAligned) 0.22f else 0.12f))
                         .padding(8.dp),
@@ -1506,7 +1511,7 @@ fun LiveQiblaCompassCard(
                     if (isAligned) {
                         Canvas(modifier = Modifier.fillMaxSize()) {
                             drawCircle(
-                                color = Color(0xFF2E7D32).copy(alpha = 0.12f),
+                                color = tertiaryColor.copy(alpha = 0.15f),
                                 radius = (size.minDimension / 2) + 4.dp.toPx()
                             )
                         }
@@ -1575,7 +1580,7 @@ fun LiveQiblaCompassCard(
                 },
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold,
-                color = if (isAligned) Color(0xFF2E7D32) else MaterialTheme.colorScheme.primary
+                color = if (isAligned) colorScheme.tertiary else MaterialTheme.colorScheme.primary
             )
         }
     }
@@ -1646,7 +1651,7 @@ fun TasbihDialCard(
             // Bouncy Dial Circle (Tap Area)
             Box(
                 modifier = Modifier
-                    .size(96.dp)
+                    .size(120.dp)
                     .padding(4.dp)
                     .graphicsLayer {
                         scaleX = scale.value
@@ -1735,7 +1740,7 @@ fun TasbihDialCard(
                 modifier = Modifier.padding(top = 8.dp)
             ) {
                 // Cycle Dhikr Button
-                IconButton(
+                FilledTonalIconButton(
                     onClick = {
                         val nextDhikr = when (dhikr) {
                             "سبحان الله" -> "الحمد لله"
@@ -1750,20 +1755,22 @@ fun TasbihDialCard(
                         imageVector = Icons.Default.Refresh,
                         contentDescription = "Cycle Dhikr",
                         tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier.size(20.dp)
                     )
                 }
 
                 // Reset Button
-                IconButton(
+                OutlinedIconButton(
                     onClick = { viewModel.resetTasbih() },
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(40.dp),
+                    border = BorderStroke(1.dp, colorScheme.error.copy(alpha = 0.4f)),
+                    colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = colorScheme.error)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Restore,
                         contentDescription = "Reset Count",
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(22.dp)
+                        tint = colorScheme.error,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }

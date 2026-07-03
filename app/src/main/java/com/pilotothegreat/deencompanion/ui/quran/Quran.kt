@@ -125,9 +125,9 @@ fun Quran(paddingValues: PaddingValues) {
         }
     }
 
-    val quranFontFamily = remember(context) {
+    val quranFontFamily = remember {
         FontFamily(
-            Font("UthmanicHafs.ttf", context.assets)
+            Font(R.font.amiri_regular)
         )
     }
 

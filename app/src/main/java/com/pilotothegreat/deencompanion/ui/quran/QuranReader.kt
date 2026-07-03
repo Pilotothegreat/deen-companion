@@ -126,9 +126,9 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
     val surah = remember(surahNumber) { surahs.firstOrNull { it.id == surahNumber } }
 
     val arabicFontSize by appPreferenceRepo.quranArabicFontSize.collectAsState(initial = 32)
-    val quranFontFamily = remember(context) {
+    val quranFontFamily = remember {
         FontFamily(
-            Font("UthmanicHafs.ttf", context.assets)
+            Font(R.font.amiri_regular)
         )
     }
 
