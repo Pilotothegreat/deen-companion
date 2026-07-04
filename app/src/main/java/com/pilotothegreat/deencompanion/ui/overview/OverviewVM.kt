@@ -29,8 +29,14 @@ class OverviewVM(
     private val appPreferenceRepo: AppPreferenceRepo
 ) : ViewModel() {
 
-    private var hasCheckedDonationThisSession = false
+    private val _updateVersionAvailable = MutableStateFlow<String?>(null)
+    val updateVersionAvailable = _updateVersionAvailable.asStateFlow()
 
+    fun dismissUpdateDialog() {
+        _updateVersionAvailable.value = null
+    }
+
+    private var hasCheckedDonationThisSession = false
     fun checkAndShowDonation(onShow: () -> Unit) {
         if (hasCheckedDonationThisSession) return
         hasCheckedDonationThisSession = true
@@ -81,6 +87,15 @@ class OverviewVM(
         viewModelScope, SharingStarted.Eagerly, 33
     )
     val tasbihHistory = appPreferenceRepo.tasbihHistory
+    val tasbihMode = appPreferenceRepo.tasbihMode.stateIn(
+        viewModelScope, SharingStarted.Eagerly, 0
+    )
+    val tasbihBeadSize = appPreferenceRepo.tasbihBeadSize.stateIn(
+        viewModelScope, SharingStarted.Eagerly, 1
+    )
+    val tasbihBeadPreset = appPreferenceRepo.tasbihBeadPreset.stateIn(
+        viewModelScope, SharingStarted.Eagerly, 3
+    )
 
     private var writeJob: Job? = null
     private var isDirty = false
@@ -118,6 +133,7 @@ class OverviewVM(
     val prayerTimes = _prayerTimes.asStateFlow()
 
     init {
+        checkForUpdates()
         viewModelScope.launch {
             appPreferenceRepo.tasbihCount.collect {
                 if (!isDirty) {
@@ -348,4 +364,78 @@ class OverviewVM(
     }
 
 
+    fun setTasbihMode(value: Int) {
+        viewModelScope.launch {
+            appPreferenceRepo.setTasbihMode(value)
+        }
+    }
+
+    fun setTasbihBeadSize(value: Int) {
+        viewModelScope.launch {
+            appPreferenceRepo.setTasbihBeadSize(value)
+        }
+    }
+
+    fun setTasbihBeadPreset(value: Int) {
+        viewModelScope.launch {
+            appPreferenceRepo.setTasbihBeadPreset(value)
+        }
+    }
+
+    fun checkForUpdates() {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                val lastCheck = appPreferenceRepo.githubCheckTimestamp.first()
+                val now = System.currentTimeMillis()
+                val oneDayInMillis = 24L * 60 * 60 * 1000
+                
+                var latestVersion = appPreferenceRepo.githubCheckLatestVersion.first()
+                
+                if (now - lastCheck >= oneDayInMillis || latestVersion.isEmpty()) {
+                    val url = java.net.URL("https://api.github.com/repos/Pilotothegreat/deen-companion/releases/latest")
+                    val connection = url.openConnection() as java.net.HttpURLConnection
+                    connection.requestMethod = "GET"
+                    connection.connectTimeout = 5000
+                    connection.readTimeout = 5000
+                    connection.setRequestProperty("Accept", "application/vnd.github+json")
+                    connection.setRequestProperty("User-Agent", "DeenCompanion-App")
+                    
+                    if (connection.responseCode == 200) {
+                        val responseText = connection.inputStream.bufferedReader().use { it.readText() }
+                        val json = org.json.JSONObject(responseText)
+                        latestVersion = json.getString("tag_name")
+                        
+                        appPreferenceRepo.setGithubCheckLatestVersion(latestVersion)
+                        appPreferenceRepo.setGithubCheckTimestamp(now)
+                    }
+                    connection.disconnect()
+                }
+                
+                val currentVersion = "v" + com.pilotothegreat.deencompanion.BuildConfig.VERSION_NAME
+                if (latestVersion.isNotEmpty() && isVersionNewer(currentVersion, latestVersion)) {
+                    _updateVersionAvailable.value = latestVersion
+                }
+            } catch (e: Exception) {
+                timber.log.Timber.e(e, "GitHub Update Check Failed")
+            }
+        }
+    }
+
+    private fun isVersionNewer(current: String, latest: String): Boolean {
+        val currClean = current.trimStart('v')
+        val lateClean = latest.trimStart('v')
+        if (currClean == lateClean) return false
+        
+        val currParts = currClean.split('.').mapNotNull { it.toIntOrNull() }
+        val lateParts = lateClean.split('.').mapNotNull { it.toIntOrNull() }
+        
+        val maxParts = maxOf(currParts.size, lateParts.size)
+        for (i in 0 until maxParts) {
+            val currPart = currParts.getOrElse(i) { 0 }
+            val latePart = lateParts.getOrElse(i) { 0 }
+            if (latePart > currPart) return true
+            if (latePart < currPart) return false
+        }
+        return false
+    }
 }

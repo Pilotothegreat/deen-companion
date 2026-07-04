@@ -170,6 +170,9 @@ class AppPreferenceRepo(
         private val ISHA_IQAMA_TIME = stringPreferencesKey("isha_iqama_time")
         private val USE_IP_LOCATION_FALLBACK = booleanPreferencesKey("use_ip_location_fallback")
         private val AMOLED_BLACK_MODE = booleanPreferencesKey("amoled_black_mode")
+        val TASBIH_MODE = intPreferencesKey("tasbih_mode")
+        val TASBIH_BEAD_SIZE = intPreferencesKey("tasbih_bead_size")
+        val TASBIH_BEAD_PRESET = intPreferencesKey("tasbih_bead_preset")
     }
 
     // Location Settings
@@ -447,5 +450,14 @@ class AppPreferenceRepo(
     // IP-based location fallback toggle (defaults true for existing installs, user can disable for strict offline mode)
     val useIpLocationFallback: Flow<Boolean> = data.map { it[USE_IP_LOCATION_FALLBACK] ?: true }.distinctUntilChanged()
     suspend fun setUseIpLocationFallback(value: Boolean) = dataStore.edit { it[USE_IP_LOCATION_FALLBACK] = value }
+
+    val tasbihMode: Flow<Int> = data.map { it[TASBIH_MODE] ?: 0 }.distinctUntilChanged()
+    suspend fun setTasbihMode(value: Int) = dataStore.edit { it[TASBIH_MODE] = value }
+
+    val tasbihBeadSize: Flow<Int> = data.map { it[TASBIH_BEAD_SIZE] ?: 1 }.distinctUntilChanged()
+    suspend fun setTasbihBeadSize(value: Int) = dataStore.edit { it[TASBIH_BEAD_SIZE] = value }
+
+    val tasbihBeadPreset: Flow<Int> = data.map { it[TASBIH_BEAD_PRESET] ?: 3 }.distinctUntilChanged()
+    suspend fun setTasbihBeadPreset(value: Int) = dataStore.edit { it[TASBIH_BEAD_PRESET] = value }
 }
 

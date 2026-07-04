@@ -84,9 +84,10 @@ fun Qibla() {
                 (sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null &&
                         sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) != null)
     }
-
     var rawHeading by remember { mutableStateOf(0f) }
     var smoothHeading by remember { mutableStateOf(0f) }
+    var pitch by remember { mutableStateOf(0f) }
+    var roll by remember { mutableStateOf(0f) }
 
     var sensorAccuracy by remember { mutableStateOf(SensorManager.SENSOR_STATUS_ACCURACY_HIGH) }
 
@@ -99,8 +100,8 @@ fun Qibla() {
         val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
         val geomagneticFieldSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
 
-        var gravity: FloatArray? = null
-        var geomagnetic: FloatArray? = null
+        var gravity = FloatArray(3)
+        var geomagnetic = FloatArray(3)
 
         val listener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent) {
@@ -113,6 +114,8 @@ fun Qibla() {
                     val heading = (azimuth + declination + 360f) % 360f
                     rawHeading = heading
                     smoothHeading = getSmoothRotation(heading, smoothHeading)
+                    pitch = Math.toDegrees(orientation[1].toDouble()).toFloat()
+                    roll = Math.toDegrees(orientation[2].toDouble()).toFloat()
                 } else {
                     if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
                         gravity = event.values.clone()
@@ -131,6 +134,8 @@ fun Qibla() {
                             val heading = (azimuth + declination + 360f) % 360f
                             rawHeading = heading
                             smoothHeading = getSmoothRotation(heading, smoothHeading)
+                            pitch = Math.toDegrees(orientation[1].toDouble()).toFloat()
+                            roll = Math.toDegrees(orientation[2].toDouble()).toFloat()
                         }
                     }
                 }
@@ -168,6 +173,16 @@ fun Qibla() {
         )
     )
 
+    // Smoothed tilt for parallax (low-pass to avoid jitter)
+    var smoothedPitch by remember { mutableStateOf(0f) }
+    var smoothedRoll by remember { mutableStateOf(0f) }
+    LaunchedEffect(pitch, roll) {
+        smoothedPitch += (pitch - smoothedPitch) * 0.15f
+        smoothedRoll += (roll - smoothedRoll) * 0.15f
+    }
+    val tiltPitch = smoothedPitch.coerceIn(-25f, 25f)
+    val tiltRoll = smoothedRoll.coerceIn(-25f, 25f)
+
     // Alignment verification (aligned when phone is pointed at Makkah +/- 4 degrees)
     val relativeAngle = (qiblaBearing - rawHeading + 360f) % 360f
     val isAligned = relativeAngle < 4f || relativeAngle > 356f
@@ -200,7 +215,6 @@ fun Qibla() {
     val centerArrowColor by animateColorAsState(
         targetValue = if (isAligned) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
     )
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -364,7 +378,12 @@ fun Qibla() {
             Box(
                 modifier = Modifier
                     .size(280.dp)
-                    .align(Alignment.CenterHorizontally),
+                    .align(Alignment.CenterHorizontally)
+                    .graphicsLayer {
+                        rotationX = tiltPitch      // forward/back parallax
+                        rotationY = -tiltRoll      // left/right parallax
+                        cameraDistance = 12 * density
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 // Background subtle ring glow when aligned
@@ -424,12 +443,22 @@ fun Qibla() {
                         )
                     }
 
-                    // N, E, S, W text
+                    // Draw red north triangle pointing to North
+                    val triSize = 10.dp.toPx()
+                    val northPath = Path().apply {
+                        moveTo(center.x, center.y - radius + 4.dp.toPx())
+                        lineTo(center.x - triSize / 2f, center.y - radius + 4.dp.toPx() + triSize)
+                        lineTo(center.x + triSize / 2f, center.y - radius + 4.dp.toPx() + triSize)
+                        close()
+                    }
+                    drawPath(northPath, color = Color(0xFFE53935))
+
+                    // N, E, S, W text counter-rotated so they always stay upright
                     val labelRadius = radius - 24.dp.toPx()
-                    drawCardinalLabel("N", center.x, center.y - labelRadius, primaryColor)
-                    drawCardinalLabel("E", center.x + labelRadius, center.y, primaryColor.copy(alpha = 0.7f))
-                    drawCardinalLabel("S", center.x, center.y + labelRadius, primaryColor.copy(alpha = 0.7f))
-                    drawCardinalLabel("W", center.x - labelRadius, center.y, primaryColor.copy(alpha = 0.7f))
+                    drawCardinalLabel("N", center.x, center.y - labelRadius, Color(0xFFE53935), animatedHeading)
+                    drawCardinalLabel("E", center.x + labelRadius, center.y, primaryColor.copy(alpha = 0.7f), animatedHeading)
+                    drawCardinalLabel("S", center.x, center.y + labelRadius, primaryColor.copy(alpha = 0.7f), animatedHeading)
+                    drawCardinalLabel("W", center.x - labelRadius, center.y, primaryColor.copy(alpha = 0.7f), animatedHeading)
 
                     // Draw Qibla marker on the rotating dial itself (Gold marker pointing to Qibla relative to N)
                     val qiblaAngleRad = Math.toRadians(qiblaBearing.toDouble())
@@ -600,14 +629,14 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawOutlineTick(
     )
 }
 
-// Simple label helper on Canvas
+// Simple label helper on Canvas with counter-rotation
 private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawCardinalLabel(
     text: String,
     x: Float,
     y: Float,
-    color: Color
+    color: Color,
+    heading: Float
 ) {
-    // For drawing text, since Canvas draws pixels, we can also use drawing paths or standard drawContext.canvas.nativeCanvas
     val paint = android.graphics.Paint().apply {
         this.color = android.graphics.Color.argb(
             (color.alpha * 255).toInt(),
@@ -624,12 +653,14 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawCardinalLabel(
     val fontMetrics = paint.fontMetrics
     val adjustedY = y - (fontMetrics.ascent + fontMetrics.descent) / 2
     
-    drawContext.canvas.nativeCanvas.drawText(
-        text,
-        x,
-        adjustedY,
-        paint
-    )
+    rotate(degrees = heading, pivot = Offset(x, y)) {
+        drawContext.canvas.nativeCanvas.drawText(
+            text,
+            x,
+            adjustedY,
+            paint
+        )
+    }
 }
 
 // Function to handle 360 wrap-around smoothly
