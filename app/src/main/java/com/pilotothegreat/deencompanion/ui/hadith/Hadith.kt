@@ -422,21 +422,16 @@ fun HadithCard(
                     val isDaif = hadith.grade.contains("Da'if", ignoreCase = true) || hadith.grade.contains("Daif", ignoreCase = true)
                     val isMawdu = hadith.grade.contains("Mawdu", ignoreCase = true)
                     
-                    val isDark = isSystemInDarkTheme()
                     val (bg, fg) = when {
-                        isSahih -> if (isDark) Color(0xFF1B3A1F) to Color(0xFF81C784)
-                                   else Color(0xFFE8F5E9) to Color(0xFF2E7D32)
-                        isHasan -> if (isDark) Color(0xFF0D2A47) to Color(0xFF64B5F6)
-                                   else Color(0xFFE3F2FD) to Color(0xFF1565C0)
-                        isDaif ->  if (isDark) Color(0xFF3B1010) to Color(0xFFEF9A9A)
-                                   else Color(0xFFFFEBEE) to Color(0xFFC62828)
-                        isMawdu -> if (isDark) Color(0xFF1C1F20) to Color(0xFF90A4AE)
-                                   else Color(0xFFECEFF1) to Color(0xFF37474F)
+                        isSahih -> colorScheme.primaryContainer to colorScheme.onPrimaryContainer
+                        isHasan -> colorScheme.secondaryContainer to colorScheme.onSecondaryContainer
+                        isDaif -> colorScheme.errorContainer to colorScheme.onErrorContainer
+                        isMawdu -> colorScheme.surfaceVariant to colorScheme.onSurfaceVariant
                         else -> colorScheme.surfaceVariant to colorScheme.onSurfaceVariant
                     }
                     
                     Surface(
-                        shape = RoundedCornerShape(8.dp),
+                        shape = shapes.small,
                         color = bg,
                         modifier = Modifier.padding(start = 8.dp)
                     ) {
@@ -529,7 +524,7 @@ fun HadithCard(
                     Icon(
                         imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                         contentDescription = stringResource(R.string.favorite),
-                        tint = if (isFavorite) Color.Red else colorScheme.outline,
+                        tint = if (isFavorite) colorScheme.primary else colorScheme.outline,
                         modifier = Modifier.size(20.dp)
                     )
                 }

@@ -56,7 +56,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Launch
+import androidx.compose.material.icons.automirrored.filled.Launch
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Restore
@@ -665,7 +665,7 @@ fun Overview(
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Launch,
+                                imageVector = Icons.AutoMirrored.Filled.Launch,
                                 contentDescription = null,
                                 modifier = Modifier.size(14.dp),
                                 tint = colorScheme.primary
@@ -883,7 +883,7 @@ fun Overview(
                                                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
                                             )
                                             Icon(
-                                                imageVector = Icons.Default.Launch,
+                                                imageVector = Icons.AutoMirrored.Filled.Launch,
                                                 contentDescription = null,
                                                 modifier = Modifier.size(12.dp)
                                             )
@@ -1494,7 +1494,7 @@ fun LiveQiblaCompassCard(
                 Box(
                     modifier = Modifier
                         .size(120.dp)
-                        .background(colorScheme.errorContainer.copy(alpha = 0.2f), shape = RoundedCornerShape(12.dp))
+                        .background(colorScheme.errorContainer.copy(alpha = 0.2f), shape = MaterialTheme.shapes.medium)
                         .padding(8.dp),
                     contentAlignment = Alignment.Center
                 ) {

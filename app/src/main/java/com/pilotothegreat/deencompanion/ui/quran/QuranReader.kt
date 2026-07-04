@@ -748,8 +748,8 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(vertical = 4.dp)
-                                            .border(1.dp, Color(0xFFD4AF37), RoundedCornerShape(12.dp)),
-                                        shape = RoundedCornerShape(12.dp),
+                                            .border(1.dp, Color(0xFFD4AF37), MaterialTheme.shapes.medium),
+                                        shape = MaterialTheme.shapes.medium,
                                         colors = CardDefaults.cardColors(
                                             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
                                         )

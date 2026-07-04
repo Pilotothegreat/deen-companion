@@ -34,7 +34,7 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Launch
+import androidx.compose.material.icons.automirrored.filled.Launch
 import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.*
@@ -270,7 +270,7 @@ fun Settings(paddingValues: PaddingValues) {
                                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
                                         )
                                         Icon(
-                                            imageVector = Icons.Default.Launch,
+                                            imageVector = Icons.AutoMirrored.Filled.Launch,
                                             contentDescription = null,
                                             modifier = Modifier.size(12.dp)
                                         )
