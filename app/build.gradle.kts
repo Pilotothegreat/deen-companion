@@ -120,6 +120,7 @@ dependencies {
     implementation(libs.koin.androidx.compose)
     implementation(libs.koin.compose.navigation3)
     implementation(libs.androidx.compose.adaptive)
+    implementation(libs.androidx.graphics.shapes)
 
     implementation(libs.androidx.lifecycle.service)
 

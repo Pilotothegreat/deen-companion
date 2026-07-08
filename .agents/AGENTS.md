@@ -1,4 +1,4 @@
-﻿# Custom Workspace Rules
+# Custom Workspace Rules
 
 - **Use Installed Skills**: A library of community skills has been registered at `C:/Users/king/.agents/skills` via `.agents/skills.json`. Always check this library or your available skills list first when tasked with code refactoring, database queries, security testing, cloud setup, or other specialized tasks, and load the relevant `SKILL.md` file using the `view_file` tool to follow its best practices.
 
@@ -132,3 +132,12 @@ Step 3 — Then write the code based on the plan and verified docs.
 }
 
 Confirm "claude50sonnetthinking" appears in the output before relying on it.
+
+# Memoirs & Custom Guidelines (Persisted Notes)
+
+## Build & Release Protocol
+1. **Gradle Build APK**: Run `./gradlew assembleDebug` to compile and package the latest version of the app.
+2. **GitHub Push**: Commit and push changes to GitHub after completing major iterations (using standard Git commands: `git add`, `git commit`, `git push`).
+3. **M3 Design Kits**: Align with Material 3 Expressive guidelines, using the custom shape-morphing wrapper (`MorphPolygonShape`) and centralized shapes/motion tokens.
+4. **Model Selection**: Always use `claude50sonnetthinking` on Perplexity MCP for reasoning, planning, and coding architecture tasks.
+

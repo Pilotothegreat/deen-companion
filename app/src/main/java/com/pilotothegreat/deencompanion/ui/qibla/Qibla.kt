@@ -397,6 +397,7 @@ fun Qibla() {
                 }
 
                 // Compass Dial (rotates with -animatedHeading)
+                // Rotating Dial Face (rotates with animatedHeading relative to phone)
                 Canvas(
                     modifier = Modifier
                         .size(260.dp)
@@ -405,7 +406,6 @@ fun Qibla() {
                         }
                 ) {
                     val radius = size.minDimension / 2
-                    val center = Offset(size.width / 2, size.height / 2)
 
                     // Draw dial face background
                     drawCircle(
@@ -418,62 +418,6 @@ fun Qibla() {
                         color = compassRingColor,
                         radius = radius,
                         style = Stroke(width = 3.dp.toPx())
-                    )
-
-                    // Draw Cardinal Ticks & Labels
-                    val ticks = 72 // ticks every 5 degrees
-                    for (t in 0 until ticks) {
-                        val angleDeg = t * 5f
-                        val angleRad = Math.toRadians(angleDeg.toDouble())
-                        val isCardinal = t % 18 == 0 // N, E, S, W
-                        val isMajor = t % 6 == 0 // every 30 degrees
-                        val tickLen = if (isCardinal) 14.dp.toPx() else if (isMajor) 9.dp.toPx() else 5.dp.toPx()
-                        val strokeW = if (isMajor) 2.dp.toPx() else 1.dp.toPx()
-
-                        val startX = (center.x + (radius - tickLen) * sin(angleRad)).toFloat()
-                        val startY = (center.y - (radius - tickLen) * cos(angleRad)).toFloat()
-                        val endX = (center.x + radius * sin(angleRad)).toFloat()
-                        val endY = (center.y - radius * cos(angleRad)).toFloat()
-
-                        drawOutlineTick(
-                            start = Offset(startX, startY),
-                            end = Offset(endX, endY),
-                            color = compassRingColor.copy(alpha = if (isMajor) 0.8f else 0.4f),
-                            width = strokeW
-                        )
-                    }
-
-                    // Draw red north triangle pointing to North
-                    val triSize = 10.dp.toPx()
-                    val northPath = Path().apply {
-                        moveTo(center.x, center.y - radius + 4.dp.toPx())
-                        lineTo(center.x - triSize / 2f, center.y - radius + 4.dp.toPx() + triSize)
-                        lineTo(center.x + triSize / 2f, center.y - radius + 4.dp.toPx() + triSize)
-                        close()
-                    }
-                    drawPath(northPath, color = Color(0xFFE53935))
-
-                    // N, E, S, W text counter-rotated so they always stay upright
-                    val labelRadius = radius - 24.dp.toPx()
-                    drawCardinalLabel("N", center.x, center.y - labelRadius, Color(0xFFE53935), animatedHeading)
-                    drawCardinalLabel("E", center.x + labelRadius, center.y, primaryColor.copy(alpha = 0.7f), animatedHeading)
-                    drawCardinalLabel("S", center.x, center.y + labelRadius, primaryColor.copy(alpha = 0.7f), animatedHeading)
-                    drawCardinalLabel("W", center.x - labelRadius, center.y, primaryColor.copy(alpha = 0.7f), animatedHeading)
-
-                    // Draw Qibla marker on the rotating dial itself (Gold marker pointing to Qibla relative to N)
-                    val qiblaAngleRad = Math.toRadians(qiblaBearing.toDouble())
-                    val qiblaMarkerRadius = radius - 7.dp.toPx()
-                    val qiblaMarkerX = (center.x + qiblaMarkerRadius * sin(qiblaAngleRad)).toFloat()
-                    val qiblaMarkerY = (center.y - qiblaMarkerRadius * cos(qiblaAngleRad)).toFloat()
-                    drawCircle(
-                        color = Color(0xFFD4AF37), // Gold accent
-                        radius = 6.dp.toPx(),
-                        center = Offset(qiblaMarkerX, qiblaMarkerY)
-                    )
-                    drawCircle(
-                        color = Color.White,
-                        radius = 2.dp.toPx(),
-                        center = Offset(qiblaMarkerX, qiblaMarkerY)
                     )
                 }
 
@@ -488,29 +432,17 @@ fun Qibla() {
                     val radius = size.minDimension / 2
                     val center = Offset(size.width / 2, size.height / 2)
 
-                    // Draw chiseled 3D needle (Left wing lighter, Right wing darker shadow)
+                    // Draw chiseled 3D M3 arrow needle
                     val leftWing = Path().apply {
                         moveTo(center.x, center.y - radius + 15.dp.toPx())
-                        quadraticTo(
-                            center.x - 12.dp.toPx(), center.y - radius / 3,
-                            center.x - 22.dp.toPx(), center.y + 24.dp.toPx()
-                        )
-                        quadraticTo(
-                            center.x, center.y + 8.dp.toPx(),
-                            center.x, center.y - radius + 15.dp.toPx()
-                        )
+                        lineTo(center.x - 22.dp.toPx(), center.y + 24.dp.toPx())
+                        lineTo(center.x, center.y + 8.dp.toPx())
                         close()
                     }
                     val rightWing = Path().apply {
                         moveTo(center.x, center.y - radius + 15.dp.toPx())
-                        quadraticTo(
-                            center.x + 12.dp.toPx(), center.y - radius / 3,
-                            center.x + 22.dp.toPx(), center.y + 24.dp.toPx()
-                        )
-                        quadraticTo(
-                            center.x, center.y + 8.dp.toPx(),
-                            center.x, center.y - radius + 15.dp.toPx()
-                        )
+                        lineTo(center.x + 22.dp.toPx(), center.y + 24.dp.toPx())
+                        lineTo(center.x, center.y + 8.dp.toPx())
                         close()
                     }
 
@@ -556,43 +488,6 @@ fun Qibla() {
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Angle Details Panel
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = stringResource(R.string.device_heading),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = String.format(Locale.US, "%.0f°", rawHeading),
-                            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = stringResource(R.string.qibla_bearing),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = String.format(Locale.US, "%.0f°", qiblaBearing),
-                            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-                            color = centerArrowColor
-                        )
-                    }
-                }
-            }
-
             // Aligned status text with smooth fade/spring entry
             Box(
                 modifier = Modifier
@@ -611,55 +506,6 @@ fun Qibla() {
                 }
             }
         }
-    }
-}
-
-// Draw ticks helper
-private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawOutlineTick(
-    start: Offset,
-    end: Offset,
-    color: Color,
-    width: Float
-) {
-    drawLine(
-        color = color,
-        start = start,
-        end = end,
-        strokeWidth = width
-    )
-}
-
-// Simple label helper on Canvas with counter-rotation
-private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawCardinalLabel(
-    text: String,
-    x: Float,
-    y: Float,
-    color: Color,
-    heading: Float
-) {
-    val paint = android.graphics.Paint().apply {
-        this.color = android.graphics.Color.argb(
-            (color.alpha * 255).toInt(),
-            (color.red * 255).toInt(),
-            (color.green * 255).toInt(),
-            (color.blue * 255).toInt()
-        )
-        textSize = 14.sp.toPx()
-        isFakeBoldText = true
-        textAlign = android.graphics.Paint.Align.CENTER
-    }
-    
-    // Adjust y slightly so it centers vertically
-    val fontMetrics = paint.fontMetrics
-    val adjustedY = y - (fontMetrics.ascent + fontMetrics.descent) / 2
-    
-    rotate(degrees = heading, pivot = Offset(x, y)) {
-        drawContext.canvas.nativeCanvas.drawText(
-            text,
-            x,
-            adjustedY,
-            paint
-        )
     }
 }
 

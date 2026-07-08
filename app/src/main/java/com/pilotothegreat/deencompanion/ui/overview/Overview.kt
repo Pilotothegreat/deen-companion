@@ -58,6 +58,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.automirrored.filled.Launch
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Schedule
@@ -1551,7 +1552,7 @@ fun LiveQiblaCompassCard(
                 .padding(12.dp)
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
+            verticalArrangement = Arrangement.Center
         ) {
             Text(
                 text = stringResource(R.string.qibla_compass),
@@ -1559,6 +1560,8 @@ fun LiveQiblaCompassCard(
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             if (!hasCompass) {
                 Box(
@@ -1593,14 +1596,13 @@ fun LiveQiblaCompassCard(
                         }
                     }
 
-                    // Rotating dial (ticks + N label + Qibla marker)
+                    // Rotating dial (just the outer ring)
                     Canvas(
                         modifier = Modifier
                             .fillMaxSize()
                             .graphicsLayer { rotationZ = -relativeAngle + qiblaBearing }
                     ) {
                         val radius = size.minDimension / 2
-                        val center = Offset(size.width / 2, size.height / 2)
 
                         // Outer ring
                         drawCircle(
@@ -1608,43 +1610,9 @@ fun LiveQiblaCompassCard(
                             radius = radius,
                             style = Stroke(width = 2.dp.toPx())
                         )
-
-                        // 8 cardinal/intercardinal ticks every 45°
-                        for (t in 0 until 8) {
-                            val angleRad = Math.toRadians((t * 45).toDouble())
-                            val isMain = t % 2 == 0
-                            val tickLen = if (isMain) 7.dp.toPx() else 4.dp.toPx()
-                            drawLine(
-                                color = compassRingColor.copy(alpha = if (isMain) 0.8f else 0.4f),
-                                start = Offset(
-                                    (center.x + (radius - tickLen) * sin(angleRad)).toFloat(),
-                                    (center.y - (radius - tickLen) * cos(angleRad)).toFloat()
-                                ),
-                                end = Offset(
-                                    (center.x + radius * sin(angleRad)).toFloat(),
-                                    (center.y - radius * cos(angleRad)).toFloat()
-                                ),
-                                strokeWidth = if (isMain) 2.dp.toPx() else 1.dp.toPx()
-                            )
-                        }
-
-                        // Qibla gold marker on the ring edge
-                        val qMarkerRadius = radius - 6.dp.toPx()
-                        val qMarkerX = center.x
-                        val qMarkerY = center.y - qMarkerRadius
-                        drawCircle(
-                            color = Color(0xFFD4AF37),
-                            radius = 5.dp.toPx(),
-                            center = Offset(qMarkerX, qMarkerY)
-                        )
-                        drawCircle(
-                            color = Color.White,
-                            radius = 2.dp.toPx(),
-                            center = Offset(qMarkerX, qMarkerY)
-                        )
                     }
 
-                    // Chiseled needle (stays pointing to Qibla)
+                    // Chiseled M3 arrow needle (stays pointing to Qibla)
                     Canvas(
                         modifier = Modifier
                             .fillMaxSize()
@@ -1658,27 +1626,15 @@ fun LiveQiblaCompassCard(
                         val center = Offset(size.width / 2, size.height / 2)
 
                         val leftWing = Path().apply {
-                            moveTo(center.x, center.y - radius + 8.dp.toPx())
-                            quadraticTo(
-                                center.x - 8.dp.toPx(), center.y - radius / 3,
-                                center.x - 14.dp.toPx(), center.y + 12.dp.toPx()
-                            )
-                            quadraticTo(
-                                center.x, center.y + 4.dp.toPx(),
-                                center.x, center.y - radius + 8.dp.toPx()
-                            )
+                            moveTo(center.x, center.y - radius + 10.dp.toPx())
+                            lineTo(center.x - 12.dp.toPx(), center.y + 12.dp.toPx())
+                            lineTo(center.x, center.y + 4.dp.toPx())
                             close()
                         }
                         val rightWing = Path().apply {
-                            moveTo(center.x, center.y - radius + 8.dp.toPx())
-                            quadraticTo(
-                                center.x + 8.dp.toPx(), center.y - radius / 3,
-                                center.x + 14.dp.toPx(), center.y + 12.dp.toPx()
-                            )
-                            quadraticTo(
-                                center.x, center.y + 4.dp.toPx(),
-                                center.x, center.y - radius + 8.dp.toPx()
-                            )
+                            moveTo(center.x, center.y - radius + 10.dp.toPx())
+                            lineTo(center.x + 12.dp.toPx(), center.y + 12.dp.toPx())
+                            lineTo(center.x, center.y + 4.dp.toPx())
                             close()
                         }
 
@@ -1691,32 +1647,9 @@ fun LiveQiblaCompassCard(
                     }
                 }
             }
-
-            Text(
-                text = if (lang == "ar") {
-                    if (isAligned) "محاذٍ للقبلة!" else "${com.pilotothegreat.deencompanion.ui.quran.toArabicNumerals(qiblaBearing.toInt())}°"
-                } else {
-                    if (isAligned) "Aligned!" else stringResource(R.string.degrees_symbol, qiblaBearing)
-                },
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Bold,
-                color = if (isAligned) colorScheme.tertiary else MaterialTheme.colorScheme.primary
-            )
         }
     }
 }
-
-enum class BeadSize { SMALL, MEDIUM, LARGE }
-
-enum class BeadPreset(val label: String, val baseColor: Color, val highlight: Color) {
-    ONYX("Onyx", Color(0xFF1B1B1F), Color(0xFF4A4A52)),
-    SANDALWOOD("Sandalwood", Color(0xFF8B5A2B), Color(0xFFC08552)),
-    PEARL("Pearl", Color(0xFFEDEAE0), Color(0xFFFFFFFF)),
-    EMERALD("Emerald", Color(0xFF0B6E4F), Color(0xFF3FB68A)),
-    AMBER("Amber", Color(0xFFB8860B), Color(0xFFFFD65C))
-}
-
-enum class TasbihMode { TAP, BREATH, BEAD }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -1727,43 +1660,11 @@ fun TasbihDialCard(
     val count by viewModel.tasbihCount.collectAsState(initial = 0)
     val dhikr by viewModel.tasbihDhikr.collectAsState(initial = "سبحان الله")
     val target by viewModel.tasbihTarget.collectAsState(initial = 33)
-    val modeIdx by viewModel.tasbihMode.collectAsState(initial = 0)
-    val beadSizeIdx by viewModel.tasbihBeadSize.collectAsState(initial = 1)
-    val presetIdx by viewModel.tasbihBeadPreset.collectAsState(initial = 3)
 
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
     val scale = remember { Animatable(1f) }
-
-    var showSettings by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var vibrationEnabled by remember { mutableStateOf(true) }
-    var customTarget by remember(target) { mutableStateOf(target.toFloat()) }
-
-    val mode = remember(modeIdx) {
-        when (modeIdx) {
-            0 -> TasbihMode.TAP
-            1 -> TasbihMode.BREATH
-            else -> TasbihMode.BEAD
-        }
-    }
-    val beadSize = remember(beadSizeIdx) {
-        when (beadSizeIdx) {
-            0 -> BeadSize.SMALL
-            1 -> BeadSize.MEDIUM
-            else -> BeadSize.LARGE
-        }
-    }
-    val preset = remember(presetIdx) {
-        when (presetIdx) {
-            0 -> BeadPreset.ONYX
-            1 -> BeadPreset.SANDALWOOD
-            2 -> BeadPreset.PEARL
-            3 -> BeadPreset.EMERALD
-            else -> BeadPreset.AMBER
-        }
-    }
 
     val localizedDhikr = remember(dhikr) {
         when (dhikr) {
@@ -1779,38 +1680,6 @@ fun TasbihDialCard(
         count.toFloat() / target.toFloat().coerceAtLeast(1f)
     }
 
-    val infiniteTransition = rememberInfiniteTransition(label = "tasbihWave")
-    val wavePhase by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 2f * Math.PI.toFloat(),
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2500, easing = LinearEasing)
-        ),
-        label = "phase"
-    )
-
-    // Pulse animations for Breathe mode
-    val scalePulse by infiniteTransition.animateFloat(
-        initialValue = 0.85f,
-        targetValue = 1.05f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "scalePulse"
-    )
-    val glowAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.1f,
-        targetValue = 0.4f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "glowAlpha"
-    )
-
-    var lastActiveIndex by remember { mutableStateOf(-1) }
-
     val onIncrement = {
         haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
         scope.launch {
@@ -1819,7 +1688,7 @@ fun TasbihDialCard(
         }
         val nextCount = count + 1
         val effectiveTarget = if (dhikr == "الله أكبر" && target == 33) 34 else target
-        if (nextCount >= effectiveTarget && vibrationEnabled) {
+        if (nextCount >= effectiveTarget) {
             val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -1845,21 +1714,10 @@ fun TasbihDialCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Dhikr Title
-            Text(
-                text = localizedDhikr,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            // Bouncy Dial Circle (Tap Area)
+            // Tapping Circle (Large, size 180.dp)
             Box(
                 modifier = Modifier
-                    .size(120.dp)
+                    .size(180.dp)
                     .padding(4.dp)
                     .graphicsLayer {
                         scaleX = scale.value
@@ -1871,409 +1729,81 @@ fun TasbihDialCard(
                     .clickable { onIncrement() },
                 contentAlignment = Alignment.Center
             ) {
-                Crossfade(targetState = mode, label = "tasbih_mode_crossfade") { currentMode ->
-                    when (currentMode) {
-                        TasbihMode.TAP -> {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                val waveColor = preset.baseColor
-                                Canvas(modifier = Modifier.fillMaxSize()) {
-                                    val baseHeight = size.height * progress
-                                    val waveAmplitude = 4.dp.toPx()
-                                    val waveFrequency = 2f * Math.PI.toFloat() / size.width
-
-                                    // Back Wave
-                                    val backPath = Path().apply {
-                                        moveTo(0f, size.height)
-                                        for (x in 0..size.width.toInt()) {
-                                            val y = size.height - baseHeight + waveAmplitude * sin(x * waveFrequency + wavePhase)
-                                            lineTo(x.toFloat(), y)
-                                        }
-                                        lineTo(size.width, size.height)
-                                        close()
-                                    }
-                                    drawPath(
-                                        path = backPath,
-                                        color = waveColor.copy(alpha = 0.2f)
-                                    )
-
-                                    // Front Wave
-                                    val frontPath = Path().apply {
-                                        moveTo(0f, size.height)
-                                        for (x in 0..size.width.toInt()) {
-                                            val y = size.height - baseHeight + waveAmplitude * sin(x * waveFrequency + wavePhase + Math.PI.toFloat())
-                                            lineTo(x.toFloat(), y)
-                                        }
-                                        lineTo(size.width, size.height)
-                                        close()
-                                    }
-                                    drawPath(
-                                        path = frontPath,
-                                        color = waveColor.copy(alpha = 0.35f)
-                                    )
-                                }
-
-                                CircularWavyProgressIndicator(
-                                    progress = { progress },
-                                    modifier = Modifier.fillMaxSize(),
-                                    color = preset.baseColor,
-                                    trackColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
-                                )
-                                Text(
-                                    text = count.toString(),
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Black,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        }
-                        TasbihMode.BREATH -> {
-                            Box(
-                                modifier = Modifier
-                                    .size(100.dp)
-                                    .graphicsLayer {
-                                        scaleX = scalePulse
-                                        scaleY = scalePulse
-                                    }
-                                    .background(
-                                        brush = Brush.radialGradient(
-                                            listOf(preset.highlight, preset.baseColor)
-                                        ),
-                                        shape = CircleShape
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Canvas(modifier = Modifier.fillMaxSize()) {
-                                    drawCircle(
-                                        color = preset.highlight.copy(alpha = glowAlpha),
-                                        radius = (size.minDimension / 2f) + 6.dp.toPx(),
-                                        style = Stroke(width = 2.dp.toPx())
-                                    )
-                                }
-                                Text(
-                                    text = count.toString(),
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Black,
-                                    color = Color.White
-                                )
-                            }
-                        }
-                        TasbihMode.BEAD -> {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Canvas(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .pointerInput(beadSize) {
-                                            detectDragGestures { change, _ ->
-                                                val center = Offset(size.width / 2f, size.height / 2f)
-                                                val radius = kotlin.math.min(size.width, size.height).toFloat() / 2.5f
-                                                val pos = change.position
-                                                val angle = (kotlin.math.atan2(pos.y - center.y, pos.x - center.x) * 180 / Math.PI + 360) % 360
-                                                val index = ((angle / (360f / 33)).toInt()).coerceIn(0, 32)
-                                                val dist = kotlin.math.hypot(pos.x - center.x, pos.y - center.y)
-                                                if (kotlin.math.abs(dist - radius) < 30f && index != lastActiveIndex) {
-                                                    lastActiveIndex = index
-                                                    onIncrement()
-                                                }
-                                            }
-                                        }
-                                ) {
-                                    val center = Offset(size.width / 2f, size.height / 2f)
-                                    val radius = size.minDimension / 2.5f
-                                    val beadRadiusPx = when (beadSize) {
-                                        BeadSize.SMALL -> 4.dp.toPx()
-                                        BeadSize.MEDIUM -> 6.dp.toPx()
-                                        BeadSize.LARGE -> 8.dp.toPx()
-                                    }
-
-                                    // Draw cord circle behind beads
-                                    drawCircle(
-                                        color = preset.baseColor.copy(alpha = 0.25f),
-                                        radius = radius,
-                                        center = center,
-                                        style = Stroke(width = 1.dp.toPx())
-                                    )
-
-                                    for (i in 0 until 33) {
-                                        val angle = Math.toRadians((360.0 / 33) * i)
-                                        val cx = center.x + (cos(angle) * radius).toFloat()
-                                        val cy = center.y + (sin(angle) * radius).toFloat()
-                                        val active = i == (count % 33)
-                                        val passed = i < (count % 33)
-
-                                        drawCircle(
-                                            brush = Brush.radialGradient(
-                                                colors = if (active || passed) listOf(preset.highlight, preset.baseColor)
-                                                         else listOf(preset.baseColor.copy(alpha = 0.35f), preset.baseColor.copy(alpha = 0.15f)),
-                                                center = Offset(cx - beadRadiusPx * 0.3f, cy - beadRadiusPx * 0.3f),
-                                                radius = beadRadiusPx * 1.4f
-                                            ),
-                                            radius = beadRadiusPx * (if (active) 1.25f else 1f),
-                                            center = Offset(cx, cy)
-                                        )
-
-                                        if (active || passed) {
-                                            drawCircle(
-                                                color = Color.White.copy(alpha = 0.5f),
-                                                radius = beadRadiusPx * 0.25f,
-                                                center = Offset(cx - beadRadiusPx * 0.35f, cy - beadRadiusPx * 0.35f)
-                                            )
-                                        }
-
-                                        // Traditional markers (11th and 22nd bead) get gold color
-                                        if (i == 11 || i == 22) {
-                                            drawCircle(
-                                                color = Color(0xFFFFD700), // Gold
-                                                radius = beadRadiusPx * 0.5f,
-                                                center = Offset(cx, cy)
-                                            )
-                                        }
-                                    }
-                                }
-
-                                Text(
-                                    text = count.toString(),
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Controls Group (Cycle Dhikr, Reset Count)
-            Row(
-                modifier = Modifier.padding(top = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                // Cycle Dhikr Button
-                FilledTonalIconButton(
-                    onClick = {
-                        val nextDhikr = when (dhikr) {
-                            "سبحان الله" -> "الحمد لله"
-                            "الحمد لله" -> "الله أكبر"
-                            else -> "سبحان الله"
-                        }
-                        viewModel.setTasbihDhikr(nextDhikr)
-                    },
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = "Cycle Dhikr",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-
-                // Settings Button (Gear)
-                FilledTonalIconButton(
-                    onClick = { showSettings = true },
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = "Customize Tasbih",
-                        tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-
-                // Reset Button
-                OutlinedIconButton(
-                    onClick = { viewModel.resetTasbih() },
-                    modifier = Modifier.size(40.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.4f)),
-                    colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Restore,
-                        contentDescription = "Reset Count",
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
-        }
-    }
-
-    // Tasbih Settings Bottom Sheet (Options button or long-press)
-    if (showSettings) {
-        ModalBottomSheet(
-            onDismissRequest = { showSettings = false },
-            sheetState = sheetState,
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(horizontal = 24.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
-            ) {
-                Text(
-                    text = "Tasbih Settings",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
+                // Clean M3 progress ring on border
+                CircularProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.primary,
+                    strokeWidth = 6.dp,
+                    trackColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
                 )
 
-                // Counter Mode selector
-                Text(
-                    text = "Counter Mode",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-                    val modes = listOf("Tap", "Breathe", "Beads")
-                    modes.forEachIndexed { index, name ->
-                        SegmentedButton(
-                            selected = mode.ordinal == index,
-                            onClick = { viewModel.setTasbihMode(index) },
-                            shape = SegmentedButtonDefaults.itemShape(index, modes.size)
-                        ) {
-                            Text(name, style = MaterialTheme.typography.labelMedium)
-                        }
-                    }
-                }
-
-                // Customization Presets (only show in Bead mode)
-                if (mode == TasbihMode.BEAD) {
-                    Text(
-                        text = "Bead Size",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-                        val sizes = listOf("Small", "Medium", "Large")
-                        sizes.forEachIndexed { index, name ->
-                            SegmentedButton(
-                                selected = beadSize.ordinal == index,
-                                onClick = { viewModel.setTasbihBeadSize(index) },
-                                shape = SegmentedButtonDefaults.itemShape(index, sizes.size)
-                            ) {
-                                Text(name, style = MaterialTheme.typography.labelMedium)
-                            }
-                        }
-                    }
-
-                    Text(
-                        text = "Bead Material & Style",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    // Dhikr Selector Name Button inside the circle
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        BeadPreset.entries.forEach { stylePreset ->
-                            val isSelected = preset == stylePreset
-                            Box(
-                                modifier = Modifier
-                                    .size(48.dp)
-                                    .clip(CircleShape)
-                                    .background(
-                                        brush = Brush.radialGradient(
-                                            listOf(stylePreset.highlight, stylePreset.baseColor)
-                                        )
-                                    )
-                                    .border(
-                                        width = if (isSelected) 3.dp else 1.dp,
-                                        color = if (isSelected) MaterialTheme.colorScheme.primary else Color.LightGray.copy(alpha = 0.5f),
-                                        shape = CircleShape
-                                    )
-                                    .clickable { viewModel.setTasbihBeadPreset(stylePreset.ordinal) },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                if (isSelected) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(8.dp)
-                                            .background(Color.White, CircleShape)
-                                    )
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(MaterialTheme.colorScheme.secondaryContainer)
+                            .clickable {
+                                val nextDhikr = when (dhikr) {
+                                    "سبحان الله" -> "الحمد لله"
+                                    "الحمد لله" -> "الله أكبر"
+                                    "الله أكبر" -> "لا إله إلا الله"
+                                    else -> "سبحان الله"
                                 }
+                                viewModel.setTasbihDhikr(nextDhikr)
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             }
-                        }
-                    }
-                }
-
-                // Target Presets
-                Text(
-                    text = "Count Target",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    listOf(33, 99, 100).forEach { presetTarget ->
-                        val isSelected = target == presetTarget
-                        FilledTonalIconButton(
-                            onClick = {
-                                viewModel.setTasbihTarget(presetTarget)
-                                customTarget = presetTarget.toFloat()
-                            },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(40.dp),
-                            colors = if (isSelected)
-                                IconButtonDefaults.filledIconButtonColors()
-                            else
-                                IconButtonDefaults.filledTonalIconButtonColors()
-                        ) {
-                            Text(
-                                text = presetTarget.toString(),
-                                style = MaterialTheme.typography.labelLarge
-                            )
-                        }
-                    }
-                }
-
-                // Custom Target Slider
-                Text(
-                    text = "Custom Target: ${customTarget.toInt()}",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Slider(
-                    value = customTarget,
-                    onValueChange = { customTarget = it },
-                    onValueChangeFinished = { viewModel.setTasbihTarget(customTarget.toInt()) },
-                    valueRange = 1f..200f,
-                    steps = 198
-                )
-
-                HorizontalDivider()
-
-                // Vibration Toggle
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
                         Text(
-                            text = "Vibrate on completion",
-                            style = MaterialTheme.typography.bodyLarge
+                            text = localizedDhikr,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
-                        Text(
-                            text = "Pulse when target is reached",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(
+                            imageVector = Icons.Default.ArrowDropDown,
+                            contentDescription = "Change Dhikr",
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier.size(16.dp)
                         )
                     }
-                    Switch(
-                        checked = vibrationEnabled,
-                        onCheckedChange = { vibrationEnabled = it }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Large bouncing count number
+                    Text(
+                        text = count.toString(),
+                        style = MaterialTheme.typography.displayLarge.copy(
+                            fontWeight = FontWeight.Black,
+                            fontSize = 48.sp
+                        ),
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
+            }
 
-                Spacer(modifier = Modifier.height(8.dp))
+            // Small Reset Button below the circle
+            FilledTonalIconButton(
+                onClick = { viewModel.resetTasbih() },
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Restore,
+                    contentDescription = "Reset Count",
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.size(20.dp)
+                )
             }
         }
     }

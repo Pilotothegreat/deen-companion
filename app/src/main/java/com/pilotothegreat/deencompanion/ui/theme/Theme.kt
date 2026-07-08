@@ -85,6 +85,7 @@ fun Theme(
     MaterialTheme(
         colorScheme = colors,
         typography = if (appLang.startsWith("ar")) ArabicTypography else AppTypography,
+        shapes = ExpressiveShapes,
         motionScheme = MotionScheme.expressive()
     ) { content() }
 }
@@ -143,6 +144,25 @@ enum class Theme {
     }
 }
 
+
+val ExpressiveShapes = androidx.compose.material3.Shapes(
+    extraSmall = RoundedCornerShape(4.dp),
+    small = RoundedCornerShape(8.dp),
+    medium = RoundedCornerShape(16.dp),
+    large = RoundedCornerShape(24.dp),
+    extraLarge = RoundedCornerShape(32.dp)
+)
+
+object AppMotion {
+    val FastBouncy = androidx.compose.animation.core.spring<Float>(
+        dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
+        stiffness = androidx.compose.animation.core.Spring.StiffnessHigh
+    )
+    val Smooth = androidx.compose.animation.core.spring<Float>(
+        dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
+        stiffness = androidx.compose.animation.core.Spring.StiffnessLow
+    )
+}
 
 val ExpressiveCardShape = RoundedCornerShape(topStart = 32.dp, topEnd = 8.dp, bottomEnd = 32.dp, bottomStart = 8.dp)
 val ExpressiveContainerShape = RoundedCornerShape(24.dp)

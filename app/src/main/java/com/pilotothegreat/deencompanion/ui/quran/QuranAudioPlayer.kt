@@ -29,6 +29,11 @@ import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
 import com.pilotothegreat.deencompanion.services.QuranPlaybackManager
 import org.koin.compose.koinInject
+import androidx.graphics.shapes.RoundedPolygon
+import androidx.graphics.shapes.Morph
+import androidx.graphics.shapes.CornerRounding
+import androidx.graphics.shapes.circle
+import com.pilotothegreat.deencompanion.ui.theme.MorphPolygonShape
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -44,9 +49,39 @@ fun QuranAudioPlayer(
     val selectedReciter by playbackManager.selectedReciter.collectAsState()
     val isBuffering by playbackManager.isBuffering.collectAsState()
     val lang by appPreferenceRepo.appLanguage.collectAsState(initial = "en")
-
+ 
     var showReciterMenu by remember { mutableStateOf(false) }
     val playScale by animateFloatAsState(if (isPlaying) 1.05f else 1f)
+
+    val playPolygon = remember<RoundedPolygon> {
+        RoundedPolygon(
+            numVertices = 3,
+            radius = 1f,
+            centerX = 0f,
+            centerY = 0f,
+            rounding = CornerRounding(radius = 0.2f)
+        )
+    }
+    val pausePolygon = remember<RoundedPolygon> {
+        RoundedPolygon.circle(
+            numVertices = 12,
+            radius = 1f,
+            centerX = 0f,
+            centerY = 0f
+        )
+    }
+    val morph = remember { Morph(playPolygon, pausePolygon) }
+    val morphProgress by animateFloatAsState(
+        targetValue = if (isPlaying) 1f else 0f,
+        animationSpec = androidx.compose.animation.core.spring(
+            dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
+            stiffness = androidx.compose.animation.core.Spring.StiffnessLow
+        ),
+        label = "morphProgress"
+    )
+    val morphShape = remember(morphProgress) {
+        MorphPolygonShape(morph = morph, progress = morphProgress, rotationZ = 90f)
+    }
 
     AnimatedVisibility(
         visible = currentSurahId == surah.id,
@@ -57,7 +92,7 @@ fun QuranAudioPlayer(
         Surface(
             tonalElevation = 8.dp,
             shadowElevation = 10.dp,
-            shape = RoundedCornerShape(32.dp),
+            shape = MaterialTheme.shapes.extraLarge,
             modifier = Modifier
                 .padding(horizontal = 24.dp, vertical = 12.dp)
                 .navigationBarsPadding()
@@ -84,7 +119,7 @@ fun QuranAudioPlayer(
                             modifier = Modifier
                                 .size(44.dp)
                                 .scale(playScale),
-                            shape = CircleShape,
+                            shape = morphShape,
                             colors = IconButtonDefaults.filledIconButtonColors(
                                 containerColor = MaterialTheme.colorScheme.primary
                             )
