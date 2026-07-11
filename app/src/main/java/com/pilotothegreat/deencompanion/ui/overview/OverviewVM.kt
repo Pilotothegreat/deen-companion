@@ -37,6 +37,7 @@ class OverviewVM(
     }
 
     private var hasCheckedDonationThisSession = false
+    // FIX #6: Updated to accept a callback so Overview.kt can use it without its own LaunchedEffect copy
     fun checkAndShowDonation(onShow: () -> Unit) {
         if (hasCheckedDonationThisSession) return
         hasCheckedDonationThisSession = true
@@ -48,6 +49,8 @@ class OverviewVM(
             val sevenDaysInMillis = 7L * 24 * 60 * 60 * 1000
 
             if (count >= 5 && !dismissed && (now - lastShow >= sevenDaysInMillis)) {
+                appPreferenceRepo.incrementDonationPromptShowCount()
+                appPreferenceRepo.setLastDonationPromptShowTime(now)
                 onShow()
             }
         }
@@ -70,7 +73,8 @@ class OverviewVM(
         viewModelScope, SharingStarted.Eagerly, PrayerTimeCalculator.AsrSchool.STANDARD
     )
     val timezoneId = appPreferenceRepo.timezoneId.stateIn(
-        viewModelScope, SharingStarted.Eagerly, "Asia/Riyadh"
+        // FIX #3: Default to Asia/Muscat (Oman) not Asia/Riyadh
+        viewModelScope, SharingStarted.Eagerly, "Asia/Muscat"
     )
 
     val cityName = appPreferenceRepo.cityName
@@ -123,9 +127,10 @@ class OverviewVM(
     private val _prayerTimes = MutableStateFlow(
         PrayerTimeCalculator.calculate(
             LocalDate.now(),
-            21.3891,
-            39.8579,
-            3.0,
+            // FIX #3: Default to Muscat, Oman (23.5880, 58.3829) not Makkah
+            23.5880,
+            58.3829,
+            4.0, // Asia/Muscat is UTC+4
             PrayerTimeCalculator.CalculationMethod.OMAN,
             PrayerTimeCalculator.AsrSchool.STANDARD
         )

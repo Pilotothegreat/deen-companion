@@ -19,14 +19,15 @@ kotlin {
 
 android {
     namespace = "com.pilotothegreat.deencompanion"
+    // FIX #15: compileSdk and targetSdk aligned to 37 — dependencies require compileSdk ≥ 37
     compileSdk = 37
 
     defaultConfig {
         applicationId = "com.pilotothegreat.deencompanion"
         minSdk = 26
-        targetSdk = 35
-        versionCode = 165
-        versionName = "1.5.15"
+        targetSdk = 37
+        versionCode = 166
+        versionName = "1.5.16"
         base.archivesName = "deen-$versionName"
     }
 

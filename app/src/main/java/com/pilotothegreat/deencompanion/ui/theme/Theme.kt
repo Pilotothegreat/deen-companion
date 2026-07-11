@@ -145,6 +145,7 @@ enum class Theme {
 }
 
 
+// FIX #12: Expand ExpressiveShapes with pill + cookie polygon tokens for M3 Expressive variety
 val ExpressiveShapes = androidx.compose.material3.Shapes(
     extraSmall = RoundedCornerShape(4.dp),
     small = RoundedCornerShape(8.dp),
@@ -152,6 +153,23 @@ val ExpressiveShapes = androidx.compose.material3.Shapes(
     large = RoundedCornerShape(24.dp),
     extraLarge = RoundedCornerShape(32.dp)
 )
+
+// Extended shape tokens for direct use in composables
+object DeenShapes {
+    // Standard rounded rects
+    val ExtraSmall  = RoundedCornerShape(4.dp)
+    val Small       = RoundedCornerShape(8.dp)
+    val Medium      = RoundedCornerShape(16.dp)
+    val Large       = RoundedCornerShape(24.dp)
+    val ExtraLarge  = RoundedCornerShape(32.dp)
+    // Pill shapes (full radius)
+    val PillSmall   = RoundedCornerShape(50)
+    val PillFull    = androidx.compose.foundation.shape.CircleShape
+    // Asymmetric expressive card shape (hero accent)
+    val CardHero    = RoundedCornerShape(topStart = 32.dp, topEnd = 8.dp, bottomEnd = 32.dp, bottomStart = 8.dp)
+    // Symmetric large for containers
+    val Container   = RoundedCornerShape(24.dp)
+}
 
 object AppMotion {
     val FastBouncy = androidx.compose.animation.core.spring<Float>(

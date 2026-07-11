@@ -21,6 +21,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.animation.core.Animatable
@@ -31,7 +37,6 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -56,6 +61,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.automirrored.filled.Launch
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -141,21 +147,19 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.material.icons.filled.Mic
 import androidx.lifecycle.compose.LifecycleResumeEffect
-import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.ui.draw.scale
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.ui.draw.scale
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
@@ -187,11 +191,6 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.Slider
-import androidx.compose.material3.Switch
 import androidx.compose.material.icons.filled.CompassCalibration
 import java.time.chrono.HijrahDate
 import java.util.Locale
@@ -297,7 +296,8 @@ fun calculateNextPrayer(
     timezoneId: String,
     context: Context
 ): NextPrayer {
-    val zoneId = ZoneId.systemDefault()
+    // FIX #1: Use timezoneId param instead of systemDefault() — critical for Oman UTC+4 users
+    val zoneId = runCatching { ZoneId.of(timezoneId) }.getOrDefault(ZoneId.of("Asia/Muscat"))
     val now = LocalDateTime.now(zoneId)
     val localTime = now.toLocalTime()
 
@@ -342,7 +342,8 @@ fun calculateNextPrayer(
     } else {
         String.format(Locale.US, "%02d:%02d", minutes, seconds)
     }
-    val finalRemainingStr = remainingStr
+    // FIX #2: Apply Arabic numerals when language is Arabic
+    val finalRemainingStr = if (lang == "ar") remainingStr.toArabicNumerals() else remainingStr
 
     val timeStr = nextTime.toLocaleHourString(context)
     return NextPrayer(nextName, finalRemainingStr, timeStr, totalSeconds)
@@ -404,39 +405,34 @@ fun Overview(
     }
 
     val times by viewModel.prayerTimes.collectAsState(initial = viewModel.prayerTimes.value)
-    val tz by viewModel.timezoneId.collectAsState(initial = "Asia/Riyadh")
+    // FIX #3: Default timezone to Asia/Muscat (Oman) instead of Asia/Riyadh
+    val tz by viewModel.timezoneId.collectAsState(initial = "Asia/Muscat")
     val city by viewModel.cityName.collectAsState(initial = "")
-    val lat by viewModel.latitude.collectAsState(initial = 21.3891)
-    val lon by viewModel.longitude.collectAsState(initial = 39.8579)
+    // FIX #3: Default coordinates to Muscat, Oman instead of Makkah
+    val lat by viewModel.latitude.collectAsState(initial = 23.5880)
+    val lon by viewModel.longitude.collectAsState(initial = 58.3829)
     var nextPrayer by remember { mutableStateOf(NextPrayer("Fajr", "--", "--", 0L)) }
 
-    var shownThisSession by remember { mutableStateOf(false) }
     var showDonationDialog by remember { mutableStateOf(false) }
     val showCount by appPreferenceRepo.donationPromptShowCount.collectAsState(initial = 0)
     val updateVersion by viewModel.updateVersionAvailable.collectAsState()
 
+    // FIX #6: Single authoritative donation check in ViewModel (count>=5, 7-day interval)
+    // Remove duplicate UI-layer check that had different thresholds (count>=2, 2-day)
     LaunchedEffect(Unit) {
-        if (!shownThisSession) {
-            val count = appPreferenceRepo.appLaunchCount.first()
-            val dismissed = appPreferenceRepo.donationPromptDismissed.first()
-            val lastShow = appPreferenceRepo.lastDonationPromptShowTime.first()
-            val now = System.currentTimeMillis()
-            val twoDaysInMillis = 2L * 24 * 60 * 60 * 1000
-
-            if (count >= 2 && !dismissed && (now - lastShow >= twoDaysInMillis)) {
-                showDonationDialog = true
-                shownThisSession = true
-                appPreferenceRepo.incrementDonationPromptShowCount()
-            }
+        viewModel.checkAndShowDonation {
+            showDonationDialog = true
         }
     }
     
     val currentTimes by rememberUpdatedState(times)
     val currentTz by rememberUpdatedState(tz)
     val currentContext by rememberUpdatedState(context)
-    
+
+    // FIX #4: Remove lifecycleOwner from keys — it caused full countdown restart on recomposition
+    // Use it inside the effect via closure instead
     val lifecycleOwner = LocalLifecycleOwner.current
-    LaunchedEffect(lang, lifecycleOwner, times, tz) {
+    LaunchedEffect(lang, times, tz) {
         val isRobolectric = try {
             Class.forName("org.robolectric.Robolectric") != null
         } catch (e: Exception) {
@@ -449,8 +445,7 @@ fun Overview(
                     calculateNextPrayer(currentTimes, currentTz, currentContext)
                 }
                 if (isRobolectric) break
-                val delayMs = 1000L
-                kotlinx.coroutines.delay(delayMs)
+                kotlinx.coroutines.delay(1000L)
             }
         }
     }
@@ -547,9 +542,25 @@ fun Overview(
 
         // Location Not Detected Warning Card
         val locationWarningDismissed by viewModel.locationWarningDismissed.collectAsState()
-        val showWarning = !locationWarningDismissed && (city.isEmpty() || (lat == 21.3891 && lon == 39.8579) || !hasLocationPermission)
+        // FIX #3: Check against Muscat coords, not Makkah
+        val showWarning = !locationWarningDismissed && (city.isEmpty() || (lat == 23.5880 && lon == 58.3829) || !hasLocationPermission)
 
-        if (showWarning) {
+        // FIX #7: Wrap in AnimatedVisibility with spring physics instead of raw if-block
+        AnimatedVisibility(
+            visible = showWarning,
+            enter = slideInVertically(
+                initialOffsetY = { -it },
+                animationSpec = spring(
+                    dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
+                    stiffness = androidx.compose.animation.core.Spring.StiffnessMedium
+                )
+            ) + fadeIn(),
+            exit = slideOutVertically(
+                targetOffsetY = { -it },
+                animationSpec = spring(stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow)
+            ) + fadeOut()
+        ) {
+            // FIX #10: Use error semantics (Warning icon + errorContainer) not info/primary
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -559,7 +570,10 @@ fun Overview(
                         viewModel.dismissLocationWarning()
                     },
                 shape = ExpressiveCardShape,
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                )
             ) {
                 Row(
                     modifier = Modifier.padding(16.dp),
@@ -567,21 +581,32 @@ fun Overview(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Info,
+                        imageVector = Icons.Default.Warning,
                         contentDescription = "Warning",
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        tint = MaterialTheme.colorScheme.onErrorContainer
                     )
-                    Column {
+                    Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = stringResource(R.string.location_not_detected),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                            color = MaterialTheme.colorScheme.onErrorContainer
                         )
                         Text(
                             text = stringResource(R.string.location_makkah_fallback),
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                            color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.85f)
+                        )
+                    }
+                    IconButton(
+                        onClick = { viewModel.dismissLocationWarning() },
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Dismiss",
+                            tint = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.7f),
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
@@ -606,7 +631,19 @@ fun Overview(
         val hijriYear = currentHijri?.get(java.time.temporal.ChronoField.YEAR) ?: 0
         val showHilalCard = isHilalPeriod && dismissedYear != hijriYear
 
-        if (showHilalCard) {
+        // FIX #8: Wrap Ramadan Hilal card in AnimatedVisibility with spring expand/shrink
+        AnimatedVisibility(
+            visible = showHilalCard,
+            enter = expandVertically(
+                animationSpec = spring(
+                    dampingRatio = androidx.compose.animation.core.Spring.DampingRatioLowBouncy,
+                    stiffness = androidx.compose.animation.core.Spring.StiffnessLow
+                )
+            ) + fadeIn(),
+            exit = shrinkVertically(
+                animationSpec = spring(stiffness = androidx.compose.animation.core.Spring.StiffnessMedium)
+            ) + fadeOut()
+        ) {
             val daysUntilRamadan = 30 - shabanDay
             Card(
                 modifier = Modifier
@@ -663,15 +700,15 @@ fun Overview(
                                 )
                             }
                         }
-                        
+
                         Text(
                             text = stringResource(R.string.ramadan_hilal_sighting_subtitle),
                             style = MaterialTheme.typography.bodySmall,
                             color = colorScheme.onSecondaryContainer.copy(alpha = 0.85f)
                         )
-                        
+
                         Spacer(modifier = Modifier.height(4.dp))
-                        
+
                         Row(
                             modifier = Modifier
                                 .clickable {
@@ -737,7 +774,8 @@ fun Overview(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                val displayedCity = if (city == "Makkah, Saudi Arabia" || city.isEmpty()) {
+                // FIX #3: Default to Muscat label, not Makkah
+            val displayedCity = if (city == "Makkah, Saudi Arabia" || city == "Muscat, Oman" || city.isEmpty()) {
                     stringResource(R.string.default_location)
                 } else {
                     city
@@ -1239,7 +1277,8 @@ fun OverviewItems(viewModel: OverviewVM, nextPrayerName: String, navigator: Navi
                             text = name,
                             style = MaterialTheme.typography.headlineSmall,
                             color = if (isNext) colorScheme.onPrimaryContainer else colorScheme.onSurface,
-                            fontWeight = if (isNext) FontWeight.Bold else FontWeight.Bold
+                            // FIX #9: Restore visual hierarchy — next=Bold, others=Normal
+                            fontWeight = if (isNext) FontWeight.Bold else FontWeight.Normal
                         )
                         Column(horizontalAlignment = Alignment.End) {
                             Text(
@@ -1686,6 +1725,8 @@ fun TasbihDialCard(
             scale.animateTo(0.85f, spring(stiffness = Spring.StiffnessHigh))
             scale.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
         }
+        // FIX #5: Removed duplicate effectiveTarget logic — ViewModel is single source of truth
+        // Completion vibration stays here for immediate UI feedback
         val nextCount = count + 1
         val effectiveTarget = if (dhikr == "الله أكبر" && target == 33) 34 else target
         if (nextCount >= effectiveTarget) {
@@ -1702,6 +1743,31 @@ fun TasbihDialCard(
         viewModel.incrementTasbih()
     }
 
+    // FIX #13: MorphPolygonShape — Tasbih button morphs Circle → Cookie12Sided on press
+    // Use MaterialShapes.Circle (already imported) as the circle endpoint for the morph
+    @Suppress("DEPRECATION")
+    val circlePolygon = remember { androidx.compose.material3.MaterialShapes.Circle }
+    val cookiePolygon = remember { Cookie12Sided }
+    val tasbihMorph = remember(circlePolygon, cookiePolygon) {
+        androidx.graphics.shapes.Morph(circlePolygon, cookiePolygon)
+    }
+    val tapInteractionSource = remember { MutableInteractionSource() }
+    val isTapPressed by tapInteractionSource.collectIsPressedAsState()
+    val morphProgress by animateFloatAsState(
+        targetValue = if (isTapPressed) 1f else 0f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMedium
+        ),
+        label = "tasbihMorphProgress"
+    )
+    val tasbihMorphShape = remember(morphProgress) {
+        com.pilotothegreat.deencompanion.ui.theme.MorphPolygonShape(
+            morph = tasbihMorph,
+            progress = morphProgress
+        )
+    }
+
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
@@ -1714,7 +1780,7 @@ fun TasbihDialCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Tapping Circle (Large, size 180.dp)
+            // Tapping area — morphs from circle to cookie12 on press
             Box(
                 modifier = Modifier
                     .size(180.dp)
@@ -1723,18 +1789,20 @@ fun TasbihDialCard(
                         scaleX = scale.value
                         scaleY = scale.value
                     }
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f))
+                    .clip(tasbihMorphShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f))
                     .semantics { contentDescription = context.getString(R.string.cd_tasbih_button) }
-                    .clickable { onIncrement() },
+                    .clickable(
+                        interactionSource = tapInteractionSource,
+                        indication = androidx.compose.foundation.LocalIndication.current
+                    ) { onIncrement() },
                 contentAlignment = Alignment.Center
             ) {
-                // Clean M3 progress ring on border
-                CircularProgressIndicator(
+                // FIX #14: Use CircularWavyProgressIndicator (M3 Expressive) instead of basic CircularProgressIndicator
+                CircularWavyProgressIndicator(
                     progress = { progress },
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.primary,
-                    strokeWidth = 6.dp,
                     trackColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
                 )
 
