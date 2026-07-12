@@ -22,7 +22,7 @@ object AdhanAlarmManager {
         val calcMethod = repo.calcMethod.first()
         val asrSchool = repo.asrSchool.first()
 
-        val zoneId = ZoneId.systemDefault()
+        val zoneId = try { ZoneId.of(tzId) } catch (e: Exception) { ZoneId.systemDefault() }
         val now = LocalDateTime.now(zoneId)
         val today = LocalDate.now(zoneId)
 

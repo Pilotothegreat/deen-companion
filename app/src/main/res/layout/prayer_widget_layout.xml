@@ -1,53 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Prayer Time Widget: Material You expressive design with proper hierarchy -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@android:id/background"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_background"
-    android:padding="12dp">
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:gravity="fill">
 
-    <TextView
-        android:id="@+id/widget_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Deen Companion"
-        android:textColor="@color/widget_text_secondary"
-        android:textSize="12sp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true" />
-
+    <!-- Header row: app name + icon indicator -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_centerInParent="true">
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
         <TextView
-            android:id="@+id/widget_prayer_name"
-            android:layout_width="wrap_content"
+            android:id="@+id/widget_title"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Dhuhr"
-            android:textColor="@color/widget_text_primary"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            android:layout_weight="1"
+            android:text="@string/app_name"
+            android:textColor="@color/widget_text_secondary"
+            android:textSize="10sp"
+            android:letterSpacing="0.1"
+            android:textAllCaps="true" />
 
-        <TextView
-            android:id="@+id/widget_countdown"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="in 2h 15m"
-            android:textColor="@color/widget_success"
-            android:textSize="14sp" />
+        <View
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:background="@drawable/widget_indicator_dot" />
     </LinearLayout>
 
+    <!-- Spacer -->
+    <View android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+
+    <!-- Prayer name - large, primary -->
+    <TextView
+        android:id="@+id/widget_prayer_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Dhuhr"
+        android:textColor="@color/widget_text_primary"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:lineSpacingMultiplier="1.0" />
+
+    <!-- Prayer time - secondary, smaller -->
     <TextView
         android:id="@+id/widget_prayer_time"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="12:30 PM"
-        android:textColor="@color/widget_text_primary"
+        android:textColor="@color/widget_accent"
         android:textSize="14sp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_marginTop="2dp" />
 
-</RelativeLayout>
+    <!-- Spacer -->
+    <View android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+
+    <!-- Countdown: highlighted chip-style -->
+    <TextView
+        android:id="@+id/widget_countdown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="in 2h 15m"
+        android:textColor="@color/widget_text_secondary"
+        android:textSize="12sp"
+        android:background="@drawable/widget_chip_background"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="4dp" />
+
+</LinearLayout>

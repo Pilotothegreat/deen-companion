@@ -431,82 +431,89 @@ fun Qibla() {
                     )
                 }
 
-                // Qibla Needle (rotates with qiblaBearing - animatedHeading relative to phone)
-                Canvas(
+                // Qibla Needle + Kaaba cursor (all rotate together at qiblaBearing - animatedHeading)
+                val kaabaColor = if (isAligned) MaterialTheme.colorScheme.tertiary else centerArrowColor
+                val kaabaGlowAlpha by animateFloatAsState(
+                    targetValue = if (isAligned) 0.25f else 0f,
+                    animationSpec = androidx.compose.animation.core.infiniteRepeatable(
+                        animation = androidx.compose.animation.core.tween(900),
+                        repeatMode = androidx.compose.animation.core.RepeatMode.Reverse
+                    ),
+                    label = "kaabaGlow"
+                )
+                Box(
                     modifier = Modifier
                         .size(260.dp)
                         .graphicsLayer {
                             rotationZ = qiblaBearing - animatedHeading
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    // Needle drawn behind the Kaaba icon
+                    Canvas(modifier = Modifier.fillMaxSize()) {
+                        val radius = size.minDimension / 2
+                        val center = Offset(size.width / 2, size.height / 2)
+
+                        // Chiseled 3D M3 arrow needle
+                        val leftWing = Path().apply {
+                            moveTo(center.x, center.y - radius + 40.dp.toPx())
+                            lineTo(center.x - 18.dp.toPx(), center.y + 24.dp.toPx())
+                            lineTo(center.x, center.y + 8.dp.toPx())
+                            close()
                         }
-                ) {
-                    val radius = size.minDimension / 2
-                    val center = Offset(size.width / 2, size.height / 2)
+                        val rightWing = Path().apply {
+                            moveTo(center.x, center.y - radius + 40.dp.toPx())
+                            lineTo(center.x + 18.dp.toPx(), center.y + 24.dp.toPx())
+                            lineTo(center.x, center.y + 8.dp.toPx())
+                            close()
+                        }
 
-                    // Draw chiseled 3D M3 arrow needle
-                    val leftWing = Path().apply {
-                        moveTo(center.x, center.y - radius + 15.dp.toPx())
-                        lineTo(center.x - 22.dp.toPx(), center.y + 24.dp.toPx())
-                        lineTo(center.x, center.y + 8.dp.toPx())
-                        close()
-                    }
-                    val rightWing = Path().apply {
-                        moveTo(center.x, center.y - radius + 15.dp.toPx())
-                        lineTo(center.x + 22.dp.toPx(), center.y + 24.dp.toPx())
-                        lineTo(center.x, center.y + 8.dp.toPx())
-                        close()
+                        drawPath(path = leftWing, color = kaabaColor)
+                        drawPath(path = rightWing, color = kaabaColor.copy(alpha = 0.65f))
+
+                        // Center pivot hub
+                        drawCircle(color = surfaceColor, radius = 9.dp.toPx(), center = center)
+                        drawCircle(color = kaabaColor, radius = 5.dp.toPx(), center = center)
                     }
 
-                    drawPath(
-                        path = leftWing,
-                        color = centerArrowColor
-                    )
-                    drawPath(
-                        path = rightWing,
-                        color = centerArrowColor.copy(alpha = 0.75f)
-                    )
-
-                    // Draw center pivot hub
-                    drawCircle(
-                        color = surfaceColor,
-                        radius = 8.dp.toPx(),
-                        center = center
-                    )
-                    drawCircle(
-                        color = centerArrowColor,
-                        radius = 4.dp.toPx(),
-                        center = center
-                    )
-                }
-
-                // Beautifully chiseled Kaaba icon cursor aligned with the top direction
-                Box(
-                    modifier = Modifier.size(260.dp),
-                    contentAlignment = Alignment.TopCenter
-                ) {
+                    // Kaaba icon at the north tip of the needle
                     Box(
                         modifier = Modifier
-                            .offset(y = (-16).dp)
-                            .size(44.dp)
-                            .clip(CircleShape)
-                            .background(
-                                if (isAligned) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f)
-                                else Color.Transparent
-                            )
-                            .border(
-                                width = 2.dp,
-                                color = if (isAligned) MaterialTheme.colorScheme.tertiary else Color.Transparent,
-                                shape = CircleShape
-                            ),
-                        contentAlignment = Alignment.Center
+                            .fillMaxSize()
+                            .padding(bottom = (260 / 2 - 14).dp), // push to top edge of 260dp circle
+                        contentAlignment = Alignment.TopCenter
                     ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.ic_kaaba),
-                            contentDescription = "Kaaba Cursor",
-                            modifier = Modifier.size(28.dp),
-                            colorFilter = if (isAligned) null else ColorFilter.colorMatrix(
-                                ColorMatrix().apply { setToSaturation(0.2f) }
+                        // Pulsing glow ring
+                        Canvas(modifier = Modifier.size(52.dp)) {
+                            drawCircle(
+                                color = kaabaColor.copy(alpha = kaabaGlowAlpha),
+                                radius = size.minDimension / 2
                             )
-                        )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .size(44.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    if (isAligned) kaabaColor.copy(alpha = 0.18f)
+                                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                                )
+                                .border(
+                                    width = if (isAligned) 2.dp else 1.dp,
+                                    color = if (isAligned) kaabaColor else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                                    shape = CircleShape
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.ic_kaaba),
+                                contentDescription = "Kaaba Cursor",
+                                modifier = Modifier.size(28.dp),
+                                colorFilter = if (isAligned) null else ColorFilter.colorMatrix(
+                                    ColorMatrix().apply { setToSaturation(0.3f) }
+                                )
+                            )
+                        }
                     }
                 }
             }

@@ -74,7 +74,7 @@ object IqamaAlarmManager {
         val ishaFixedTimeVal    = appPreferenceRepo.ishaIqamaTime.first()
 
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
-        val zoneId = ZoneId.systemDefault()
+        val zoneId = try { ZoneId.of(tzId) } catch (e: Exception) { ZoneId.systemDefault() }
         val now = LocalDateTime.now(zoneId)
 
         // Cancel legacy hardcoded alarms (1001-1005, 1011-1015) to prevent duplicates upon app update

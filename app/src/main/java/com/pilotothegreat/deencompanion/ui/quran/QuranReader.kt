@@ -1057,7 +1057,7 @@ fun JuzHeader(juzNumber: Int, goldAccent: Color = Color(0xFFC5A059), isDark: Boo
 }
 
 fun toArabicNumerals(n: Int): String =
-    n.toString()
+    n.toString().map { c -> if (c.isDigit()) '\u0660' + (c - '0') else c }.joinToString("")
 
 fun getJuzNumber(surahId: Int, verseId: Int): Int {
     val match = juzData.lastOrNull { boundary ->

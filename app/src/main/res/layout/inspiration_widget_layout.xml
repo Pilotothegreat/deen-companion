@@ -1,47 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Inspiration Widget: Material You — quote + reference -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@android:id/background"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_background"
-    android:padding="12dp">
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:gravity="fill">
 
+    <!-- Header -->
     <TextView
         android:id="@+id/widget_title"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Daily Inspiration"
         android:textColor="@color/widget_text_secondary"
-        android:textSize="12sp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true" />
+        android:textSize="10sp"
+        android:letterSpacing="0.1"
+        android:textAllCaps="true" />
 
-    <LinearLayout
+    <!-- Accent divider line -->
+    <View
+        android:layout_width="32dp"
+        android:layout_height="2dp"
+        android:background="@color/widget_accent"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Spacer -->
+    <View android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+
+    <!-- Quote text -->
+    <TextView
+        android:id="@+id/widget_inspiration_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_centerInParent="true">
+        android:text="So verily, with hardship, there is ease."
+        android:textColor="@color/widget_text_primary"
+        android:textSize="14sp"
+        android:lineSpacingMultiplier="1.3"
+        android:maxLines="3"
+        android:ellipsize="end" />
 
-        <TextView
-            android:id="@+id/widget_inspiration_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="So verily, with hardship, there is ease."
-            android:textColor="@color/widget_text_primary"
-            android:textSize="15sp"
-            android:textStyle="italic"
-            android:maxLines="2"
-            android:ellipsize="end" />
+    <!-- Spacer -->
+    <View android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
 
-        <TextView
-            android:id="@+id/widget_inspiration_ref"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Quran 94:5"
-            android:textColor="@color/widget_text_secondary"
-            android:textSize="11sp"
-            android:layout_gravity="end"
-            android:layout_marginTop="4dp" />
-    </LinearLayout>
+    <!-- Reference -->
+    <TextView
+        android:id="@+id/widget_inspiration_ref"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Quran 94:5"
+        android:textColor="@color/widget_accent"
+        android:textSize="11sp"
+        android:gravity="end"
+        android:layout_marginTop="4dp" />
 
-</RelativeLayout>
+</LinearLayout>

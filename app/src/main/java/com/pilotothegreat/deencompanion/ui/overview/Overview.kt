@@ -1731,7 +1731,9 @@ fun TasbihDialCard(
             ) {
                 CircularWavyProgressIndicator(
                     progress = { progress },
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(6.dp),
                     color = MaterialTheme.colorScheme.primary,
                     trackColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
                 )
