@@ -1,0 +1,33 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+  <path
+      android:pathData="M12,2L3,7v10l9,5 9,-5V7L12,2z"
+      android:fillColor="#1A1A1A"/>
+  <path
+      android:pathData="M12,22l9,-5V7l-9,5v10z"
+      android:fillColor="#2A2A2A"/>
+  <path
+      android:pathData="M3,7l9,5 9,-5L12,2 3,7z"
+      android:fillColor="#FFD700"
+      android:strokeWidth="0.5"
+      android:strokeColor="#B8860B"/>
+  <path
+      android:pathData="M12,12l9,-5"
+      android:strokeWidth="1"
+      android:strokeColor="#FFD700"/>
+  <path
+      android:pathData="M12,12v10"
+      android:strokeWidth="1"
+      android:strokeColor="#FFD700"/>
+  <path
+      android:pathData="M3,7l9,5"
+      android:strokeWidth="1"
+      android:strokeColor="#FFD700"/>
+  <!-- Door of Kaaba -->
+  <path
+      android:pathData="M14.5,15.5l3,-1.6v3.2l-3,1.6z"
+      android:fillColor="#FFD700"/>
+</vector>

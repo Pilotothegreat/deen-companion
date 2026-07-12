@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Deen Companion"
-        android:textColor="#80FFFFFF"
+        android:textColor="@color/widget_text_secondary"
         android:textSize="12sp"
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true" />
@@ -27,7 +27,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Dhuhr"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/widget_text_primary"
             android:textSize="20sp"
             android:textStyle="bold" />
 
@@ -36,7 +36,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="in 2h 15m"
-            android:textColor="#34C759"
+            android:textColor="@color/widget_success"
             android:textSize="14sp" />
     </LinearLayout>
 
@@ -45,7 +45,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="12:30 PM"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/widget_text_primary"
         android:textSize="14sp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true" />

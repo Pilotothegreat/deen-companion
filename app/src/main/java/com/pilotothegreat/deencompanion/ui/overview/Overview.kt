@@ -97,6 +97,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.ButtonGroup
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.OutlinedTextField
@@ -279,16 +280,7 @@ fun getLocalizedInspirationRef(ref: String, lang: String): String {
 }
 
 fun String.toArabicNumerals(): String {
-    return this.replace("1", "١")
-        .replace("2", "٢")
-        .replace("3", "٣")
-        .replace("4", "٤")
-        .replace("5", "٥")
-        .replace("6", "٦")
-        .replace("7", "٧")
-        .replace("8", "٨")
-        .replace("9", "٩")
-        .replace("0", "٠")
+    return this
 }
 
 fun calculateNextPrayer(
@@ -466,64 +458,11 @@ fun Overview(
             },
             state = pullState,
             indicator = {
-                val trigger = pullState.distanceFraction
-                val isRobolectric = remember {
-                    try {
-                        Class.forName("org.robolectric.Robolectric") != null
-                    } catch (e: Exception) {
-                        false
-                    }
-                }
-                val refreshingRotation = if (isRobolectric) {
-                    0f
-                } else {
-                    val rotationTransition = rememberInfiniteTransition(label = "pull_to_refresh_rotation")
-                    val rot by rotationTransition.animateFloat(
-                        initialValue = 0f,
-                        targetValue = 360f,
-                        animationSpec = infiniteRepeatable(
-                            animation = tween(1000, easing = LinearEasing)
-                        ),
-                        label = "rotation"
-                    )
-                    rot
-                }
-
-                if (trigger > 0f || isRefreshing) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.TopCenter)
-                            .padding(top = 16.dp)
-                            .size(56.dp)
-                            .graphicsLayer {
-                                translationY = if (isRefreshing) {
-                                    24.dp.toPx()
-                                } else {
-                                    ((trigger * 80.dp.toPx()) - 56.dp.toPx()).coerceAtLeast(0f)
-                                }
-                                scaleX = if (isRefreshing) 1f else trigger.coerceIn(0f, 1f)
-                                scaleY = if (isRefreshing) 1f else trigger.coerceIn(0f, 1f)
-                                rotationZ = if (isRefreshing) refreshingRotation else trigger * 360f
-                            }
-                            .clip(cookie12SidedShape)
-                            .background(colorScheme.primaryContainer),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (isRefreshing) {
-                            CircularWavyProgressIndicator(
-                                color = colorScheme.onPrimaryContainer,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Default.Refresh,
-                                contentDescription = null,
-                                tint = colorScheme.onPrimaryContainer,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                    }
-                }
+                PullToRefreshDefaults.Indicator(
+                    state = pullState,
+                    isRefreshing = isRefreshing,
+                    modifier = Modifier.align(Alignment.TopCenter)
+                )
             },
             modifier = Modifier.fillMaxSize()
         ) {
@@ -1780,7 +1719,6 @@ fun TasbihDialCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Tapping area — morphs from circle to cookie12 on press
             Box(
                 modifier = Modifier
                     .size(180.dp)
@@ -1788,17 +1726,9 @@ fun TasbihDialCard(
                     .graphicsLayer {
                         scaleX = scale.value
                         scaleY = scale.value
-                    }
-                    .clip(tasbihMorphShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f))
-                    .semantics { contentDescription = context.getString(R.string.cd_tasbih_button) }
-                    .clickable(
-                        interactionSource = tapInteractionSource,
-                        indication = androidx.compose.foundation.LocalIndication.current
-                    ) { onIncrement() },
+                    },
                 contentAlignment = Alignment.Center
             ) {
-                // FIX #14: Use CircularWavyProgressIndicator (M3 Expressive) instead of basic CircularProgressIndicator
                 CircularWavyProgressIndicator(
                     progress = { progress },
                     modifier = Modifier.fillMaxSize(),
@@ -1806,11 +1736,24 @@ fun TasbihDialCard(
                     trackColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
                 )
 
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                    modifier = Modifier.padding(16.dp)
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(4.dp)
+                        .clip(tasbihMorphShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f))
+                        .semantics { contentDescription = context.getString(R.string.cd_tasbih_button) }
+                        .clickable(
+                            interactionSource = tapInteractionSource,
+                            indication = androidx.compose.foundation.LocalIndication.current
+                        ) { onIncrement() },
+                    contentAlignment = Alignment.Center
                 ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.padding(16.dp)
+                    ) {
                     // Dhikr Selector Name Button inside the circle
                     Row(
                         modifier = Modifier
@@ -1860,8 +1803,9 @@ fun TasbihDialCard(
                     )
                 }
             }
+        }
 
-            // Small Reset Button below the circle
+        // Small Reset Button below the circle
             FilledTonalIconButton(
                 onClick = { viewModel.resetTasbih() },
                 modifier = Modifier.size(40.dp)

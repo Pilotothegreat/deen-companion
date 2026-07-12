@@ -16,6 +16,13 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.foundation.border
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CompassCalibration
@@ -24,6 +31,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -231,11 +239,13 @@ fun Qibla() {
             )
         }
     ) { padding ->
+        val scrollState = rememberScrollState()
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(padding)
+                .verticalScroll(scrollState)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp)
@@ -372,7 +382,7 @@ fun Qibla() {
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Beautiful compass representation
             Box(
@@ -468,25 +478,40 @@ fun Qibla() {
                     )
                 }
 
-                val crosshairColor = if (isAligned) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.outline
-                // Inner static alignment crosshair to help user line up
-                Canvas(modifier = Modifier.size(260.dp)) {
-                    val center = Offset(size.width / 2, size.height / 2)
-                    // Top pointer (marker indicating top of screen direction)
-                    val pointerPath = Path().apply {
-                        moveTo(center.x, 8.dp.toPx())
-                        lineTo(center.x - 6.dp.toPx(), 18.dp.toPx())
-                        lineTo(center.x + 6.dp.toPx(), 18.dp.toPx())
-                        close()
+                // Beautifully chiseled Kaaba icon cursor aligned with the top direction
+                Box(
+                    modifier = Modifier.size(260.dp),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .offset(y = (-16).dp)
+                            .size(44.dp)
+                            .clip(CircleShape)
+                            .background(
+                                if (isAligned) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f)
+                                else Color.Transparent
+                            )
+                            .border(
+                                width = 2.dp,
+                                color = if (isAligned) MaterialTheme.colorScheme.tertiary else Color.Transparent,
+                                shape = CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_kaaba),
+                            contentDescription = "Kaaba Cursor",
+                            modifier = Modifier.size(28.dp),
+                            colorFilter = if (isAligned) null else ColorFilter.colorMatrix(
+                                ColorMatrix().apply { setToSaturation(0.2f) }
+                            )
+                        )
                     }
-                    drawPath(
-                        path = pointerPath,
-                        color = crosshairColor
-                    )
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Aligned status text with smooth fade/spring entry
             Box(

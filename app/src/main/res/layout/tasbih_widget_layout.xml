@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Tasbih Counter"
-        android:textColor="#80FFFFFF"
+        android:textColor="@color/widget_text_secondary"
         android:textSize="12sp"
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true" />
@@ -28,7 +28,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Dhikr"
-            android:textColor="#A0A0A0"
+            android:textColor="@color/widget_text_secondary"
             android:textSize="14sp" />
 
         <TextView
@@ -36,22 +36,24 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="0"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/widget_text_primary"
             android:textSize="28sp"
             android:textStyle="bold" />
     </LinearLayout>
 
-    <Button
+    <TextView
         android:id="@+id/widget_btn_container"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_centerVertical="true"
         android:layout_alignParentEnd="true"
         android:text="+"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/widget_text_primary"
         android:textSize="22sp"
         android:textStyle="bold"
-        android:background="?android:attr/selectableItemBackground"
+        android:background="@drawable/widget_btn_background"
+        android:clickable="true"
+        android:focusable="true"
         android:gravity="center" />
 
 </RelativeLayout>

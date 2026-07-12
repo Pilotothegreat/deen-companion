@@ -122,14 +122,21 @@ class QuranPlaybackManager(private val context: Context) {
             player.clearMediaItems()
 
             val mediaItems = mutableListOf<MediaItem>()
+            val reciterName = context.getString(reciter.labelRes)
             for (ayahNum in 1..surah.totalVerses) {
                 val surahStr = surah.id.toString().padStart(3, '0')
                 val ayahStr = ayahNum.toString().padStart(3, '0')
                 val url = "https://everyayah.com/data/${reciter.folder}/$surahStr$ayahStr.mp3"
+                val mediaMetadata = androidx.media3.common.MediaMetadata.Builder()
+                    .setTitle("${surah.transliteration} - Ayah $ayahNum")
+                    .setArtist(reciterName)
+                    .setAlbumTitle("Noble Quran")
+                    .build()
                 mediaItems.add(
                     MediaItem.Builder()
                         .setUri(url)
                         .setMediaId("${surah.id}_$ayahNum")
+                        .setMediaMetadata(mediaMetadata)
                         .build()
                 )
             }

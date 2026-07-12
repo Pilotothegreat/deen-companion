@@ -56,6 +56,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
@@ -165,6 +166,15 @@ fun NavigationManager() {
 fun NavigationButton(navigator: Navigator, route: NavKey, name: String, icon: ImageVector) {
     val selected = navigator.current == route
     val horizontalPadding by animateDpAsState(if (selected) 24.dp else 12.dp)
+    val cornerSize by animateDpAsState(
+        targetValue = if (selected) 24.dp else 12.dp,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "cornerSize"
+    )
+    val buttonShape = remember(cornerSize) { RoundedCornerShape(cornerSize) }
     val haptic = LocalHapticFeedback.current
     val scale = remember { Animatable(1f) }
 
@@ -190,6 +200,7 @@ fun NavigationButton(navigator: Navigator, route: NavKey, name: String, icon: Im
             } else {
                 ButtonDefaults.textButtonColors()
             },
+        shape = buttonShape,
         onClick = {
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
             if (navigator.current != route) {

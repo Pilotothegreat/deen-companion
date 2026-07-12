@@ -295,7 +295,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
             }
         } else {
             val statusBarHeightDp = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-            val pagerBottomPaddingDp = if (currentSurahId == surah.id) 116.dp else 40.dp
+            val pagerBottomPaddingDp = if (currentSurahId == currentSurah?.id) 116.dp else 40.dp
             val pagerTopPaddingDp = statusBarHeightDp + 64.dp
 
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
@@ -494,7 +494,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                             val annotated = remember(block.verseItem, isHighlighted, primaryContainerColor, onPrimaryContainerColor, isDark, goldAccent, mushafTextColor) {
                                                 val builder = AnnotatedString.Builder()
                                                 val startOrn = builder.length
-                                                val ornament = "\u200F﴿${toArabicNumerals(block.verseItem.verse.id)}﴾\u200F "
+                                                val ornament = "\u200F\u06DD${toArabicNumerals(block.verseItem.verse.id)}\u200F "
                                                 builder.append(ornament)
                                                 val endOrn = builder.length
 
@@ -616,7 +616,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                     val endSajdah = builder.length
 
                                                     val startOrnNum = builder.length
-                                                    val ornament = "\u200F﴿${toArabicNumerals(verse.id)}﴾\u200F "
+                                                    val ornament = "\u200F\u06DD${toArabicNumerals(verse.id)}\u200F "
                                                     builder.append(ornament)
                                                     val endOrnNum = builder.length
                                                     
@@ -1057,7 +1057,7 @@ fun JuzHeader(juzNumber: Int, goldAccent: Color = Color(0xFFC5A059), isDark: Boo
 }
 
 fun toArabicNumerals(n: Int): String =
-    n.toString().map { c -> if (c.isDigit()) '٠' + (c - '0') else c }.joinToString("")
+    n.toString()
 
 fun getJuzNumber(surahId: Int, verseId: Int): Int {
     val match = juzData.lastOrNull { boundary ->
@@ -1437,7 +1437,7 @@ fun calculatePageHeight(
                     if (QuranHelper.isSajdahVerse(surahId, verse.id)) {
                         builder.append("۩ ")
                     }
-                    val ornament = "\u200F﴿${toArabicNumerals(verse.id)}﴾\u200F "
+                    val ornament = "\u200F\u06DD${toArabicNumerals(verse.id)}\u200F "
                     builder.append(ornament)
                 }
                 
@@ -1468,7 +1468,11 @@ fun calculatePageHeight(
         totalHeightPx += with(density) { 90.dp.toPx() }
     }
     
-    totalHeightPx += with(density) { 68.dp.toPx() }
+    if (lang == "en") {
+        totalHeightPx += with(density) { 48.dp.toPx() }
+    }
+    
+    totalHeightPx += with(density) { 92.dp.toPx() }
     
     return totalHeightPx
 }

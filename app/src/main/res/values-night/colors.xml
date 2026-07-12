@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Widget Dark Mode Colors -->
+    <color name="widget_background">#151412</color>
+    <color name="widget_border">#2E2A27</color>
+    <color name="widget_text_primary">#E8DCC8</color>
+    <color name="widget_text_secondary">#9A8E7E</color>
+    <color name="widget_accent">#D4A855</color>
+    <color name="widget_button_background">#2A2520</color>
+    <color name="widget_success">#4CAF50</color>
+</resources>

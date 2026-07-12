@@ -2,4 +2,13 @@
 <resources>
     <color name="white">#FFFFFFFF</color>
     <color name="icon_bg_simple">#FF0F0F0F</color>
+
+    <!-- Widget Light Mode Colors -->
+    <color name="widget_background">#FAF8F5</color>
+    <color name="widget_border">#E6E1DA</color>
+    <color name="widget_text_primary">#2C2724</color>
+    <color name="widget_text_secondary">#7A726C</color>
+    <color name="widget_accent">#C5A059</color>
+    <color name="widget_button_background">#F0EAE1</color>
+    <color name="widget_success">#2E7D32</color>
 </resources>
