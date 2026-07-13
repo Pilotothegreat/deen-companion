@@ -1,4 +1,4 @@
-// FIXED: Add ndk block to release build type and bump version to 1.3.1
+// FIXED: Add ndk block to release build type and bump version to 1.5.18
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -26,8 +26,8 @@ android {
         applicationId = "com.pilotothegreat.deencompanion"
         minSdk = 26
         targetSdk = 37
-        versionCode = 167
-        versionName = "1.5.17"
+        versionCode = 168
+        versionName = "1.5.18"
         base.archivesName = "deen-$versionName"
     }
 
