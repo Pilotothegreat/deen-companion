@@ -494,7 +494,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                             val annotated = remember(block.verseItem, isHighlighted, primaryContainerColor, onPrimaryContainerColor, isDark, goldAccent, mushafTextColor) {
                                                 val builder = AnnotatedString.Builder()
                                                 val startOrn = builder.length
-                                                val ornament = "\u200F\u06DD${toArabicNumerals(block.verseItem.verse.id)}\u200F "
+                                                val ornament = " \u06DD${block.verseItem.verse.id} "
                                                 builder.append(ornament)
                                                 val endOrn = builder.length
 
@@ -616,7 +616,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                     val endSajdah = builder.length
 
                                                     val startOrnNum = builder.length
-                                                    val ornament = "\u200F\u06DD${toArabicNumerals(verse.id)}\u200F "
+                                                    val ornament = " \u06DD${verse.id} "
                                                     builder.append(ornament)
                                                     val endOrnNum = builder.length
                                                     
@@ -1096,7 +1096,7 @@ fun InnerPageHeader(
                 style = TextStyle(
                     fontWeight = FontWeight.Bold,
                     fontFamily = fontFamily,
-                    fontSize = 12.sp,
+                    fontSize = 18.sp,
                     color = goldAccent
                 )
             )
@@ -1106,7 +1106,7 @@ fun InnerPageHeader(
                 style = TextStyle(
                     fontWeight = FontWeight.Bold,
                     fontFamily = fontFamily,
-                    fontSize = 12.sp,
+                    fontSize = 18.sp,
                     color = goldAccent
                 )
             )
@@ -1279,7 +1279,7 @@ fun SurahStartBanner(
                 style = MaterialTheme.typography.headlineMedium.copy(
                     fontWeight = FontWeight.Bold,
                     fontFamily = fontFamily,
-                    fontSize = 14.sp
+                    fontSize = 18.sp
                 ),
                 color = goldAccent,
                 textAlign = TextAlign.Center
@@ -1290,7 +1290,7 @@ fun SurahStartBanner(
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Bold,
                     fontFamily = fontFamily,
-                    fontSize = 8.sp
+                    fontSize = 12.sp
                 ),
                 color = textColor.copy(alpha = 0.8f),
                 textAlign = TextAlign.Center
@@ -1437,7 +1437,7 @@ fun calculatePageHeight(
                     if (QuranHelper.isSajdahVerse(surahId, verse.id)) {
                         builder.append("۩ ")
                     }
-                    val ornament = "\u200F\u06DD${toArabicNumerals(verse.id)}\u200F "
+                    val ornament = " \u06DD${verse.id} "
                     builder.append(ornament)
                 }
                 

@@ -1342,6 +1342,7 @@ private fun getSmoothRotation(target: Float, current: Float): Float {
     return current + diff
 }
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun LiveQiblaCompassCard(
     viewModel: OverviewVM,
@@ -1354,7 +1355,6 @@ fun LiveQiblaCompassCard(
     val lat by viewModel.latitude.collectAsState(initial = 21.3891)
     val lon by viewModel.longitude.collectAsState(initial = 39.8579)
     val qiblaBearing = remember(lat, lon) { calculateQiblaDirection(lat, lon).toFloat() }
-    val cookie12SidedShape = rememberCookie12SidedShape()
     val cdQibla = stringResource(R.string.cd_qibla_compass)
 
     val declination = remember(lat, lon) {
@@ -1492,6 +1492,26 @@ fun LiveQiblaCompassCard(
         )
     )
 
+    val circlePolygon = remember { androidx.compose.material3.MaterialShapes.Circle }
+    val cookiePolygon = remember { Cookie12Sided }
+    val qiblaMorph = remember(circlePolygon, cookiePolygon) {
+        androidx.graphics.shapes.Morph(circlePolygon, cookiePolygon)
+    }
+    val qiblaMorphProgress by animateFloatAsState(
+        targetValue = if (isAligned) 1f else 0f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMedium
+        ),
+        label = "qiblaCardMorphProgress"
+    )
+    val qiblaMorphShape = remember(qiblaMorphProgress) {
+        com.pilotothegreat.deencompanion.ui.theme.MorphPolygonShape(
+            morph = qiblaMorph,
+            progress = qiblaMorphProgress
+        )
+    }
+
     var visible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         visible = true
@@ -1560,7 +1580,7 @@ fun LiveQiblaCompassCard(
                 Box(
                     modifier = Modifier
                         .size(120.dp)
-                        .clip(cookie12SidedShape)
+                        .clip(qiblaMorphShape)
                         .background(colorScheme.primaryContainer.copy(alpha = if (isAligned) 0.22f else 0.12f))
                         .padding(8.dp),
                     contentAlignment = Alignment.Center
@@ -1664,11 +1684,8 @@ fun TasbihDialCard(
             scale.animateTo(0.85f, spring(stiffness = Spring.StiffnessHigh))
             scale.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
         }
-        // FIX #5: Removed duplicate effectiveTarget logic — ViewModel is single source of truth
-        // Completion vibration stays here for immediate UI feedback
         val nextCount = count + 1
-        val effectiveTarget = if (dhikr == "الله أكبر" && target == 33) 34 else target
-        if (nextCount >= effectiveTarget) {
+        if (nextCount >= target) {
             val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -1682,7 +1699,7 @@ fun TasbihDialCard(
         viewModel.incrementTasbih()
     }
 
-    // FIX #13: MorphPolygonShape — Tasbih button morphs Circle → Cookie12Sided on press
+    // FIX #13: MorphPolygonShape — Tasbih button morphs Circle → Cookie12Sided on press/completion
     // Use MaterialShapes.Circle (already imported) as the circle endpoint for the morph
     @Suppress("DEPRECATION")
     val circlePolygon = remember { androidx.compose.material3.MaterialShapes.Circle }
@@ -1692,8 +1709,10 @@ fun TasbihDialCard(
     }
     val tapInteractionSource = remember { MutableInteractionSource() }
     val isTapPressed by tapInteractionSource.collectIsPressedAsState()
+    
+    val isTargetReached = count >= target
     val morphProgress by animateFloatAsState(
-        targetValue = if (isTapPressed) 1f else 0f,
+        targetValue = if (isTapPressed || isTargetReached) 1f else 0f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessMedium
@@ -1706,6 +1725,16 @@ fun TasbihDialCard(
             progress = morphProgress
         )
     }
+    val progressColor by animateColorAsState(
+        targetValue = if (isTargetReached) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
+        animationSpec = spring(stiffness = Spring.StiffnessLow),
+        label = "progressColor"
+    )
+    val buttonBgColor by animateColorAsState(
+        targetValue = if (isTargetReached) MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.25f) else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f),
+        animationSpec = spring(stiffness = Spring.StiffnessLow),
+        label = "buttonBgColor"
+    )
 
     Card(
         modifier = modifier,
@@ -1734,7 +1763,7 @@ fun TasbihDialCard(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(6.dp),
-                    color = MaterialTheme.colorScheme.primary,
+                    color = progressColor,
                     trackColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
                 )
 
@@ -1743,7 +1772,7 @@ fun TasbihDialCard(
                         .fillMaxSize()
                         .padding(4.dp)
                         .clip(tasbihMorphShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.15f))
+                        .background(buttonBgColor)
                         .semantics { contentDescription = context.getString(R.string.cd_tasbih_button) }
                         .clickable(
                             interactionSource = tapInteractionSource,
@@ -1756,56 +1785,56 @@ fun TasbihDialCard(
                         verticalArrangement = Arrangement.Center,
                         modifier = Modifier.padding(16.dp)
                     ) {
-                    // Dhikr Selector Name Button inside the circle
-                    Row(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(MaterialTheme.colorScheme.secondaryContainer)
-                            .clickable {
-                                val nextDhikr = when (dhikr) {
-                                    "سبحان الله" -> "الحمد لله"
-                                    "الحمد لله" -> "الله أكبر"
-                                    "الله أكبر" -> "لا إله إلا الله"
-                                    else -> "سبحان الله"
+                        // Dhikr Selector Name Button inside the circle
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(MaterialTheme.colorScheme.secondaryContainer)
+                                .clickable {
+                                    val nextDhikr = when (dhikr) {
+                                        "سبحان الله" -> "الحمد لله"
+                                        "الحمد لله" -> "الله أكبر"
+                                        "الله أكبر" -> "لا إله إلا الله"
+                                        else -> "سبحان الله"
+                                    }
+                                    viewModel.setTasbihDhikr(nextDhikr)
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 }
-                                viewModel.setTasbihDhikr(nextDhikr)
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            }
-                            .padding(horizontal = 12.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
+                                .padding(horizontal = 12.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = localizedDhikr,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Icon(
+                                imageVector = Icons.Default.ArrowDropDown,
+                                contentDescription = "Change Dhikr",
+                                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // Large bouncing count number
                         Text(
-                            text = localizedDhikr,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Icon(
-                            imageVector = Icons.Default.ArrowDropDown,
-                            contentDescription = "Change Dhikr",
-                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                            modifier = Modifier.size(16.dp)
+                            text = count.toString(),
+                            style = MaterialTheme.typography.displayLarge.copy(
+                                fontWeight = FontWeight.Black,
+                                fontSize = 48.sp
+                            ),
+                            color = if (isTargetReached) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
                         )
                     }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Large bouncing count number
-                    Text(
-                        text = count.toString(),
-                        style = MaterialTheme.typography.displayLarge.copy(
-                            fontWeight = FontWeight.Black,
-                            fontSize = 48.sp
-                        ),
-                        color = MaterialTheme.colorScheme.primary
-                    )
                 }
             }
-        }
 
         // Small Reset Button below the circle
             FilledTonalIconButton(

@@ -48,6 +48,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pilotothegreat.deencompanion.R
+import androidx.compose.material3.MaterialShapes.Companion.Cookie12Sided
+import com.pilotothegreat.deencompanion.ui.theme.MorphPolygonShape
 import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
 import com.pilotothegreat.deencompanion.ui.navigation.Navigator
 import com.pilotothegreat.deencompanion.ui.overview.calculateQiblaDirection
@@ -58,7 +60,7 @@ import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun Qibla() {
     val context = LocalContext.current
@@ -211,6 +213,26 @@ fun Qibla() {
             }
         }
         wasAligned = isAligned
+    }
+
+    val circlePolygon = remember { androidx.compose.material3.MaterialShapes.Circle }
+    val cookiePolygon = remember { Cookie12Sided }
+    val qiblaMorph = remember(circlePolygon, cookiePolygon) {
+        androidx.graphics.shapes.Morph(circlePolygon, cookiePolygon)
+    }
+    val qiblaMorphProgress by animateFloatAsState(
+        targetValue = if (isAligned) 1f else 0f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMedium
+        ),
+        label = "qiblaScreenMorphProgress"
+    )
+    val qiblaMorphShape = remember(qiblaMorphProgress) {
+        MorphPolygonShape(
+            morph = qiblaMorph,
+            progress = qiblaMorphProgress
+        )
     }
 
     val primaryColor = MaterialTheme.colorScheme.primary
@@ -493,7 +515,7 @@ fun Qibla() {
                         Box(
                             modifier = Modifier
                                 .size(44.dp)
-                                .clip(CircleShape)
+                                .clip(qiblaMorphShape)
                                 .background(
                                     if (isAligned) kaabaColor.copy(alpha = 0.18f)
                                     else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
@@ -501,7 +523,7 @@ fun Qibla() {
                                 .border(
                                     width = if (isAligned) 2.dp else 1.dp,
                                     color = if (isAligned) kaabaColor else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-                                    shape = CircleShape
+                                    shape = qiblaMorphShape
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
