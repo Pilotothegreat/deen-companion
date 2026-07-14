@@ -140,4 +140,6 @@ Confirm "claude50sonnetthinking" appears in the output before relying on it.
 2. **GitHub Push**: Commit and push changes to GitHub after completing major iterations (using standard Git commands: `git add`, `git commit`, `git push`).
 3. **M3 Design Kits**: Align with Material 3 Expressive guidelines, using the custom shape-morphing wrapper (`MorphPolygonShape`) and centralized shapes/motion tokens.
 4. **Model Selection**: Always use `claude50sonnetthinking` on Perplexity MCP for reasoning, planning, and coding architecture tasks.
-
+5. **Sonnet 5 Guidance**: Leverage `claude50sonnetthinking` for all architectural designs, complex plans, and code generation due to its superior capabilities. Use Perplexity tools extensively to research new topics, verify library APIs, and fetch correct reference documentation before writing code.
+6. **Command & Rule Logging**: Log all critical executed commands, instructions, and newly discovered project rules/protocols directly in `AGENTS.md` (or relevant workspace memoirs/logs) to maintain complete project history in the workstation.
+7. **GitHub Context**: Note that Sonnet 5 is connected directly to the user's GitHub through the GitHub connector. Proactively pull context, check repository status/history (`git log`, `git status`, etc.), and remain fully aware of the repository's state to guide decisions.

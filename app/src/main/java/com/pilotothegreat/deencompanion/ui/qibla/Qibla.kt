@@ -515,7 +515,7 @@ fun Qibla() {
                         Box(
                             modifier = Modifier
                                 .size(44.dp)
-                                .clip(qiblaMorphShape)
+                                .clip(CircleShape)
                                 .background(
                                     if (isAligned) kaabaColor.copy(alpha = 0.18f)
                                     else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
@@ -523,14 +523,19 @@ fun Qibla() {
                                 .border(
                                     width = if (isAligned) 2.dp else 1.dp,
                                     color = if (isAligned) kaabaColor else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-                                    shape = qiblaMorphShape
+                                    shape = CircleShape
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
                             Image(
                                 painter = painterResource(id = R.drawable.ic_kaaba),
                                 contentDescription = "Kaaba Cursor",
-                                modifier = Modifier.size(28.dp),
+                                modifier = Modifier
+                                    .size(28.dp)
+                                    .graphicsLayer {
+                                        // Keep Kaaba icon upright by canceling parent rotation
+                                        rotationZ = -(qiblaBearing - animatedHeading)
+                                    },
                                 colorFilter = if (isAligned) null else ColorFilter.colorMatrix(
                                     ColorMatrix().apply { setToSaturation(0.3f) }
                                 )

@@ -13,13 +13,7 @@
     <string name="default_theme">標準</string>
     <string name="help">ヘルプ</string>
     <string name="app_name">Traffic Light：ネットワークトラッカー</string>
-    <plurals name="resets_in_days">
-        <item quantity="other">%d日後にリセットされます</item>
-    </plurals>
     <string name="app_name_short">Traffic Light</string>
     <string name="go_back">戻る</string>
     <string name="close">閉じる</string>
-    <plurals name="resets_in_hours">
-        <item quantity="other">%d時間後にリセットされます</item>
-    </plurals>
 </resources>

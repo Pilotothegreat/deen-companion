@@ -13,13 +13,7 @@
     <string name="dark">深色</string>
     <string name="default_theme">默认</string>
     <string name="help">帮助</string>
-    <plurals name="resets_in_days">
-        <item quantity="other">%d 天后重置</item>
-    </plurals>
     <string name="close">关闭</string>
     <string name="app_name_short">红绿灯</string>
     <string name="go_back">返回</string>
-    <plurals name="resets_in_hours">
-        <item quantity="other">%d小时后重置</item>
-    </plurals>
 </resources>

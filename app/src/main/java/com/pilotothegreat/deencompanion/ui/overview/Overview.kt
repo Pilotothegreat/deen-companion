@@ -475,7 +475,7 @@ fun Overview(
                 .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-        Box(Modifier.height(paddingTop - 8.dp))
+        Spacer(Modifier.height(paddingTop + TOP_BAR_HEIGHT + 8.dp))
 
 
 
@@ -1770,7 +1770,7 @@ fun TasbihDialCard(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(4.dp)
+                        .padding(20.dp)
                         .clip(tasbihMorphShape)
                         .background(buttonBgColor)
                         .semantics { contentDescription = context.getString(R.string.cd_tasbih_button) }

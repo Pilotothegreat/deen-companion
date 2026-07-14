@@ -13,15 +13,7 @@
     <string name="dark">Dunkel</string>
     <string name="default_theme">Standard</string>
     <string name="help">Hilfe</string>
-    <plurals name="resets_in_days">
-        <item quantity="one">Wird morgen zurückgesetzt</item>
-        <item quantity="other">Zurücksetzen in %d Tagen</item>
-    </plurals>
     <string name="go_back">Zurück</string>
     <string name="app_name_short">Traffic Light</string>
     <string name="close">Schließen</string>
-    <plurals name="resets_in_hours">
-        <item quantity="one">Zurücksetzung in %d Stunde</item>
-        <item quantity="other">Zurücksetzung in %d Stunden</item>
-    </plurals>
 </resources>

@@ -13,15 +13,7 @@
     <string name="dark">Karanlık</string>
     <string name="default_theme">Varsayılan</string>
     <string name="help">Yardım</string>
-    <plurals name="resets_in_days">
-        <item quantity="one">Yarın sıfırlanacak</item>
-        <item quantity="other">%d gün içerisinde sıfırlanacak</item>
-    </plurals>
     <string name="app_name_short">Traffic Light</string>
     <string name="go_back">Geri git</string>
     <string name="close">Kapat</string>
-    <plurals name="resets_in_hours">
-        <item quantity="one">%d saat içinde sıfırlanacak</item>
-        <item quantity="other">%d saat içinde sıfırlanacak</item>
-    </plurals>
 </resources>

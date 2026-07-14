@@ -63,7 +63,7 @@
         <!-- Home Screen Widget -->
         <receiver
             android:name=".widget.PrayerWidgetProvider"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="com.pilotothegreat.deencompanion.widget.ACTION_UPDATE_WIDGET" />
@@ -75,7 +75,7 @@
 
         <receiver
             android:name=".widget.TasbihWidgetProvider"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="com.pilotothegreat.deencompanion.widget.ACTION_INCREMENT_TASBIH" />
@@ -87,7 +87,7 @@
 
         <receiver
             android:name=".widget.InspirationWidgetProvider"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>

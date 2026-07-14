@@ -5,7 +5,10 @@
       "args": [
         "C:\\Users\\king\\.perplexity-mcp\\start.mjs"
       ],
-      "env": {}
+      "env": {
+        "PERPLEXITY_VAULT_PASSPHRASE": "5cyi_uxJqYXjdDNK7bA6ktWVAIF70Gly8gIinkUJLpA",
+        "PERPLEXITY_NO_DAEMON": "1"
+      }
     }
   }
 }

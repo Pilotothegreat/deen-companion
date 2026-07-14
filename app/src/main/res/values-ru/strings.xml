@@ -16,16 +16,4 @@
     <string name="app_name_short">Traffic Light</string>
     <string name="go_back">Вернуться</string>
     <string name="close">Закрыть</string>
-    <plurals name="resets_in_days">
-        <item quantity="one">Сбрасывается завтра</item>
-        <item quantity="few">Сбрасывается в %d дня</item>
-        <item quantity="many">Сбрасывается в %d дней</item>
-        <item quantity="other">Сбрасывается в %d дней</item>
-    </plurals>
-    <plurals name="resets_in_hours">
-        <item quantity="one">Сбрасывается в течение %d часа</item>
-        <item quantity="few">Сбрасывается в течение %d часов</item>
-        <item quantity="many">Сбрасывается в течение %d часов</item>
-        <item quantity="other">Сбрасывается в течение %d часов</item>
-    </plurals>
 </resources>

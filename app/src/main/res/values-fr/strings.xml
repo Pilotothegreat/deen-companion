@@ -13,17 +13,7 @@
     <string name="notifications">Notification</string>
     <string name="version">Version %1$s</string>
     <string name="grant">Autoriser</string>
-    <plurals name="resets_in_days">
-        <item quantity="one">Réinitialisation demain</item>
-        <item quantity="many">Réinitialisation dans %d jours</item>
-        <item quantity="other">Réinitialisation dans %d jours</item>
-    </plurals>
     <string name="go_back">Revenir</string>
     <string name="app_name_short">Traffic Light</string>
     <string name="close">Fermer</string>
-    <plurals name="resets_in_hours">
-        <item quantity="one">Réinitialisation dans %d heure</item>
-        <item quantity="many">Réinitialisation dans %d heures</item>
-        <item quantity="other">Réinitialisation dans %d heures</item>
-    </plurals>
 </resources>

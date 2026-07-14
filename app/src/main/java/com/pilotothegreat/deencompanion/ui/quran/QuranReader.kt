@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bedtime
@@ -351,7 +352,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                     }
 
                     val maxContentHeightPx = remember(screenHeightDp, pagerTopPaddingDp, pagerBottomPaddingDp) {
-                        with(density) { (screenHeightDp.dp - pagerTopPaddingDp - pagerBottomPaddingDp).coerceAtLeast(300.dp).toPx() }
+                        with(density) { (screenHeightDp.dp - pagerTopPaddingDp - pagerBottomPaddingDp - 40.dp).coerceAtLeast(300.dp).toPx() }
                     }
 
                     // Dynamically calculate adjusted font size (try to downscale to 18f to fit within screen)
@@ -421,7 +422,9 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(horizontal = 4.dp, vertical = 4.dp),
+                                .padding(horizontal = 8.dp, vertical = 8.dp)
+                                .mushafBorder(goldAccent)
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             // Top Header inside the Mus'haf border frame
@@ -494,7 +497,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                             val annotated = remember(block.verseItem, isHighlighted, primaryContainerColor, onPrimaryContainerColor, isDark, goldAccent, mushafTextColor) {
                                                 val builder = AnnotatedString.Builder()
                                                 val startOrn = builder.length
-                                                val ornament = " \u06DD${block.verseItem.verse.id} "
+                                                val ornament = "\u00A0\u06DD${toArabicNumerals(block.verseItem.verse.id)} "
                                                 builder.append(ornament)
                                                 val endOrn = builder.length
 
@@ -616,7 +619,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                     val endSajdah = builder.length
 
                                                     val startOrnNum = builder.length
-                                                    val ornament = " \u06DD${verse.id} "
+                                                    val ornament = "\u00A0\u06DD${toArabicNumerals(verse.id)} "
                                                     builder.append(ornament)
                                                     val endOrnNum = builder.length
                                                     
@@ -690,41 +693,67 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                         }
                                                         is AnnotatedString -> {
                                                             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                                                                var layoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
-                                                                Text(
-                                                                    text = segment,
-                                                                    style = MaterialTheme.typography.bodyLarge.copy(
-                                                                        fontSize = (adjustedFontSize * zoomFactor).sp,
-                                                                        fontFamily = quranFontFamily,
-                                                                        lineHeight = ((adjustedFontSize * zoomFactor) * 1.8f).sp,
-                                                                        textAlign = TextAlign.Justify,
-                                                                        fontFeatureSettings = "rlig 1, calt 1"
-                                                                    ),
-                                                                    onTextLayout = { layoutResult = it },
-                                                                    modifier = Modifier
-                                                                        .fillMaxWidth()
-                                                                        .pointerInput(segment) {
-                                                                            detectTapGestures { offset ->
-                                                                                layoutResult?.let { textLayoutResult ->
-                                                                                    val position = textLayoutResult.getOffsetForPosition(offset)
-                                                                                    segment.getStringAnnotations(tag = "AYAH_CLICK", start = position, end = position)
-                                                                                        .firstOrNull()?.let { annotation ->
-                                                                                            val parts = annotation.item.split("_")
-                                                                                            if (parts.size == 2) {
-                                                                                                val clickedSurahId = parts[0].toIntOrNull()
-                                                                                                val clickedAyahId = parts[1].toIntOrNull()
-                                                                                                if (clickedSurahId != null && clickedAyahId != null) {
-                                                                                                    val targetSurah = surahs.firstOrNull { it.id == clickedSurahId }
-                                                                                                    if (targetSurah != null) {
-                                                                                                        playbackManager.playOrJumpToAyah(targetSurah, clickedAyahId)
+                                                                val textStyle = TextStyle(
+                                                                    fontSize = (adjustedFontSize * zoomFactor).sp,
+                                                                    fontFamily = quranFontFamily,
+                                                                    lineHeight = ((adjustedFontSize * zoomFactor) * 1.8f).sp,
+                                                                    textAlign = TextAlign.Justify,
+                                                                    fontFeatureSettings = "rlig 1, calt 1"
+                                                                )
+                                                                
+                                                                val measuredResult = remember(segment, textStyle, widthPx) {
+                                                                    textMeasurer.measure(
+                                                                        text = segment,
+                                                                        style = textStyle,
+                                                                        constraints = androidx.compose.ui.unit.Constraints(maxWidth = widthPx.toInt())
+                                                                    )
+                                                                }
+                                                                
+                                                                Column(modifier = Modifier.fillMaxWidth()) {
+                                                                    for (i in 0 until measuredResult.lineCount) {
+                                                                        val lineStart = measuredResult.getLineStart(i)
+                                                                        val lineEnd = measuredResult.getLineEnd(i)
+                                                                        val lineText = segment.subSequence(lineStart, lineEnd)
+                                                                        
+                                                                        // Force full justification including the last line of the page by appending a newline and a space.
+                                                                        val forcedJustifiedText = buildAnnotatedString {
+                                                                            append(lineText)
+                                                                            append("\n ")
+                                                                        }
+                                                                        
+                                                                        var lineLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+                                                                        Text(
+                                                                            text = forcedJustifiedText,
+                                                                            style = textStyle,
+                                                                            maxLines = 1,
+                                                                            onTextLayout = { lineLayoutResult = it },
+                                                                            modifier = Modifier
+                                                                                .fillMaxWidth()
+                                                                                .pointerInput(lineText) {
+                                                                                    detectTapGestures { offset ->
+                                                                                        lineLayoutResult?.let { textLayoutResult ->
+                                                                                            val localPosition = textLayoutResult.getOffsetForPosition(offset)
+                                                                                            val absolutePosition = (lineStart + localPosition).coerceIn(0, segment.length)
+                                                                                            segment.getStringAnnotations(tag = "AYAH_CLICK", start = absolutePosition, end = absolutePosition)
+                                                                                                .firstOrNull()?.let { annotation ->
+                                                                                                    val parts = annotation.item.split("_")
+                                                                                                    if (parts.size == 2) {
+                                                                                                        val clickedSurahId = parts[0].toIntOrNull()
+                                                                                                        val clickedAyahId = parts[1].toIntOrNull()
+                                                                                                        if (clickedSurahId != null && clickedAyahId != null) {
+                                                                                                            val targetSurah = surahs.firstOrNull { it.id == clickedSurahId }
+                                                                                                            if (targetSurah != null) {
+                                                                                                                playbackManager.playOrJumpToAyah(targetSurah, clickedAyahId)
+                                                                                                            }
+                                                                                                        }
                                                                                                     }
                                                                                                 }
-                                                                                            }
                                                                                         }
+                                                                                    }
                                                                                 }
-                                                                            }
-                                                                        }
-                                                                )
+                                                                        )
+                                                                    }
+                                                                }
                                                             }
                                                         }
                                                     }
@@ -1437,7 +1466,7 @@ fun calculatePageHeight(
                     if (QuranHelper.isSajdahVerse(surahId, verse.id)) {
                         builder.append("۩ ")
                     }
-                    val ornament = " \u06DD${verse.id} "
+                    val ornament = "\u00A0\u06DD${toArabicNumerals(verse.id)} "
                     builder.append(ornament)
                 }
                 
@@ -1446,7 +1475,8 @@ fun calculatePageHeight(
                     fontSize = fontSizeSp.sp,
                     fontFamily = fontFamily,
                     lineHeight = (fontSizeSp * 1.8f).sp,
-                    textAlign = TextAlign.Justify
+                    textAlign = TextAlign.Justify,
+                    fontFeatureSettings = "rlig 1, calt 1"
                 )
                 
                 val textLayoutResult = textMeasurer.measure(

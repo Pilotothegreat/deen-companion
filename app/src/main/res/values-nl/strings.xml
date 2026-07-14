@@ -13,15 +13,7 @@
     <string name="dark">Donker</string>
     <string name="default_theme">Standaard</string>
     <string name="help">Hulp</string>
-    <plurals name="resets_in_days">
-        <item quantity="one">Reset morgen</item>
-        <item quantity="other">Reset in %d dagen</item>
-    </plurals>
     <string name="go_back">Terug</string>
     <string name="app_name_short">Traffic Light</string>
     <string name="close">Sluiten</string>
-    <plurals name="resets_in_hours">
-        <item quantity="one">Reset in %d uur</item>
-        <item quantity="other">Reset in %d uren</item>
-    </plurals>
 </resources>
