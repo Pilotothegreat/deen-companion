@@ -1710,9 +1710,46 @@ fun TasbihDialCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
+            // Dhikr Selector Header at the top of the card
+            Row(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
+                    .clickable {
+                        val nextDhikr = when (dhikr) {
+                            "سبحان الله" -> "الحمد لله"
+                            "الحمد لله" -> "الله أكبر"
+                            "الله أكبر" -> "لا إله إلا الله"
+                            else -> "سبحان الله"
+                        }
+                        viewModel.setTasbihDhikr(nextDhikr)
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    }
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = localizedDhikr,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = "Change Dhikr",
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+
+            // Big 160dp Circular Tap Counter Button
             Box(
                 modifier = Modifier
-                    .size(180.dp)
+                    .size(160.dp)
                     .padding(4.dp)
                     .graphicsLayer {
                         scaleX = scale.value
@@ -1724,7 +1761,7 @@ fun TasbihDialCard(
                     progress = { progress },
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(6.dp),
+                        .padding(4.dp),
                     color = progressColor,
                     trackColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
                 )
@@ -1732,7 +1769,7 @@ fun TasbihDialCard(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(20.dp)
+                        .padding(16.dp)
                         .clip(CircleShape)
                         .background(buttonBgColor)
                         .semantics { contentDescription = context.getString(R.string.cd_tasbih_button) }
@@ -1744,71 +1781,53 @@ fun TasbihDialCard(
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
-                        modifier = Modifier.padding(16.dp)
+                        verticalArrangement = Arrangement.Center
                     ) {
-                        // Dhikr Selector Name Button inside the circle
-                        Row(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(MaterialTheme.colorScheme.secondaryContainer)
-                                .clickable {
-                                    val nextDhikr = when (dhikr) {
-                                        "سبحان الله" -> "الحمد لله"
-                                        "الحمد لله" -> "الله أكبر"
-                                        "الله أكبر" -> "لا إله إلا الله"
-                                        else -> "سبحان الله"
-                                    }
-                                    viewModel.setTasbihDhikr(nextDhikr)
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                }
-                                .padding(horizontal = 12.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                text = localizedDhikr,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Icon(
-                                imageVector = Icons.Default.ArrowDropDown,
-                                contentDescription = "Change Dhikr",
-                                tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        // Large bouncing count number
                         Text(
                             text = count.toString(),
-                            style = MaterialTheme.typography.displayLarge.copy(
+                            style = MaterialTheme.typography.displayMedium.copy(
                                 fontWeight = FontWeight.Black,
-                                fontSize = 48.sp
+                                fontSize = 42.sp
                             ),
                             color = if (isTargetReached) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = "$count / $target",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
                         )
                     }
                 }
             }
 
-        // Small Reset Button below the circle
-            FilledTonalIconButton(
-                onClick = { viewModel.resetTasbih() },
-                modifier = Modifier.size(40.dp)
+            // Bottom bar: Target Chips + Reset Button
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Default.Restore,
-                    contentDescription = "Reset Count",
-                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                    modifier = Modifier.size(20.dp)
-                )
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    listOf(33, 100).forEach { t ->
+                        FilterChip(
+                            selected = target == t,
+                            onClick = { viewModel.setTasbihTarget(t) },
+                            label = { Text(t.toString(), style = MaterialTheme.typography.labelSmall) },
+                            modifier = Modifier.height(28.dp)
+                        )
+                    }
+                }
+
+                FilledTonalIconButton(
+                    onClick = { viewModel.resetTasbih() },
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Restore,
+                        contentDescription = "Reset Count",
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
             }
         }
     }
