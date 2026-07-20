@@ -420,6 +420,7 @@ fun Qibla() {
                         }
                 ) {
                     val radius = size.minDimension / 2
+                    val center = Offset(size.width / 2, size.height / 2)
 
                     // Draw dial face background
                     drawCircle(
@@ -433,6 +434,29 @@ fun Qibla() {
                         radius = radius,
                         style = Stroke(width = 3.dp.toPx())
                     )
+
+                    // Draw 36 precision M3 compass tick marks
+                    for (i in 0 until 36) {
+                        val angleDeg = i * 10f
+                        val angleRad = Math.toRadians(angleDeg.toDouble())
+                        val isMajor = i % 9 == 0
+                        val isMedium = i % 3 == 0
+                        val tickLength = if (isMajor) 14.dp.toPx() else if (isMedium) 9.dp.toPx() else 5.dp.toPx()
+                        val tickStroke = if (isMajor) 2.5.dp.toPx() else 1.2.dp.toPx()
+                        val tickColor = if (isMajor) compassRingColor else compassRingColor.copy(alpha = 0.45f)
+
+                        val startX = (center.x + (radius - tickLength) * Math.sin(angleRad)).toFloat()
+                        val startY = (center.y - (radius - tickLength) * Math.cos(angleRad)).toFloat()
+                        val endX = (center.x - 4.dp.toPx() * Math.sin(angleRad) + (radius - 2.dp.toPx()) * Math.sin(angleRad)).toFloat()
+                        val endY = (center.y + 4.dp.toPx() * Math.cos(angleRad) - (radius - 2.dp.toPx()) * Math.cos(angleRad)).toFloat()
+
+                        drawLine(
+                            color = tickColor,
+                            start = Offset(startX, startY),
+                            end = Offset(endX, endY),
+                            strokeWidth = tickStroke
+                        )
+                    }
                 }
 
                 // Qibla Needle + Kaaba cursor (all rotate together at qiblaBearing - animatedHeading)

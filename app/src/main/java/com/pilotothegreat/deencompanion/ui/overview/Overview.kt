@@ -1642,16 +1642,18 @@ fun TasbihDialCard(
     val target by viewModel.tasbihTarget.collectAsState(initial = 33)
 
     val context = LocalContext.current
+    val appPreferenceRepo: com.pilotothegreat.deencompanion.database.AppPreferenceRepo = org.koin.compose.koinInject()
+    val lang by appPreferenceRepo.appLanguage.collectAsState(initial = "en")
     val haptic = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
     val scale = remember { Animatable(1f) }
 
-    val localizedDhikr = remember(dhikr) {
+    val localizedDhikr = remember(dhikr, lang) {
         when (dhikr) {
-            "سبحان الله" -> context.getString(R.string.tasbih_dhikr_subhanallah)
-            "الحمد لله" -> context.getString(R.string.tasbih_dhikr_alhamdulillah)
-            "لا إله إلا الله" -> context.getString(R.string.tasbih_dhikr_lailahaillallah)
-            "الله أكبر" -> context.getString(R.string.tasbih_dhikr_allahuakbar)
+            "سبحان الله" -> if (lang == "ar") "سبحان الله" else "Subhan Allah"
+            "الحمد لله" -> if (lang == "ar") "الحمد لله" else "Alhamdulillah"
+            "لا إله إلا الله" -> if (lang == "ar") "لا إله إلا الله" else "La ilaha illa Allah"
+            "الله أكبر" -> if (lang == "ar") "الله أكبر" else "Allahu Akbar"
             else -> dhikr
         }
     }

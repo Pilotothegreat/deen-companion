@@ -360,7 +360,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                         var size = arabicFontSize.toFloat()
                         val hasSajdah = pageVerses.any { QuranHelper.isSajdahVerse(it.surahId, it.verse.id) }
                         
-                        while (size > 18f) {
+                        while (size > 16f) {
                             val estimatedHeight = calculatePageHeight(
                                 blocks = blocks,
                                 fontSizeSp = size,
@@ -496,14 +496,14 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
 
                                             val annotated = remember(block.verseItem, isHighlighted, primaryContainerColor, onPrimaryContainerColor, isDark, goldAccent, mushafTextColor) {
                                                 val builder = AnnotatedString.Builder()
+                                                val startText = builder.length
+                                                builder.append(block.verseItem.verse.text)
+                                                val endText = builder.length
+
                                                 val startOrn = builder.length
                                                 val ornament = "\u00A0\u06DD${toArabicNumerals(block.verseItem.verse.id)} "
                                                 builder.append(ornament)
                                                 val endOrn = builder.length
-
-                                                val startText = builder.length
-                                                builder.append(block.verseItem.verse.text)
-                                                val endText = builder.length
 
                                                 builder.addStringAnnotation(
                                                     tag = "AYAH_CLICK",
@@ -696,7 +696,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                                 val textStyle = TextStyle(
                                                                     fontSize = (adjustedFontSize * zoomFactor).sp,
                                                                     fontFamily = quranFontFamily,
-                                                                    lineHeight = ((adjustedFontSize * zoomFactor) * 1.8f).sp,
+                                                                    lineHeight = ((adjustedFontSize * zoomFactor) * 2.0f).sp,
                                                                     textAlign = TextAlign.Justify,
                                                                     fontFeatureSettings = "rlig 1, calt 1"
                                                                 )
@@ -1474,7 +1474,7 @@ fun calculatePageHeight(
                 val textStyle = TextStyle(
                     fontSize = fontSizeSp.sp,
                     fontFamily = fontFamily,
-                    lineHeight = (fontSizeSp * 1.8f).sp,
+                    lineHeight = (fontSizeSp * 2.0f).sp,
                     textAlign = TextAlign.Justify,
                     fontFeatureSettings = "rlig 1, calt 1"
                 )
