@@ -215,25 +215,7 @@ fun Qibla() {
         wasAligned = isAligned
     }
 
-    val circlePolygon = remember { androidx.compose.material3.MaterialShapes.Circle }
-    val cookiePolygon = remember { Cookie12Sided }
-    val qiblaMorph = remember(circlePolygon, cookiePolygon) {
-        androidx.graphics.shapes.Morph(circlePolygon, cookiePolygon)
-    }
-    val qiblaMorphProgress by animateFloatAsState(
-        targetValue = if (isAligned) 1f else 0f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium
-        ),
-        label = "qiblaScreenMorphProgress"
-    )
-    val qiblaMorphShape = remember(qiblaMorphProgress) {
-        MorphPolygonShape(
-            morph = qiblaMorph,
-            progress = qiblaMorphProgress
-        )
-    }
+
 
     val primaryColor = MaterialTheme.colorScheme.primary
     val onPrimaryColor = MaterialTheme.colorScheme.onPrimary

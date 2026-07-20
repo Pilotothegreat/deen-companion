@@ -1492,25 +1492,7 @@ fun LiveQiblaCompassCard(
         )
     )
 
-    val circlePolygon = remember { androidx.compose.material3.MaterialShapes.Circle }
-    val cookiePolygon = remember { Cookie12Sided }
-    val qiblaMorph = remember(circlePolygon, cookiePolygon) {
-        androidx.graphics.shapes.Morph(circlePolygon, cookiePolygon)
-    }
-    val qiblaMorphProgress by animateFloatAsState(
-        targetValue = if (isAligned) 1f else 0f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium
-        ),
-        label = "qiblaCardMorphProgress"
-    )
-    val qiblaMorphShape = remember(qiblaMorphProgress) {
-        com.pilotothegreat.deencompanion.ui.theme.MorphPolygonShape(
-            morph = qiblaMorph,
-            progress = qiblaMorphProgress
-        )
-    }
+
 
     var visible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
@@ -1580,7 +1562,7 @@ fun LiveQiblaCompassCard(
                 Box(
                     modifier = Modifier
                         .size(120.dp)
-                        .clip(qiblaMorphShape)
+                        .clip(CircleShape)
                         .background(colorScheme.primaryContainer.copy(alpha = if (isAligned) 0.22f else 0.12f))
                         .padding(8.dp),
                     contentAlignment = Alignment.Center
@@ -1701,30 +1683,8 @@ fun TasbihDialCard(
 
     // FIX #13: MorphPolygonShape — Tasbih button morphs Circle → Cookie12Sided on press/completion
     // Use MaterialShapes.Circle (already imported) as the circle endpoint for the morph
-    @Suppress("DEPRECATION")
-    val circlePolygon = remember { androidx.compose.material3.MaterialShapes.Circle }
-    val cookiePolygon = remember { Cookie12Sided }
-    val tasbihMorph = remember(circlePolygon, cookiePolygon) {
-        androidx.graphics.shapes.Morph(circlePolygon, cookiePolygon)
-    }
     val tapInteractionSource = remember { MutableInteractionSource() }
-    val isTapPressed by tapInteractionSource.collectIsPressedAsState()
-    
     val isTargetReached = count >= target
-    val morphProgress by animateFloatAsState(
-        targetValue = if (isTapPressed || isTargetReached) 1f else 0f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMedium
-        ),
-        label = "tasbihMorphProgress"
-    )
-    val tasbihMorphShape = remember(morphProgress) {
-        com.pilotothegreat.deencompanion.ui.theme.MorphPolygonShape(
-            morph = tasbihMorph,
-            progress = morphProgress
-        )
-    }
     val progressColor by animateColorAsState(
         targetValue = if (isTargetReached) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
         animationSpec = spring(stiffness = Spring.StiffnessLow),
@@ -1771,7 +1731,7 @@ fun TasbihDialCard(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(20.dp)
-                        .clip(tasbihMorphShape)
+                        .clip(CircleShape)
                         .background(buttonBgColor)
                         .semantics { contentDescription = context.getString(R.string.cd_tasbih_button) }
                         .clickable(
