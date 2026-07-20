@@ -499,9 +499,8 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                 val startText = builder.length
                                                 builder.append(block.verseItem.verse.text)
                                                 val endText = builder.length
-
                                                 val startOrn = builder.length
-                                                val ornament = " ﴿${toArabicNumerals(block.verseItem.verse.id)}﴾ "
+                                                val ornament = "\u00A0﴿${toArabicNumerals(block.verseItem.verse.id)}﴾\u00A0"
                                                 builder.append(ornament)
                                                 val endOrn = builder.length
 
@@ -619,7 +618,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                     val endSajdah = builder.length
 
                                                     val startOrnNum = builder.length
-                                                    val ornament = " ﴿${toArabicNumerals(verse.id)}﴾ "
+                                                    val ornament = "\u00A0﴿${toArabicNumerals(verse.id)}﴾\u00A0"
                                                     builder.append(ornament)
                                                     val endOrnNum = builder.length
                                                     
