@@ -91,6 +91,13 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.material3.CircularWavyProgressIndicator
 import com.pilotothegreat.deencompanion.ui.theme.ExpressiveCardShape
 import com.pilotothegreat.deencompanion.ui.theme.ExpressiveContainerShape
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
+import androidx.graphics.shapes.RoundedPolygon
+import androidx.graphics.shapes.Morph
+import androidx.graphics.shapes.CornerRounding
+import com.pilotothegreat.deencompanion.ui.theme.MorphPolygonShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -1434,6 +1441,8 @@ fun LiveQiblaCompassCard(
 
     var rawHeading by remember { mutableStateOf(0f) }
     var smoothHeading by remember { mutableStateOf(0f) }
+    var pitch by remember { mutableStateOf(0f) }
+    var roll by remember { mutableStateOf(0f) }
 
     DisposableEffect(context, lat, lon) {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -1455,6 +1464,8 @@ fun LiveQiblaCompassCard(
                     val heading = (azimuth + declination + 360f) % 360f
                     rawHeading = heading
                     smoothHeading = getSmoothRotation(heading, smoothHeading)
+                    pitch = Math.toDegrees(orientation[1].toDouble()).toFloat()
+                    roll = Math.toDegrees(orientation[2].toDouble()).toFloat()
                 } else {
                     if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
                         gravity = event.values.clone()
@@ -1473,6 +1484,8 @@ fun LiveQiblaCompassCard(
                             val heading = (azimuth + declination + 360f) % 360f
                             rawHeading = heading
                             smoothHeading = getSmoothRotation(heading, smoothHeading)
+                            pitch = Math.toDegrees(orientation[1].toDouble()).toFloat()
+                            roll = Math.toDegrees(orientation[2].toDouble()).toFloat()
                         }
                     }
                 }
@@ -1515,6 +1528,46 @@ fun LiveQiblaCompassCard(
     val isAligned = remember(effectiveRawHeading, qiblaBearing) {
         val rel = (qiblaBearing - effectiveRawHeading + 360f) % 360f
         rel < 8f || rel > 352f
+    }
+
+    var smoothedPitch by remember { mutableStateOf(0f) }
+    var smoothedRoll by remember { mutableStateOf(0f) }
+    LaunchedEffect(pitch, roll) {
+        smoothedPitch += (pitch - smoothedPitch) * 0.15f
+        smoothedRoll += (roll - smoothedRoll) * 0.15f
+    }
+    val tiltPitch = smoothedPitch.coerceIn(-25f, 25f)
+    val tiltRoll = smoothedRoll.coerceIn(-25f, 25f)
+
+    val unalignedPoly = remember {
+        RoundedPolygon(
+            numVertices = 8,
+            radius = 1f,
+            centerX = 0f,
+            centerY = 0f,
+            rounding = CornerRounding(radius = 0.3f)
+        )
+    }
+    val alignedPoly = remember {
+        RoundedPolygon(
+            numVertices = 4,
+            radius = 1f,
+            centerX = 0f,
+            centerY = 0f,
+            rounding = CornerRounding(radius = 0.7f)
+        )
+    }
+    val morph = remember { Morph(unalignedPoly, alignedPoly) }
+    val morphProgress by animateFloatAsState(
+        targetValue = if (isAligned) 1f else 0f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "qiblaCardMorph"
+    )
+    val morphShape = remember(morphProgress) {
+        MorphPolygonShape(morph = morph, progress = morphProgress, rotationZ = 45f)
     }
 
     var wasAligned by remember { mutableStateOf(false) }
@@ -1595,75 +1648,136 @@ fun LiveQiblaCompassCard(
                 color = MaterialTheme.colorScheme.onSurface
             )
 
+            Text(
+                text = if (isAligned) (if (lang == "ar") "تمت المحاذاة للقبلة" else "Aligned with Qibla")
+                       else (if (lang == "ar") "اضغط للفتح" else "Tap to open"),
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = if (isAligned) FontWeight.Bold else FontWeight.Normal,
+                color = if (isAligned) colorScheme.tertiary else colorScheme.onSurfaceVariant
+            )
+
             Spacer(modifier = Modifier.height(8.dp))
 
             Box(
                 modifier = Modifier
                     .size(120.dp)
+                    .graphicsLayer {
+                        rotationX = tiltPitch      // forward/back parallax
+                        rotationY = -tiltRoll      // left/right parallax
+                        cameraDistance = 8 * density
+                    }
                     .clip(CircleShape)
                     .background(colorScheme.primaryContainer.copy(alpha = if (isAligned) 0.22f else 0.12f))
                     .padding(8.dp),
                 contentAlignment = Alignment.Center
             ) {
-                    if (isAligned) {
-                        Canvas(modifier = Modifier.fillMaxSize()) {
-                            drawCircle(
-                                color = tertiaryColor.copy(alpha = 0.15f),
-                                radius = (size.minDimension / 2) + 4.dp.toPx()
-                            )
-                        }
-                    }
-
-                    // Rotating dial (just the outer ring)
-                    Canvas(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .graphicsLayer { rotationZ = -relativeAngle + qiblaBearing }
-                    ) {
-                        val radius = size.minDimension / 2
-
-                        // Outer ring
+                if (isAligned) {
+                    Canvas(modifier = Modifier.fillMaxSize()) {
                         drawCircle(
-                            color = compassRingColor,
-                            radius = radius,
-                            style = Stroke(width = 2.dp.toPx())
+                            color = tertiaryColor.copy(alpha = 0.15f),
+                            radius = (size.minDimension / 2) + 4.dp.toPx()
                         )
                     }
+                }
 
-                    // Chiseled M3 arrow needle (stays pointing to Qibla)
-                    Canvas(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .graphicsLayer {
-                                rotationZ = relativeAngle
-                                scaleX = needleScale
-                                scaleY = needleScale
-                            }
-                    ) {
-                        val radius = size.minDimension / 2
-                        val center = Offset(size.width / 2, size.height / 2)
+                // Rotating dial (just the outer ring + ticks)
+                Canvas(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer { rotationZ = -relativeAngle + qiblaBearing }
+                ) {
+                    val radius = size.minDimension / 2
+                    val center = Offset(size.width / 2, size.height / 2)
 
-                        val leftWing = Path().apply {
-                            moveTo(center.x, center.y - radius + 10.dp.toPx())
-                            lineTo(center.x - 12.dp.toPx(), center.y + 12.dp.toPx())
-                            lineTo(center.x, center.y + 4.dp.toPx())
-                            close()
-                        }
-                        val rightWing = Path().apply {
-                            moveTo(center.x, center.y - radius + 10.dp.toPx())
-                            lineTo(center.x + 12.dp.toPx(), center.y + 12.dp.toPx())
-                            lineTo(center.x, center.y + 4.dp.toPx())
-                            close()
-                        }
+                    // Outer ring
+                    drawCircle(
+                        color = compassRingColor,
+                        radius = radius,
+                        style = Stroke(width = 2.dp.toPx())
+                    )
 
-                        drawPath(path = leftWing, color = needleColor)
-                        drawPath(path = rightWing, color = needleColor.copy(alpha = 0.75f))
+                    // Outer ticks (draw 12 tick marks for the smaller card)
+                    for (i in 0 until 12) {
+                        val angleDeg = i * 30f
+                        val angleRad = Math.toRadians(angleDeg.toDouble())
+                        val tickLength = 6.dp.toPx()
+                        val outerR = radius - 2.dp.toPx()
+                        val innerR = radius - tickLength
+                        val startX = (center.x + innerR * sin(angleRad)).toFloat()
+                        val startY = (center.y - innerR * cos(angleRad)).toFloat()
+                        val endX = (center.x + outerR * sin(angleRad)).toFloat()
+                        val endY = (center.y - outerR * cos(angleRad)).toFloat()
 
-                        // Pivot hub
-                        drawCircle(color = onPrimaryContainerColor, radius = 5.dp.toPx(), center = center)
-                        drawCircle(color = needleColor, radius = 2.5.dp.toPx(), center = center)
+                        drawLine(
+                            color = compassRingColor.copy(alpha = 0.6f),
+                            start = Offset(startX, startY),
+                            end = Offset(endX, endY),
+                            strokeWidth = 1.dp.toPx()
+                        )
                     }
                 }
+
+                // Chiseled M3 arrow needle (stays pointing to Qibla)
+                Canvas(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer {
+                            rotationZ = relativeAngle
+                            scaleX = needleScale
+                            scaleY = needleScale
+                        }
+                ) {
+                    val radius = size.minDimension / 2
+                    val center = Offset(size.width / 2, size.height / 2)
+
+                    val leftWing = Path().apply {
+                        moveTo(center.x, center.y - radius + 15.dp.toPx())
+                        lineTo(center.x - 8.dp.toPx(), center.y)
+                        lineTo(center.x, center.y + 3.dp.toPx())
+                        close()
+                    }
+                    val rightWing = Path().apply {
+                        moveTo(center.x, center.y - radius + 15.dp.toPx())
+                        lineTo(center.x + 8.dp.toPx(), center.y)
+                        lineTo(center.x, center.y + 3.dp.toPx())
+                        close()
+                    }
+
+                    drawPath(path = leftWing, color = needleColor)
+                    drawPath(path = rightWing, color = needleColor.copy(alpha = 0.7f))
+                }
+
+                // Kaaba cursor in the center
+                val kaabaColor = if (isAligned) tertiaryColor else needleColor
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(morphShape)
+                        .background(
+                            if (isAligned) kaabaColor.copy(alpha = 0.25f)
+                            else colorScheme.surfaceVariant
+                        )
+                        .border(
+                            width = if (isAligned) 2.dp else 1.dp,
+                            color = if (isAligned) kaabaColor else colorScheme.outline,
+                            shape = morphShape
+                        )
+                        .graphicsLayer {
+                            // Keep Kaaba icon upright by canceling parent rotation
+                            rotationZ = -relativeAngle
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_kaaba),
+                        contentDescription = "Kaaba",
+                        modifier = Modifier.size(20.dp),
+                        colorFilter = if (isAligned) null else androidx.compose.ui.graphics.ColorFilter.colorMatrix(
+                            androidx.compose.ui.graphics.ColorMatrix().apply { setToSaturation(0.3f) }
+                        )
+                    )
+                }
+            }
 
                 if (!hasCompass) {
                     Spacer(modifier = Modifier.height(4.dp))
