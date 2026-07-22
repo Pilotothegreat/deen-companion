@@ -69,7 +69,15 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.NotificationsOff
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.layout.offset
+import androidx.compose.ui.unit.IntOffset
+import kotlin.math.roundToInt
+import kotlin.math.absoluteValue
+import androidx.compose.material3.Surface
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -1192,6 +1200,8 @@ fun OverviewItems(viewModel: OverviewVM, nextPrayerName: String, navigator: Navi
             Triple(stringResource(R.string.isha),   times.isha,    ishaIqama)
         )
 
+        val prayerKeys = listOf("Fajr", "Sunrise", "Dhuhr", "Asr", "Maghrib", "Isha")
+
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = ExpressiveCardShape,
@@ -1199,42 +1209,21 @@ fun OverviewItems(viewModel: OverviewVM, nextPrayerName: String, navigator: Navi
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
             Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                for (prayer in prayers) {
+                prayers.forEachIndexed { idx, prayer ->
                     val (name, time, offset) = prayer
-                    val isNext = name == localizedPrayerName  // highlight next prayer
-                    val bg = if (isNext) colorScheme.primaryContainer else Color.Transparent
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(MaterialTheme.shapes.medium)
-                            .background(bg)
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = name,
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = if (isNext) colorScheme.onPrimaryContainer else colorScheme.onSurface,
-                            // FIX #9: Restore visual hierarchy — next=Bold, others=Normal
-                            fontWeight = if (isNext) FontWeight.Bold else FontWeight.Normal
-                        )
-                        Column(horizontalAlignment = Alignment.End) {
-                            Text(
-                                text = time.toLocaleHourString(context),
-                                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                                color = if (isNext) colorScheme.onPrimaryContainer else colorScheme.primary
-                            )
-                            if (offset != null) {
-                                Text(
-                                    text = stringResource(R.string.iqama_time, offset.toLocaleHourString(context)),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = if (isNext) colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-                                            else colorScheme.secondary
-                                )
-                            }
-                        }
-                    }
+                    val prayerKey = prayerKeys.getOrElse(idx) { name }
+                    val isNext = name == localizedPrayerName
+
+                    SwipeablePrayerRow(
+                        prayerKey = prayerKey,
+                        name = name,
+                        time = time,
+                        offset = offset,
+                        isNext = isNext,
+                        context = context,
+                        appPreferenceRepo = appPreferenceRepo
+                    )
+
                     if (name != stringResource(R.string.isha)) {
                         HorizontalDivider(thickness = 0.5.dp, color = colorScheme.outlineVariant.copy(alpha = 0.4f))
                     }
@@ -1826,6 +1815,115 @@ fun TasbihDialCard(
                         contentDescription = "Reset Count",
                         tint = MaterialTheme.colorScheme.onSecondaryContainer,
                         modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SwipeablePrayerRow(
+    prayerKey: String,
+    name: String,
+    time: LocalTime,
+    offset: LocalTime?,
+    isNext: Boolean,
+    context: Context,
+    appPreferenceRepo: AppPreferenceRepo
+) {
+    val coroutineScope = rememberCoroutineScope()
+    val mutedPrayers by appPreferenceRepo.mutedPrayers.collectAsState(initial = emptySet())
+    val isMuted = mutedPrayers.contains(prayerKey)
+    var swipeOffset by remember { mutableStateOf(0f) }
+    val animatedOffset by animateFloatAsState(
+        targetValue = swipeOffset,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)
+    )
+
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.CenterEnd
+    ) {
+        if (animatedOffset.absoluteValue > 5f) {
+            Surface(
+                onClick = {
+                    coroutineScope.launch {
+                        appPreferenceRepo.setPrayerMuted(prayerKey, !isMuted)
+                        swipeOffset = 0f
+                    }
+                },
+                modifier = Modifier
+                    .size(48.dp)
+                    .padding(end = 4.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = if (isMuted) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = if (isMuted) Icons.Default.NotificationsOff else Icons.Default.Notifications,
+                        contentDescription = "Toggle Mute",
+                        tint = if (isMuted) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+            }
+        }
+
+        val bg = if (isNext) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .offset { IntOffset(animatedOffset.roundToInt(), 0) }
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures(
+                        onDragEnd = {
+                            if (swipeOffset < -40f) {
+                                swipeOffset = -60f
+                            } else {
+                                swipeOffset = 0f
+                            }
+                        },
+                        onHorizontalDrag = { _, dragAmount ->
+                            swipeOffset = (swipeOffset + dragAmount).coerceIn(-70f, 0f)
+                        }
+                    )
+                }
+                .clip(MaterialTheme.shapes.medium)
+                .background(bg)
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = name,
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = if (isNext) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
+                    fontWeight = if (isNext) FontWeight.Bold else FontWeight.Normal
+                )
+                if (isMuted) {
+                    Icon(
+                        imageVector = Icons.Default.NotificationsOff,
+                        contentDescription = "Muted",
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    text = time.toLocaleHourString(context),
+                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                    color = if (isNext) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.primary
+                )
+                if (offset != null) {
+                    Text(
+                        text = stringResource(R.string.iqama_time, offset.toLocaleHourString(context)),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = if (isNext) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                                else MaterialTheme.colorScheme.secondary
                     )
                 }
             }

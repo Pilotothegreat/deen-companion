@@ -634,7 +634,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                     val endSajdah = builder.length
 
                                                     val startOrnNum = builder.length
-                                                    val ornament = "\u00A0﴿${toArabicNumerals(verse.id)}﴾\u00A0"
+                                                    val ornament = "\u00A0${toArabicNumerals(verse.id)}\u00A0"
                                                     builder.append(ornament)
                                                     val endOrnNum = builder.length
                                                     
@@ -714,7 +714,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                                     fontFamily = quranFontFamily,
                                                                     lineHeight = ((adjustedFontSize * zoomFactor) * 1.8f).sp,
                                                                     textAlign = TextAlign.Justify,
-                                                                    fontFeatureSettings = "rlig 1, calt 1"
+                                                                    fontFeatureSettings = "rlig 1, calt 1, mset 1, kash 1"
                                                                 )
                                                                 
                                                                 var lineLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
@@ -725,27 +725,53 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                                     modifier = Modifier
                                                                         .fillMaxWidth()
                                                                         .pointerInput(segment) {
-                                                                            detectTapGestures { offset ->
-                                                                                lineLayoutResult?.let { textLayoutResult ->
-                                                                                    val position = textLayoutResult.getOffsetForPosition(offset)
-                                                                                    segment.getStringAnnotations(tag = "AYAH_CLICK", start = position, end = position)
-                                                                                        .firstOrNull()?.let { annotation ->
-                                                                                            val parts = annotation.item.split("_")
-                                                                                            if (parts.size == 2) {
-                                                                                                val clickedSurahId = parts[0].toIntOrNull()
-                                                                                                val clickedAyahId = parts[1].toIntOrNull()
-                                                                                                if (clickedSurahId != null && clickedAyahId != null) {
-                                                                                                    val targetSurah = surahs.firstOrNull { it.id == clickedSurahId }
-                                                                                                    val targetVerse = targetSurah?.verses?.firstOrNull { it.id == clickedAyahId }
-                                                                                                    if (targetSurah != null && targetVerse != null) {
-                                                                                                        selectedAyah = Pair(targetSurah.id, targetVerse.id)
-                                                                                                        selectedAyahTarget = Pair(targetSurah, targetVerse)
+                                                                            detectTapGestures(
+                                                                                onTap = { offset ->
+                                                                                    lineLayoutResult?.let { textLayoutResult ->
+                                                                                        val position = textLayoutResult.getOffsetForPosition(offset)
+                                                                                        segment.getStringAnnotations(tag = "AYAH_CLICK", start = position, end = position)
+                                                                                            .firstOrNull()?.let { annotation ->
+                                                                                                val parts = annotation.item.split("_")
+                                                                                                if (parts.size == 2) {
+                                                                                                    val clickedSurahId = parts[0].toIntOrNull()
+                                                                                                    val clickedAyahId = parts[1].toIntOrNull()
+                                                                                                    if (clickedSurahId != null && clickedAyahId != null) {
+                                                                                                        val targetSurah = surahs.firstOrNull { it.id == clickedSurahId }
+                                                                                                        if (targetSurah != null) {
+                                                                                                            selectedAyah = Pair(targetSurah.id, clickedAyahId)
+                                                                                                            playbackManager.playOrJumpToAyah(targetSurah, clickedAyahId)
+                                                                                                        }
                                                                                                     }
                                                                                                 }
                                                                                             }
-                                                                                        }
+                                                                                    }
+                                                                                },
+                                                                                onLongPress = { offset ->
+                                                                                    lineLayoutResult?.let { textLayoutResult ->
+                                                                                        val position = textLayoutResult.getOffsetForPosition(offset)
+                                                                                        segment.getStringAnnotations(tag = "AYAH_CLICK", start = position, end = position)
+                                                                                            .firstOrNull()?.let { annotation ->
+                                                                                                val parts = annotation.item.split("_")
+                                                                                                if (parts.size == 2) {
+                                                                                                    val clickedSurahId = parts[0].toIntOrNull()
+                                                                                                    val clickedAyahId = parts[1].toIntOrNull()
+                                                                                                    if (clickedSurahId != null && clickedAyahId != null) {
+                                                                                                        val targetSurah = surahs.firstOrNull { it.id == clickedSurahId }
+                                                                                                        val targetVerse = targetSurah?.verses?.firstOrNull { it.id == clickedAyahId }
+                                                                                                        if (targetSurah != null && targetVerse != null) {
+                                                                                                            selectedAyah = Pair(targetSurah.id, targetVerse.id)
+                                                                                                            val textToCopy = "${targetVerse.text}\n\n${targetVerse.translation}\n(Surah ${targetSurah.transliteration} ${targetSurah.id}:${targetVerse.id})"
+                                                                                                            val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                                                                                            val clip = ClipData.newPlainText("Ayah Text", textToCopy)
+                                                                                                            clipboard.setPrimaryClip(clip)
+                                                                                                            Toast.makeText(context, if (lang == "ar") "تم نسخ النص بنجاح" else "Ayah text copied to clipboard", Toast.LENGTH_SHORT).show()
+                                                                                                        }
+                                                                                                    }
+                                                                                                }
+                                                                                            }
+                                                                                    }
                                                                                 }
-                                                                            }
+                                                                            )
                                                                         }
                                                                 )
                                                             }
@@ -1053,31 +1079,6 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                         .background(goldAccent)
                 )
             }
-        }
-
-        // Render Ayah Contextual Action Sheet when selected
-        selectedAyahTarget?.let { (s, v) ->
-            val isPlayingAyah by playbackManager.isPlaying.collectAsState()
-            val currentPlayingSurahId by playbackManager.currentSurahId.collectAsState()
-            val currentPlayingAyahId by playbackManager.currentAyahId.collectAsState()
-            val isThisAyahPlaying = isPlayingAyah && currentPlayingSurahId == s.id && currentPlayingAyahId == v.id
-
-            AyahActionSheet(
-                surah = s,
-                verse = v,
-                isPlaying = isThisAyahPlaying,
-                onPlay = {
-                    playbackManager.playOrJumpToAyah(s, v.id)
-                },
-                onCopy = {
-                    val textToCopy = "${v.text}\n\n${v.translation}\n(Surah ${s.transliteration} ${s.id}:${v.id})"
-                    val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val clip = ClipData.newPlainText("Ayah Text", textToCopy)
-                    clipboard.setPrimaryClip(clip)
-                    Toast.makeText(context, if (lang == "ar") "تم نسخ الآية بنجاح" else "Ayah copied to clipboard", Toast.LENGTH_SHORT).show()
-                },
-                onDismiss = { selectedAyahTarget = null }
-            )
         }
     }
 }
@@ -1549,177 +1550,5 @@ fun calculatePageHeight(
     totalHeightPx += with(density) { 92.dp.toPx() }
     
     return totalHeightPx
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AyahActionSheet(
-    surah: QuranHelper.Surah,
-    verse: QuranHelper.Verse,
-    isPlaying: Boolean,
-    onPlay: () -> Unit,
-    onCopy: () -> Unit,
-    onDismiss: () -> Unit
-) {
-    val appPreferenceRepo: AppPreferenceRepo = koinInject()
-    val lang by appPreferenceRepo.appLanguage.collectAsState(initial = "en")
-    val direction = if (lang == "ar") LayoutDirection.Rtl else LayoutDirection.Ltr
-    val goldAccent = Color(0xFFD4AF37)
-    val isSajdah = QuranHelper.isSajdahVerse(surah.id, verse.id)
-
-    CompositionLocalProvider(LocalLayoutDirection provides direction) {
-        ModalBottomSheet(
-            onDismissRequest = onDismiss,
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            tonalElevation = 8.dp,
-            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-                    .padding(bottom = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // Header
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text(
-                            text = if (lang == "ar") "سورة ${surah.name} • الآية ${toArabicNumerals(verse.id)}" else "Surah ${surah.transliteration} • Ayah ${verse.id}",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = goldAccent
-                        )
-                        val page = QuranHelper.getMushafPageNumber(surah.id, verse.id)
-                        val juz = getJuzNumber(surah.id, verse.id)
-                        Text(
-                            text = if (lang == "ar") "الجزء ${toArabicNumerals(juz)} • صفحة ${toArabicNumerals(page)}" else "Juz $juz • Page $page",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    IconButton(onClick = onDismiss) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = stringResource(R.string.close),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-
-                // Ayah Text Card
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(14.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = verse.text,
-                            style = TextStyle(
-                                fontFamily = FontFamily(Font(R.font.uthmanic_hafs)),
-                                fontSize = 22.sp,
-                                lineHeight = 34.sp,
-                                textAlign = TextAlign.Start
-                            ),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        if (verse.translation.isNotEmpty()) {
-                            HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
-                            Text(
-                                text = verse.translation,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-
-                if (isSajdah) {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .border(1.dp, goldAccent, MaterialTheme.shapes.medium),
-                        colors = CardDefaults.cardColors(containerColor = goldAccent.copy(alpha = 0.1f))
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .padding(12.dp)
-                                .fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Text("۩", color = goldAccent, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-                            Text(
-                                text = if (lang == "ar") "هذه آية سجود تلاوة. يُسن السجود عند قراءتها." else "Prostration verse (Sajdah al-Tilawah). Prostration is recommended when reading.",
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
-                }
-
-                // Action Buttons Row
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Button(
-                        onClick = {
-                            onPlay()
-                            onDismiss()
-                        },
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(containerColor = goldAccent)
-                    ) {
-                        Icon(
-                            imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp),
-                            tint = Color.Black
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = if (lang == "ar") "استماع للآية" else "Listen",
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black
-                        )
-                    }
-
-                    OutlinedButton(
-                        onClick = {
-                            onCopy()
-                            onDismiss()
-                        },
-                        modifier = Modifier.weight(1f),
-                        border = BorderStroke(1.dp, goldAccent)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ContentCopy,
-                            contentDescription = null,
-                            tint = goldAccent,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = if (lang == "ar") "نسخ النص" else "Copy Verse",
-                            color = goldAccent
-                        )
-                    }
-                }
-            }
-        }
-    }
 }
 

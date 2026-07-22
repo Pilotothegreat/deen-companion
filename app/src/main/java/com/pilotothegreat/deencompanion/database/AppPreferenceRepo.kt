@@ -158,6 +158,7 @@ class AppPreferenceRepo(
         private val TASBIH_DHIKR = stringPreferencesKey("tasbih_dhikr")
         private val TASBIH_TARGET = intPreferencesKey("tasbih_target")
         private val TASBIH_HISTORY = stringPreferencesKey("tasbih_history")
+        private val MUTED_PRAYERS = stringSetPreferencesKey("muted_prayers")
         private val FAJR_IQAMA_IS_FIXED = booleanPreferencesKey("fajr_iqama_is_fixed")
         private val DHUHR_IQAMA_IS_FIXED = booleanPreferencesKey("dhuhr_iqama_is_fixed")
         private val ASR_IQAMA_IS_FIXED = booleanPreferencesKey("asr_iqama_is_fixed")
@@ -358,6 +359,17 @@ class AppPreferenceRepo(
     // Notification Volume (0-100)
     val notificationVolume: Flow<Int> = data.map { it[NOTIFICATION_VOLUME] ?: 80 }.distinctUntilChanged()
     suspend fun setNotificationVolume(value: Int) = dataStore.edit { it[NOTIFICATION_VOLUME] = value }
+
+    // Per-prayer notification mute toggle
+    val mutedPrayers: Flow<Set<String>> = data.map { it[MUTED_PRAYERS] ?: emptySet() }.distinctUntilChanged()
+    suspend fun setPrayerMuted(prayerName: String, muted: Boolean) = dataStore.edit { prefs ->
+        val current = prefs[MUTED_PRAYERS] ?: emptySet()
+        if (muted) {
+            prefs[MUTED_PRAYERS] = current + prayerName
+        } else {
+            prefs[MUTED_PRAYERS] = current - prayerName
+        }
+    }
 
     // Last Prayer Time Update (epoch millis)
     val lastPrayerTimeUpdate: Flow<Long> = data.map { it[LAST_PRAYER_TIME_UPDATE] ?: 0L }.distinctUntilChanged()

@@ -49,6 +49,10 @@ class IqamaAlarmReceiver : BroadcastReceiver(), KoinComponent {
                             "Isha" -> localizedContext.getString(R.string.isha)
                             else -> prayerName
                         }
+                        val mutedPrayers = repo.mutedPrayers.first()
+                        if (mutedPrayers.contains(prayerName)) {
+                            return@launch
+                        }
 
                         showPrayerNotification(context, localizedContext, localizedPrayerName, isIqama = true)
 

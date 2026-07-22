@@ -182,7 +182,7 @@ object AppMotion {
     )
 }
 
-val ExpressiveCardShape = RoundedCornerShape(topStart = 32.dp, topEnd = 8.dp, bottomEnd = 32.dp, bottomStart = 8.dp)
+val ExpressiveCardShape = RoundedCornerShape(26.dp)
 val ExpressiveContainerShape = RoundedCornerShape(24.dp)
 
 @Composable

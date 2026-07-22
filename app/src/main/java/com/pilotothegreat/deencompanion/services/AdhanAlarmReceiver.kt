@@ -43,6 +43,12 @@ class AdhanAlarmReceiver : BroadcastReceiver(), KoinComponent {
                         "Isha" -> localizedContext.getString(R.string.isha)
                         else -> prayerName
                     }
+                    val mutedPrayers = repo.mutedPrayers.first()
+                    if (mutedPrayers.contains(prayerName)) {
+                        Timber.d("AdhanAlarmReceiver: Notification muted for %s", prayerName)
+                        return@launch
+                    }
+
                     showAdhanNotification(context, localizedContext, localizedPrayerName)
                     // Reschedule to maintain the rolling 2-day queue
                     AdhanAlarmManager.scheduleAllAdhanAlarms(context, repo)
@@ -75,6 +81,8 @@ class AdhanAlarmReceiver : BroadcastReceiver(), KoinComponent {
             .setSmallIcon(R.drawable.notification)
             .setContentTitle(title)
             .setContentText(body)
+            .setProgress(100, 0, true) // Unified line timer countdown to Iqama
+            .setUsesChronometer(true)
             .setContentIntent(tapPendingIntent)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)

@@ -96,49 +96,43 @@ class PrayerWidgetProvider : AppWidgetProvider(), KoinComponent {
             for (appWidgetId in appWidgetIds) {
                 val views = RemoteViews(context.packageName, R.layout.prayer_widget_layout)
 
-                if (hasOpened) {
-                    val lat = repo.latitude.first()
-                    val lon = repo.longitude.first()
-                    val tzId = repo.timezoneId.first()
-                    val calcMethod = repo.calcMethod.first()
-                    val asrSchool = repo.asrSchool.first()
+                val lat = if (hasOpened) repo.latitude.first() else 21.3891
+                val lon = if (hasOpened) repo.longitude.first() else 39.8579
+                val tzId = if (hasOpened) repo.timezoneId.first() else "Asia/Muscat"
+                val calcMethod = repo.calcMethod.first()
+                val asrSchool = repo.asrSchool.first()
 
-                    // Use saved timezone instead of system default
-                    val zoneId = try { ZoneId.of(tzId) } catch (e: Exception) { ZoneId.systemDefault() }
-                    val today = LocalDate.now(zoneId)
-                    val zonedDateTime = today.atStartOfDay(zoneId)
-                    val offsetHours = zonedDateTime.offset.totalSeconds / 3600.0
+                // Use saved timezone instead of system default
+                val zoneId = try { ZoneId.of(tzId) } catch (e: Exception) { ZoneId.systemDefault() }
+                val today = LocalDate.now(zoneId)
+                val zonedDateTime = today.atStartOfDay(zoneId)
+                val offsetHours = zonedDateTime.offset.totalSeconds / 3600.0
 
-                    val times = PrayerTimeCalculator.calculate(
-                        date = today,
-                        latitude = lat,
-                        longitude = lon,
-                        timezoneOffsetHours = offsetHours,
-                        method = calcMethod,
-                        asrSchool = asrSchool
-                    )
+                val times = PrayerTimeCalculator.calculate(
+                    date = today,
+                    latitude = lat,
+                    longitude = lon,
+                    timezoneOffsetHours = offsetHours,
+                    method = calcMethod,
+                    asrSchool = asrSchool
+                )
 
-                    // Get next prayer in localized context
-                    val next = calculateNextPrayer(times, tzId, localizedContext)
+                // Get next prayer in localized context
+                val next = calculateNextPrayer(times, tzId, localizedContext)
 
-                    val countdownPrefix = if (lang == "ar") "خلال" else "in"
-                    val localizedPrayerName = when (next.name) {
-                        "Fajr" -> localizedContext.getString(R.string.fajr)
-                        "Sunrise" -> localizedContext.getString(R.string.sunrise)
-                        "Dhuhr" -> localizedContext.getString(R.string.dhuhr)
-                        "Asr" -> localizedContext.getString(R.string.asr)
-                        "Maghrib" -> localizedContext.getString(R.string.maghrib)
-                        "Isha" -> localizedContext.getString(R.string.isha)
-                        else -> next.name
-                    }
-                    views.setTextViewText(R.id.widget_prayer_name, localizedPrayerName)
-                    views.setTextViewText(R.id.widget_countdown, "$countdownPrefix ${next.remainingTimeStr}")
-                    views.setTextViewText(R.id.widget_prayer_time, next.timeStr)
-                } else {
-                    views.setTextViewText(R.id.widget_prayer_name, localizedContext.getString(R.string.app_name))
-                    views.setTextViewText(R.id.widget_countdown, localizedContext.getString(R.string.widget_placeholder_initialize))
-                    views.setTextViewText(R.id.widget_prayer_time, "--:--")
+                val countdownPrefix = if (lang == "ar") "خلال" else "in"
+                val localizedPrayerName = when (next.name) {
+                    "Fajr" -> localizedContext.getString(R.string.fajr)
+                    "Sunrise" -> localizedContext.getString(R.string.sunrise)
+                    "Dhuhr" -> localizedContext.getString(R.string.dhuhr)
+                    "Asr" -> localizedContext.getString(R.string.asr)
+                    "Maghrib" -> localizedContext.getString(R.string.maghrib)
+                    "Isha" -> localizedContext.getString(R.string.isha)
+                    else -> next.name
                 }
+                views.setTextViewText(R.id.widget_prayer_name, localizedPrayerName)
+                views.setTextViewText(R.id.widget_countdown, "$countdownPrefix ${next.remainingTimeStr}")
+                views.setTextViewText(R.id.widget_prayer_time, next.timeStr)
 
                 views.setTextViewText(R.id.widget_title, localizedContext.getString(R.string.app_name))
 
