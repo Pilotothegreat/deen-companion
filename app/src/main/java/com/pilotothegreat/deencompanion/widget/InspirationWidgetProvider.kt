@@ -129,6 +129,7 @@ class InspirationWidgetProvider : AppWidgetProvider(), KoinComponent {
                     context, 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
                 views.setOnClickPendingIntent(android.R.id.background, pendingIntent)
+                views.setOnClickPendingIntent(R.id.widget_title, pendingIntent)
 
                 appWidgetManager.updateAppWidget(appWidgetId, views)
             }

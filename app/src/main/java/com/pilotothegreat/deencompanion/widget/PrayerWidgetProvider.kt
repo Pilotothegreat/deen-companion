@@ -134,14 +134,13 @@ class PrayerWidgetProvider : AppWidgetProvider(), KoinComponent {
                 views.setTextViewText(R.id.widget_countdown, "$countdownPrefix ${next.remainingTimeStr}")
                 views.setTextViewText(R.id.widget_prayer_time, next.timeStr)
 
-                views.setTextViewText(R.id.widget_title, localizedContext.getString(R.string.app_name))
-
-                // Set click intent to open main application on the background ID
+                // Set click intent to open main application on both root background and widget_title
                 val mainIntent = Intent(context, MainActivity::class.java)
                 val pendingIntent = PendingIntent.getActivity(
                     context, 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
                 views.setOnClickPendingIntent(android.R.id.background, pendingIntent)
+                views.setOnClickPendingIntent(R.id.widget_title, pendingIntent)
 
                 appWidgetManager.updateAppWidget(appWidgetId, views)
             }
