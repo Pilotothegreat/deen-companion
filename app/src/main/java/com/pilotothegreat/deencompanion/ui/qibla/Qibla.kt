@@ -24,7 +24,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.foundation.border
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CompassCalibration
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.*
@@ -110,8 +110,8 @@ fun Qibla() {
         val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
         val geomagneticFieldSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
 
-        var gravity = FloatArray(3)
-        var geomagnetic = FloatArray(3)
+        var gravity: FloatArray? = null
+        var geomagnetic: FloatArray? = null
 
         val listener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent) {
@@ -224,7 +224,7 @@ fun Qibla() {
                 title = { Text(stringResource(R.string.qibla_compass)) },
                 navigationIcon = {
                     IconButton(onClick = { navigator.goBack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.go_back))
+                        Icon(androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.go_back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

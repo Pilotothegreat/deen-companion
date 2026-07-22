@@ -104,7 +104,7 @@ class InspirationWidgetProvider : AppWidgetProvider(), KoinComponent {
             val hasOpened = lastUpdated != 0L
 
             val lang = repo.appLanguage.first()
-            val locale = Locale(lang)
+            val locale = Locale.forLanguageTag(lang)
             val config = Configuration(context.resources.configuration).apply {
                 setLocale(locale)
             }

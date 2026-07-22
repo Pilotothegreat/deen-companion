@@ -38,7 +38,7 @@ class IqamaAlarmReceiver : BroadcastReceiver(), KoinComponent {
                     try {
                         val lang = repo.appLanguage.first()
                         val config = android.content.res.Configuration(context.resources.configuration).apply {
-                            setLocale(java.util.Locale(lang))
+                            setLocale(java.util.Locale.forLanguageTag(lang))
                         }
                         val localizedContext = context.createConfigurationContext(config)
                         val localizedPrayerName = when (prayerName) {

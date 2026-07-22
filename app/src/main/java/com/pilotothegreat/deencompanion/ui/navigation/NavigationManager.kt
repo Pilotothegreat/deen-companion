@@ -28,8 +28,8 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LibraryBooks
-import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.LibraryBooks
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -123,8 +123,8 @@ fun NavigationManager() {
                         expanded = true,
                         content = {
                             NavigationButton(navigator, OverviewKey, stringResource(R.string.today), Icons.Default.Today)
-                            NavigationButton(navigator, QuranKey, stringResource(R.string.quran), Icons.Default.MenuBook)
-                            NavigationButton(navigator, HadithKey, stringResource(R.string.hadith), Icons.Default.LibraryBooks)
+                            NavigationButton(navigator, QuranKey, stringResource(R.string.quran), Icons.AutoMirrored.Filled.MenuBook)
+                            NavigationButton(navigator, HadithKey, stringResource(R.string.hadith), Icons.AutoMirrored.Filled.LibraryBooks)
                         },
                     )
                 }

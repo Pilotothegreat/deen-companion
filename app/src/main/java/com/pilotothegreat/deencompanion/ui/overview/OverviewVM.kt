@@ -253,7 +253,7 @@ class OverviewVM(
             _locationWarningDismissed.value = false
             try {
                 val appLang = appPreferenceRepo.appLanguage.first()
-                val locale = Locale(appLang)
+                val locale = Locale.forLanguageTag(appLang)
                 var loc = LocationHelper.getDeviceLocation(context)
                 if (loc == null) {
                     loc = LocationHelper.fetchIpLocation()

@@ -371,7 +371,7 @@ fun Overview(
     val scrollState = rememberScrollState()
 
     // Date Header setup moved to top-level scope
-    val locale = remember(lang) { Locale(lang) }
+    val locale = remember(lang) { Locale.forLanguageTag(lang) }
     val gregFormatter = remember(locale) { java.time.format.DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", locale) }
     val hijriFormatter = remember(locale) { java.time.format.DateTimeFormatter.ofPattern("d MMMM yyyy", locale) }
     val gregDateStr = remember(locale) { LocalDate.now().format(gregFormatter) }
