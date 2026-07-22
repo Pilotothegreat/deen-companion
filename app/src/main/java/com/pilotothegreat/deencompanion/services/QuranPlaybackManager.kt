@@ -99,6 +99,19 @@ class QuranPlaybackManager(private val context: Context) {
                     _endOfSurahEnabled.value = false
                 }
             }
+
+            override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
+                Timber.e(error, "Player error occurred during Quran playback")
+                val p = controller
+                if (p != null) {
+                    val nextIndex = p.currentMediaItemIndex + 1
+                    if (nextIndex < p.mediaItemCount) {
+                        p.seekTo(nextIndex, 0L)
+                        p.prepare()
+                        p.play()
+                    }
+                }
+            }
         })
     }
 
@@ -114,6 +127,8 @@ class QuranPlaybackManager(private val context: Context) {
     }
 
     fun playSurah(surah: QuranHelper.Surah, startAyah: Int = 1) {
+        _currentSurahId.value = surah.id
+        _currentAyahId.value = startAyah
         val player = controller ?: return
         val reciter = _selectedReciter.value
 
@@ -154,6 +169,7 @@ class QuranPlaybackManager(private val context: Context) {
     fun jumpToAyah(ayahId: Int) {
         val player = controller ?: return
         val currentSurah = _currentSurahId.value
+        _currentAyahId.value = ayahId
         
         // If we are currently playing the correct surah, seek directly in the playlist
         if (player.mediaItemCount > 0 && player.currentMediaItem?.mediaId?.startsWith("${currentSurah}_") == true) {
@@ -166,6 +182,8 @@ class QuranPlaybackManager(private val context: Context) {
     }
 
     fun playOrJumpToAyah(surah: QuranHelper.Surah, ayahId: Int) {
+        _currentSurahId.value = surah.id
+        _currentAyahId.value = ayahId
         val player = controller ?: return
         val expectedMediaPrefix = "${surah.id}_"
         val isLoaded = player.mediaItemCount > 0 && player.currentMediaItem?.mediaId?.startsWith(expectedMediaPrefix) == true

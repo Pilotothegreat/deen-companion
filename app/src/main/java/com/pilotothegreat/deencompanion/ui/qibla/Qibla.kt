@@ -32,6 +32,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CompassCalibration
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -62,6 +63,7 @@ import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
 import com.pilotothegreat.deencompanion.ui.navigation.Navigator
 import com.pilotothegreat.deencompanion.ui.overview.calculateQiblaDirection
 import org.koin.compose.koinInject
+import kotlinx.coroutines.launch
 import java.util.Locale
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -120,6 +122,7 @@ fun Qibla() {
                         sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) != null)
     }
     var rawHeading by remember { mutableStateOf(0f) }
+    var manualHeading by remember { mutableStateOf(0f) }
     var smoothHeading by remember { mutableStateOf(0f) }
     var pitch by remember { mutableStateOf(0f) }
     var roll by remember { mutableStateOf(0f) }
@@ -217,7 +220,9 @@ fun Qibla() {
     val tiltRoll = smoothedRoll.coerceIn(-25f, 25f)
 
     // Alignment verification (aligned when phone is pointed at Makkah +/- 4 degrees)
-    val relativeAngle = (qiblaBearing - rawHeading + 360f) % 360f
+    val effectiveRawHeading = if (hasCompass) rawHeading else manualHeading
+    val effectiveHeading = if (hasCompass) animatedHeading else manualHeading
+    val relativeAngle = (qiblaBearing - effectiveRawHeading + 360f) % 360f
     val isAligned = relativeAngle < 4f || relativeAngle > 356f
 
     // Polygons for morphing cursor indicating alignment status
@@ -303,69 +308,159 @@ fun Qibla() {
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             // Location information
+            var isRefreshingLocation by remember { mutableStateOf(false) }
+            val scope = rememberCoroutineScope()
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
             ) {
                 Row(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.LocationOn,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Column {
-                        Text(
-                            text = com.pilotothegreat.deencompanion.util.localizeCityName(
-                                if (cityName.isNotEmpty()) cityName else stringResource(R.string.default_location),
-                                appLang
-                            ),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
                         )
-                        Text(
-                            text = String.format(Locale.US, "Lat: %.4f • Lon: %.4f", lat, lon),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Column {
+                            Text(
+                                text = com.pilotothegreat.deencompanion.util.localizeCityName(
+                                    if (cityName.isNotEmpty()) cityName else stringResource(R.string.default_location),
+                                    appLang
+                                ),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = String.format(Locale.US, "Lat: %.4f • Lon: %.4f", lat, lon),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    IconButton(
+                        onClick = {
+                            if (!isRefreshingLocation) {
+                                isRefreshingLocation = true
+                                scope.launch {
+                                    try {
+                                        var loc = com.pilotothegreat.deencompanion.util.LocationHelper.getDeviceLocation(context)
+                                        if (loc == null) {
+                                            loc = com.pilotothegreat.deencompanion.util.LocationHelper.fetchIpLocation()
+                                        }
+                                        if (loc != null) {
+                                            appPreferenceRepo.setLatitude(loc.latitude)
+                                            appPreferenceRepo.setLongitude(loc.longitude)
+                                            appPreferenceRepo.setCityName(loc.cityName)
+                                            appPreferenceRepo.setTimezoneId(loc.timezoneId)
+                                        }
+                                    } catch (e: java.lang.Exception) {
+                                        e.printStackTrace()
+                                    } finally {
+                                        isRefreshingLocation = false
+                                    }
+                                }
+                            }
+                        },
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        if (isRefreshingLocation) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                strokeWidth = 2.dp,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        } else {
+                            Icon(
+                                imageVector = androidx.compose.material.icons.Icons.Default.Refresh,
+                                contentDescription = "Refresh Location",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
                 }
             }
 
             if (!hasCompass) {
-                Card(
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error)
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.CompassCalibration,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.error
-                        )
-                        Column {
-                            Text(
-                                text = if (appLang == "ar") "البوصلة غير متوفرة" else "Compass Sensor Unavailable",
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onErrorContainer
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CompassCalibration,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
                             )
-                            Text(
-                                text = if (appLang == "ar") {
-                                    "يفتقر جهازك إلى مستشعر الاتجاه المغناطيسي. البوصلة لن تدور تلقائيًا. يرجى استخدام زاوية اتجاه القبلة لتوجيه جهازك يدويًا."
-                                } else {
-                                    "Your device lacks magnetic/compass sensors. The compass needle cannot rotate automatically. Use the bearing angle value to orient yourself manually."
-                                },
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.8f)
+                            Column {
+                                Text(
+                                    text = if (appLang == "ar") "محاكاة البوصلة اليدوية" else "Manual Compass Simulation",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = if (appLang == "ar") {
+                                        "اسحب شريط التمرير أدناه لتدوير قرص البوصلة ليطابق اتجاه الشمال الفعلي حولك."
+                                    } else {
+                                        "Slide the bar below to manually rotate the compass face to match actual North around you."
+                                    },
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = if (appLang == "ar") "اتجاه الهاتف الحالي:" else "Phone Heading Direction:",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    text = String.format(Locale.US, "%d°", manualHeading.toInt()),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                            Slider(
+                                value = manualHeading,
+                                onValueChange = { manualHeading = it },
+                                valueRange = 0f..360f,
+                                modifier = Modifier.fillMaxWidth()
                             )
                         }
                     }
@@ -458,12 +553,12 @@ fun Qibla() {
                     }
                 }
 
-                // Compass Dial (rotates with -animatedHeading)
+                // Compass Dial (rotates with -effectiveHeading)
                 Box(
                     modifier = Modifier
                         .size(260.dp)
                         .graphicsLayer {
-                            rotationZ = -animatedHeading
+                            rotationZ = -effectiveHeading
                         },
                     contentAlignment = Alignment.Center
                 ) {
@@ -555,7 +650,7 @@ fun Qibla() {
                     modifier = Modifier
                         .size(260.dp)
                         .graphicsLayer {
-                            rotationZ = qiblaBearing - animatedHeading
+                            rotationZ = qiblaBearing - effectiveHeading
                         },
                     contentAlignment = Alignment.Center
                 ) {
@@ -621,7 +716,7 @@ fun Qibla() {
                                     .size(34.dp)
                                     .graphicsLayer {
                                         // Keep Kaaba icon upright by canceling parent rotation
-                                        rotationZ = -(qiblaBearing - animatedHeading)
+                                        rotationZ = -(qiblaBearing - effectiveHeading)
                                     },
                                 colorFilter = if (isAligned) null else ColorFilter.colorMatrix(
                                     ColorMatrix().apply { setToSaturation(0.3f) }

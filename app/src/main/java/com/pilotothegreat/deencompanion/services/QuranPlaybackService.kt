@@ -35,8 +35,19 @@ class QuranPlaybackService : MediaSessionService() {
                 .setContentType(C.AUDIO_CONTENT_TYPE_SPEECH)
                 .build()
 
+            val userAgent = "Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
+            val dataSourceFactory = androidx.media3.datasource.DefaultHttpDataSource.Factory()
+                .setUserAgent(userAgent)
+                .setConnectTimeoutMs(15000)
+                .setReadTimeoutMs(15000)
+                .setAllowCrossProtocolRedirects(true)
+
             player = ExoPlayer.Builder(this)
                 .setAudioAttributes(audioAttributes, /* handleAudioFocus= */ true)
+                .setMediaSourceFactory(
+                    androidx.media3.exoplayer.source.DefaultMediaSourceFactory(this)
+                        .setDataSourceFactory(dataSourceFactory)
+                )
                 .build()
 
             mediaSession = MediaSession.Builder(this, player!!)
