@@ -275,7 +275,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
 
     var previousActivePage by remember { mutableStateOf(-1) }
     LaunchedEffect(pageIndexForActiveAyah) {
-        if (pageIndexForActiveAyah >= 0 && globalPages.isNotEmpty()) {
+        if (currentSurahId == surahNumber && pageIndexForActiveAyah >= 0 && globalPages.isNotEmpty()) {
             if (pagerState.currentPage != pageIndexForActiveAyah && !pagerState.isScrollInProgress) {
                 if (previousActivePage == -1 || pagerState.currentPage == previousActivePage) {
                     pagerState.animateScrollToPage(pageIndexForActiveAyah)
@@ -456,7 +456,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                 .fillMaxSize()
                                 .padding(horizontal = 8.dp, vertical = 8.dp)
                                 .mushafBorder(goldAccent)
-                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                                .padding(horizontal = 12.dp, vertical = 4.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             // Top Header inside the Mus'haf border frame
@@ -470,7 +470,6 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                     fontFamily = quranFontFamily,
                                     lang = lang
                                 )
-                                Spacer(modifier = Modifier.height(4.dp))
                             }
 
                             val scrollState = rememberScrollState()
@@ -498,7 +497,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                 fontFamily = quranFontFamily,
                                                 lang = lang
                                             )
-                                            Spacer(modifier = Modifier.height(8.dp))
+                                            Spacer(modifier = Modifier.height(2.dp))
                                         }
                                         is RenderBlock.BismillahText -> {
                                             val bFontSize = adjustedFontSize * 1.3f * zoomFactor
@@ -516,10 +515,10 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                 textAlign = TextAlign.Center,
                                                 modifier = Modifier
                                                     .fillMaxWidth()
-                                                    .padding(vertical = 12.dp),
+                                                    .padding(vertical = 4.dp),
                                                 color = bismillahColor
                                             )
-                                            Spacer(modifier = Modifier.height(8.dp))
+                                            Spacer(modifier = Modifier.height(2.dp))
                                         }
                                         is RenderBlock.FatihaBismillah -> {
                                             val primaryContainerColor = colorScheme.primaryContainer
@@ -591,7 +590,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                 onTextLayout = { layoutResult = it },
                                                 modifier = Modifier
                                                     .fillMaxWidth()
-                                                    .padding(vertical = 12.dp)
+                                                    .padding(vertical = 4.dp)
                                                     .pointerInput(annotated) {
                                                         detectTapGestures { offset ->
                                                             layoutResult?.let { textLayoutResult ->
@@ -614,7 +613,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                         }
                                                     }
                                             )
-                                            Spacer(modifier = Modifier.height(8.dp))
+                                            Spacer(modifier = Modifier.height(2.dp))
                                         }
                                         is RenderBlock.Verses -> {
                                             val primaryContainerColor = colorScheme.primaryContainer
@@ -1173,7 +1172,7 @@ fun InnerPageHeader(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 6.dp),
+            .padding(bottom = 2.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(

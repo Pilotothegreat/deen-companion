@@ -8,6 +8,11 @@ import android.hardware.SensorManager
 import android.os.Build
 import android.os.Vibrator
 import android.os.VibrationEffect
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -50,6 +55,9 @@ import androidx.compose.ui.unit.sp
 import com.pilotothegreat.deencompanion.R
 import androidx.compose.material3.MaterialShapes.Companion.Cookie12Sided
 import com.pilotothegreat.deencompanion.ui.theme.MorphPolygonShape
+import androidx.graphics.shapes.RoundedPolygon
+import androidx.graphics.shapes.Morph
+import androidx.graphics.shapes.CornerRounding
 import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
 import com.pilotothegreat.deencompanion.ui.navigation.Navigator
 import com.pilotothegreat.deencompanion.ui.overview.calculateQiblaDirection
@@ -211,6 +219,38 @@ fun Qibla() {
     // Alignment verification (aligned when phone is pointed at Makkah +/- 4 degrees)
     val relativeAngle = (qiblaBearing - rawHeading + 360f) % 360f
     val isAligned = relativeAngle < 4f || relativeAngle > 356f
+
+    // Polygons for morphing cursor indicating alignment status
+    val unalignedPoly = remember {
+        RoundedPolygon(
+            numVertices = 8,
+            radius = 1f,
+            centerX = 0f,
+            centerY = 0f,
+            rounding = CornerRounding(radius = 0.3f)
+        )
+    }
+    val alignedPoly = remember {
+        RoundedPolygon(
+            numVertices = 4,
+            radius = 1f,
+            centerX = 0f,
+            centerY = 0f,
+            rounding = CornerRounding(radius = 0.7f)
+        )
+    }
+    val morph = remember { Morph(unalignedPoly, alignedPoly) }
+    val morphProgress by animateFloatAsState(
+        targetValue = if (isAligned) 1f else 0f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "qiblaMorph"
+    )
+    val morphShape = remember(morphProgress) {
+        MorphPolygonShape(morph = morph, progress = morphProgress, rotationZ = 45f)
+    }
 
     var wasAligned by remember { mutableStateOf(false) }
 
@@ -553,7 +593,7 @@ fun Qibla() {
                         contentAlignment = Alignment.Center
                     ) {
                         // Pulsing glow ring
-                        Canvas(modifier = Modifier.size(52.dp)) {
+                        Canvas(modifier = Modifier.size(64.dp)) {
                             drawCircle(
                                 color = kaabaColor.copy(alpha = kaabaGlowAlpha),
                                 radius = size.minDimension / 2
@@ -561,16 +601,16 @@ fun Qibla() {
                         }
                         Box(
                             modifier = Modifier
-                                .size(44.dp)
-                                .clip(CircleShape)
+                                .size(56.dp)
+                                .clip(morphShape)
                                 .background(
-                                    if (isAligned) kaabaColor.copy(alpha = 0.18f)
-                                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                                    if (isAligned) kaabaColor.copy(alpha = 0.2f)
+                                    else MaterialTheme.colorScheme.surfaceVariant
                                 )
                                 .border(
-                                    width = if (isAligned) 2.dp else 1.dp,
-                                    color = if (isAligned) kaabaColor else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-                                    shape = CircleShape
+                                    width = if (isAligned) 3.dp else 1.5.dp,
+                                    color = if (isAligned) kaabaColor else MaterialTheme.colorScheme.outline,
+                                    shape = morphShape
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
@@ -578,7 +618,7 @@ fun Qibla() {
                                 painter = painterResource(id = R.drawable.ic_kaaba),
                                 contentDescription = "Kaaba Cursor",
                                 modifier = Modifier
-                                    .size(28.dp)
+                                    .size(34.dp)
                                     .graphicsLayer {
                                         // Keep Kaaba icon upright by canceling parent rotation
                                         rotationZ = -(qiblaBearing - animatedHeading)
@@ -595,20 +635,36 @@ fun Qibla() {
             Spacer(modifier = Modifier.height(16.dp))
 
             // Aligned status text with smooth fade/spring entry
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
-                contentAlignment = Alignment.Center
+            AnimatedVisibility(
+                visible = isAligned,
+                enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.scaleIn(),
+                exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.scaleOut()
             ) {
-                if (isAligned) {
-                    Text(
-                        text = stringResource(R.string.qibla_aligned),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.tertiary,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
-                    )
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                    border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.tertiary),
+                    modifier = Modifier.padding(vertical = 4.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // Small morphic shape indicating Qibla
+                        Box(
+                            modifier = Modifier
+                                .size(16.dp)
+                                .background(MaterialTheme.colorScheme.tertiary, morphShape)
+                        )
+                        Text(
+                            text = stringResource(R.string.qibla_aligned),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
 

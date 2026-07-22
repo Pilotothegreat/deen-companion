@@ -27,10 +27,10 @@ class QuranPlaybackManager(private val context: Context) {
     private val _isPlaying = MutableStateFlow(false)
     val isPlaying: StateFlow<Boolean> = _isPlaying.asStateFlow()
 
-    private val _currentSurahId = MutableStateFlow(1)
+    private val _currentSurahId = MutableStateFlow(-1)
     val currentSurahId: StateFlow<Int> = _currentSurahId.asStateFlow()
 
-    private val _currentAyahId = MutableStateFlow(1)
+    private val _currentAyahId = MutableStateFlow(-1)
     val currentAyahId: StateFlow<Int> = _currentAyahId.asStateFlow()
 
     private val _selectedReciter = MutableStateFlow(Reciter.MISHARY)
