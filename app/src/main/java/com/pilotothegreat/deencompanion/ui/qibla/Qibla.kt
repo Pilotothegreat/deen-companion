@@ -56,6 +56,7 @@ import com.pilotothegreat.deencompanion.ui.overview.calculateQiblaDirection
 import org.koin.compose.koinInject
 import java.util.Locale
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
@@ -73,6 +74,22 @@ fun Qibla() {
     val appLang by appPreferenceRepo.appLanguage.collectAsState(initial = "ar")
 
     val qiblaBearing = remember(lat, lon) { calculateQiblaDirection(lat, lon).toFloat() }
+
+    val distanceToMakkahKm = remember(lat, lon) {
+        val makkahLat = Math.toRadians(21.4225)
+        val makkahLon = Math.toRadians(39.8262)
+        val userLat = Math.toRadians(lat)
+        val userLon = Math.toRadians(lon)
+
+        val dLat = userLat - makkahLat
+        val dLon = userLon - makkahLon
+
+        val a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(makkahLat) * Math.cos(userLat) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2)
+        val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+        (6371 * c).toInt()
+    }
 
     val declination = remember(lat, lon) {
         try {
@@ -556,6 +573,56 @@ fun Qibla() {
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center
                     )
+                }
+            }
+
+            // Qibla & Makkah Distance Hero Card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+                shape = RoundedCornerShape(24.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = if (appLang == "ar") "اتجاه القبلة" else "Qibla Angle",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "${qiblaBearing.toInt()}°",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .width(1.dp)
+                            .height(32.dp)
+                            .background(MaterialTheme.colorScheme.outlineVariant)
+                    )
+
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = if (appLang == "ar") "المسافة إلى مكة" else "Makkah Distance",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "${String.format(Locale.US, "%,d", distanceToMakkahKm)} km",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
                 }
             }
         }
