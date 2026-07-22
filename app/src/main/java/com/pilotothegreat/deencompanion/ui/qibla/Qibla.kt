@@ -201,16 +201,7 @@ fun Qibla() {
 
     LaunchedEffect(isAligned) {
         if (isAligned && !wasAligned) {
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    vibrator?.vibrate(VibrationEffect.createOneShot(40, VibrationEffect.DEFAULT_AMPLITUDE))
-                } else {
-                    @Suppress("DEPRECATION")
-                    vibrator?.vibrate(40)
-                }
-            } catch (e: Exception) {
-                // Ignore vibration failures in test/emulator
-            }
+            com.pilotothegreat.deencompanion.util.VibratorHelper.vibrateQiblaAligned(context)
         }
         wasAligned = isAligned
     }

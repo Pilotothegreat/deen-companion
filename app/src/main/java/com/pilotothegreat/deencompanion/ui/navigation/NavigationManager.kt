@@ -155,8 +155,12 @@ fun NavigationManager() {
                 slideOutHorizontally { it }
             },
             predictivePopTransitionSpec = {
-                slideInHorizontally { -it/2 } + scaleIn(initialScale = 0.7f) + fadeIn(effectsSpec) togetherWith
-                slideOutHorizontally { it }
+                (slideInHorizontally(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)) { -it / 3 } +
+                 scaleIn(initialScale = 0.88f, animationSpec = spring(stiffness = Spring.StiffnessLow)) +
+                 fadeIn(effectsSpec)) togetherWith
+                (slideOutHorizontally(animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)) { it } +
+                 scaleOut(targetScale = 0.92f, animationSpec = spring(stiffness = Spring.StiffnessLow)) +
+                 fadeOut(effectsSpec))
             }
         )
     }

@@ -786,7 +786,10 @@ fun Overview(
                 } else {
                     city
                 }
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(0.9f),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Icon(
                         imageVector = Icons.Default.LocationOn,
                         contentDescription = null,
@@ -796,10 +799,11 @@ fun Overview(
                     Spacer(Modifier.width(4.dp))
                     Text(
                         text = com.pilotothegreat.deencompanion.util.localizeCityName(displayedCity, lang),
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
                         color = colorScheme.secondary,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
                     )
                 }
             }
@@ -1115,7 +1119,8 @@ private fun OverviewHero(scrollState: ScrollState, viewModel: OverviewVM, nextPr
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(1.3f)
+            .aspectRatio(1.6f)
+            .padding(top = 4.dp)
             .semantics { contentDescription = cdCountdown }
             .clickable(
                 interactionSource = interactionSource,
@@ -1711,22 +1716,14 @@ fun TasbihDialCard(
     }
 
     val onIncrement = {
-        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+        com.pilotothegreat.deencompanion.util.VibratorHelper.vibrateTasbihClick(context)
         scope.launch {
             scale.animateTo(0.85f, spring(stiffness = Spring.StiffnessHigh))
             scale.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
         }
         val nextCount = count + 1
         if (nextCount >= target) {
-            val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    vibrator?.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 60, 40, 120), -1))
-                } else {
-                    @Suppress("DEPRECATION")
-                    vibrator?.vibrate(120)
-                }
-            } catch (e: Exception) {}
+            com.pilotothegreat.deencompanion.util.VibratorHelper.vibrateTasbihMilestone(context)
         }
         viewModel.incrementTasbih()
     }
