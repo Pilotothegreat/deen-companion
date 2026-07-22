@@ -26,8 +26,8 @@ android {
         applicationId = "com.pilotothegreat.deencompanion"
         minSdk = 26
         targetSdk = 37
-        versionCode = 190
-        versionName = "1.5.40"
+        versionCode = 191
+        versionName = "1.5.41"
         base.archivesName = "deen-$versionName"
     }
 
@@ -36,9 +36,9 @@ android {
             val keystoreFile = rootProject.file("release.jks")
             if (keystoreFile.exists()) {
                 storeFile = keystoreFile
-                storePassword = System.getenv("RELEASE_KEYSTORE_PASSWORD") ?: "dummy_pass"
-                keyAlias = System.getenv("RELEASE_KEY_ALIAS") ?: "dummy_alias"
-                keyPassword = System.getenv("RELEASE_KEY_PASSWORD") ?: "dummy_pass"
+                storePassword = System.getenv("RELEASE_KEYSTORE_PASSWORD") ?: "deenkey123"
+                keyAlias = System.getenv("RELEASE_KEY_ALIAS") ?: "deen-release"
+                keyPassword = System.getenv("RELEASE_KEY_PASSWORD") ?: "deenkey123"
             } else {
                 val debugConfig = signingConfigs.getByName("debug")
                 storeFile = debugConfig.storeFile
