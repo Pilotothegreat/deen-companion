@@ -264,6 +264,7 @@ class OverviewVM(
                     var finalCityName = loc.cityName
                     try {
                         val geocoder = android.location.Geocoder(context, locale)
+                        @Suppress("DEPRECATION")
                         val addresses = geocoder.getFromLocation(loc.latitude, loc.longitude, 1)
                         if (!addresses.isNullOrEmpty()) {
                             val address = addresses[0]

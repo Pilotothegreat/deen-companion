@@ -71,7 +71,7 @@ class MainActivity : ComponentActivity() {
         // by AppPreferenceRepo.init(), so this read is always consistent.
         val sharedPrefs = base.getSharedPreferences("settings", Context.MODE_PRIVATE)
         val lang = sharedPrefs.getString("app_language", "ar") ?: "ar"
-        val locale = Locale(lang)
+        val locale = Locale.forLanguageTag(lang)
         Locale.setDefault(locale)
         val config = Configuration(base.resources.configuration)
         config.setLocale(locale)
@@ -191,7 +191,7 @@ fun AppWithLocale(content: @Composable () -> Unit) {
     val context = LocalContext.current
 
     val localizedContext = remember(context, lang) {
-        val locale = Locale(lang)
+        val locale = Locale.forLanguageTag(lang)
         Locale.setDefault(locale)
         val config = Configuration(context.resources.configuration)
         config.setLocale(locale)
@@ -206,7 +206,7 @@ fun AppWithLocale(content: @Composable () -> Unit) {
 
     // Keep Android's per-app locale API in sync (covers Android 13+ system settings)
     LaunchedEffect(lang) {
-        val locale = Locale(lang)
+        val locale = Locale.forLanguageTag(lang)
         Locale.setDefault(locale)
         AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(lang))
 

@@ -49,6 +49,7 @@ object LocationHelper {
                 var city = "GPS: ${"%.2f".format(bestLocation.latitude)}, ${"%.2f".format(bestLocation.longitude)}"
                 try {
                     val geocoder = android.location.Geocoder(context, java.util.Locale.getDefault())
+                    @Suppress("DEPRECATION")
                     val addresses = geocoder.getFromLocation(bestLocation.latitude, bestLocation.longitude, 1)
                     if (!addresses.isNullOrEmpty()) {
                         val address = addresses[0]

@@ -29,7 +29,7 @@ val databaseModule = module {
                     AppDatabase::class.java
                 )
                     .allowMainThreadQueries()
-                    .fallbackToDestructiveMigration()
+                    .fallbackToDestructiveMigration(dropAllTables = true)
                     .build()
             } else {
                 Room.databaseBuilder(
@@ -37,7 +37,7 @@ val databaseModule = module {
                     AppDatabase::class.java,
                     "database"
                 )
-                    .fallbackToDestructiveMigration()
+                    .fallbackToDestructiveMigration(dropAllTables = true)
                     .build()
             }
         } catch (e: Exception) {

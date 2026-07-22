@@ -101,8 +101,6 @@ fun Qibla() {
 
     var sensorAccuracy by remember { mutableStateOf(SensorManager.SENSOR_STATUS_ACCURACY_HIGH) }
 
-    val vibrator = remember(context) { context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator }
-
     // Sensor tracking
     DisposableEffect(context, lat, lon) {
         val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager

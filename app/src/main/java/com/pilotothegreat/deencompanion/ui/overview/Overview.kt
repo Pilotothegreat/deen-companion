@@ -1513,17 +1513,11 @@ fun LiveQiblaCompassCard(
         rel < 8f || rel > 352f
     }
 
-    val vibrator = remember(context) { context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator }
     var wasAligned by remember { mutableStateOf(false) }
     LaunchedEffect(isAligned) {
         if (isAligned && !wasAligned) {
             try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    vibrator?.vibrate(VibrationEffect.createOneShot(40, VibrationEffect.DEFAULT_AMPLITUDE))
-                } else {
-                    @Suppress("DEPRECATION")
-                    vibrator?.vibrate(40)
-                }
+                com.pilotothegreat.deencompanion.util.VibratorHelper.vibrateQiblaAligned(context)
             } catch (e: Exception) {}
         }
         wasAligned = isAligned
@@ -1893,6 +1887,7 @@ fun SwipeablePrayerRow(
     val mutedPrayers by appPreferenceRepo.mutedPrayers.collectAsState(initial = emptySet())
     val isMuted = mutedPrayers.contains(prayerKey)
 
+    @Suppress("DEPRECATION")
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { dismissValue ->
             if (dismissValue == SwipeToDismissBoxValue.EndToStart || dismissValue == SwipeToDismissBoxValue.StartToEnd) {
