@@ -1717,66 +1717,81 @@ fun LiveQiblaCompassCard(
                     }
                 }
 
-                // Chiseled M3 arrow needle (stays pointing to Qibla)
-                Canvas(
+                // Rotating container for needle and cursor tip (aligns cursor to the actual Qibla direction on the outer dial)
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .graphicsLayer {
                             rotationZ = relativeAngle
-                            scaleX = needleScale
-                            scaleY = needleScale
-                        }
-                ) {
-                    val radius = size.minDimension / 2
-                    val center = Offset(size.width / 2, size.height / 2)
-
-                    val leftWing = Path().apply {
-                        moveTo(center.x, center.y - radius + 15.dp.toPx())
-                        lineTo(center.x - 8.dp.toPx(), center.y)
-                        lineTo(center.x, center.y + 3.dp.toPx())
-                        close()
-                    }
-                    val rightWing = Path().apply {
-                        moveTo(center.x, center.y - radius + 15.dp.toPx())
-                        lineTo(center.x + 8.dp.toPx(), center.y)
-                        lineTo(center.x, center.y + 3.dp.toPx())
-                        close()
-                    }
-
-                    drawPath(path = leftWing, color = needleColor)
-                    drawPath(path = rightWing, color = needleColor.copy(alpha = 0.7f))
-                }
-
-                // Kaaba cursor in the center
-                val kaabaColor = if (isAligned) tertiaryColor else needleColor
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(morphShape)
-                        .background(
-                            if (isAligned) kaabaColor.copy(alpha = 0.25f)
-                            else colorScheme.surfaceVariant
-                        )
-                        .border(
-                            width = if (isAligned) 2.dp else 1.dp,
-                            color = if (isAligned) kaabaColor else colorScheme.outline,
-                            shape = morphShape
-                        )
-                        .graphicsLayer {
-                            // Keep Kaaba icon upright by canceling parent rotation
-                            rotationZ = -relativeAngle
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    Image(
-                        painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_kaaba),
-                        contentDescription = "Kaaba",
-                        modifier = Modifier.size(20.dp),
-                        colorFilter = if (isAligned) null else androidx.compose.ui.graphics.ColorFilter.colorMatrix(
-                            androidx.compose.ui.graphics.ColorMatrix().apply { setToSaturation(0.3f) }
+                    // Needle pointing upwards
+                    Canvas(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        val radius = size.minDimension / 2
+                        val center = Offset(size.width / 2, size.height / 2)
+
+                        // 3D chiseled needle path pointing upwards
+                        val leftWing = Path().apply {
+                            moveTo(center.x, center.y - radius + 18.dp.toPx())
+                            lineTo(center.x - 6.dp.toPx(), center.y)
+                            lineTo(center.x, center.y + 3.dp.toPx())
+                            close()
+                        }
+                        val rightWing = Path().apply {
+                            moveTo(center.x, center.y - radius + 18.dp.toPx())
+                            lineTo(center.x + 6.dp.toPx(), center.y)
+                            lineTo(center.x, center.y + 3.dp.toPx())
+                            close()
+                        }
+
+                        drawPath(path = leftWing, color = needleColor)
+                        drawPath(path = rightWing, color = needleColor.copy(alpha = 0.7f))
+                    }
+
+                    // Kaaba cursor aligned at the tip of the needle (outer edge)
+                    val kaabaColor = if (isAligned) tertiaryColor else needleColor
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .offset(y = (-6).dp)
+                            .size(28.dp)
+                            .clip(morphShape)
+                            .background(
+                                if (isAligned) kaabaColor.copy(alpha = 0.25f)
+                                else colorScheme.surfaceVariant
+                            )
+                            .border(
+                                width = if (isAligned) 2.dp else 1.dp,
+                                color = if (isAligned) kaabaColor else colorScheme.outline,
+                                shape = morphShape
+                            )
+                            .graphicsLayer {
+                                // Keep Kaaba icon upright by canceling parent rotation
+                                rotationZ = -relativeAngle
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_kaaba),
+                            contentDescription = "Kaaba",
+                            modifier = Modifier.size(16.dp),
+                            colorFilter = if (isAligned) null else androidx.compose.ui.graphics.ColorFilter.colorMatrix(
+                                androidx.compose.ui.graphics.ColorMatrix().apply { setToSaturation(0.3f) }
+                            )
                         )
-                    )
+                    }
                 }
+
+                // Decorative central pivot hub
+                Box(
+                    modifier = Modifier
+                        .size(10.dp)
+                        .clip(CircleShape)
+                        .background(colorScheme.onPrimaryContainer)
+                )
             }
 
                 if (!hasCompass) {
