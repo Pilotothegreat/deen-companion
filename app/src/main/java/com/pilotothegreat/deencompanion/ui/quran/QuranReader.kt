@@ -242,7 +242,6 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
     val coroutineScope = rememberCoroutineScope()
     var selectedAyah by remember { mutableStateOf<Pair<Int, Int>?>(if (scrollToVerse != null) Pair(surahNumber, scrollToVerse) else null) }
     var selectedAyahTarget by remember { mutableStateOf<Pair<QuranHelper.Surah, QuranHelper.Verse>?>(null) }
-    var showScholarlyReportSheet by remember { mutableStateOf(false) }
 
     val pageIndexForActiveAyah = remember(currentSurahId, currentAyahId, globalPages) {
         if (currentSurahId > 0 && currentAyahId > 0) {
@@ -963,9 +962,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                 val currentPageNum = pagerState.currentPage + 1
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .weight(1f)
-                        .clickable { showScholarlyReportSheet = true }
+                    modifier = Modifier.weight(1f)
                 ) {
                     Text(
                         text = if (lang == "ar") "سُورَةُ ${currentSurah?.name ?: surahName}" else "Surah ${currentSurah?.transliteration ?: surahName}",
@@ -980,115 +977,59 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                     )
                 }
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    // Scholarly Report Button
-                    IconButton(onClick = { showScholarlyReportSheet = true }) {
-                        Icon(
-                            imageVector = Icons.Default.MenuBook,
-                            contentDescription = if (lang == "ar") "تقرير القرآن" else "Quran Report",
-                            tint = goldAccent
-                        )
-                    }
+                // Sleep Timer Button
+                var showSleepMenu by remember { mutableStateOf(false) }
+                val sleepTimerRemaining by playbackManager.sleepTimerRemaining.collectAsState()
+                val endOfSurahEnabled by playbackManager.endOfSurahEnabled.collectAsState()
 
-                    // Font Size Menu Button
-                    Box(contentAlignment = Alignment.Center) {
-                        var showFontMenu by remember { mutableStateOf(false) }
-                        IconButton(onClick = { showFontMenu = true }) {
+                Box(contentAlignment = Alignment.Center) {
+                    IconButton(onClick = { showSleepMenu = true }) {
+                        BadgedBox(
+                            badge = {
+                                if (sleepTimerRemaining > 0) {
+                                    val mins = (sleepTimerRemaining + 59) / 60
+                                    Badge { Text(mins.toString()) }
+                                } else if (endOfSurahEnabled) {
+                                    Badge { Text("S") }
+                                }
+                            }
+                        ) {
                             Icon(
-                                imageVector = Icons.Default.FormatSize,
-                                contentDescription = if (lang == "ar") "حجم الخط" else "Font Size",
+                                imageVector = Icons.Default.Bedtime,
+                                contentDescription = stringResource(R.string.sleep_mode),
                                 tint = goldAccent
                             )
                         }
-
-                        DropdownMenu(
-                            expanded = showFontMenu,
-                            onDismissRequest = { showFontMenu = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text(if (lang == "ar") "تكبير الخط (+)" else "Increase Font (+)") },
-                                onClick = {
-                                    coroutineScope.launch {
-                                        appPreferenceRepo.setQuranArabicFontSize((arabicFontSize + 2).coerceAtMost(48))
-                                    }
-                                    showFontMenu = false
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text(if (lang == "ar") "تصغير الخط (-)" else "Decrease Font (-)") },
-                                onClick = {
-                                    coroutineScope.launch {
-                                        appPreferenceRepo.setQuranArabicFontSize((arabicFontSize - 2).coerceAtLeast(20))
-                                    }
-                                    showFontMenu = false
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text(if (lang == "ar") "الحجم الافتراضي (32)" else "Reset Font Size (32)") },
-                                onClick = {
-                                    coroutineScope.launch {
-                                        appPreferenceRepo.setQuranArabicFontSize(32)
-                                    }
-                                    showFontMenu = false
-                                }
-                            )
-                        }
                     }
 
-                    // Sleep Timer Button
-                    var showSleepMenu by remember { mutableStateOf(false) }
-                    val sleepTimerRemaining by playbackManager.sleepTimerRemaining.collectAsState()
-                    val endOfSurahEnabled by playbackManager.endOfSurahEnabled.collectAsState()
-
-                    Box(contentAlignment = Alignment.Center) {
-                        IconButton(onClick = { showSleepMenu = true }) {
-                            BadgedBox(
-                                badge = {
-                                    if (sleepTimerRemaining > 0) {
-                                        val mins = (sleepTimerRemaining + 59) / 60
-                                        Badge { Text(mins.toString()) }
-                                    } else if (endOfSurahEnabled) {
-                                        Badge { Text("S") }
-                                    }
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Bedtime,
-                                    contentDescription = stringResource(R.string.sleep_mode),
-                                    tint = goldAccent
-                                )
-                            }
-                        }
-
-                        DropdownMenu(
-                            expanded = showSleepMenu,
-                            onDismissRequest = { showSleepMenu = false }
-                        ) {
-                            listOf(
-                                0 to stringResource(R.string.timer_off),
-                                10 to stringResource(R.string.timer_10m),
-                                15 to stringResource(R.string.timer_15m),
-                                30 to stringResource(R.string.timer_30m),
-                                45 to stringResource(R.string.timer_45m),
-                                60 to stringResource(R.string.timer_60m)
-                            ).forEach { (minutes, label) ->
-                                DropdownMenuItem(
-                                    text = { Text(label) },
-                                    onClick = {
-                                        playbackManager.setSleepTimer(minutes)
-                                        showSleepMenu = false
-                                    }
-                                )
-                            }
-
+                    DropdownMenu(
+                        expanded = showSleepMenu,
+                        onDismissRequest = { showSleepMenu = false }
+                    ) {
+                        listOf(
+                            0 to stringResource(R.string.timer_off),
+                            10 to stringResource(R.string.timer_10m),
+                            15 to stringResource(R.string.timer_15m),
+                            30 to stringResource(R.string.timer_30m),
+                            45 to stringResource(R.string.timer_45m),
+                            60 to stringResource(R.string.timer_60m)
+                        ).forEach { (minutes, label) ->
                             DropdownMenuItem(
-                                text = { Text(stringResource(R.string.timer_end_of_surah)) },
+                                text = { Text(label) },
                                 onClick = {
-                                    playbackManager.setEndOfSurahEnabled(true)
+                                    playbackManager.setSleepTimer(minutes)
                                     showSleepMenu = false
                                 }
                             )
                         }
+
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.timer_end_of_surah)) },
+                            onClick = {
+                                playbackManager.setEndOfSurahEnabled(true)
+                                showSleepMenu = false
+                            }
+                        )
                     }
                 }
             }
@@ -1136,14 +1077,6 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                     Toast.makeText(context, if (lang == "ar") "تم نسخ الآية بنجاح" else "Ayah copied to clipboard", Toast.LENGTH_SHORT).show()
                 },
                 onDismiss = { selectedAyahTarget = null }
-            )
-        }
-
-        // Render Scholarly Quran Report Sheet when triggered
-        if (showScholarlyReportSheet) {
-            QuranScholarlyReportSheet(
-                currentSurahId = currentSurah?.id ?: surahNumber,
-                onDismiss = { showScholarlyReportSheet = false }
             )
         }
     }

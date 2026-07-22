@@ -135,12 +135,6 @@ fun Quran(paddingValues: PaddingValues) {
         )
     }
 
-    var showScholarlyReport by remember { mutableStateOf(false) }
-
-    BackHandler(enabled = searchQuery.isNotEmpty()) {
-        searchState.clearText()
-    }
-
     val paddingSide = paddingValues.calculateLeftPadding(LayoutDirection.Ltr)
     val paddingTop = paddingValues.calculateTopPadding()
     val paddingBottom = paddingValues.calculateBottomPadding()
@@ -155,31 +149,11 @@ fun Quran(paddingValues: PaddingValues) {
     ) {
         Box(Modifier.height(paddingTop + 8.dp))
 
-        // Unified Search Field with Scholarly Report button
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(modifier = Modifier.weight(1f)) {
-                SearchField(
-                    textFieldState = searchState,
-                    placeholderText = stringResource(R.string.search_quran_hint)
-                )
-            }
-            FilledTonalIconButton(
-                onClick = { showScholarlyReport = true },
-                colors = IconButtonDefaults.filledTonalIconButtonColors(
-                    containerColor = colorScheme.primaryContainer,
-                    contentColor = colorScheme.onPrimaryContainer
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.MenuBook,
-                    contentDescription = if (lang == "ar") "تقرير القرآن" else "Quran Report"
-                )
-            }
-        }
+        // Unified Search Field
+        SearchField(
+            textFieldState = searchState,
+            placeholderText = stringResource(R.string.search_quran_hint)
+        )
 
         if (debouncedQuery.isNotEmpty()) {
             val direction = if (lang == "ar") LayoutDirection.Rtl else LayoutDirection.Ltr
@@ -285,12 +259,6 @@ fun Quran(paddingValues: PaddingValues) {
                 SurahsList(surahs, navigator, paddingBottom, quranFontFamily)
             }
         }
-    }
-
-    if (showScholarlyReport) {
-        QuranScholarlyReportSheet(
-            onDismiss = { showScholarlyReport = false }
-        )
     }
 
     PageTitle(false, hazeState, stringResource(R.string.quran_browser))
