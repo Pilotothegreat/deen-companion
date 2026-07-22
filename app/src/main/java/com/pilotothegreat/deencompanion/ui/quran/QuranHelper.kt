@@ -685,18 +685,26 @@ object QuranHelper {
         return boundary?.pageNumber ?: 1
     }
 
-
-
     @Volatile
     private var cachedSurahs: List<Surah>? = null
 
+    fun cleanArabicText(raw: String): String {
+        val normalized = java.text.Normalizer.normalize(raw, java.text.Normalizer.Form.NFC)
+        return normalized
+            .replace("إِ", "إ")
+            .replace("أُ", "أ")
+            .replace("أَ", "أ")
+            .replace("ءَأَ", "أَأَ")
+            .replace("ءَا", "آ")
+    }
+
     fun getSurahs(context: Context): List<Surah> {
-        cachedSurahs?.let { return it }
+        if (cachedSurahs != null) return cachedSurahs!!
+
         synchronized(this) {
-            cachedSurahs?.let { return it }
-            val json = context.resources.openRawResource(R.raw.quran)
-                .bufferedReader()
-                .use { it.readText() }
+            if (cachedSurahs != null) return cachedSurahs!!
+
+            val json = context.assets.open("quran.json").bufferedReader().use { it.readText() }
             val array = JSONArray(json)
             val surahs = mutableListOf<Surah>()
             for (i in 0 until array.length()) {
@@ -708,7 +716,7 @@ object QuranHelper {
                     verses.add(
                         Verse(
                             id = vObj.getInt("id"),
-                            text = vObj.getString("text"),
+                            text = cleanArabicText(vObj.getString("text")),
                             translation = vObj.getString("translation")
                         )
                     )

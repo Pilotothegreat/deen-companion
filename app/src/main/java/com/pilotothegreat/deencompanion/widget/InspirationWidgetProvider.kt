@@ -120,14 +120,8 @@ class InspirationWidgetProvider : AppWidgetProvider(), KoinComponent {
                 val views = RemoteViews(context.packageName, R.layout.inspiration_widget_layout)
                 
                 views.setTextViewText(R.id.widget_title, localizedContext.getString(R.string.daily_inspiration))
-
-                if (hasOpened) {
-                    views.setTextViewText(R.id.widget_inspiration_text, "\"$text\"")
-                    views.setTextViewText(R.id.widget_inspiration_ref, "— ${getLocalizedInspirationRef(ref, lang)}")
-                } else {
-                    views.setTextViewText(R.id.widget_inspiration_text, localizedContext.getString(R.string.widget_placeholder_initialize))
-                    views.setTextViewText(R.id.widget_inspiration_ref, "--")
-                }
+                views.setTextViewText(R.id.widget_inspiration_text, "\"$text\"")
+                views.setTextViewText(R.id.widget_inspiration_ref, "— ${getLocalizedInspirationRef(ref, lang)}")
 
                 // Open app on widget click
                 val mainIntent = Intent(context, MainActivity::class.java)

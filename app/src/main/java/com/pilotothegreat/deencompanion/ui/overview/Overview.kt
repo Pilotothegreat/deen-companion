@@ -2,6 +2,8 @@
 package com.pilotothegreat.deencompanion.ui.overview
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -103,6 +105,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
@@ -484,6 +489,60 @@ fun Overview(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
         Spacer(Modifier.height(paddingTop + TOP_BAR_HEIGHT + 8.dp))
+
+        // GitHub Release Update Dialog Prompt
+        val updateVersionAvailable by viewModel.updateVersionAvailable.collectAsState()
+        updateVersionAvailable?.let { latestVer ->
+            AlertDialog(
+                onDismissRequest = { },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = "Update",
+                        tint = colorScheme.primary
+                    )
+                },
+                title = {
+                    Text(
+                        text = if (lang == "ar") "تحديث جديد متوفر ($latestVer)" else "New Update Available ($latestVer)",
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                text = {
+                    Text(
+                        text = if (lang == "ar") 
+                            "يتوفر إصدار جديد من تطبيق رفيق الدين. يرجى التحديث للحصول على أحدث المميزات والتحسينات." 
+                        else 
+                            "A new version ($latestVer) of Deen Companion is available. Update now to get the latest features and improvements."
+                    )
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            val cleanTag = latestVer.trim()
+                            val apkUrl = "https://github.com/Pilotothegreat/deen-companion/releases/download/$cleanTag/deen-${cleanTag.replace("v","")}-release.apk"
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(apkUrl)).apply {
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                            }
+                            try {
+                                context.startActivity(intent)
+                            } catch (e: Exception) {
+                                val releaseUrl = "https://github.com/Pilotothegreat/deen-companion/releases/latest"
+                                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(releaseUrl)))
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
+                    ) {
+                        Text(if (lang == "ar") "تحديث الآن" else "Update Now")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { viewModel.dismissUpdatePrompt() }) {
+                        Text(if (lang == "ar") "لاحقاً" else "Later")
+                    }
+                }
+            )
+        }
 
 
 
@@ -1822,6 +1881,7 @@ fun TasbihDialCard(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SwipeablePrayerRow(
     prayerKey: String,
@@ -1835,99 +1895,102 @@ fun SwipeablePrayerRow(
     val coroutineScope = rememberCoroutineScope()
     val mutedPrayers by appPreferenceRepo.mutedPrayers.collectAsState(initial = emptySet())
     val isMuted = mutedPrayers.contains(prayerKey)
-    var swipeOffset by remember { mutableStateOf(0f) }
-    val animatedOffset by animateFloatAsState(
-        targetValue = swipeOffset,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)
+
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { dismissValue ->
+            if (dismissValue == SwipeToDismissBoxValue.EndToStart || dismissValue == SwipeToDismissBoxValue.StartToEnd) {
+                coroutineScope.launch {
+                    appPreferenceRepo.setPrayerMuted(prayerKey, !isMuted)
+                }
+            }
+            false
+        }
     )
 
-    Box(
-        modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.CenterEnd
-    ) {
-        if (animatedOffset.absoluteValue > 5f) {
-            Surface(
-                onClick = {
-                    coroutineScope.launch {
-                        appPreferenceRepo.setPrayerMuted(prayerKey, !isMuted)
-                        swipeOffset = 0f
-                    }
-                },
+    SwipeToDismissBox(
+        state = dismissState,
+        enableDismissFromStartToEnd = true,
+        enableDismissFromEndToStart = true,
+        backgroundContent = {
+            val isError = isMuted
+            val containerBg = if (isError) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
+            val contentTint = if (isError) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onPrimaryContainer
+            val alignment = if (dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) Alignment.CenterStart else Alignment.CenterEnd
+
+            Box(
                 modifier = Modifier
-                    .size(48.dp)
-                    .padding(end = 4.dp),
-                shape = RoundedCornerShape(16.dp),
-                color = if (isMuted) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
+                    .fillMaxSize()
+                    .clip(MaterialTheme.shapes.medium)
+                    .background(containerBg)
+                    .padding(horizontal = 16.dp),
+                contentAlignment = alignment
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = if (isMuted) Icons.Default.NotificationsOff else Icons.Default.Notifications,
-                        contentDescription = "Toggle Mute",
-                        tint = if (isMuted) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(22.dp)
-                    )
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = contentTint.copy(alpha = 0.2f),
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = if (isMuted) Icons.Default.NotificationsOff else Icons.Default.Notifications,
+                            contentDescription = "Toggle Mute Notification",
+                            tint = contentTint,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
-        }
-
-        val bg = if (isNext) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .offset { IntOffset(animatedOffset.roundToInt(), 0) }
-                .pointerInput(Unit) {
-                    detectHorizontalDragGestures(
-                        onDragEnd = {
-                            if (swipeOffset < -40f) {
-                                swipeOffset = -60f
-                            } else {
-                                swipeOffset = 0f
-                            }
-                        },
-                        onHorizontalDrag = { _, dragAmount ->
-                            swipeOffset = (swipeOffset + dragAmount).coerceIn(-70f, 0f)
+        },
+        content = {
+            val bg = if (isNext) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerLow
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(MaterialTheme.shapes.medium)
+                    .background(bg)
+                    .clickable {
+                        coroutineScope.launch {
+                            appPreferenceRepo.setPrayerMuted(prayerKey, !isMuted)
                         }
-                    )
-                }
-                .clip(MaterialTheme.shapes.medium)
-                .background(bg)
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = if (isNext) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
-                    fontWeight = if (isNext) FontWeight.Bold else FontWeight.Normal
-                )
-                if (isMuted) {
-                    Icon(
-                        imageVector = Icons.Default.NotificationsOff,
-                        contentDescription = "Muted",
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-            }
-
-            Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    text = time.toLocaleHourString(context),
-                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                    color = if (isNext) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.primary
-                )
-                if (offset != null) {
+                    }
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        text = stringResource(R.string.iqama_time, offset.toLocaleHourString(context)),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = if (isNext) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-                                else MaterialTheme.colorScheme.secondary
+                        text = name,
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = if (isNext) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
+                        fontWeight = if (isNext) FontWeight.Bold else FontWeight.Normal
                     )
+                    if (isMuted) {
+                        Icon(
+                            imageVector = Icons.Default.NotificationsOff,
+                            contentDescription = "Muted",
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = time.toLocaleHourString(context),
+                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                        color = if (isNext) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.primary
+                    )
+                    if (offset != null) {
+                        Text(
+                            text = stringResource(R.string.iqama_time, offset.toLocaleHourString(context)),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = if (isNext) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                                    else MaterialTheme.colorScheme.secondary
+                        )
+                    }
                 }
             }
         }
-    }
+    )
 }
 

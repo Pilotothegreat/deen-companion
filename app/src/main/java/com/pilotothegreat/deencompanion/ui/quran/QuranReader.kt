@@ -487,13 +487,13 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                             val bLineHeight = bFontSize * 1.5f
                                             val paddingDp = 24f
                                             Text(
-                                                text = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+                                                text = "بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ",
                                                 style = MaterialTheme.typography.headlineLarge.copy(
                                                     fontWeight = FontWeight.Bold,
                                                     fontFamily = quranFontFamily,
                                                     fontSize = bFontSize.sp,
                                                     lineHeight = bLineHeight.sp,
-                                                    fontFeatureSettings = "rlig 1, calt 1"
+                                                    fontFeatureSettings = "rlig 1, calt 1, mset 1, kash 1"
                                                 ),
                                                 textAlign = TextAlign.Center,
                                                 modifier = Modifier
@@ -516,7 +516,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                 builder.append(block.verseItem.verse.text)
                                                 val endText = builder.length
                                                 val startOrn = builder.length
-                                                val ornament = "\u00A0﴿${toArabicNumerals(block.verseItem.verse.id)}﴾\u00A0"
+                                                val ornament = "\u00A0${toArabicNumerals(block.verseItem.verse.id)}\u00A0"
                                                 builder.append(ornament)
                                                 val endOrn = builder.length
 

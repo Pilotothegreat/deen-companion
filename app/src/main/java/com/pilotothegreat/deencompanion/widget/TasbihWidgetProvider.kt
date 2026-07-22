@@ -99,22 +99,16 @@ class TasbihWidgetProvider : AppWidgetProvider(), KoinComponent {
                 val views = RemoteViews(context.packageName, R.layout.tasbih_widget_layout)
                 
                 views.setTextViewText(R.id.widget_title, localizedContext.getString(R.string.tasbih_counter))
+                views.setTextViewText(R.id.widget_tasbih_count, count.toString())
 
-                if (hasOpened) {
-                    views.setTextViewText(R.id.widget_tasbih_count, count.toString())
-                    // Dhikr preset localization check: if presets, localize them
-                    val localizedDhikr = when (dhikr) {
-                        "سبحان الله" -> localizedContext.getString(R.string.tasbih_dhikr_subhanallah)
-                        "الحمد لله" -> localizedContext.getString(R.string.tasbih_dhikr_alhamdulillah)
-                        "لا إله إلا الله" -> localizedContext.getString(R.string.tasbih_dhikr_lailahaillallah)
-                        "الله أكبر" -> localizedContext.getString(R.string.tasbih_dhikr_allahuakbar)
-                        else -> dhikr
-                    }
-                    views.setTextViewText(R.id.widget_dhikr_name, localizedDhikr)
-                } else {
-                    views.setTextViewText(R.id.widget_tasbih_count, "0")
-                    views.setTextViewText(R.id.widget_dhikr_name, localizedContext.getString(R.string.widget_placeholder_initialize))
+                val localizedDhikr = when (dhikr) {
+                    "سبحان الله" -> localizedContext.getString(R.string.tasbih_dhikr_subhanallah)
+                    "الحمد لله" -> localizedContext.getString(R.string.tasbih_dhikr_alhamdulillah)
+                    "لا إله إلا الله" -> localizedContext.getString(R.string.tasbih_dhikr_lailahaillallah)
+                    "الله أكبر" -> localizedContext.getString(R.string.tasbih_dhikr_allahuakbar)
+                    else -> dhikr
                 }
+                views.setTextViewText(R.id.widget_dhikr_name, localizedDhikr)
 
                 // Increment button broadcast intent
                 val incrementIntent = Intent(context, TasbihWidgetProvider::class.java).apply {

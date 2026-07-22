@@ -390,36 +390,28 @@ class OverviewVM(
     fun checkForUpdates() {
         viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             try {
-                val lastCheck = appPreferenceRepo.githubCheckTimestamp.first()
-                val now = System.currentTimeMillis()
-                val oneDayInMillis = 24L * 60 * 60 * 1000
+                val url = java.net.URL("https://api.github.com/repos/Pilotothegreat/deen-companion/releases/latest")
+                val connection = url.openConnection() as java.net.HttpURLConnection
+                connection.requestMethod = "GET"
+                connection.connectTimeout = 5000
+                connection.readTimeout = 5000
+                connection.setRequestProperty("Accept", "application/vnd.github+json")
+                connection.setRequestProperty("User-Agent", "DeenCompanion-App")
                 
-                var latestVersion = appPreferenceRepo.githubCheckLatestVersion.first()
-                
-                if (now - lastCheck >= oneDayInMillis || latestVersion.isEmpty()) {
-                    val url = java.net.URL("https://api.github.com/repos/Pilotothegreat/deen-companion/releases/latest")
-                    val connection = url.openConnection() as java.net.HttpURLConnection
-                    connection.requestMethod = "GET"
-                    connection.connectTimeout = 5000
-                    connection.readTimeout = 5000
-                    connection.setRequestProperty("Accept", "application/vnd.github+json")
-                    connection.setRequestProperty("User-Agent", "DeenCompanion-App")
+                if (connection.responseCode == 200) {
+                    val responseText = connection.inputStream.bufferedReader().use { it.readText() }
+                    val json = org.json.JSONObject(responseText)
+                    val latestVersion = json.getString("tag_name")
                     
-                    if (connection.responseCode == 200) {
-                        val responseText = connection.inputStream.bufferedReader().use { it.readText() }
-                        val json = org.json.JSONObject(responseText)
-                        latestVersion = json.getString("tag_name")
-                        
-                        appPreferenceRepo.setGithubCheckLatestVersion(latestVersion)
-                        appPreferenceRepo.setGithubCheckTimestamp(now)
+                    appPreferenceRepo.setGithubCheckLatestVersion(latestVersion)
+                    appPreferenceRepo.setGithubCheckTimestamp(System.currentTimeMillis())
+                    
+                    val currentVersion = "v" + com.pilotothegreat.deencompanion.BuildConfig.VERSION_NAME
+                    if (isVersionNewer(currentVersion, latestVersion)) {
+                        _updateVersionAvailable.value = latestVersion
                     }
-                    connection.disconnect()
                 }
-                
-                val currentVersion = "v" + com.pilotothegreat.deencompanion.BuildConfig.VERSION_NAME
-                if (latestVersion.isNotEmpty() && isVersionNewer(currentVersion, latestVersion)) {
-                    _updateVersionAvailable.value = latestVersion
-                }
+                connection.disconnect()
             } catch (e: Exception) {
                 timber.log.Timber.e(e, "GitHub Update Check Failed")
             }
@@ -442,5 +434,9 @@ class OverviewVM(
             if (latePart < currPart) return false
         }
         return false
+    }
+
+    fun dismissUpdatePrompt() {
+        _updateVersionAvailable.value = null
     }
 }
