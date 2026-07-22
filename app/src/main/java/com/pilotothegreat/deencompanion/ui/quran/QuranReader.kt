@@ -45,6 +45,16 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bedtime
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.FormatSize
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
+import android.widget.Toast
+import android.content.ClipData
+import android.content.ClipboardManager
+import kotlinx.coroutines.launch
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.ui.theme.Theme
 import com.pilotothegreat.deencompanion.database.AppPreferenceRepo
@@ -229,8 +239,13 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
         }
     }
 
-    val pageIndexForActiveAyah = remember(currentSurahId, currentAyahId, globalPages, surahNumber) {
-        if (currentSurahId == surahNumber) {
+    val coroutineScope = rememberCoroutineScope()
+    var selectedAyah by remember { mutableStateOf<Pair<Int, Int>?>(if (scrollToVerse != null) Pair(surahNumber, scrollToVerse) else null) }
+    var selectedAyahTarget by remember { mutableStateOf<Pair<QuranHelper.Surah, QuranHelper.Verse>?>(null) }
+    var showScholarlyReportSheet by remember { mutableStateOf(false) }
+
+    val pageIndexForActiveAyah = remember(currentSurahId, currentAyahId, globalPages) {
+        if (currentSurahId > 0 && currentAyahId > 0) {
             globalPages.indexOfFirst { page ->
                 page.any { item ->
                     item is PageContent.VerseItem && item.surahId == currentSurahId && item.verse.id == currentAyahId
@@ -432,6 +447,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                 InnerPageHeader(
                                     surahName = currentSurah.name,
                                     juzNumber = currentJuz,
+                                    mushafPageNumber = pageIdx + 1,
                                     goldAccent = goldAccent,
                                     textColor = mushafTextColor,
                                     fontFamily = quranFontFamily,
@@ -492,7 +508,8 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                             val primaryContainerColor = colorScheme.primaryContainer
                                             val onPrimaryContainerColor = colorScheme.onPrimaryContainer
                                             val isCurrentlyPlaying = (block.verseItem.surahId == currentSurahId && block.verseItem.verse.id == currentAyahId)
-                                            val isHighlighted = isCurrentlyPlaying || (block.verseItem.surahId == surahNumber && block.verseItem.verse.id == activeAyah)
+                                            val isSelected = selectedAyah?.first == block.verseItem.surahId && selectedAyah?.second == block.verseItem.verse.id
+                                            val isHighlighted = isCurrentlyPlaying || isSelected
 
                                             val annotated = remember(block.verseItem, isHighlighted, primaryContainerColor, onPrimaryContainerColor, isDark, goldAccent, mushafTextColor) {
                                                 val builder = AnnotatedString.Builder()
@@ -632,7 +649,8 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                     )
 
                                                     val isCurrentlyPlaying = (surahId == currentSurahId && verse.id == currentAyahId)
-                                                    val isHighlighted = isCurrentlyPlaying || (surahId == surahNumber && verse.id == activeAyah)
+                                                    val isSelected = selectedAyah?.first == surahId && selectedAyah?.second == verse.id
+                                                    val isHighlighted = isCurrentlyPlaying || isSelected
 
                                                     if (isHighlighted) {
                                                         builder.addStyle(
@@ -719,8 +737,10 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                                                                 val clickedAyahId = parts[1].toIntOrNull()
                                                                                                 if (clickedSurahId != null && clickedAyahId != null) {
                                                                                                     val targetSurah = surahs.firstOrNull { it.id == clickedSurahId }
-                                                                                                    if (targetSurah != null) {
-                                                                                                        playbackManager.playOrJumpToAyah(targetSurah, clickedAyahId)
+                                                                                                    val targetVerse = targetSurah?.verses?.firstOrNull { it.id == clickedAyahId }
+                                                                                                    if (targetSurah != null && targetVerse != null) {
+                                                                                                        selectedAyah = Pair(targetSurah.id, targetVerse.id)
+                                                                                                        selectedAyahTarget = Pair(targetSurah, targetVerse)
                                                                                                     }
                                                                                                 }
                                                                                             }
@@ -926,7 +946,7 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                     .fillMaxWidth()
                     .statusBarsPadding()
                     .height(56.dp)
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -939,61 +959,136 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                     )
                 }
 
-                Spacer(modifier = Modifier.weight(1f))
+                // Center Title (Surah Name & Mushaf Page X of 604)
+                val currentPageNum = pagerState.currentPage + 1
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { showScholarlyReportSheet = true }
+                ) {
+                    Text(
+                        text = if (lang == "ar") "سُورَةُ ${currentSurah?.name ?: surahName}" else "Surah ${currentSurah?.transliteration ?: surahName}",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = goldAccent
+                    )
+                    Text(
+                        text = if (lang == "ar") "صفحة ${toArabicNumerals(currentPageNum)} من ٦٠٤" else "Page $currentPageNum of 604",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = mushafTextColor.copy(alpha = 0.7f)
+                    )
+                }
 
-                // Sleep timer button
-                var showSleepMenu by remember { mutableStateOf(false) }
-                val sleepTimerRemaining by playbackManager.sleepTimerRemaining.collectAsState()
-                val endOfSurahEnabled by playbackManager.endOfSurahEnabled.collectAsState()
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Scholarly Report Button
+                    IconButton(onClick = { showScholarlyReportSheet = true }) {
+                        Icon(
+                            imageVector = Icons.Default.MenuBook,
+                            contentDescription = if (lang == "ar") "تقرير القرآن" else "Quran Report",
+                            tint = goldAccent
+                        )
+                    }
 
-                Box(contentAlignment = Alignment.Center) {
-                    IconButton(onClick = { showSleepMenu = true }) {
-                        BadgedBox(
-                            badge = {
-                                if (sleepTimerRemaining > 0) {
-                                    val mins = (sleepTimerRemaining + 59) / 60
-                                    Badge { Text(mins.toString()) }
-                                } else if (endOfSurahEnabled) {
-                                    Badge { Text("S") }
-                                }
-                            }
-                        ) {
+                    // Font Size Menu Button
+                    Box(contentAlignment = Alignment.Center) {
+                        var showFontMenu by remember { mutableStateOf(false) }
+                        IconButton(onClick = { showFontMenu = true }) {
                             Icon(
-                                imageVector = Icons.Default.Bedtime,
-                                contentDescription = stringResource(R.string.sleep_mode),
+                                imageVector = Icons.Default.FormatSize,
+                                contentDescription = if (lang == "ar") "حجم الخط" else "Font Size",
                                 tint = goldAccent
+                            )
+                        }
+
+                        DropdownMenu(
+                            expanded = showFontMenu,
+                            onDismissRequest = { showFontMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text(if (lang == "ar") "تكبير الخط (+)" else "Increase Font (+)") },
+                                onClick = {
+                                    coroutineScope.launch {
+                                        appPreferenceRepo.setQuranArabicFontSize((arabicFontSize + 2).coerceAtMost(48))
+                                    }
+                                    showFontMenu = false
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(if (lang == "ar") "تصغير الخط (-)" else "Decrease Font (-)") },
+                                onClick = {
+                                    coroutineScope.launch {
+                                        appPreferenceRepo.setQuranArabicFontSize((arabicFontSize - 2).coerceAtLeast(20))
+                                    }
+                                    showFontMenu = false
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(if (lang == "ar") "الحجم الافتراضي (32)" else "Reset Font Size (32)") },
+                                onClick = {
+                                    coroutineScope.launch {
+                                        appPreferenceRepo.setQuranArabicFontSize(32)
+                                    }
+                                    showFontMenu = false
+                                }
                             )
                         }
                     }
 
-                    DropdownMenu(
-                        expanded = showSleepMenu,
-                        onDismissRequest = { showSleepMenu = false }
-                    ) {
-                        listOf(
-                            0 to stringResource(R.string.timer_off),
-                            10 to stringResource(R.string.timer_10m),
-                            15 to stringResource(R.string.timer_15m),
-                            30 to stringResource(R.string.timer_30m),
-                            45 to stringResource(R.string.timer_45m),
-                            60 to stringResource(R.string.timer_60m)
-                        ).forEach { (minutes, label) ->
+                    // Sleep Timer Button
+                    var showSleepMenu by remember { mutableStateOf(false) }
+                    val sleepTimerRemaining by playbackManager.sleepTimerRemaining.collectAsState()
+                    val endOfSurahEnabled by playbackManager.endOfSurahEnabled.collectAsState()
+
+                    Box(contentAlignment = Alignment.Center) {
+                        IconButton(onClick = { showSleepMenu = true }) {
+                            BadgedBox(
+                                badge = {
+                                    if (sleepTimerRemaining > 0) {
+                                        val mins = (sleepTimerRemaining + 59) / 60
+                                        Badge { Text(mins.toString()) }
+                                    } else if (endOfSurahEnabled) {
+                                        Badge { Text("S") }
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Bedtime,
+                                    contentDescription = stringResource(R.string.sleep_mode),
+                                    tint = goldAccent
+                                )
+                            }
+                        }
+
+                        DropdownMenu(
+                            expanded = showSleepMenu,
+                            onDismissRequest = { showSleepMenu = false }
+                        ) {
+                            listOf(
+                                0 to stringResource(R.string.timer_off),
+                                10 to stringResource(R.string.timer_10m),
+                                15 to stringResource(R.string.timer_15m),
+                                30 to stringResource(R.string.timer_30m),
+                                45 to stringResource(R.string.timer_45m),
+                                60 to stringResource(R.string.timer_60m)
+                            ).forEach { (minutes, label) ->
+                                DropdownMenuItem(
+                                    text = { Text(label) },
+                                    onClick = {
+                                        playbackManager.setSleepTimer(minutes)
+                                        showSleepMenu = false
+                                    }
+                                )
+                            }
+
                             DropdownMenuItem(
-                                text = { Text(label) },
+                                text = { Text(stringResource(R.string.timer_end_of_surah)) },
                                 onClick = {
-                                    playbackManager.setSleepTimer(minutes)
+                                    playbackManager.setEndOfSurahEnabled(true)
                                     showSleepMenu = false
                                 }
                             )
                         }
-
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.timer_end_of_surah)) },
-                            onClick = {
-                                playbackManager.setEndOfSurahEnabled(true)
-                                showSleepMenu = false
-                            }
-                        )
                     }
                 }
             }
@@ -1017,6 +1112,39 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                         .background(goldAccent)
                 )
             }
+        }
+
+        // Render Ayah Contextual Action Sheet when selected
+        selectedAyahTarget?.let { (s, v) ->
+            val isPlayingAyah by playbackManager.isPlaying.collectAsState()
+            val currentPlayingSurahId by playbackManager.currentSurahId.collectAsState()
+            val currentPlayingAyahId by playbackManager.currentAyahId.collectAsState()
+            val isThisAyahPlaying = isPlayingAyah && currentPlayingSurahId == s.id && currentPlayingAyahId == v.id
+
+            AyahActionSheet(
+                surah = s,
+                verse = v,
+                isPlaying = isThisAyahPlaying,
+                onPlay = {
+                    playbackManager.playOrJumpToAyah(s, v.id)
+                },
+                onCopy = {
+                    val textToCopy = "${v.text}\n\n${v.translation}\n(Surah ${s.transliteration} ${s.id}:${v.id})"
+                    val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    val clip = ClipData.newPlainText("Ayah Text", textToCopy)
+                    clipboard.setPrimaryClip(clip)
+                    Toast.makeText(context, if (lang == "ar") "تم نسخ الآية بنجاح" else "Ayah copied to clipboard", Toast.LENGTH_SHORT).show()
+                },
+                onDismiss = { selectedAyahTarget = null }
+            )
+        }
+
+        // Render Scholarly Quran Report Sheet when triggered
+        if (showScholarlyReportSheet) {
+            QuranScholarlyReportSheet(
+                currentSurahId = currentSurah?.id ?: surahNumber,
+                onDismiss = { showScholarlyReportSheet = false }
+            )
         }
     }
 }
@@ -1074,6 +1202,7 @@ fun getJuzNumber(surahId: Int, verseId: Int): Int {
 fun InnerPageHeader(
     surahName: String,
     juzNumber: Int,
+    mushafPageNumber: Int,
     goldAccent: Color,
     textColor: Color,
     fontFamily: FontFamily,
@@ -1081,6 +1210,13 @@ fun InnerPageHeader(
 ) {
     val surahText = if (lang == "ar") "سُورَةُ $surahName" else "Surah $surahName"
     val juzText = if (lang == "ar") "الجُزْءُ ${toArabicNumerals(juzNumber)}" else "Juz $juzNumber"
+
+    // Madinah Hafs Mushaf print fidelity:
+    // Odd pages (Right): Surah Name on outer right, Juz on inner left.
+    // Even pages (Left): Juz on outer left, Surah Name on inner right.
+    val isRightPage = mushafPageNumber % 2 != 0
+    val firstText = if (isRightPage) surahText else juzText
+    val secondText = if (isRightPage) juzText else surahText
     
     Column(
         modifier = Modifier
@@ -1096,7 +1232,7 @@ fun InnerPageHeader(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = surahText,
+                text = firstText,
                 style = TextStyle(
                     fontWeight = FontWeight.Bold,
                     fontFamily = fontFamily,
@@ -1106,7 +1242,7 @@ fun InnerPageHeader(
             )
             
             Text(
-                text = juzText,
+                text = secondText,
                 style = TextStyle(
                     fontWeight = FontWeight.Bold,
                     fontFamily = fontFamily,
@@ -1480,5 +1616,177 @@ fun calculatePageHeight(
     totalHeightPx += with(density) { 92.dp.toPx() }
     
     return totalHeightPx
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AyahActionSheet(
+    surah: QuranHelper.Surah,
+    verse: QuranHelper.Verse,
+    isPlaying: Boolean,
+    onPlay: () -> Unit,
+    onCopy: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val appPreferenceRepo: AppPreferenceRepo = koinInject()
+    val lang by appPreferenceRepo.appLanguage.collectAsState(initial = "en")
+    val direction = if (lang == "ar") LayoutDirection.Rtl else LayoutDirection.Ltr
+    val goldAccent = Color(0xFFD4AF37)
+    val isSajdah = QuranHelper.isSajdahVerse(surah.id, verse.id)
+
+    CompositionLocalProvider(LocalLayoutDirection provides direction) {
+        ModalBottomSheet(
+            onDismissRequest = onDismiss,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            tonalElevation = 8.dp,
+            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+                    .padding(bottom = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Header
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = if (lang == "ar") "سورة ${surah.name} • الآية ${toArabicNumerals(verse.id)}" else "Surah ${surah.transliteration} • Ayah ${verse.id}",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = goldAccent
+                        )
+                        val page = QuranHelper.getMushafPageNumber(surah.id, verse.id)
+                        val juz = getJuzNumber(surah.id, verse.id)
+                        Text(
+                            text = if (lang == "ar") "الجزء ${toArabicNumerals(juz)} • صفحة ${toArabicNumerals(page)}" else "Juz $juz • Page $page",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    IconButton(onClick = onDismiss) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = stringResource(R.string.close),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+
+                // Ayah Text Card
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = verse.text,
+                            style = TextStyle(
+                                fontFamily = FontFamily(Font(R.font.uthmanic_hafs)),
+                                fontSize = 22.sp,
+                                lineHeight = 34.sp,
+                                textAlign = TextAlign.Start
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        if (verse.translation.isNotEmpty()) {
+                            HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                            Text(
+                                text = verse.translation,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+
+                if (isSajdah) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .border(1.dp, goldAccent, MaterialTheme.shapes.medium),
+                        colors = CardDefaults.cardColors(containerColor = goldAccent.copy(alpha = 0.1f))
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .padding(12.dp)
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Text("۩", color = goldAccent, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                            Text(
+                                text = if (lang == "ar") "هذه آية سجود تلاوة. يُسن السجود عند قراءتها." else "Prostration verse (Sajdah al-Tilawah). Prostration is recommended when reading.",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+
+                // Action Buttons Row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            onPlay()
+                            onDismiss()
+                        },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(containerColor = goldAccent)
+                    ) {
+                        Icon(
+                            imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = Color.Black
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = if (lang == "ar") "استماع للآية" else "Listen",
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            onCopy()
+                            onDismiss()
+                        },
+                        modifier = Modifier.weight(1f),
+                        border = BorderStroke(1.dp, goldAccent)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ContentCopy,
+                            contentDescription = null,
+                            tint = goldAccent,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = if (lang == "ar") "نسخ النص" else "Copy Verse",
+                            color = goldAccent
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
 

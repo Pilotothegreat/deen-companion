@@ -19,8 +19,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.clearText
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
@@ -30,6 +32,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -131,6 +135,12 @@ fun Quran(paddingValues: PaddingValues) {
         )
     }
 
+    var showScholarlyReport by remember { mutableStateOf(false) }
+
+    BackHandler(enabled = searchQuery.isNotEmpty()) {
+        searchState.clearText()
+    }
+
     val paddingSide = paddingValues.calculateLeftPadding(LayoutDirection.Ltr)
     val paddingTop = paddingValues.calculateTopPadding()
     val paddingBottom = paddingValues.calculateBottomPadding()
@@ -145,11 +155,31 @@ fun Quran(paddingValues: PaddingValues) {
     ) {
         Box(Modifier.height(paddingTop + 8.dp))
 
-        // Unified Search Field
-        SearchField(
-            textFieldState = searchState,
-            placeholderText = stringResource(R.string.search_quran_hint)
-        )
+        // Unified Search Field with Scholarly Report button
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(modifier = Modifier.weight(1f)) {
+                SearchField(
+                    textFieldState = searchState,
+                    placeholderText = stringResource(R.string.search_quran_hint)
+                )
+            }
+            FilledTonalIconButton(
+                onClick = { showScholarlyReport = true },
+                colors = IconButtonDefaults.filledTonalIconButtonColors(
+                    containerColor = colorScheme.primaryContainer,
+                    contentColor = colorScheme.onPrimaryContainer
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.MenuBook,
+                    contentDescription = if (lang == "ar") "تقرير القرآن" else "Quran Report"
+                )
+            }
+        }
 
         if (debouncedQuery.isNotEmpty()) {
             val direction = if (lang == "ar") LayoutDirection.Rtl else LayoutDirection.Ltr
@@ -202,15 +232,38 @@ fun Quran(paddingValues: PaddingValues) {
                                     Text(
                                         text = if (lang == "ar") "${surah.name} (آية ${toArabicNumerals(verse.id)})" else "${surah.transliteration} (Ayah ${verse.id})",
                                         style = MaterialTheme.typography.titleSmall,
-                                        color = colorScheme.primary
+                                        color = colorScheme.primary,
+                                        fontWeight = FontWeight.Bold
                                     )
                                     Spacer(Modifier.height(4.dp))
+                                    
+                                    val highlightedArabic = remember(verse.text, debouncedQuery) {
+                                        val query = normalizeArabic(debouncedQuery)
+                                        val normalizedText = normalizeArabic(verse.text)
+                                        val builder = androidx.compose.ui.text.AnnotatedString.Builder()
+                                        val idx = normalizedText.indexOf(query, ignoreCase = true)
+                                        builder.append(verse.text)
+                                        if (idx >= 0 && query.isNotEmpty()) {
+                                            val start = idx.coerceIn(0, verse.text.length)
+                                            val end = (start + query.length).coerceAtMost(verse.text.length)
+                                            builder.addStyle(
+                                                style = androidx.compose.ui.text.SpanStyle(
+                                                    background = Color(0xFFD4AF37).copy(alpha = 0.35f),
+                                                    fontWeight = FontWeight.Bold
+                                                ),
+                                                start = start,
+                                                end = end
+                                            )
+                                        }
+                                        builder.toAnnotatedString()
+                                    }
+
                                     Text(
-                                        text = verse.text,
+                                        text = highlightedArabic,
                                         style = MaterialTheme.typography.bodyLarge.copy(
                                             fontFamily = quranFontFamily,
-                                            fontSize = 26.sp,
-                                            lineHeight = 38.sp
+                                            fontSize = 24.sp,
+                                            lineHeight = 36.sp
                                         ),
                                         modifier = Modifier.fillMaxWidth(),
                                         textAlign = TextAlign.Start
@@ -232,6 +285,12 @@ fun Quran(paddingValues: PaddingValues) {
                 SurahsList(surahs, navigator, paddingBottom, quranFontFamily)
             }
         }
+    }
+
+    if (showScholarlyReport) {
+        QuranScholarlyReportSheet(
+            onDismiss = { showScholarlyReport = false }
+        )
     }
 
     PageTitle(false, hazeState, stringResource(R.string.quran_browser))

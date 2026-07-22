@@ -773,4 +773,18 @@ object QuranHelper {
             else -> false
         }
     }
+
+    fun getSajdahVerses(context: Context): List<Pair<Surah, Verse>> {
+        val surahs = getSurahs(context)
+        val result = mutableListOf<Pair<Surah, Verse>>()
+        for (surah in surahs) {
+            for (verse in surah.verses) {
+                if (isSajdahVerse(surah.id, verse.id)) {
+                    result.add(Pair(surah, verse))
+                }
+            }
+        }
+        return result
+    }
 }
+

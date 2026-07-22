@@ -261,7 +261,7 @@ fun QuranAudioPlayer(
                             playbackManager.jumpToAyah(sliderPosition.toInt().coerceIn(1, surah.verses.size))
                         },
                         valueRange = 1f..surah.verses.size.toFloat().coerceAtLeast(2f),
-                        steps = (surah.verses.size - 2).coerceAtLeast(0),
+                        steps = 0,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(18.dp),
@@ -279,16 +279,18 @@ fun QuranAudioPlayer(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        val activeAyahNum = if (isDragging) sliderPosition.toInt().coerceIn(1, surah.verses.size) else currentAyahId
                         val progressLabel = if (lang == "ar") {
-                            "آية ${toArabicNumerals(currentAyahId)} من ${toArabicNumerals(surah.verses.size)}"
+                            "آية ${toArabicNumerals(activeAyahNum)} من ${toArabicNumerals(surah.verses.size)}"
                         } else {
-                            stringResource(R.string.player_ayah_progress, currentAyahId, surah.verses.size)
+                            stringResource(R.string.player_ayah_progress, activeAyahNum, surah.verses.size)
                         }
                         Text(
                             text = progressLabel,
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.secondary,
-                            fontSize = 11.sp
+                            color = if (isDragging) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+                            fontSize = 11.sp,
+                            fontWeight = if (isDragging) FontWeight.Bold else FontWeight.Normal
                         )
                     }
                 }
