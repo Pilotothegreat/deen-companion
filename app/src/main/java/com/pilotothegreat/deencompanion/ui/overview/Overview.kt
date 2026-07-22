@@ -44,6 +44,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.material3.Slider
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -1506,10 +1507,13 @@ fun LiveQiblaCompassCard(
         )
     )
 
-    val relativeAngle = qiblaBearing - animatedHeading
+    var manualHeading by remember { mutableStateOf(0f) }
+    val effectiveHeading = if (hasCompass) animatedHeading else manualHeading
+    val effectiveRawHeading = if (hasCompass) rawHeading else manualHeading
+    val relativeAngle = qiblaBearing - effectiveHeading
 
-    val isAligned = remember(relativeAngle) {
-        val rel = (relativeAngle + 360f) % 360f
+    val isAligned = remember(effectiveRawHeading, qiblaBearing) {
+        val rel = (qiblaBearing - effectiveRawHeading + 360f) % 360f
         rel < 8f || rel > 352f
     }
 
@@ -1567,6 +1571,9 @@ fun LiveQiblaCompassCard(
     Card(
         modifier = modifier
             .semantics { contentDescription = cdQibla }
+            .clickable {
+                navigator.goTo(com.pilotothegreat.deencompanion.ui.navigation.QiblaKey)
+            }
             .graphicsLayer {
                 scaleX = cardScale * alignmentScale
                 scaleY = cardScale * alignmentScale
@@ -1590,30 +1597,14 @@ fun LiveQiblaCompassCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            if (!hasCompass) {
-                Box(
-                    modifier = Modifier
-                        .size(120.dp)
-                        .background(colorScheme.errorContainer.copy(alpha = 0.2f), shape = MaterialTheme.shapes.medium)
-                        .padding(8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = if (lang == "ar") "البوصلة غير متوفرة" else "Compass Unavailable",
-                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
-                        color = colorScheme.error,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            } else {
-                Box(
-                    modifier = Modifier
-                        .size(120.dp)
-                        .clip(CircleShape)
-                        .background(colorScheme.primaryContainer.copy(alpha = if (isAligned) 0.22f else 0.12f))
-                        .padding(8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
+            Box(
+                modifier = Modifier
+                    .size(120.dp)
+                    .clip(CircleShape)
+                    .background(colorScheme.primaryContainer.copy(alpha = if (isAligned) 0.22f else 0.12f))
+                    .padding(8.dp),
+                contentAlignment = Alignment.Center
+            ) {
                     if (isAligned) {
                         Canvas(modifier = Modifier.fillMaxSize()) {
                             drawCircle(
@@ -1673,10 +1664,19 @@ fun LiveQiblaCompassCard(
                         drawCircle(color = needleColor, radius = 2.5.dp.toPx(), center = center)
                     }
                 }
+
+                if (!hasCompass) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Slider(
+                        value = manualHeading,
+                        onValueChange = { manualHeading = it },
+                        valueRange = 0f..360f,
+                        modifier = Modifier.fillMaxWidth().height(20.dp)
+                    )
+                }
             }
         }
     }
-}
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
