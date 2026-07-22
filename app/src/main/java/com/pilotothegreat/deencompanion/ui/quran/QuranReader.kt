@@ -75,6 +75,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.first
 
 data class JuzBoundary(val surahNumber: Int, val verseNumber: Int, val juzNumber: Int)
 
@@ -219,27 +220,41 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
         pagesList
     }
 
-    val activePageIndex = remember(globalPages, surahNumber, scrollToVerse) {
-        val targetVerse = scrollToVerse ?: 1
-        val found = globalPages.indexOfFirst { page ->
-            page.any { item ->
-                item is PageContent.VerseItem && item.surahId == surahNumber && item.verse.id == targetVerse
+    // Compute the target page index for the requested surah
+    val activePageIndex by remember(surahNumber, scrollToVerse) {
+        derivedStateOf {
+            if (globalPages.isEmpty()) -1
+            else {
+                val targetVerse = scrollToVerse ?: 1
+                val found = globalPages.indexOfFirst { page ->
+                    page.any { item ->
+                        item is PageContent.VerseItem && item.surahId == surahNumber && item.verse.id == targetVerse
+                    }
+                }
+                if (found >= 0) found else {
+                    globalPages.indexOfFirst { page ->
+                        page.any { item -> item is PageContent.VerseItem && item.surahId == surahNumber }
+                    }.coerceAtLeast(0)
+                }
             }
-        }
-        if (found >= 0) found else {
-            globalPages.indexOfFirst { page ->
-                page.any { item -> item is PageContent.VerseItem && item.surahId == surahNumber }
-            }.coerceAtLeast(0)
         }
     }
 
-    val pagerState = rememberPagerState(initialPage = activePageIndex.coerceIn(0, (globalPages.size - 1).coerceAtLeast(0)), pageCount = { globalPages.size })
+    val pagerState = rememberPagerState(
+        initialPage = if (activePageIndex >= 0) activePageIndex else 0,
+        pageCount = { globalPages.size }
+    )
 
-    // Scroll to the active page when first loaded or when target surah changes
-    LaunchedEffect(surahNumber, scrollToVerse, activePageIndex) {
-        if (activePageIndex >= 0 && activePageIndex < globalPages.size) {
-            pagerState.scrollToPage(activePageIndex)
-        }
+    // Scroll to the correct page once data is ready, keyed on surahNumber so it fires on each new surah
+    LaunchedEffect(surahNumber, scrollToVerse) {
+        // Use snapshotFlow to wait until activePageIndex is valid (>= 0)
+        snapshotFlow { activePageIndex }
+            .first { it >= 0 }
+            .let { targetPage ->
+                if (targetPage < globalPages.size) {
+                    pagerState.scrollToPage(targetPage)
+                }
+            }
     }
 
     val coroutineScope = rememberCoroutineScope()

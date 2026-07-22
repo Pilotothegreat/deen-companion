@@ -225,14 +225,16 @@ fun Qibla() {
 
     val primaryColor = MaterialTheme.colorScheme.primary
     val onPrimaryColor = MaterialTheme.colorScheme.onPrimary
-    val dialFaceColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f)
+    val dialFaceColor = MaterialTheme.colorScheme.surfaceContainerHighest
     val surfaceColor = MaterialTheme.colorScheme.surface
     val compassRingColor by animateColorAsState(
-        targetValue = if (isAligned) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+        targetValue = if (isAligned) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.outline
     )
     val centerArrowColor by animateColorAsState(
         targetValue = if (isAligned) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
     )
+    val cardinalColor = MaterialTheme.colorScheme.onSurface
+    val cardinalNorthColor = MaterialTheme.colorScheme.error
     Scaffold(
         topBar = {
             TopAppBar(
@@ -417,50 +419,84 @@ fun Qibla() {
                 }
 
                 // Compass Dial (rotates with -animatedHeading)
-                // Rotating Dial Face (rotates with animatedHeading relative to phone)
-                Canvas(
+                Box(
                     modifier = Modifier
                         .size(260.dp)
                         .graphicsLayer {
                             rotationZ = -animatedHeading
-                        }
+                        },
+                    contentAlignment = Alignment.Center
                 ) {
-                    val radius = size.minDimension / 2
-                    val center = Offset(size.width / 2, size.height / 2)
+                    Canvas(modifier = Modifier.fillMaxSize()) {
+                        val radius = size.minDimension / 2
+                        val center = Offset(size.width / 2, size.height / 2)
 
-                    // Draw dial face background
-                    drawCircle(
-                        color = dialFaceColor,
-                        radius = radius
+                        // Draw dial face background
+                        drawCircle(
+                            color = dialFaceColor,
+                            radius = radius
+                        )
+
+                        // Draw outer border ring
+                        drawCircle(
+                            color = compassRingColor,
+                            radius = radius,
+                            style = Stroke(width = 3.dp.toPx())
+                        )
+
+                        // Inner decorative ring
+                        drawCircle(
+                            color = compassRingColor.copy(alpha = 0.2f),
+                            radius = radius - 20.dp.toPx(),
+                            style = Stroke(width = 1.dp.toPx())
+                        )
+
+                        // Draw 36 precision compass tick marks
+                        for (i in 0 until 36) {
+                            val angleDeg = i * 10f
+                            val angleRad = Math.toRadians(angleDeg.toDouble())
+                            val isMajor = i % 9 == 0
+                            val isMedium = i % 3 == 0
+                            val tickLength = if (isMajor) 16.dp.toPx() else if (isMedium) 10.dp.toPx() else 5.dp.toPx()
+                            val tickStroke = if (isMajor) 2.5.dp.toPx() else if (isMedium) 1.5.dp.toPx() else 1.dp.toPx()
+                            val tickColor = if (isMajor) compassRingColor else compassRingColor.copy(alpha = 0.6f)
+
+                            val outerR = radius - 3.dp.toPx()
+                            val innerR = radius - tickLength
+                            val startX = (center.x + innerR * sin(angleRad)).toFloat()
+                            val startY = (center.y - innerR * cos(angleRad)).toFloat()
+                            val endX = (center.x + outerR * sin(angleRad)).toFloat()
+                            val endY = (center.y - outerR * cos(angleRad)).toFloat()
+
+                            drawLine(
+                                color = tickColor,
+                                start = Offset(startX, startY),
+                                end = Offset(endX, endY),
+                                strokeWidth = tickStroke
+                            )
+                        }
+                    }
+
+                    // Cardinal direction labels overlaid on the dial
+                    val cardinalLabels = listOf(
+                        Triple("N", 0f, cardinalNorthColor),
+                        Triple("E", 90f, cardinalColor),
+                        Triple("S", 180f, cardinalColor),
+                        Triple("W", 270f, cardinalColor)
                     )
-
-                    // Draw outer border ring
-                    drawCircle(
-                        color = compassRingColor,
-                        radius = radius,
-                        style = Stroke(width = 3.dp.toPx())
-                    )
-
-                    // Draw 36 precision M3 compass tick marks
-                    for (i in 0 until 36) {
-                        val angleDeg = i * 10f
-                        val angleRad = Math.toRadians(angleDeg.toDouble())
-                        val isMajor = i % 9 == 0
-                        val isMedium = i % 3 == 0
-                        val tickLength = if (isMajor) 14.dp.toPx() else if (isMedium) 9.dp.toPx() else 5.dp.toPx()
-                        val tickStroke = if (isMajor) 2.5.dp.toPx() else 1.2.dp.toPx()
-                        val tickColor = if (isMajor) compassRingColor else compassRingColor.copy(alpha = 0.45f)
-
-                        val startX = (center.x + (radius - tickLength) * Math.sin(angleRad)).toFloat()
-                        val startY = (center.y - (radius - tickLength) * Math.cos(angleRad)).toFloat()
-                        val endX = (center.x + (radius - 3.dp.toPx()) * Math.sin(angleRad)).toFloat()
-                        val endY = (center.y - (radius - 3.dp.toPx()) * Math.cos(angleRad)).toFloat()
-
-                        drawLine(
-                            color = tickColor,
-                            start = Offset(startX, startY),
-                            end = Offset(endX, endY),
-                            strokeWidth = tickStroke
+                    cardinalLabels.forEach { (label, angle, color) ->
+                        val angleRad = Math.toRadians(angle.toDouble())
+                        val labelRadius = 90.dp  // distance from center for labels
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = color,
+                            modifier = Modifier
+                                .offset(
+                                    x = (labelRadius.value * sin(angleRad)).dp,
+                                    y = (-labelRadius.value * cos(angleRad)).dp
+                                )
                         )
                     }
                 }

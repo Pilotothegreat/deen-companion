@@ -187,59 +187,44 @@ fun QuranAudioPlayer(
                         }
                     }
 
-                    // Right: Prev/Next & Dismiss Controls (Enforce LTR so controls are never reversed)
-                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                    // Right: Ayah Badge & Dismiss
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // Ayah counter badge
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            modifier = Modifier.height(28.dp)
                         ) {
-                            IconButton(
-                                onClick = {
-                                    if (currentAyahId > 1) {
-                                        playbackManager.jumpToAyah(currentAyahId - 1)
-                                    }
-                                },
-                                modifier = Modifier.size(32.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.SkipPrevious,
-                                    contentDescription = stringResource(R.string.cd_prev_verse),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(18.dp)
-                                )
+                            val ayahLabel = if (lang == "ar") {
+                                "${toArabicNumerals(currentAyahId)} / ${toArabicNumerals(surah.verses.size)}"
+                            } else {
+                                "$currentAyahId / ${surah.verses.size}"
                             }
+                            Text(
+                                text = ayahLabel,
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                            )
+                        }
 
-                            IconButton(
-                                onClick = {
-                                    if (currentAyahId < surah.verses.size) {
-                                        playbackManager.jumpToAyah(currentAyahId + 1)
-                                    }
-                                },
-                                modifier = Modifier.size(32.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.SkipNext,
-                                    contentDescription = stringResource(R.string.cd_next_verse),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.width(4.dp))
-
-                            IconButton(
-                                onClick = { playbackManager.stopAndClear() },
-                                modifier = Modifier
-                                    .size(28.dp)
-                                    .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = stringResource(R.string.close),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                            }
+                        // Dismiss button
+                        IconButton(
+                            onClick = { playbackManager.stopAndClear() },
+                            modifier = Modifier
+                                .size(32.dp)
+                                .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = stringResource(R.string.close),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(16.dp)
+                            )
                         }
                     }
                 }
