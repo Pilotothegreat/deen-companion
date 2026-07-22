@@ -134,7 +134,7 @@
     <string name="player_ayah_progress">Ayah %1$d of %2$d</string>
 
     <!-- Qibla Compass -->
-    <string name="qibla_compass">Qibla Compass</string>
+    <string name="qibla_compass">Qibla</string>
     <string name="compass_calibration_title">Calibration Required</string>
     <string name="compass_calibration_desc">Hold the device flat and wave it in a figure-8 pattern to calibrate sensors.</string>
     <string name="qibla_aligned">Aligned with Qibla!</string>

@@ -221,21 +221,24 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
 
     val activePageIndex = remember(globalPages, surahNumber, scrollToVerse) {
         val targetVerse = scrollToVerse ?: 1
-        globalPages.indexOfFirst { page ->
+        val found = globalPages.indexOfFirst { page ->
             page.any { item ->
                 item is PageContent.VerseItem && item.surahId == surahNumber && item.verse.id == targetVerse
             }
-        }.coerceAtLeast(0)
+        }
+        if (found >= 0) found else {
+            globalPages.indexOfFirst { page ->
+                page.any { item -> item is PageContent.VerseItem && item.surahId == surahNumber }
+            }.coerceAtLeast(0)
+        }
     }
 
-    val pagerState = rememberPagerState(initialPage = activePageIndex, pageCount = { globalPages.size })
+    val pagerState = rememberPagerState(initialPage = activePageIndex.coerceIn(0, (globalPages.size - 1).coerceAtLeast(0)), pageCount = { globalPages.size })
 
-    // Scroll to the active page when first loaded or changed
-    var hasScrolledToTarget by remember(surahNumber, scrollToVerse) { mutableStateOf(false) }
-    LaunchedEffect(activePageIndex, globalPages) {
-        if (activePageIndex >= 0 && globalPages.isNotEmpty() && !hasScrolledToTarget) {
+    // Scroll to the active page when first loaded or when target surah changes
+    LaunchedEffect(surahNumber, scrollToVerse, activePageIndex) {
+        if (activePageIndex >= 0 && activePageIndex < globalPages.size) {
             pagerState.scrollToPage(activePageIndex)
-            hasScrolledToTarget = true
         }
     }
 

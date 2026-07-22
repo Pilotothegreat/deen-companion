@@ -436,8 +436,8 @@ fun Qibla() {
 
                         val startX = (center.x + (radius - tickLength) * Math.sin(angleRad)).toFloat()
                         val startY = (center.y - (radius - tickLength) * Math.cos(angleRad)).toFloat()
-                        val endX = (center.x - 4.dp.toPx() * Math.sin(angleRad) + (radius - 2.dp.toPx()) * Math.sin(angleRad)).toFloat()
-                        val endY = (center.y + 4.dp.toPx() * Math.cos(angleRad) - (radius - 2.dp.toPx()) * Math.cos(angleRad)).toFloat()
+                        val endX = (center.x + (radius - 3.dp.toPx()) * Math.sin(angleRad)).toFloat()
+                        val endY = (center.y - (radius - 3.dp.toPx()) * Math.cos(angleRad)).toFloat()
 
                         drawLine(
                             color = tickColor,
@@ -496,9 +496,8 @@ fun Qibla() {
                     // Kaaba icon at the north tip of the needle
                     Box(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .padding(bottom = (260 / 2 - 14).dp), // push to top edge of 260dp circle
-                        contentAlignment = Alignment.TopCenter
+                            .offset(y = (-95).dp),
+                        contentAlignment = Alignment.Center
                     ) {
                         // Pulsing glow ring
                         Canvas(modifier = Modifier.size(52.dp)) {

@@ -131,7 +131,7 @@
     <string name="player_ayah_progress">الآية %1$d من %2$d</string>
 
     <!-- Qibla Compass -->
-    <string name="qibla_compass">بوصلة القبلة</string>
+    <string name="qibla_compass">القبلة</string>
     <string name="compass_calibration_title">تنبيه المعايرة</string>
     <string name="compass_calibration_desc">احمل الجهاز بشكل مسطح وحركه في مسار على شكل رقم 8 لمعايرة المستشعرات.</string>
     <string name="qibla_aligned">محاذاة مع القبلة!</string>

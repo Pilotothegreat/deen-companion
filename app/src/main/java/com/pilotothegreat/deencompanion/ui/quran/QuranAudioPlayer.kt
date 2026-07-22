@@ -20,6 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -185,57 +187,59 @@ fun QuranAudioPlayer(
                         }
                     }
 
-                    // Right: Prev/Next & Dismiss Controls
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(2.dp)
-                    ) {
-                        IconButton(
-                            onClick = {
-                                if (currentAyahId > 1) {
-                                    playbackManager.jumpToAyah(currentAyahId - 1)
-                                }
-                            },
-                            modifier = Modifier.size(32.dp)
+                    // Right: Prev/Next & Dismiss Controls (Enforce LTR so controls are never reversed)
+                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(2.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.SkipPrevious,
-                                contentDescription = stringResource(R.string.cd_prev_verse),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
+                            IconButton(
+                                onClick = {
+                                    if (currentAyahId > 1) {
+                                        playbackManager.jumpToAyah(currentAyahId - 1)
+                                    }
+                                },
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.SkipPrevious,
+                                    contentDescription = stringResource(R.string.cd_prev_verse),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
 
-                        IconButton(
-                            onClick = {
-                                if (currentAyahId < surah.verses.size) {
-                                    playbackManager.jumpToAyah(currentAyahId + 1)
-                                }
-                            },
-                            modifier = Modifier.size(32.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.SkipNext,
-                                contentDescription = stringResource(R.string.cd_next_verse),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
+                            IconButton(
+                                onClick = {
+                                    if (currentAyahId < surah.verses.size) {
+                                        playbackManager.jumpToAyah(currentAyahId + 1)
+                                    }
+                                },
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.SkipNext,
+                                    contentDescription = stringResource(R.string.cd_next_verse),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
 
-                        Spacer(modifier = Modifier.width(4.dp))
-                        
-                        IconButton(
-                            onClick = { playbackManager.stopAndClear() },
-                            modifier = Modifier
-                                .size(28.dp)
-                                .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = stringResource(R.string.close),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(14.dp)
-                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+
+                            IconButton(
+                                onClick = { playbackManager.stopAndClear() },
+                                modifier = Modifier
+                                    .size(28.dp)
+                                    .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = stringResource(R.string.close),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                            }
                         }
                     }
                 }
