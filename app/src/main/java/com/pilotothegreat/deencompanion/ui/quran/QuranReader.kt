@@ -23,7 +23,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
@@ -125,7 +124,7 @@ sealed interface RenderBlock {
     data class Verses(val verses: List<PageContent.VerseItem>) : RenderBlock
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null, autoPlay: Boolean = false) {
     val context = LocalContext.current
@@ -909,12 +908,13 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                                 color = if (isHighlighted) colorScheme.primary else colorScheme.onSurfaceVariant
                                                             )
                                                             if (isSajdah) {
-                                                                Box(
-                                                                    modifier = Modifier
-                                                                        .background(Color(0xFFD4AF37).copy(alpha = 0.15f), RoundedCornerShape(4.dp))
-                                                                        .border(0.5.dp, Color(0xFFD4AF37), RoundedCornerShape(4.dp))
-                                                                        .padding(horizontal = 6.dp, vertical = 2.dp)
-                                                                ) {
+                                                                    // M3 Expressive: replacing RoundedCornerShape(4.dp) with extraSmall token
+                                                                    Box(
+                                                                        modifier = Modifier
+                                                                            .background(Color(0xFFD4AF37).copy(alpha = 0.15f), MaterialTheme.shapes.extraSmall)
+                                                                            .border(0.5.dp, Color(0xFFD4AF37), MaterialTheme.shapes.extraSmall)
+                                                                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                                                                    ) {
                                                                     Text(
                                                                         text = if (lang == "ar") "سجدة" else "Sajdah",
                                                                         color = Color(0xFFD4AF37),

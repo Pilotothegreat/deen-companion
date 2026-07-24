@@ -120,6 +120,8 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.ButtonGroup
+import androidx.compose.material3.ButtonGroupDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.foundation.layout.width
@@ -362,7 +364,7 @@ fun calculateNextPrayer(
     return NextPrayer(nextName, finalRemainingStr, timeStr, totalSeconds)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun Overview(
     paddingValues: PaddingValues,
@@ -916,38 +918,29 @@ fun Overview(
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colorScheme.onSurfaceVariant
                             )
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                installedBanks.forEach { bank ->
-                                    val bankInteractionSource = remember { MutableInteractionSource() }
-                                    val bankPressed by bankInteractionSource.collectIsPressedAsState()
-                                    val bankScale by animateFloatAsState(
-                                        targetValue = if (bankPressed) 0.94f else 1f,
-                                        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
-                                    )
-                                    Button(
+                            // M3 Expressive: ButtonGroup for connected launch action pill row
+                            ButtonGroup {
+                                installedBanks.forEachIndexed { index, bank ->
+                                    val shapes = when {
+                                        installedBanks.size == 1 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                                        index == 0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                                        index == installedBanks.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                                        else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                                    }
+                                    FilledTonalButton(
                                         onClick = {
                                             val launchIntent = context.packageManager.getLaunchIntentForPackage(bank.packageName)
                                             if (launchIntent != null) {
                                                 context.startActivity(launchIntent)
                                             }
                                         },
-                                        colors = ButtonDefaults.buttonColors(
+                                        colors = ButtonDefaults.filledTonalButtonColors(
                                             containerColor = bank.color,
                                             contentColor = Color.White
                                         ),
                                         contentPadding = PaddingValues(horizontal = 10.dp),
-                                        modifier = Modifier
-                                            .height(32.dp)
-                                            .graphicsLayer {
-                                                scaleX = bankScale
-                                                scaleY = bankScale
-                                            },
-                                        interactionSource = bankInteractionSource,
-                                        shape = RoundedCornerShape(16.dp)
+                                        modifier = Modifier.height(32.dp),
+                                        shape = shapes.shape
                                     ) {
                                         Row(
                                             horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -1879,9 +1872,10 @@ fun TasbihDialCard(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             // Dhikr Selector Header at the top of the card
+            // M3: replace hardcoded RoundedCornerShape(16.dp) with theme token (shapes.large = 24dp)
             Row(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(MaterialTheme.shapes.large)
                     .background(MaterialTheme.colorScheme.secondaryContainer)
                     .clickable {
                         val nextDhikr = when (dhikr) {
@@ -2047,7 +2041,8 @@ fun SwipeablePrayerRow(
                 contentAlignment = alignment
             ) {
                 Surface(
-                    shape = RoundedCornerShape(12.dp),
+                    // M3: replace hardcoded RoundedCornerShape(12.dp) with theme token
+                    shape = MaterialTheme.shapes.medium,
                     color = contentTint.copy(alpha = 0.2f),
                     modifier = Modifier.size(40.dp)
                 ) {

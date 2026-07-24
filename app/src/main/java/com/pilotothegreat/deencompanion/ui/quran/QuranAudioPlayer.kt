@@ -194,7 +194,7 @@ fun QuranAudioPlayer(
                     ) {
                         // Ayah counter badge
                         Surface(
-                            shape = RoundedCornerShape(12.dp),
+                            shape = MaterialTheme.shapes.medium,
                             color = MaterialTheme.colorScheme.secondaryContainer,
                             modifier = Modifier.height(28.dp)
                         ) {

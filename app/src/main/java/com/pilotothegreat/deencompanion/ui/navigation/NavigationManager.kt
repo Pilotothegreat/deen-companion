@@ -1,10 +1,10 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
 package com.pilotothegreat.deencompanion.ui.navigation
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.ui.graphics.graphicsLayer
@@ -31,8 +31,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Today
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ButtonGroup
+import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingToolbarDefaults
 import androidx.compose.material3.HorizontalFloatingToolbar
@@ -42,6 +42,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Badge
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ToggleButton
+import androidx.compose.material3.ToggleButtonShapes
+import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.pilotothegreat.deencompanion.R
@@ -56,7 +59,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
@@ -122,9 +124,31 @@ fun NavigationManager() {
                         modifier = Modifier.navBarShadow(),
                         expanded = true,
                         content = {
-                            NavigationButton(navigator, OverviewKey, stringResource(R.string.today), Icons.Default.Today)
-                            NavigationButton(navigator, QuranKey, stringResource(R.string.quran), Icons.AutoMirrored.Filled.MenuBook)
-                            NavigationButton(navigator, HadithKey, stringResource(R.string.hadith), Icons.AutoMirrored.Filled.LibraryBooks)
+                            // M3 Expressive: ButtonGroup provides connected shape morphing
+                            // on selection automatically via ButtonGroupDefaults.
+                            ButtonGroup {
+                                NavigationButton(
+                                    navigator = navigator,
+                                    route = OverviewKey,
+                                    name = stringResource(R.string.today),
+                                    icon = Icons.Default.Today,
+                                    buttonShapes = ButtonGroupDefaults.connectedLeadingButtonShapes()
+                                )
+                                NavigationButton(
+                                    navigator = navigator,
+                                    route = QuranKey,
+                                    name = stringResource(R.string.quran),
+                                    icon = Icons.AutoMirrored.Filled.MenuBook,
+                                    buttonShapes = ButtonGroupDefaults.connectedMiddleButtonShapes()
+                                )
+                                NavigationButton(
+                                    navigator = navigator,
+                                    route = HadithKey,
+                                    name = stringResource(R.string.hadith),
+                                    icon = Icons.AutoMirrored.Filled.LibraryBooks,
+                                    buttonShapes = ButtonGroupDefaults.connectedTrailingButtonShapes()
+                                )
+                            }
                         },
                     )
                 }
@@ -166,48 +190,35 @@ fun NavigationManager() {
     }
 }
 
+// M3 Expressive: ToggleButton inside a ButtonGroup.
+// Shapes are provided by the caller via ButtonGroupDefaults.connectedLeading/Middle/TrailingButtonShapes()
+// so there is no need for manual RoundedCornerShape animation.
 @Composable
-fun NavigationButton(navigator: Navigator, route: NavKey, name: String, icon: ImageVector) {
+fun NavigationButton(
+    navigator: Navigator,
+    route: NavKey,
+    name: String,
+    icon: ImageVector,
+    buttonShapes: ToggleButtonShapes = ButtonGroupDefaults.connectedMiddleButtonShapes()
+) {
     val selected = navigator.current == route
-    val horizontalPadding by animateDpAsState(if (selected) 24.dp else 12.dp)
-    val cornerSize by animateDpAsState(
-        targetValue = if (selected) 24.dp else 12.dp,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
-        label = "cornerSize"
-    )
-    val buttonShape = remember(cornerSize) { RoundedCornerShape(cornerSize) }
     val haptic = LocalHapticFeedback.current
     val scale = remember { Animatable(1f) }
 
+    // Spring bounce on selection for tactile emphasis (SKILL.md: motion must communicate state)
     val spatialSpec = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
-
     LaunchedEffect(selected) {
         if (selected) {
-            scale.animateTo(
-                targetValue = 1.15f,
-                animationSpec = spatialSpec
-            )
-            scale.animateTo(
-                targetValue = 1f,
-                animationSpec = spatialSpec
-            )
+            scale.animateTo(targetValue = 1.12f, animationSpec = spatialSpec)
+            scale.animateTo(targetValue = 1f, animationSpec = spatialSpec)
         }
     }
 
-    Button (
-        colors =
-            if (navigator.current == route){
-                ButtonDefaults.filledTonalButtonColors()
-            } else {
-                ButtonDefaults.textButtonColors()
-            },
-        shape = buttonShape,
-        onClick = {
+    ToggleButton(
+        checked = selected,
+        onCheckedChange = {
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-            if (navigator.current != route) {
+            if (!selected) {
                 if (route == OverviewKey) {
                     navigator.setTo(OverviewKey)
                 } else {
@@ -219,7 +230,8 @@ fun NavigationButton(navigator: Navigator, route: NavKey, name: String, icon: Im
                 }
             }
         },
-        contentPadding = PaddingValues(vertical = 8.dp, horizontal = horizontalPadding),
+        shapes = buttonShapes,
+        contentPadding = PaddingValues(vertical = 8.dp, horizontal = if (selected) 20.dp else 12.dp),
         modifier = Modifier.graphicsLayer {
             scaleX = scale.value
             scaleY = scale.value
@@ -238,7 +250,8 @@ fun NavigationButton(navigator: Navigator, route: NavKey, name: String, icon: Im
                     contentDescription = route.toString()
                 )
             }
-            AnimatedVisibility(navigator.current == route) {
+            // Slide the label in/out when selected — expressive label reveal
+            AnimatedVisibility(selected) {
                 Text(
                     modifier = Modifier.padding(start = 4.dp),
                     text = name

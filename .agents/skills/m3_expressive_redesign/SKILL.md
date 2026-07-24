@@ -182,3 +182,51 @@ When using this skill, the coding agent should output:
 - redesigned composables
 - any custom morph shape wrappers
 - concise notes explaining shape, motion, and hierarchy decisions
+
+
+
+
+
+
+
+
+
+---
+name: m3-expressive-android-master-rule
+description: Master rules for Jetpack Compose Material 3 Expressive design, components, motion physics, and morphing shapes.
+---
+
+# Material 3 Expressive Master Rules
+
+## 1. Hard Requirements & Opt-In
+- ALWAYS add `@OptIn(ExperimentalMaterial3ExpressiveApi::class)` on functions, files, or classes using M3 Expressive APIs.
+- Keep UI product-grade: expressive, accessible, and tactile—never add generic glassmorphism, neon glows, or non-functional visual fluff.
+- Preserve touch targets (minimum 48dp), semantics, and color contrast ratios.
+
+## 2. Component Mapping & Swaps
+Prefer these modern M3 Expressive swaps over standard fallback elements:
+
+| Standard / Legacy Element | Mandatory M3 Expressive Replacement |
+| :--- | :--- |
+| Standard `Button` / `Row` of Buttons | `ButtonGroup` or `SplitButton` with `ButtonGroupDefaults` |
+| Standard `BottomAppBar` | `FloatingToolbar` or `DockedToolbar` |
+| Standard `CircularProgressIndicator` | `LoadingIndicator` or `ContainedLoadingIndicator` |
+| Standard `FloatingActionButton` | Expressive FAB / FAB Menu variants |
+| Static `RoundedCornerShape(dp)` | Dynamic M3 Expressive Shape Tokens or `androidx.graphics.shapes` Morphing |
+
+## 3. Shape System & Morphing Guidance
+Use shapes to communicate hierarchy and state transitions, not as static decoration.
+
+- **Standard Corner Tokens:** Use restrained radii for dense lists, inputs, and settings rows.
+- **Expressive Shapes:** Apply pills, larger radii, or shape morphing ONLY on state changes (e.g., selection thumbs, expanded FABs, play/pause containers, card press states).
+- **Morphing Implementation:** Use `androidx.graphics.shapes` (`RoundedPolygon`, `Morph`) and Compose drawing paths for state transitions (e.g., idle vs. pressed). Never run constant idle morphing loops.
+
+## 4. Theme & Motion Physics
+- Enforce the expressive motion scheme in your root theme:
+  ```kotlin
+  MaterialTheme(
+      colorScheme = colorScheme,
+      typography = typography,
+      shapes = shapes,
+      motionScheme = MotionScheme.expressive()
+  ) { ... }

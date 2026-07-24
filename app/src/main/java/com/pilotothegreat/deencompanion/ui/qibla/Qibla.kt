@@ -66,7 +66,6 @@ import org.koin.compose.koinInject
 import kotlinx.coroutines.launch
 import java.util.Locale
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
@@ -373,10 +372,12 @@ fun Qibla() {
                         modifier = Modifier.size(36.dp)
                     ) {
                         if (isRefreshingLocation) {
-                            CircularProgressIndicator(
+                            // M3 Expressive: CircularWavyProgressIndicator replaces
+                            // legacy CircularProgressIndicator (SKILL.md component swap table)
+                            CircularWavyProgressIndicator(
                                 modifier = Modifier.size(18.dp),
-                                strokeWidth = 2.dp,
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.primary,
+                                trackColor = MaterialTheme.colorScheme.surfaceVariant
                             )
                         } else {
                             Icon(
@@ -387,6 +388,7 @@ fun Qibla() {
                             )
                         }
                     }
+
                 }
             }
 
@@ -736,7 +738,7 @@ fun Qibla() {
                 exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.scaleOut()
             ) {
                 Surface(
-                    shape = RoundedCornerShape(16.dp),
+                    shape = MaterialTheme.shapes.large,
                     color = MaterialTheme.colorScheme.tertiaryContainer,
                     border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.tertiary),
                     modifier = Modifier.padding(vertical = 4.dp)
@@ -767,7 +769,7 @@ fun Qibla() {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-                shape = RoundedCornerShape(24.dp)
+                shape = MaterialTheme.shapes.extraLarge
             ) {
                 Row(
                     modifier = Modifier

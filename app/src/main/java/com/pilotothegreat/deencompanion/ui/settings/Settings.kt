@@ -1,3 +1,4 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
 package com.pilotothegreat.deencompanion.ui.settings
 
 import android.Manifest
@@ -28,7 +29,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ExpandLess
@@ -86,7 +86,7 @@ val omaniBankApps = listOf(
     OmaniBankApp("Ahli Bank", "com.ahlibank", "AB", Color(0xFF8D5B4C))
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun Settings(paddingValues: PaddingValues) {
     val viewModel: SettingsVM = koinViewModel()
@@ -220,60 +220,51 @@ fun Settings(paddingValues: PaddingValues) {
                             tint = colorScheme.onTertiaryContainer)
                     }
 
-                    // Direct Omani Bank launch buttons
+                    // M3 Expressive: ButtonGroup wraps launch actions for connected pill shape hierarchy.
+                    // FilledTonalButton (not ToggleButton) because these are non-toggle, one-shot actions.
                     if (installedBanks.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(4.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Text(
                                 text = if (lang == "ar") "افتح تطبيق البنك:" else "Open Bank App:",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colorScheme.onTertiaryContainer.copy(alpha = 0.8f)
                             )
-                            installedBanks.forEach { bank ->
-                                val bankInteractionSource = remember { MutableInteractionSource() }
-                                val bankPressed by bankInteractionSource.collectIsPressedAsState()
-                                val bankScale by animateFloatAsState(
-                                    targetValue = if (bankPressed) 0.94f else 1f,
-                                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
-                                )
-                                Button(
-                                    onClick = {
-                                        val launchIntent = context.packageManager.getLaunchIntentForPackage(bank.packageName)
-                                        if (launchIntent != null) {
-                                            context.startActivity(launchIntent)
-                                        }
-                                    },
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = bank.color,
-                                        contentColor = Color.White
-                                    ),
-                                    contentPadding = PaddingValues(horizontal = 10.dp),
-                                    modifier = Modifier
-                                        .height(32.dp)
-                                        .graphicsLayer {
-                                            scaleX = bankScale
-                                            scaleY = bankScale
+                            ButtonGroup {
+                                installedBanks.forEachIndexed { index, bank ->
+                                    val shapes = when {
+                                        installedBanks.size == 1 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                                        index == 0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                                        index == installedBanks.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                                        else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                                    }
+                                    FilledTonalButton(
+                                        onClick = {
+                                            val launchIntent = context.packageManager.getLaunchIntentForPackage(bank.packageName)
+                                            if (launchIntent != null) context.startActivity(launchIntent)
                                         },
-                                    interactionSource = bankInteractionSource,
-                                    shape = RoundedCornerShape(16.dp)
-                                ) {
-                                    Row(
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
+                                        colors = ButtonDefaults.filledTonalButtonColors(
+                                            containerColor = bank.color,
+                                            contentColor = Color.White
+                                        ),
+                                        contentPadding = PaddingValues(horizontal = 10.dp),
+                                        modifier = Modifier.height(32.dp),
+                                        shape = shapes.shape
                                     ) {
-                                        Text(
-                                            text = bank.initials,
-                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
-                                        )
-                                        Icon(
-                                            imageVector = Icons.AutoMirrored.Filled.Launch,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(12.dp)
-                                        )
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = bank.initials,
+                                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
+                                            )
+                                            Icon(
+                                                imageVector = Icons.AutoMirrored.Filled.Launch,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(12.dp)
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -780,15 +771,13 @@ fun IqamaConfigRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(text = title, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                val containerColorOffset = if (!isFixed) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
-                val textColorOffset = if (!isFixed) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
-                val containerColorFixed = if (isFixed) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
-                val textColorFixed = if (isFixed) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
-                
-                Button(
-                    onClick = { onModeChange(false) },
-                    colors = ButtonDefaults.buttonColors(containerColor = containerColorOffset, contentColor = textColorOffset),
+            // M3 Expressive: ButtonGroup with connected ToggleButton shapes replaces the two
+            // adjacent Button toggle items — selection state drives shape morphing automatically.
+            ButtonGroup {
+                ToggleButton(
+                    checked = !isFixed,
+                    onCheckedChange = { if (it) onModeChange(false) },
+                    shapes = ButtonGroupDefaults.connectedLeadingButtonShapes(),
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                     modifier = Modifier.height(28.dp)
                 ) {
@@ -797,9 +786,10 @@ fun IqamaConfigRow(
                         style = MaterialTheme.typography.labelSmall
                     )
                 }
-                Button(
-                    onClick = { onModeChange(true) },
-                    colors = ButtonDefaults.buttonColors(containerColor = containerColorFixed, contentColor = textColorFixed),
+                ToggleButton(
+                    checked = isFixed,
+                    onCheckedChange = { if (it) onModeChange(true) },
+                    shapes = ButtonGroupDefaults.connectedTrailingButtonShapes(),
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                     modifier = Modifier.height(28.dp)
                 ) {
