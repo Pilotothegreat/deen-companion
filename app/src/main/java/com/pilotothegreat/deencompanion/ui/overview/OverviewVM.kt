@@ -23,14 +23,25 @@ import java.time.ZoneId
 
 import android.app.Application
 import kotlinx.coroutines.flow.distinctUntilChanged
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.model.UpdateAvailability
+import com.pilotothegreat.deencompanion.util.isPlayStoreInstalled
 
 class OverviewVM(
     private val context: Context,
     private val appPreferenceRepo: AppPreferenceRepo
 ) : ViewModel() {
 
+    private val appUpdateManager: AppUpdateManager by lazy {
+        AppUpdateManagerFactory.create(context)
+    }
+
     private val _updateVersionAvailable = MutableStateFlow<String?>(null)
     val updateVersionAvailable = _updateVersionAvailable.asStateFlow()
+
+    private val _isPlayStoreUpdate = MutableStateFlow(false)
+    val isPlayStoreUpdate = _isPlayStoreUpdate.asStateFlow()
 
     fun dismissUpdateDialog() {
         _updateVersionAvailable.value = null
@@ -170,11 +181,11 @@ class OverviewVM(
                     try {
                         recalculatePrayerTimes(state.lat, state.lon, state.tz)
                     } catch (e: Exception) {
-                        e.printStackTrace()
+                        timber.log.Timber.e(e, "Error recalculating prayer times on state change")
                     }
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                timber.log.Timber.e(e, "Error in prayer times combine flow")
             }
         }
 
@@ -203,7 +214,7 @@ class OverviewVM(
                     val currentTz = timezoneId.first()
                     recalculatePrayerTimes(currentLat, currentLon, currentTz)
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    timber.log.Timber.e(e, "Error in midnight prayer time rollover")
                     // Fallback delay in case of exception to avoid infinite busy loop
                     kotlinx.coroutines.delay(60000)
                 }
@@ -234,7 +245,7 @@ class OverviewVM(
                 AdhanAlarmManager.scheduleAllAdhanAlarms(context, appPreferenceRepo)
                 IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
             } catch (e: Exception) {
-                e.printStackTrace()
+                timber.log.Timber.e(e, "Error scheduling alarms after recalculation")
             }
         }
     }
@@ -280,7 +291,7 @@ class OverviewVM(
                             }
                         }
                     } catch (e: Exception) {
-                        e.printStackTrace()
+                        timber.log.Timber.w(e, "Geocoder failed in refreshLocation")
                     }
 
                     appPreferenceRepo.setLatitude(loc.latitude)
@@ -292,7 +303,7 @@ class OverviewVM(
                     IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                timber.log.Timber.e(e, "Error refreshing location")
             } finally {
                 _isRefreshingLocation.value = false
             }
@@ -389,15 +400,35 @@ class OverviewVM(
     }
 
     fun checkForUpdates() {
+        if (isPlayStoreInstalled(context)) {
+            _isPlayStoreUpdate.value = true
+            appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
+                val now = System.currentTimeMillis()
+                viewModelScope.launch {
+                    appPreferenceRepo.setGithubCheckTimestamp(now)
+                }
+                if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) {
+                    _updateVersionAvailable.value = "Google Play"
+                } else {
+                    _updateVersionAvailable.value = null
+                }
+            }.addOnFailureListener { e ->
+                timber.log.Timber.w(e, "Play Store Update Check Failed")
+            }
+            return
+        }
+
+        _isPlayStoreUpdate.value = false
         viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            var connection: java.net.HttpURLConnection? = null
             try {
                 val url = java.net.URL("https://api.github.com/repos/Pilotothegreat/deen-companion/releases/latest")
-                val connection = url.openConnection() as java.net.HttpURLConnection
+                connection = url.openConnection() as java.net.HttpURLConnection
                 connection.requestMethod = "GET"
                 connection.connectTimeout = 5000
                 connection.readTimeout = 5000
                 connection.setRequestProperty("Accept", "application/vnd.github+json")
-                connection.setRequestProperty("User-Agent", "DeenCompanion-App")
+                connection.setRequestProperty("User-Agent", "DeenCompanion/1.5.43 (Android)")
                 
                 if (connection.responseCode == 200) {
                     val responseText = connection.inputStream.bufferedReader().use { it.readText() }
@@ -412,9 +443,10 @@ class OverviewVM(
                         _updateVersionAvailable.value = latestVersion
                     }
                 }
-                connection.disconnect()
             } catch (e: Exception) {
                 timber.log.Timber.e(e, "GitHub Update Check Failed")
+            } finally {
+                connection?.disconnect()
             }
         }
     }

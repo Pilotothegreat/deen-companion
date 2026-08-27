@@ -241,6 +241,22 @@
     <string name="cd_next_verse">Skip to next verse</string>
     <string name="cd_prev_verse">Go to previous verse</string>
     <string name="cd_qibla_compass">Qibla compass showing direction to Makkah</string>
+    <string name="increase_font_size">Increase font size</string>
+    <string name="decrease_font_size">Decrease font size</string>
+    <string name="increase_offset">Increase offset</string>
+    <string name="decrease_offset">Decrease offset</string>
+    <string name="change_dhikr">Change Dhikr</string>
+    <string name="reset_tasbih">Reset Count</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="update_now">Update Now</string>
+    <string name="toggle_mute_notification">Toggle mute notification</string>
+    <string name="muted">Muted</string>
+    <string name="copy">Copy</string>
+    <string name="refresh_location">Refresh location</string>
+    <string name="update_available_title">New Update Available (%1$s)</string>
+    <string name="update_available_desc_playstore">A new version of Deen Companion is available on Google Play. Update now to get the latest features and stability improvements.</string>
+    <string name="update_available_desc_github">A new version (%1$s) of Deen Companion is available. Update now to get the latest features and stability improvements.</string>
+    <string name="update_playstore_btn">Update on Google Play</string>
 
     <string name="syncing_full_collection">Downloading entire collection...</string>
     <string name="collections_load_error">Collections could not be loaded. Check your internet connection and reopen the app.</string>

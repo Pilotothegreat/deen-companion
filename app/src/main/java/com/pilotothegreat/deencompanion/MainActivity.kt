@@ -1,6 +1,4 @@
-// v1.4.5: Consolidated locale management, replaced double-dialog with OnboardingScreen,
-// removed SharedPreferences first-launch flag (now DataStore IS_ONBOARDING_COMPLETE),
-// removed Robolectric checks from production code
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
 package com.pilotothegreat.deencompanion
 
 import android.app.Activity
@@ -226,7 +224,7 @@ fun AppWithLocale(content: @Composable () -> Unit) {
     CompositionLocalProvider(
         LocalContext provides localizedContext,
         androidx.compose.ui.platform.LocalConfiguration provides localizedContext.resources.configuration,
-        LocalLayoutDirection provides if (lang == "ar") LayoutDirection.Rtl else LayoutDirection.Ltr
+        LocalLayoutDirection provides if (com.pilotothegreat.deencompanion.util.isRtlLanguage(lang)) LayoutDirection.Rtl else LayoutDirection.Ltr
     ) {
         content()
     }

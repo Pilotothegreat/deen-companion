@@ -240,6 +240,22 @@
     <string name="cd_next_verse">الانتقال إلى الآية التالية</string>
     <string name="cd_prev_verse">الرجوع إلى الآية السابقة</string>
     <string name="cd_qibla_compass">بوصلة القبلة تُظهر اتجاه مكة المكرمة</string>
+    <string name="increase_font_size">تكبير حجم الخط</string>
+    <string name="decrease_font_size">تصغير حجم الخط</string>
+    <string name="increase_offset">زيادة الفارق الزمني</string>
+    <string name="decrease_offset">تقليل الفارق الزمني</string>
+    <string name="change_dhikr">تغيير الذكر</string>
+    <string name="reset_tasbih">إعادة ضبط العداد</string>
+    <string name="dismiss">إغلاق</string>
+    <string name="update_now">تحديث الآن</string>
+    <string name="toggle_mute_notification">تبديل كتم الإشعار</string>
+    <string name="muted">مكتوم</string>
+    <string name="copy">نسخ</string>
+    <string name="refresh_location">تحديث الموقع</string>
+    <string name="update_available_title">تحديث جديد متوفر (%1$s)</string>
+    <string name="update_available_desc_playstore">يتوفر إصدار جديد من تطبيق رفيق الدين على متجر Google Play. يرجى التحديث للحصول على أحدث المميزات والتحسينات.</string>
+    <string name="update_available_desc_github">يتوفر إصدار جديد (%1$s) من تطبيق رفيق الدين. يرجى التحديث للحصول على أحدث المميزات والتحسينات.</string>
+    <string name="update_playstore_btn">التحديث عبر Google Play</string>
 
     <string name="syncing_full_collection">جاري تحميل المجموعة كاملة...</string>
     <string name="collections_load_error">لم يتم تحميل المجموعات. تحقق من اتصالك بالإنترنت وافتح التطبيق مرة أخرى.</string>

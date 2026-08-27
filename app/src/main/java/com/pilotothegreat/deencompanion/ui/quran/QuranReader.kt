@@ -1,3 +1,4 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
 package com.pilotothegreat.deencompanion.ui.quran
 
 import androidx.compose.foundation.ExperimentalFoundationApi

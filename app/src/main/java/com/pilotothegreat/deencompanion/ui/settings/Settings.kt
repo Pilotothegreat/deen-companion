@@ -216,7 +216,7 @@ fun Settings(paddingValues: PaddingValues) {
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colorScheme.onTertiaryContainer.copy(alpha = 0.7f))
                         }
-                        Icon(Icons.Default.ContentCopy, contentDescription = "Copy",
+                        Icon(Icons.Default.ContentCopy, contentDescription = stringResource(R.string.copy),
                             tint = colorScheme.onTertiaryContainer)
                     }
 
@@ -814,7 +814,7 @@ fun IqamaConfigRow(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.secondary
                 )
-                Button(
+                FilledTonalButton(
                     onClick = {
                         val parts = fixedTime.split(":")
                         val initialHour = parts.getOrNull(0)?.toIntOrNull() ?: 12
@@ -848,6 +848,8 @@ fun IqamaConfigRow(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.secondary
                 )
+                val decOffsetDesc = stringResource(R.string.decrease_offset)
+                val incOffsetDesc = stringResource(R.string.increase_offset)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -855,7 +857,9 @@ fun IqamaConfigRow(
                     IconButton(
                         onClick = { if (offset > 0) onOffsetChange(offset - 5) },
                         colors = IconButtonDefaults.filledTonalIconButtonColors(),
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier
+                            .size(32.dp)
+                            .semantics { androidx.compose.ui.semantics.contentDescription = decOffsetDesc }
                     ) {
                         Text("-", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
                     }
@@ -868,7 +872,9 @@ fun IqamaConfigRow(
                     IconButton(
                         onClick = { if (offset < 60) onOffsetChange(offset + 5) },
                         colors = IconButtonDefaults.filledTonalIconButtonColors(),
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier
+                            .size(32.dp)
+                            .semantics { androidx.compose.ui.semantics.contentDescription = incOffsetDesc }
                     ) {
                         Text("+", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
                     }
@@ -885,6 +891,8 @@ fun OffsetAdjustmentRow(
     value: Int,
     onValueChange: (Int) -> Unit
 ) {
+    val decOffsetDesc = stringResource(R.string.decrease_offset)
+    val incOffsetDesc = stringResource(R.string.increase_offset)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -902,7 +910,8 @@ fun OffsetAdjustmentRow(
         ) {
             IconButton(
                 onClick = { if (value > 0) onValueChange(value - 5) },
-                colors = IconButtonDefaults.filledTonalIconButtonColors()
+                colors = IconButtonDefaults.filledTonalIconButtonColors(),
+                modifier = Modifier.semantics { androidx.compose.ui.semantics.contentDescription = decOffsetDesc }
             ) {
                 Text("-", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             }
@@ -914,7 +923,8 @@ fun OffsetAdjustmentRow(
             )
             IconButton(
                 onClick = { if (value < 60) onValueChange(value + 5) },
-                colors = IconButtonDefaults.filledTonalIconButtonColors()
+                colors = IconButtonDefaults.filledTonalIconButtonColors(),
+                modifier = Modifier.semantics { androidx.compose.ui.semantics.contentDescription = incOffsetDesc }
             ) {
                 Text("+", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             }
@@ -928,6 +938,8 @@ fun FontSizeAdjustmentRow(
     value: Int,
     onValueChange: (Int) -> Unit
 ) {
+    val decFontDesc = stringResource(R.string.decrease_font_size)
+    val incFontDesc = stringResource(R.string.increase_font_size)
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -947,7 +959,8 @@ fun FontSizeAdjustmentRow(
         ) {
             IconButton(
                 onClick = { if (value > 16) onValueChange(value - 2) },
-                colors = IconButtonDefaults.filledTonalIconButtonColors()
+                colors = IconButtonDefaults.filledTonalIconButtonColors(),
+                modifier = Modifier.semantics { androidx.compose.ui.semantics.contentDescription = decFontDesc }
             ) {
                 Text("-", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             }
@@ -959,7 +972,8 @@ fun FontSizeAdjustmentRow(
             )
             IconButton(
                 onClick = { if (value < 48) onValueChange(value + 2) },
-                colors = IconButtonDefaults.filledTonalIconButtonColors()
+                colors = IconButtonDefaults.filledTonalIconButtonColors(),
+                modifier = Modifier.semantics { androidx.compose.ui.semantics.contentDescription = incFontDesc }
             ) {
                 Text("+", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             }

@@ -35,7 +35,7 @@ class QuranPlaybackService : MediaSessionService() {
                 .setContentType(C.AUDIO_CONTENT_TYPE_SPEECH)
                 .build()
 
-            val userAgent = "Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
+            val userAgent = "DeenCompanion/1.5.43 (Android; Media3)"
             val dataSourceFactory = androidx.media3.datasource.DefaultHttpDataSource.Factory()
                 .setUserAgent(userAgent)
                 .setConnectTimeoutMs(15000)

@@ -160,14 +160,16 @@ class HadithRepository(
             val araUrl = "https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/ara-$bookId.json"
             val engUrl = "https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/eng-$bookId.json"
 
+            val appUserAgent = "DeenCompanion/1.5.42 (Android)"
+
             araConnection = URL(araUrl).openConnection() as java.net.HttpURLConnection
-            araConnection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
+            araConnection.setRequestProperty("User-Agent", appUserAgent)
             araConnection.connectTimeout = 15000
             araConnection.readTimeout = 15000
             val araJson = araConnection.inputStream.bufferedReader().use { it.readText() }
 
             engConnection = URL(engUrl).openConnection() as java.net.HttpURLConnection
-            engConnection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
+            engConnection.setRequestProperty("User-Agent", appUserAgent)
             engConnection.connectTimeout = 15000
             engConnection.readTimeout = 15000
             val engJson = engConnection.inputStream.bufferedReader().use { it.readText() }

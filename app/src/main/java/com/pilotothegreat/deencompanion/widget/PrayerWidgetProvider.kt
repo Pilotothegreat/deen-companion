@@ -48,7 +48,7 @@ class PrayerWidgetProvider : AppWidgetProvider(), KoinComponent {
                 try {
                     updateWidgets(context, appWidgetManager, appWidgetIds)
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    timber.log.Timber.e(e, "Error updating prayer widgets on ACTION_UPDATE_WIDGET")
                 } finally {
                     pendingResult.finish()
                 }
@@ -64,7 +64,7 @@ class PrayerWidgetProvider : AppWidgetProvider(), KoinComponent {
             try {
                 updateWidgets(context, appWidgetManager, appWidgetIds)
             } catch (e: Exception) {
-                e.printStackTrace()
+                timber.log.Timber.e(e, "Error in PrayerWidgetProvider.onUpdate")
             } finally {
                 pendingResult.finish()
             }
@@ -98,7 +98,7 @@ class PrayerWidgetProvider : AppWidgetProvider(), KoinComponent {
 
                 val lat = if (hasOpened) repo.latitude.first() else 21.3891
                 val lon = if (hasOpened) repo.longitude.first() else 39.8579
-                val tzId = if (hasOpened) repo.timezoneId.first() else "Asia/Muscat"
+                val tzId = if (hasOpened) repo.timezoneId.first() else "Asia/Riyadh"
                 val calcMethod = repo.calcMethod.first()
                 val asrSchool = repo.asrSchool.first()
 
@@ -145,7 +145,7 @@ class PrayerWidgetProvider : AppWidgetProvider(), KoinComponent {
                 appWidgetManager.updateAppWidget(appWidgetId, views)
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            timber.log.Timber.e(e, "Error updating prayer widgets")
         }
     }
 

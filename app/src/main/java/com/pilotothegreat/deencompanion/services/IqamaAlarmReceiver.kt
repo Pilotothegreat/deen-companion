@@ -120,17 +120,17 @@ class IqamaAlarmReceiver : BroadcastReceiver(), KoinComponent {
                                     start()
                                 }
                             } catch (e: Exception) {
-                                e.printStackTrace()
+                                timber.log.Timber.e(e, "Error playing Iqama notification sound")
                             }
                         }
                         IqamaAlarmManager.scheduleAllIqamaAlarms(context, repo)
                     } catch (e: Exception) {
-                        e.printStackTrace()
+                        timber.log.Timber.e(e, "Error processing Iqama notification")
                     } finally {
                         try {
                             pendingResult.finish()
                         } catch (e: Exception) {
-                            e.printStackTrace()
+                            timber.log.Timber.e(e, "Error finishing pendingResult in IqamaAlarmReceiver")
                         }
                     }
                 }
@@ -140,12 +140,12 @@ class IqamaAlarmReceiver : BroadcastReceiver(), KoinComponent {
                     try {
                         pendingResult.finish()
                     } catch (e: Exception) {
-                        e.printStackTrace()
+                        timber.log.Timber.e(e, "Error finishing pendingResult on unlaunched scope")
                     }
                 }
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            timber.log.Timber.e(e, "Error in IqamaAlarmReceiver.onReceive")
         }
     }
 

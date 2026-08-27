@@ -382,7 +382,7 @@ fun Qibla() {
                         } else {
                             Icon(
                                 imageVector = androidx.compose.material.icons.Icons.Default.Refresh,
-                                contentDescription = "Refresh Location",
+                                contentDescription = stringResource(R.string.refresh_location),
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(20.dp)
                             )
@@ -713,7 +713,7 @@ fun Qibla() {
                         ) {
                             Image(
                                 painter = painterResource(id = R.drawable.ic_kaaba),
-                                contentDescription = "Kaaba Cursor",
+                                contentDescription = stringResource(R.string.cd_qibla_compass),
                                 modifier = Modifier
                                     .size(34.dp)
                                     .graphicsLayer {

@@ -65,7 +65,7 @@ object LocationHelper {
                         }
                     }
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    timber.log.Timber.w(e, "Geocoder failed to resolve city name")
                 }
                 return@withContext LocationData(
                     latitude = bestLocation.latitude,
@@ -135,17 +135,20 @@ object LocationHelper {
     }
 
     suspend fun fetchIpLocation(): LocationData? = withContext(Dispatchers.IO) {
+        val appUserAgent = "DeenCompanion/1.5.42 (Android)"
+
         // Try Provider 1: ipapi.co
+        var conn1: HttpURLConnection? = null
         try {
             val url = URL("https://ipapi.co/json/")
-            val connection = url.openConnection() as HttpURLConnection
-            connection.requestMethod = "GET"
-            connection.connectTimeout = 5000
-            connection.readTimeout = 5000
-            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
+            conn1 = url.openConnection() as HttpURLConnection
+            conn1.requestMethod = "GET"
+            conn1.connectTimeout = 5000
+            conn1.readTimeout = 5000
+            conn1.setRequestProperty("User-Agent", appUserAgent)
 
-            if (connection.responseCode == 200) {
-                val responseText = connection.inputStream.bufferedReader().use { it.readText() }
+            if (conn1.responseCode == 200) {
+                val responseText = conn1.inputStream.bufferedReader().use { it.readText() }
                 val json = JSONObject(responseText)
                 val lat = json.getDouble("latitude")
                 val lon = json.getDouble("longitude")
@@ -156,20 +159,23 @@ object LocationHelper {
                 return@withContext LocationData(lat, lon, dispName, tz)
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            timber.log.Timber.w(e, "ipapi.co location lookup failed")
+        } finally {
+            conn1?.disconnect()
         }
 
         // Try Provider 2: ip-api.com
+        var conn2: HttpURLConnection? = null
         try {
             val url = URL("https://ip-api.com/json/")
-            val connection = url.openConnection() as HttpURLConnection
-            connection.requestMethod = "GET"
-            connection.connectTimeout = 5000
-            connection.readTimeout = 5000
-            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
+            conn2 = url.openConnection() as HttpURLConnection
+            conn2.requestMethod = "GET"
+            conn2.connectTimeout = 5000
+            conn2.readTimeout = 5000
+            conn2.setRequestProperty("User-Agent", appUserAgent)
 
-            if (connection.responseCode == 200) {
-                val responseText = connection.inputStream.bufferedReader().use { it.readText() }
+            if (conn2.responseCode == 200) {
+                val responseText = conn2.inputStream.bufferedReader().use { it.readText() }
                 val json = JSONObject(responseText)
                 if (json.optString("status") == "success") {
                     val lat = json.getDouble("lat")
@@ -182,20 +188,23 @@ object LocationHelper {
                 }
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            timber.log.Timber.w(e, "ip-api.com location lookup failed")
+        } finally {
+            conn2?.disconnect()
         }
 
         // Try Provider 3: freeipapi.com
+        var conn3: HttpURLConnection? = null
         try {
             val url = URL("https://freeipapi.com/api/json")
-            val connection = url.openConnection() as HttpURLConnection
-            connection.requestMethod = "GET"
-            connection.connectTimeout = 5000
-            connection.readTimeout = 5000
-            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
+            conn3 = url.openConnection() as HttpURLConnection
+            conn3.requestMethod = "GET"
+            conn3.connectTimeout = 5000
+            conn3.readTimeout = 5000
+            conn3.setRequestProperty("User-Agent", appUserAgent)
 
-            if (connection.responseCode == 200) {
-                val responseText = connection.inputStream.bufferedReader().use { it.readText() }
+            if (conn3.responseCode == 200) {
+                val responseText = conn3.inputStream.bufferedReader().use { it.readText() }
                 val json = JSONObject(responseText)
                 val lat = json.getDouble("latitude")
                 val lon = json.getDouble("longitude")
@@ -206,7 +215,9 @@ object LocationHelper {
                 return@withContext LocationData(lat, lon, dispName, tz)
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            timber.log.Timber.w(e, "freeipapi.com location lookup failed")
+        } finally {
+            conn3?.disconnect()
         }
 
         return@withContext null

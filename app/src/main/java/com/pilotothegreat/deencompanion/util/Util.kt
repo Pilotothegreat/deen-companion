@@ -242,6 +242,40 @@ fun normalizeArabic(text: String): String {
     return normalized.trim()
 }
 
+fun isRtlLanguage(lang: String): Boolean {
+    val clean = lang.lowercase().trim()
+    return clean.startsWith("ar") || clean.startsWith("fa") || clean.startsWith("ur") || clean.startsWith("ckb") || clean.startsWith("he") || clean.startsWith("ps")
+}
+
+fun isPlayStoreInstalled(context: Context): Boolean {
+    return try {
+        val installer = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            context.packageManager.getInstallSourceInfo(context.packageName).installingPackageName
+        } else {
+            @Suppress("DEPRECATION")
+            context.packageManager.getInstallerPackageName(context.packageName)
+        }
+        installer == "com.android.vending"
+    } catch (e: Exception) {
+        false
+    }
+}
+
+fun openAppInPlayStore(context: Context) {
+    val packageName = context.packageName
+    val playStoreIntent = Intent(Intent.ACTION_VIEW, "market://details?id=$packageName".toUri()).apply {
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+    }
+    try {
+        context.startActivity(playStoreIntent)
+    } catch (e: Exception) {
+        val webIntent = Intent(Intent.ACTION_VIEW, "https://play.google.com/store/apps/details?id=$packageName".toUri()).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+        context.startActivity(webIntent)
+    }
+}
+
 fun currentTimezone(): ZoneOffset = ZoneId.systemDefault().rules.getOffset(Instant.now())
 
 fun openLink(activity: Activity?, link: String) {

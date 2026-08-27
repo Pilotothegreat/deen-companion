@@ -112,21 +112,8 @@ class SettingsVM(
         AppUpdateManagerFactory.create(context)
     }
 
-    private fun getInstallSource(context: Context): String? {
-        return try {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-                context.packageManager.getInstallSourceInfo(context.packageName).installingPackageName
-            } else {
-                @Suppress("DEPRECATION")
-                context.packageManager.getInstallerPackageName(context.packageName)
-            }
-        } catch (e: Exception) {
-            null
-        }
-    }
-
     val isPlayStoreInstall: Boolean by lazy {
-        getInstallSource(context) == "com.android.vending"
+        com.pilotothegreat.deencompanion.util.isPlayStoreInstalled(context)
     }
 
     fun startPlayStoreUpdate(activity: Activity) {
@@ -167,7 +154,7 @@ class SettingsVM(
                     _updateState.value = UpdateState.UP_TO_DATE
                 }
             }.addOnFailureListener { e ->
-                e.printStackTrace()
+                timber.log.Timber.w(e, "Play Store Update Check Failed in SettingsVM")
                 _updateState.value = UpdateState.FAILED
             }
             return
@@ -191,13 +178,14 @@ class SettingsVM(
             }
 
             _updateState.value = UpdateState.CHECKING
+            var connection: java.net.HttpURLConnection? = null
             try {
                 val url = java.net.URL("https://api.github.com/repos/Pilotothegreat/deen-companion/releases/latest")
-                val connection = url.openConnection() as java.net.HttpURLConnection
+                connection = url.openConnection() as java.net.HttpURLConnection
                 connection.requestMethod = "GET"
                 connection.connectTimeout = 5000
                 connection.readTimeout = 5000
-                connection.setRequestProperty("User-Agent", "Deen-Companion-App")
+                connection.setRequestProperty("User-Agent", "DeenCompanion/1.5.43 (Android)")
 
                 if (connection.responseCode == 200) {
                     val jsonStr = connection.inputStream.bufferedReader().use { it.readText() }
@@ -220,8 +208,10 @@ class SettingsVM(
                     _updateState.value = UpdateState.FAILED
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                timber.log.Timber.e(e, "GitHub Update Check Failed in SettingsVM")
                 _updateState.value = UpdateState.FAILED
+            } finally {
+                connection?.disconnect()
             }
         }
     }

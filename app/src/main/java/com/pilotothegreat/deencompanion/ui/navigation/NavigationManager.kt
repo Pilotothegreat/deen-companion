@@ -247,7 +247,7 @@ fun NavigationButton(
             ) {
                 Icon(
                     imageVector = icon,
-                    contentDescription = route.toString()
+                    contentDescription = name
                 )
             }
             // Slide the label in/out when selected — expressive label reveal

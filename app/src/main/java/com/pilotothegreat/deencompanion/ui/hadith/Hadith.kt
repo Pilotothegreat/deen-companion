@@ -100,7 +100,7 @@ fun Hadith(paddingValues: PaddingValues) {
     val paddingTop = paddingValues.calculateTopPadding()
     val paddingBottom = paddingValues.calculateBottomPadding()
 
-    val direction = if (lang == "ar") LayoutDirection.Rtl else LayoutDirection.Ltr
+    val direction = if (com.pilotothegreat.deencompanion.util.isRtlLanguage(lang)) LayoutDirection.Rtl else LayoutDirection.Ltr
     CompositionLocalProvider(LocalLayoutDirection provides direction) {
         Column(
             modifier = Modifier

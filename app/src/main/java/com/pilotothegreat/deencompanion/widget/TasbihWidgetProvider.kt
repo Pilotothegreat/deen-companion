@@ -42,7 +42,7 @@ class TasbihWidgetProvider : AppWidgetProvider(), KoinComponent {
                     val appWidgetIds = appWidgetManager.getAppWidgetIds(componentName)
                     updateWidgets(context, appWidgetManager, appWidgetIds)
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    timber.log.Timber.e(e, "Error processing ACTION_INCREMENT_TASBIH")
                 } finally {
                     pendingResult.finish()
                 }
@@ -58,7 +58,7 @@ class TasbihWidgetProvider : AppWidgetProvider(), KoinComponent {
                 try {
                     updateWidgets(context, appWidgetManager, appWidgetIds)
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    timber.log.Timber.e(e, "Error updating Tasbih widgets on ACTION_APPWIDGET_UPDATE")
                 } finally {
                     pendingResult.finish()
                 }
@@ -73,7 +73,7 @@ class TasbihWidgetProvider : AppWidgetProvider(), KoinComponent {
             try {
                 updateWidgets(context, appWidgetManager, appWidgetIds)
             } catch (e: Exception) {
-                e.printStackTrace()
+                timber.log.Timber.e(e, "Error in TasbihWidgetProvider.onUpdate")
             } finally {
                 pendingResult.finish()
             }
@@ -110,7 +110,7 @@ class TasbihWidgetProvider : AppWidgetProvider(), KoinComponent {
                 }
                 views.setTextViewText(R.id.widget_dhikr_name, localizedDhikr)
 
-                // Increment button broadcast intent
+                // Increment button broadcast intent (FLAG_IMMUTABLE prevents redirection)
                 val incrementIntent = Intent(context, TasbihWidgetProvider::class.java).apply {
                     action = ACTION_INCREMENT_TASBIH
                 }
@@ -118,7 +118,7 @@ class TasbihWidgetProvider : AppWidgetProvider(), KoinComponent {
                     context,
                     3001,
                     incrementIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
                 views.setOnClickPendingIntent(R.id.widget_btn_container, incrementPendingIntent)
 
@@ -133,7 +133,7 @@ class TasbihWidgetProvider : AppWidgetProvider(), KoinComponent {
                 appWidgetManager.updateAppWidget(appWidgetId, views)
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            timber.log.Timber.e(e, "Error updating Tasbih widgets")
         }
     }
 }

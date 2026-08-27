@@ -500,55 +500,64 @@ fun Overview(
         ) {
         Spacer(Modifier.height(paddingTop + TOP_BAR_HEIGHT + 8.dp))
 
-        // GitHub Release Update Dialog Prompt
+        // Dual-Distribution Update Dialog Prompt (Play Store & GitHub Releases)
         val updateVersionAvailable by viewModel.updateVersionAvailable.collectAsState()
+        val isPlayStoreUpdate by viewModel.isPlayStoreUpdate.collectAsState()
         updateVersionAvailable?.let { latestVer ->
             AlertDialog(
                 onDismissRequest = { },
                 icon = {
                     Icon(
                         imageVector = Icons.Default.Refresh,
-                        contentDescription = "Update",
+                        contentDescription = stringResource(R.string.update_now),
                         tint = colorScheme.primary
                     )
                 },
                 title = {
                     Text(
-                        text = if (lang == "ar") "تحديث جديد متوفر ($latestVer)" else "New Update Available ($latestVer)",
+                        text = stringResource(R.string.update_available_title, latestVer),
                         fontWeight = FontWeight.Bold
                     )
                 },
                 text = {
                     Text(
-                        text = if (lang == "ar") 
-                            "يتوفر إصدار جديد من تطبيق رفيق الدين. يرجى التحديث للحصول على أحدث المميزات والتحسينات." 
-                        else 
-                            "A new version ($latestVer) of Deen Companion is available. Update now to get the latest features and improvements."
+                        text = if (isPlayStoreUpdate) {
+                            stringResource(R.string.update_available_desc_playstore)
+                        } else {
+                            stringResource(R.string.update_available_desc_github, latestVer)
+                        }
                     )
                 },
                 confirmButton = {
-                    Button(
+                    FilledTonalButton(
                         onClick = {
-                            val cleanTag = latestVer.trim()
-                            val apkUrl = "https://github.com/Pilotothegreat/deen-companion/releases/download/$cleanTag/deen-${cleanTag.replace("v","")}-release.apk"
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(apkUrl)).apply {
-                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                            }
-                            try {
-                                context.startActivity(intent)
-                            } catch (e: Exception) {
-                                val releaseUrl = "https://github.com/Pilotothegreat/deen-companion/releases/latest"
-                                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(releaseUrl)))
+                            if (isPlayStoreUpdate) {
+                                com.pilotothegreat.deencompanion.util.openAppInPlayStore(context)
+                            } else {
+                                val cleanTag = latestVer.trim()
+                                val apkUrl = "https://github.com/Pilotothegreat/deen-companion/releases/download/$cleanTag/deen-${cleanTag.replace("v","")}-release.apk"
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(apkUrl)).apply {
+                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                }
+                                try {
+                                    context.startActivity(intent)
+                                } catch (e: Exception) {
+                                    val releaseUrl = "https://github.com/Pilotothegreat/deen-companion/releases/latest"
+                                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(releaseUrl)))
+                                }
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary)
+                        colors = ButtonDefaults.filledTonalButtonColors(
+                            containerColor = colorScheme.primaryContainer,
+                            contentColor = colorScheme.onPrimaryContainer
+                        )
                     ) {
-                        Text(if (lang == "ar") "تحديث الآن" else "Update Now")
+                        Text(if (isPlayStoreUpdate) stringResource(R.string.update_playstore_btn) else stringResource(R.string.update_now))
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { viewModel.dismissUpdatePrompt() }) {
-                        Text(if (lang == "ar") "لاحقاً" else "Later")
+                        Text(stringResource(R.string.later))
                     }
                 }
             )
@@ -598,7 +607,7 @@ fun Overview(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Warning,
-                        contentDescription = "Warning",
+                        contentDescription = stringResource(R.string.permissions_required),
                         tint = MaterialTheme.colorScheme.onErrorContainer
                     )
                     Column(modifier = Modifier.weight(1f)) {
@@ -620,7 +629,7 @@ fun Overview(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Dismiss",
+                            contentDescription = stringResource(R.string.dismiss),
                             tint = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.7f),
                             modifier = Modifier.size(18.dp)
                         )
@@ -711,7 +720,7 @@ fun Overview(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Close,
-                                    contentDescription = "Dismiss",
+                                    contentDescription = stringResource(R.string.dismiss),
                                     tint = colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
                                 )
                             }
@@ -906,7 +915,7 @@ fun Overview(
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colorScheme.onTertiaryContainer.copy(alpha = 0.7f))
                         }
-                        Icon(Icons.Default.ContentCopy, contentDescription = "Copy",
+                        Icon(Icons.Default.ContentCopy, contentDescription = stringResource(R.string.copy),
                             tint = colorScheme.onTertiaryContainer)
                     }
 
@@ -1769,7 +1778,7 @@ fun LiveQiblaCompassCard(
                     ) {
                         Image(
                             painter = androidx.compose.ui.res.painterResource(id = R.drawable.ic_kaaba),
-                            contentDescription = "Kaaba",
+                            contentDescription = stringResource(R.string.cd_qibla_compass),
                             modifier = Modifier.size(16.dp),
                             colorFilter = if (isAligned) null else androidx.compose.ui.graphics.ColorFilter.colorMatrix(
                                 androidx.compose.ui.graphics.ColorMatrix().apply { setToSaturation(0.3f) }
@@ -1902,7 +1911,7 @@ fun TasbihDialCard(
                 Spacer(modifier = Modifier.width(4.dp))
                 Icon(
                     imageVector = Icons.Default.ArrowDropDown,
-                    contentDescription = "Change Dhikr",
+                    contentDescription = stringResource(R.string.change_dhikr),
                     tint = MaterialTheme.colorScheme.onSecondaryContainer,
                     modifier = Modifier.size(16.dp)
                 )
@@ -1985,7 +1994,7 @@ fun TasbihDialCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Restore,
-                        contentDescription = "Reset Count",
+                        contentDescription = stringResource(R.string.reset_tasbih),
                         tint = MaterialTheme.colorScheme.onSecondaryContainer,
                         modifier = Modifier.size(16.dp)
                     )
@@ -2049,7 +2058,7 @@ fun SwipeablePrayerRow(
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             imageVector = if (isMuted) Icons.Default.NotificationsOff else Icons.Default.Notifications,
-                            contentDescription = "Toggle Mute Notification",
+                            contentDescription = stringResource(R.string.toggle_mute_notification),
                             tint = contentTint,
                             modifier = Modifier.size(20.dp)
                         )
@@ -2083,7 +2092,7 @@ fun SwipeablePrayerRow(
                     if (isMuted) {
                         Icon(
                             imageVector = Icons.Default.NotificationsOff,
-                            contentDescription = "Muted",
+                            contentDescription = stringResource(R.string.muted),
                             tint = MaterialTheme.colorScheme.error,
                             modifier = Modifier.size(16.dp)
                         )
