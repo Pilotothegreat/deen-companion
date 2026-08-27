@@ -247,7 +247,6 @@
     <string name="decrease_offset">Decrease offset</string>
     <string name="change_dhikr">Change Dhikr</string>
     <string name="reset_tasbih">Reset Count</string>
-    <string name="dismiss">Dismiss</string>
     <string name="update_now">Update Now</string>
     <string name="toggle_mute_notification">Toggle mute notification</string>
     <string name="muted">Muted</string>

@@ -246,7 +246,6 @@
     <string name="decrease_offset">تقليل الفارق الزمني</string>
     <string name="change_dhikr">تغيير الذكر</string>
     <string name="reset_tasbih">إعادة ضبط العداد</string>
-    <string name="dismiss">إغلاق</string>
     <string name="update_now">تحديث الآن</string>
     <string name="toggle_mute_notification">تبديل كتم الإشعار</string>
     <string name="muted">مكتوم</string>
