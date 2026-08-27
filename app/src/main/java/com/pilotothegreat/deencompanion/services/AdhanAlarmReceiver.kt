@@ -81,8 +81,6 @@ class AdhanAlarmReceiver : BroadcastReceiver(), KoinComponent {
             .setSmallIcon(R.drawable.notification)
             .setContentTitle(title)
             .setContentText(body)
-            .setProgress(100, 0, true) // Unified line timer countdown to Iqama
-            .setUsesChronometer(true)
             .setContentIntent(tapPendingIntent)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)

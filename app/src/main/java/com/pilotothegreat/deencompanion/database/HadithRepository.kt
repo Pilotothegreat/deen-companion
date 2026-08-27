@@ -27,7 +27,7 @@ class HadithRepository(
         }
         if (!isRobolectric) {
             // Run database pre-population in a background dispatcher on initialization
-            kotlinx.coroutines.CoroutineScope(Dispatchers.IO).launchPrepopulation()
+            kotlinx.coroutines.CoroutineScope(Dispatchers.IO + kotlinx.coroutines.SupervisorJob()).launchPrepopulation()
         }
     }
 

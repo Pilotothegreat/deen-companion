@@ -47,19 +47,14 @@ class InspirationWidgetProvider : AppWidgetProvider(), KoinComponent {
 
     private fun getLocalizedInspirationRef(ref: String, lang: String): String {
         if (lang != "ar") return ref
-        return ref.replace("Quran", "القرآن")
+        val arabicDigits = mapOf('0' to '٠', '1' to '١', '2' to '٢', '3' to '٣', '4' to '٤',
+            '5' to '٥', '6' to '٦', '7' to '٧', '8' to '٨', '9' to '٩')
+        return ref
+            .replace("Quran", "القرآن")
             .replace("Bukhari & Muslim", "البخاري ومسلم")
             .replace("Bukhari", "البخاري")
-            .replace("1", "١")
-            .replace("2", "٢")
-            .replace("3", "٣")
-            .replace("4", "٤")
-            .replace("5", "٥")
-            .replace("6", "٦")
-            .replace("7", "٧")
-            .replace("8", "٨")
-            .replace("9", "٩")
-            .replace("0", "٠")
+            .map { arabicDigits[it] ?: it }
+            .joinToString("")
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -100,9 +95,6 @@ class InspirationWidgetProvider : AppWidgetProvider(), KoinComponent {
 
     private suspend fun updateWidgets(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
         try {
-            val lastUpdated = repo.lastPrayerTimeUpdate.first()
-            val hasOpened = lastUpdated != 0L
-
             val lang = repo.appLanguage.first()
             val locale = Locale.forLanguageTag(lang)
             val config = Configuration(context.resources.configuration).apply {
@@ -110,7 +102,9 @@ class InspirationWidgetProvider : AppWidgetProvider(), KoinComponent {
             }
             val localizedContext = context.createConfigurationContext(config)
 
-            val dayIndex = LocalDate.now().dayOfYear % inspirations.size
+            val tzId = try { repo.timezoneId.first() } catch (e: Exception) { java.util.TimeZone.getDefault().id }
+            val zoneId = try { java.time.ZoneId.of(tzId) } catch (e: Exception) { java.time.ZoneId.systemDefault() }
+            val dayIndex = LocalDate.now(zoneId).dayOfYear % inspirations.size
             val inspiration = inspirations[dayIndex]
             val ref = refs[dayIndex]
             

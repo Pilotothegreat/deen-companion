@@ -44,6 +44,7 @@ class QuranPlaybackService : MediaSessionService() {
 
             player = ExoPlayer.Builder(this)
                 .setAudioAttributes(audioAttributes, /* handleAudioFocus= */ true)
+                .setHandleAudioBecomingNoisy(true)
                 .setMediaSourceFactory(
                     androidx.media3.exoplayer.source.DefaultMediaSourceFactory(this)
                         .setDataSourceFactory(dataSourceFactory)

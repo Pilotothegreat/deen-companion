@@ -96,9 +96,9 @@ class PrayerWidgetProvider : AppWidgetProvider(), KoinComponent {
             for (appWidgetId in appWidgetIds) {
                 val views = RemoteViews(context.packageName, R.layout.prayer_widget_layout)
 
-                val lat = if (hasOpened) repo.latitude.first() else 21.3891
-                val lon = if (hasOpened) repo.longitude.first() else 39.8579
-                val tzId = if (hasOpened) repo.timezoneId.first() else "Asia/Riyadh"
+                val lat = if (hasOpened) repo.latitude.first() else 23.5880
+                val lon = if (hasOpened) repo.longitude.first() else 58.3829
+                val tzId = if (hasOpened) repo.timezoneId.first() else "Asia/Muscat"
                 val calcMethod = repo.calcMethod.first()
                 val asrSchool = repo.asrSchool.first()
 

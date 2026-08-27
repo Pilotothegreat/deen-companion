@@ -93,7 +93,7 @@ object IqamaAlarmManager {
                     pendingIntent.cancel()
                 }
             } catch (e: Exception) {
-                // Ignore
+                timber.log.Timber.w(e, "Ignoring exception cancelling legacy Iqama alarm requestCode=$code")
             }
         }
 
