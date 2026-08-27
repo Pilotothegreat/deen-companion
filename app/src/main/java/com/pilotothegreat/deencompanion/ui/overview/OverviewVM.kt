@@ -243,7 +243,7 @@ class OverviewVM(
             try {
                 appPreferenceRepo.setLastPrayerTimeUpdate(System.currentTimeMillis())
                 AdhanAlarmManager.scheduleAllAdhanAlarms(context, appPreferenceRepo)
-                IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+                IqamaAlarmManager.scheduleAllIqamaAlarms(context, appPreferenceRepo)
             } catch (e: Exception) {
                 timber.log.Timber.e(e, "Error scheduling alarms after recalculation")
             }
@@ -300,7 +300,7 @@ class OverviewVM(
                     appPreferenceRepo.setTimezoneId(loc.timezoneId)
 
                     AdhanAlarmManager.scheduleAllAdhanAlarms(context, appPreferenceRepo)
-                    IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+                    IqamaAlarmManager.scheduleAllIqamaAlarms(context, appPreferenceRepo)
                 }
             } catch (e: Exception) {
                 timber.log.Timber.e(e, "Error refreshing location")

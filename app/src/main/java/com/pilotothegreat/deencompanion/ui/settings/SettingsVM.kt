@@ -251,7 +251,7 @@ class SettingsVM(
         viewModelScope.launch {
             appPreferenceRepo.setCalcMethod(value)
             AdhanAlarmManager.scheduleAllAdhanAlarms(context, appPreferenceRepo)
-            IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+            IqamaAlarmManager.scheduleAllIqamaAlarms(context, appPreferenceRepo)
         }
     }
 
@@ -259,112 +259,112 @@ class SettingsVM(
         viewModelScope.launch {
             appPreferenceRepo.setAsrSchool(value)
             AdhanAlarmManager.scheduleAllAdhanAlarms(context, appPreferenceRepo)
-            IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+            IqamaAlarmManager.scheduleAllIqamaAlarms(context, appPreferenceRepo)
         }
     }
 
     fun setFajrIqamaOffset(value: Int) {
         viewModelScope.launch {
             appPreferenceRepo.setFajrIqamaOffset(value)
-            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+            IqamaAlarmManager.scheduleAllIqamaAlarms(context, appPreferenceRepo)
         }
     }
 
     fun setDhuhrIqamaOffset(value: Int) {
         viewModelScope.launch {
             appPreferenceRepo.setDhuhrIqamaOffset(value)
-            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+            IqamaAlarmManager.scheduleAllIqamaAlarms(context, appPreferenceRepo)
         }
     }
 
     fun setAsrIqamaOffset(value: Int) {
         viewModelScope.launch {
             appPreferenceRepo.setAsrIqamaOffset(value)
-            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+            IqamaAlarmManager.scheduleAllIqamaAlarms(context, appPreferenceRepo)
         }
     }
 
     fun setMaghribIqamaOffset(value: Int) {
         viewModelScope.launch {
             appPreferenceRepo.setMaghribIqamaOffset(value)
-            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+            IqamaAlarmManager.scheduleAllIqamaAlarms(context, appPreferenceRepo)
         }
     }
 
     fun setIshaIqamaOffset(value: Int) {
         viewModelScope.launch {
             appPreferenceRepo.setIshaIqamaOffset(value)
-            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+            IqamaAlarmManager.scheduleAllIqamaAlarms(context, appPreferenceRepo)
         }
     }
 
     fun setFajrIqamaIsFixed(value: Boolean) {
         viewModelScope.launch {
             appPreferenceRepo.setFajrIqamaIsFixed(value)
-            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+            IqamaAlarmManager.scheduleAllIqamaAlarms(context, appPreferenceRepo)
         }
     }
 
     fun setDhuhrIqamaIsFixed(value: Boolean) {
         viewModelScope.launch {
             appPreferenceRepo.setDhuhrIqamaIsFixed(value)
-            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+            IqamaAlarmManager.scheduleAllIqamaAlarms(context, appPreferenceRepo)
         }
     }
 
     fun setAsrIqamaIsFixed(value: Boolean) {
         viewModelScope.launch {
             appPreferenceRepo.setAsrIqamaIsFixed(value)
-            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+            IqamaAlarmManager.scheduleAllIqamaAlarms(context, appPreferenceRepo)
         }
     }
 
     fun setMaghribIqamaIsFixed(value: Boolean) {
         viewModelScope.launch {
             appPreferenceRepo.setMaghribIqamaIsFixed(value)
-            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+            IqamaAlarmManager.scheduleAllIqamaAlarms(context, appPreferenceRepo)
         }
     }
 
     fun setIshaIqamaIsFixed(value: Boolean) {
         viewModelScope.launch {
             appPreferenceRepo.setIshaIqamaIsFixed(value)
-            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+            IqamaAlarmManager.scheduleAllIqamaAlarms(context, appPreferenceRepo)
         }
     }
 
     fun setFajrIqamaTime(value: String) {
         viewModelScope.launch {
             appPreferenceRepo.setFajrIqamaTime(value)
-            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+            IqamaAlarmManager.scheduleAllIqamaAlarms(context, appPreferenceRepo)
         }
     }
 
     fun setDhuhrIqamaTime(value: String) {
         viewModelScope.launch {
             appPreferenceRepo.setDhuhrIqamaTime(value)
-            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+            IqamaAlarmManager.scheduleAllIqamaAlarms(context, appPreferenceRepo)
         }
     }
 
     fun setAsrIqamaTime(value: String) {
         viewModelScope.launch {
             appPreferenceRepo.setAsrIqamaTime(value)
-            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+            IqamaAlarmManager.scheduleAllIqamaAlarms(context, appPreferenceRepo)
         }
     }
 
     fun setMaghribIqamaTime(value: String) {
         viewModelScope.launch {
             appPreferenceRepo.setMaghribIqamaTime(value)
-            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+            IqamaAlarmManager.scheduleAllIqamaAlarms(context, appPreferenceRepo)
         }
     }
 
     fun setIshaIqamaTime(value: String) {
         viewModelScope.launch {
             appPreferenceRepo.setIshaIqamaTime(value)
-            com.pilotothegreat.deencompanion.services.IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+            IqamaAlarmManager.scheduleAllIqamaAlarms(context, appPreferenceRepo)
         }
     }
 

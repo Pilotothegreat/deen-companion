@@ -21,11 +21,17 @@ class AutoStarter : BroadcastReceiver(), KoinComponent {
     private val appPreferenceRepo: AppPreferenceRepo by inject()
 
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
+        val action = intent.action
+        if (action == Intent.ACTION_BOOT_COMPLETED ||
+            action == Intent.ACTION_TIMEZONE_CHANGED ||
+            action == Intent.ACTION_TIME_SET ||
+            action == Intent.ACTION_MY_PACKAGE_REPLACED
+        ) {
             val pendingResult = goAsync()
             CoroutineScope(Dispatchers.Default).launch {
                 try {
-                    IqamaAlarmManager.scheduleNextIqamaAlarm(context, appPreferenceRepo)
+                    AdhanAlarmManager.scheduleAllAdhanAlarms(context, appPreferenceRepo)
+                    IqamaAlarmManager.scheduleAllIqamaAlarms(context, appPreferenceRepo)
 
                     val workManager = WorkManager.getInstance(context)
                     val oneTimeRequest = OneTimeWorkRequestBuilder<AdhanNotificationWorker>().build()
@@ -43,8 +49,9 @@ class AutoStarter : BroadcastReceiver(), KoinComponent {
                         ExistingPeriodicWorkPolicy.KEEP,
                         periodicRequest
                     )
+                    Timber.i("AutoStarter: Restored all Adhan and Iqama alerts on $action")
                 } catch (e: Exception) {
-                    Timber.e(e, "AutoStarter: Failed to restore scheduled alerts on boot")
+                    Timber.e(e, "AutoStarter: Failed to restore scheduled alerts on $action")
                 } finally {
                     try {
                         pendingResult.finish()

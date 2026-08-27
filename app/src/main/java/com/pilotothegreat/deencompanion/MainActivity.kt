@@ -55,7 +55,7 @@ class MainActivity : ComponentActivity() {
             lifecycleScope.launch {
                 try {
                     AdhanAlarmManager.scheduleAllAdhanAlarms(this@MainActivity, appPreferenceRepo)
-                    IqamaAlarmManager.scheduleNextIqamaAlarm(this@MainActivity, appPreferenceRepo)
+                    IqamaAlarmManager.scheduleAllIqamaAlarms(this@MainActivity, appPreferenceRepo)
                 } catch (e: Exception) {
                     Timber.e(e, "Failed to schedule alarms on permission grant")
                 }
@@ -111,7 +111,7 @@ class MainActivity : ComponentActivity() {
             lifecycleScope.launch {
                 try {
                     AdhanAlarmManager.scheduleAllAdhanAlarms(this@MainActivity, appPreferenceRepo)
-                    IqamaAlarmManager.scheduleNextIqamaAlarm(this@MainActivity, appPreferenceRepo)
+                    IqamaAlarmManager.scheduleAllIqamaAlarms(this@MainActivity, appPreferenceRepo)
                 } catch (e: Exception) {
                     Timber.e(e, "Failed to schedule alarms on launch")
                 }
