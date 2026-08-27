@@ -29,4 +29,12 @@
   - **Quran Reader Complete Interaction Flow**: Added `onLongPress` support for `FatihaBismillah` block in `QuranReader.kt` with localized clipboard toast notifications.
   - **Audio Reciter Reselection Guard**: Bounded `currentAyah` index to `maxOf(1, ...)` in `QuranPlaybackManager.setReciter`.
   - **User-Agent Sync**: Aligned all network components (`LocationHelper.kt`, `HadithRepository.kt`) to `DeenCompanion/1.5.43 (Android)`.
+- **Deep Audit & Targeted Hardening Pass v1.5.44 (2026-08-27)**:
+  - **Widget Default Coords**: Fixed `PrayerWidgetProvider` first-launch default from Makkah (`21.38, 39.85, Asia/Riyadh`) to Muscat/Oman (`23.58, 58.38, Asia/Muscat`) to match app target region and `OverviewVM` default.
+  - **Adhan Notification Fix**: Removed conflicting `setProgress(100,0,true)` (indeterminate spinner) + `setUsesChronometer(true)` call pair in `AdhanAlarmReceiver` that produced visual noise without implementing a real countdown.
+  - **Inspiration Widget Quality**: `InspirationWidgetProvider` now reads user saved timezone from `AppPreferenceRepo` for correct day-of-year selection; removed dead `hasOpened` variable; replaced fragile 10-call chained `String.replace()` for Arabic digits with a single char-by-char lookup map (`mapOf('0' to '٠', ...)`).
+  - **HadithRepository Scope Safety**: Added `SupervisorJob()` to the orphaned `CoroutineScope(Dispatchers.IO)` in `init` block, preventing any error from silently cancelling sibling jobs.
+  - **IqamaAlarmManager Logging**: Replaced silent `// Ignore` catch in legacy alarm cancellation loop with `Timber.w` for observability.
+  - **Quran Audio Polish**: Added `setHandleAudioBecomingNoisy(true)` to ExoPlayer builder in `QuranPlaybackService` so headphone disconnection auto-pauses recitation.
+  - **Commit**: `3bc287e` pushed to `main` branch on GitHub.
 
