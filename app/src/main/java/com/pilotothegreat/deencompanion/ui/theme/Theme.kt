@@ -84,7 +84,7 @@ fun Theme(
 
     MaterialTheme(
         colorScheme = colors,
-        typography = if (appLang.startsWith("ar")) ArabicTypography else AppTypography,
+        typography = if (com.pilotothegreat.deencompanion.util.isRtlLanguage(appLang)) ArabicTypography else AppTypography,
         shapes = ExpressiveShapes,
         motionScheme = MotionScheme.expressive()
     ) { content() }

@@ -592,25 +592,51 @@ fun QuranReader(surahNumber: Int, surahName: String, scrollToVerse: Int? = null,
                                                     .fillMaxWidth()
                                                     .padding(vertical = 4.dp)
                                                     .pointerInput(annotated) {
-                                                        detectTapGestures { offset ->
-                                                            layoutResult?.let { textLayoutResult ->
-                                                                val position = textLayoutResult.getOffsetForPosition(offset)
-                                                                annotated.getStringAnnotations(tag = "AYAH_CLICK", start = position, end = position)
-                                                                    .firstOrNull()?.let { annotation ->
-                                                                        val parts = annotation.item.split("_")
-                                                                        if (parts.size == 2) {
-                                                                            val clickedSurahId = parts[0].toIntOrNull()
-                                                                            val clickedAyahId = parts[1].toIntOrNull()
-                                                                            if (clickedSurahId != null && clickedAyahId != null) {
-                                                                                val targetSurah = surahs.firstOrNull { it.id == clickedSurahId }
-                                                                                if (targetSurah != null) {
-                                                                                    playbackManager.playOrJumpToAyah(targetSurah, clickedAyahId)
+                                                        detectTapGestures(
+                                                            onTap = { offset ->
+                                                                layoutResult?.let { textLayoutResult ->
+                                                                    val position = textLayoutResult.getOffsetForPosition(offset)
+                                                                    annotated.getStringAnnotations(tag = "AYAH_CLICK", start = position, end = position)
+                                                                        .firstOrNull()?.let { annotation ->
+                                                                            val parts = annotation.item.split("_")
+                                                                            if (parts.size == 2) {
+                                                                                val clickedSurahId = parts[0].toIntOrNull()
+                                                                                val clickedAyahId = parts[1].toIntOrNull()
+                                                                                if (clickedSurahId != null && clickedAyahId != null) {
+                                                                                    val targetSurah = surahs.firstOrNull { it.id == clickedSurahId }
+                                                                                    if (targetSurah != null) {
+                                                                                        playbackManager.playOrJumpToAyah(targetSurah, clickedAyahId)
+                                                                                    }
                                                                                 }
                                                                             }
                                                                         }
-                                                                    }
+                                                                }
+                                                            },
+                                                            onLongPress = { offset ->
+                                                                layoutResult?.let { textLayoutResult ->
+                                                                    val position = textLayoutResult.getOffsetForPosition(offset)
+                                                                    annotated.getStringAnnotations(tag = "AYAH_CLICK", start = position, end = position)
+                                                                        .firstOrNull()?.let { annotation ->
+                                                                            val parts = annotation.item.split("_")
+                                                                            if (parts.size == 2) {
+                                                                                val clickedSurahId = parts[0].toIntOrNull()
+                                                                                val clickedAyahId = parts[1].toIntOrNull()
+                                                                                if (clickedSurahId != null && clickedAyahId != null) {
+                                                                                    val targetSurah = surahs.firstOrNull { it.id == clickedSurahId }
+                                                                                    val targetVerse = targetSurah?.verses?.firstOrNull { it.id == clickedAyahId }
+                                                                                    if (targetSurah != null && targetVerse != null) {
+                                                                                        val textToCopy = "${targetVerse.text}\n\n${targetVerse.translation}\n(Surah ${targetSurah.transliteration} ${targetSurah.id}:${targetVerse.id})"
+                                                                                        val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                                                                        val clip = ClipData.newPlainText("Ayah Text", textToCopy)
+                                                                                        clipboard.setPrimaryClip(clip)
+                                                                                        Toast.makeText(context, if (lang == "ar") "تم نسخ النص بنجاح" else "Ayah text copied to clipboard", Toast.LENGTH_SHORT).show()
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                }
                                                             }
-                                                        }
+                                                        )
                                                     }
                                             )
                                             Spacer(modifier = Modifier.height(2.dp))

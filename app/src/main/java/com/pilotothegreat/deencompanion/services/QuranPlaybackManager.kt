@@ -213,7 +213,7 @@ class QuranPlaybackManager(private val context: Context) {
     fun setReciter(reciter: Reciter, surah: QuranHelper.Surah) {
         _selectedReciter.value = reciter
         // Restart current Surah from the current Ayah to apply new reciter voice url
-        val currentAyah = _currentAyahId.value
+        val currentAyah = maxOf(1, _currentAyahId.value)
         playSurah(surah, currentAyah)
     }
 

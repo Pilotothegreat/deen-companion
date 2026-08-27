@@ -76,7 +76,7 @@ class InspirationWidgetProvider : AppWidgetProvider(), KoinComponent {
                 try {
                     updateWidgets(context, appWidgetManager, appWidgetIds)
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    timber.log.Timber.e(e, "Error updating inspiration widget on ACTION_APPWIDGET_UPDATE")
                 } finally {
                     pendingResult.finish()
                 }
@@ -91,7 +91,7 @@ class InspirationWidgetProvider : AppWidgetProvider(), KoinComponent {
             try {
                 updateWidgets(context, appWidgetManager, appWidgetIds)
             } catch (e: Exception) {
-                e.printStackTrace()
+                timber.log.Timber.e(e, "Error updating inspiration widget on onUpdate")
             } finally {
                 pendingResult.finish()
             }
@@ -134,7 +134,7 @@ class InspirationWidgetProvider : AppWidgetProvider(), KoinComponent {
                 appWidgetManager.updateAppWidget(appWidgetId, views)
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            timber.log.Timber.e(e, "Error in InspirationWidgetProvider.updateWidgets")
         }
     }
 }

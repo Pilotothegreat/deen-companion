@@ -166,9 +166,9 @@ object IqamaAlarmManager {
                 alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, epochMillis, pendingIntent)
             }
         } catch (e: SecurityException) {
-            e.printStackTrace()
+            timber.log.Timber.e(e, "SecurityException scheduling Iqama exact alarm")
         } catch (e: Exception) {
-            e.printStackTrace()
+            timber.log.Timber.e(e, "Exception scheduling Iqama alarm")
         }
     }
 

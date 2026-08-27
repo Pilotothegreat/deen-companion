@@ -61,7 +61,7 @@ object HadithHelper {
                 cachedCollections = collections
                 return collections
             } catch (e: Exception) {
-                e.printStackTrace()
+                timber.log.Timber.e(e, "Error loading local Hadith collections")
                 return emptyList()
             }
         }

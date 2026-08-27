@@ -170,7 +170,7 @@ class PrayerWidgetProvider : AppWidgetProvider(), KoinComponent {
                 pendingIntent
             )
         } catch (e: Exception) {
-            e.printStackTrace()
+            timber.log.Timber.e(e, "Error scheduling widget update alarm")
         }
     }
 
@@ -191,7 +191,7 @@ class PrayerWidgetProvider : AppWidgetProvider(), KoinComponent {
                 pendingIntent.cancel()
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            timber.log.Timber.e(e, "Error cancelling widget update alarm")
         }
     }
 }

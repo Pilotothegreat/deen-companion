@@ -23,4 +23,10 @@
   - **Dual Update Subsystem**: Implemented installer detection (`isPlayStoreInstalled`) in `Util.kt`, `OverviewVM.kt`, and `SettingsVM.kt`. Supports Google Play In-App Updates and market link for Play Store installs, with automatic fallback to GitHub APK releases for sideloads.
   - **Quran & Audio Hardening**: Standardized `QuranPlaybackService` User-Agent to `DeenCompanion/1.5.43 (Android; Media3)`.
   - **App Store Optimization & Release Notes**: Authored `STORE_LISTING_METADATA.md` with complete ASO descriptions, keywords, feature breakdown, and bilingual release notes. Bumped `versionCode = 193`, `versionName = "1.5.43"`.
+- **Comprehensive Production Code Audit & Zero-Debt Hardening (2026-08-27)**:
+  - **Zero Unhandled Stack Traces**: Eliminated all remaining `e.printStackTrace()` calls across widgets (`PrayerWidgetProvider`, `InspirationWidgetProvider`), receivers (`IqamaAlarmReceiver`), managers (`IqamaAlarmManager`), helpers (`HadithHelper`), and composables (`Qibla.kt`), converting 100% of catch blocks to structured `Timber` logging.
+  - **Arabic & RTL Typography Generalization**: Updated `Theme.kt` font selection to evaluate `isRtlLanguage(appLang)`, automatically routing Arabic, Persian, Urdu, Kurdish, and Pashto through `ArabicTypography` and Google Sans Arabic font glyphs.
+  - **Quran Reader Complete Interaction Flow**: Added `onLongPress` support for `FatihaBismillah` block in `QuranReader.kt` with localized clipboard toast notifications.
+  - **Audio Reciter Reselection Guard**: Bounded `currentAyah` index to `maxOf(1, ...)` in `QuranPlaybackManager.setReciter`.
+  - **User-Agent Sync**: Aligned all network components (`LocationHelper.kt`, `HadithRepository.kt`) to `DeenCompanion/1.5.43 (Android)`.
 

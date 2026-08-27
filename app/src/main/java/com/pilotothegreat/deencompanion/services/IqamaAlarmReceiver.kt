@@ -187,7 +187,7 @@ class IqamaAlarmReceiver : BroadcastReceiver(), KoinComponent {
             NotificationManagerCompat.from(context)
                 .notify(prayerName.hashCode(), notification)
         } catch (e: SecurityException) {
-            e.printStackTrace()
+            timber.log.Timber.e(e, "SecurityException showing Iqama notification for $prayerName")
         }
     }
 }

@@ -135,7 +135,7 @@ object LocationHelper {
     }
 
     suspend fun fetchIpLocation(): LocationData? = withContext(Dispatchers.IO) {
-        val appUserAgent = "DeenCompanion/1.5.42 (Android)"
+        val appUserAgent = "DeenCompanion/1.5.43 (Android)"
 
         // Try Provider 1: ipapi.co
         var conn1: HttpURLConnection? = null

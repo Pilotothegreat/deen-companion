@@ -362,7 +362,7 @@ fun Qibla() {
                                             appPreferenceRepo.setTimezoneId(loc.timezoneId)
                                         }
                                     } catch (e: java.lang.Exception) {
-                                        e.printStackTrace()
+                                        timber.log.Timber.e(e, "Error refreshing location in Qibla")
                                     } finally {
                                         isRefreshingLocation = false
                                     }

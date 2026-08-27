@@ -160,7 +160,7 @@ class HadithRepository(
             val araUrl = "https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/ara-$bookId.json"
             val engUrl = "https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/eng-$bookId.json"
 
-            val appUserAgent = "DeenCompanion/1.5.42 (Android)"
+            val appUserAgent = "DeenCompanion/1.5.43 (Android)"
 
             araConnection = URL(araUrl).openConnection() as java.net.HttpURLConnection
             araConnection.setRequestProperty("User-Agent", appUserAgent)
