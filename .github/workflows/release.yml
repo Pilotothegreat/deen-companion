@@ -15,6 +15,7 @@ jobs:
       RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
       RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
       RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+      PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
 
     steps:
       - uses: actions/checkout@v5
@@ -69,3 +70,19 @@ jobs:
           gh release create "$GITHUB_REF_NAME" app/build/outputs/apk/release/*.apk app/build/outputs/bundle/play/*.aab \
             --title "Bilal $GITHUB_REF_NAME" \
             --notes-file "$notes"
+
+      - name: Set up Ruby for fastlane
+        if: env.PLAY_SERVICE_ACCOUNT_JSON != ''
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+
+      # Needs the PLAY_SERVICE_ACCOUNT_JSON secret; without it the Play upload is skipped.
+      - name: Upload to Google Play internal testing
+        if: env.PLAY_SERVICE_ACCOUNT_JSON != ''
+        run: |
+          gem install fastlane --no-document --quiet
+          fastlane supply --package_name com.pilotothegreat.bilal \
+            --aab "$(ls app/build/outputs/bundle/play/*.aab)" --track internal \
+            --json_key_data "$PLAY_SERVICE_ACCOUNT_JSON" --metadata_path fastlane/metadata/android \
+            --skip_upload_metadata true --skip_upload_images true --skip_upload_screenshots true --skip_upload_apk true

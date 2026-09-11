@@ -64,6 +64,17 @@ The old Deen Companion listing (`com.pilotothegreat.deencompanion`) can't take u
 
 Play installs are signed by Google and use a different package from the GitHub APK, so the two are separate apps that can sit side by side.
 
+## Automation
+
+After the app exists on Play and its first bundle has been uploaded by hand, two workflows keep Play in sync:
+
+- `.github/workflows/play-listing.yml` pushes the listing in `fastlane/metadata/android` (text and graphics, English and Arabic) whenever it changes, or on demand from the Actions tab.
+- `.github/workflows/release.yml` uploads the Play bundle to **internal testing**, with the release notes for its version code, on every `v*` tag.
+
+Both need the `PLAY_SERVICE_ACCOUNT_JSON` repository secret and skip their Play steps without it. The secret holds the JSON key of a Google Cloud service account that:
+1. belongs to a project with the **Google Play Android Developer API** enabled, and
+2. is invited in the Play Console (**Users and permissions**) with **Release to testing tracks**, **Manage testing tracks** and **Manage store presence** for Bilal.
+
 ## Before submitting
 
 - **Support development sheet:** the Play build (`bundlePlay`) leaves it out, along with its banking-app queries, because Google Play's payments policy generally requires Play Billing for payments to the developer. The GitHub APK keeps it.
