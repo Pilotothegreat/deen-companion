@@ -49,14 +49,20 @@ class AthkarRepository(
 
     val streak: Flow<Streak> = dataStore.data.map { it.streak() }.distinctUntilChanged()
 
-    /** Counts one repetition. Finishing both the morning and the evening athkar extends the streak. */
-    suspend fun increment(category: AthkarCategory, item: AthkarItem, today: LocalDate): DayProgress {
+    /**
+     * Counts one repetition and returns the new progress, or null when [item] was already done (so
+     * rapid taps can't report a completion twice). Finishing both the morning and the evening athkar
+     * extends the streak.
+     */
+    suspend fun increment(category: AthkarCategory, item: AthkarItem, today: LocalDate): DayProgress? {
         val library = library()
         val morning = library.category(AthkarIds.MORNING)
         val evening = library.category(AthkarIds.EVENING)
-        var result = DayProgress(today)
+        var result: DayProgress? = null
         dataStore.edit { prefs ->
-            val updated = decode(prefs[PROGRESS]).on(today).increment(category.id, item)
+            val before = decode(prefs[PROGRESS]).on(today)
+            if (before.isDone(category, item)) return@edit
+            val updated = before.increment(category.id, item)
             prefs[PROGRESS] = encode(updated)
             if (morning != null && evening != null && updated.isComplete(morning) && updated.isComplete(evening)) {
                 val streak = prefs.streak().completed(today)

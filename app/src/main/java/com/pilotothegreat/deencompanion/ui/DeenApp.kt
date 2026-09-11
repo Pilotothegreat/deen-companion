@@ -8,18 +8,24 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.pilotothegreat.deencompanion.data.settings.AppSettings
+import com.pilotothegreat.deencompanion.ui.athkar.AthkarScreen
+import com.pilotothegreat.deencompanion.ui.athkar.AthkarSessionScreen
 import com.pilotothegreat.deencompanion.ui.hadith.HadithBookScreen
 import com.pilotothegreat.deencompanion.ui.hadith.HadithScreen
 import com.pilotothegreat.deencompanion.ui.home.HomeScreen
 import com.pilotothegreat.deencompanion.ui.location.LocationPickerScreen
+import com.pilotothegreat.deencompanion.ui.navigation.AthkarKey
+import com.pilotothegreat.deencompanion.ui.navigation.AthkarSessionKey
 import com.pilotothegreat.deencompanion.ui.navigation.HadithBookKey
 import com.pilotothegreat.deencompanion.ui.navigation.HadithKey
 import com.pilotothegreat.deencompanion.ui.navigation.HomeKey
@@ -35,11 +41,20 @@ import com.pilotothegreat.deencompanion.ui.quran.QuranScreen
 import com.pilotothegreat.deencompanion.ui.reader.ReaderScreen
 import com.pilotothegreat.deencompanion.ui.settings.SettingsScreen
 
-/** App shell: an adaptive navigation suite (bar on phones, rail on wide screens) over the Nav3 back stack. */
+/**
+ * App shell: an adaptive navigation suite (bar on phones, rail on wide screens) over the Nav3 back
+ * stack. [destination] is a screen requested by a notification or widget.
+ */
 @Composable
-fun DeenApp(settings: AppSettings) {
+fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpened: () -> Unit = {}) {
     val backStack = rememberNavBackStack(HomeKey)
     val navigator = remember(backStack) { Navigator(backStack) }
+    LaunchedEffect(destination) {
+        destination?.let {
+            navigator.open(it)
+            onDestinationOpened()
+        }
+    }
     val suiteType = if (navigator.isOnTopLevel) {
         NavigationSuiteScaffoldDefaults.navigationSuiteType(currentWindowAdaptiveInfo())
     } else {
@@ -72,15 +87,18 @@ fun DeenApp(settings: AppSettings) {
                 entry<HomeKey> {
                     HomeScreen(
                         onOpenSettings = { navigator.navigate(SettingsKey) },
-                        onOpenQibla = { navigator.selectTab(TopLevel.QIBLA) },
+                        onOpenQibla = { navigator.navigate(QiblaKey) },
                         onOpenLocation = { navigator.navigate(LocationKey) },
+                        onOpenAthkar = { navigator.navigate(AthkarSessionKey(it)) },
                     )
                 }
                 entry<QuranKey> { QuranScreen(onOpenReader = navigator::navigate) }
                 entry<ReaderKey> { key -> ReaderScreen(key, onBack = navigator::back) }
+                entry<AthkarKey> { AthkarScreen(onOpenCategory = { navigator.navigate(AthkarSessionKey(it)) }) }
+                entry<AthkarSessionKey> { key -> AthkarSessionScreen(key, onBack = navigator::back) }
                 entry<HadithKey> { HadithScreen(onOpenBook = { navigator.navigate(HadithBookKey(it)) }) }
                 entry<HadithBookKey> { key -> HadithBookScreen(key, onBack = navigator::back) }
-                entry<QiblaKey> { QiblaScreen() }
+                entry<QiblaKey> { QiblaScreen(onBack = navigator::back) }
                 entry<SettingsKey> {
                     SettingsScreen(settings = settings, onBack = navigator::back, onOpenLocation = { navigator.navigate(LocationKey) })
                 }

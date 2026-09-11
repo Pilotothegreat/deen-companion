@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import com.pilotothegreat.deencompanion.core.prayer.DaySchedule
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
+import com.pilotothegreat.deencompanion.core.prayer.PrayerSchedule
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -29,21 +30,34 @@ class PrayerAlarmScheduler(private val context: Context, private val settings: S
         val manager = alarmManager ?: return@withLock
         cancelAll(manager)
         val current = settings.current()
-        if (!current.notificationsEnabled) return@withLock
+        if (!current.notificationsEnabled && !current.athkarReminders) return@withLock
 
         val now = ZonedDateTime.now(current.zone)
         for (day in 0..1) {
             val schedule = DaySchedule.forDate(now.toLocalDate().plusDays(day.toLong()), current.prayerConfig)
-            for (prayer in Prayer.obligatory) {
-                if (prayer in current.mutedPrayers) continue
-                val adhan = schedule.adhan.getValue(prayer)
-                if (adhan.isAfter(now)) set(manager, AlarmKind.ADHAN, day, prayer, adhan)
-                val iqama = schedule.iqama[prayer]
-                if (iqama != null && iqama.isAfter(now) && iqama != adhan) set(manager, AlarmKind.IQAMA, day, prayer, iqama)
+            if (current.notificationsEnabled) {
+                for (prayer in Prayer.obligatory) {
+                    if (prayer in current.mutedPrayers) continue
+                    val adhan = schedule.adhan.getValue(prayer)
+                    if (adhan.isAfter(now)) set(manager, AlarmKind.ADHAN, day, prayer, adhan)
+                    val iqama = schedule.iqama[prayer]
+                    if (iqama != null && iqama.isAfter(now) && iqama != adhan) set(manager, AlarmKind.IQAMA, day, prayer, iqama)
+                }
+            }
+            if (current.athkarReminders) {
+                athkarTime(schedule, Prayer.FAJR).takeIf { it.isAfter(now) }
+                    ?.let { set(manager, AlarmKind.ATHKAR_MORNING, day, Prayer.FAJR, it) }
+                athkarTime(schedule, Prayer.ASR).takeIf { it.isAfter(now) }
+                    ?.let { set(manager, AlarmKind.ATHKAR_EVENING, day, Prayer.ASR, it) }
             }
         }
     }
 
+    /** Twenty minutes after the prayer has been prayed: the iqama, or twenty minutes after the adhan without one. */
+    private fun athkarTime(schedule: PrayerSchedule, prayer: Prayer): ZonedDateTime =
+        (schedule.iqama[prayer] ?: schedule.adhan.getValue(prayer).plusMinutes(20)).plusMinutes(20)
+
+    /** Reminders don't need to be to-the-minute, so they use inexact alarms and spare the battery. */
     private fun set(manager: AlarmManager, kind: AlarmKind, day: Int, prayer: Prayer, at: ZonedDateTime) {
         val millis = at.toInstant().toEpochMilli()
         val intent = PrayerAlarmReceiver.intent(context, kind, prayer, millis)
@@ -52,7 +66,7 @@ class PrayerAlarmScheduler(private val context: Context, private val settings: S
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         try {
-            if (canScheduleExact()) {
+            if (canScheduleExact() && !kind.isAthkar) {
                 manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, millis, pending)
             } else {
                 manager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, millis, pending)

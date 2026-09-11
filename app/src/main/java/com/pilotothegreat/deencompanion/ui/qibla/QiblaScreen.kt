@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.CompassCalibration
 import androidx.compose.material.icons.rounded.ExploreOff
 import androidx.compose.material.icons.rounded.MyLocation
@@ -73,7 +74,7 @@ import kotlin.math.roundToInt
 private const val ALIGNMENT_TOLERANCE_DEGREES = 5.0
 
 @Composable
-fun QiblaScreen(viewModel: QiblaViewModel = koinViewModel()) {
+fun QiblaScreen(onBack: () -> Unit, viewModel: QiblaViewModel = koinViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val refreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -102,6 +103,11 @@ fun QiblaScreen(viewModel: QiblaViewModel = koinViewModel()) {
             TopAppBar(
                 title = { Text(stringResource(R.string.qibla_compass)) },
                 subtitle = { Text(state?.cityName ?: stringResource(R.string.default_location)) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.go_back))
+                    }
+                },
                 actions = {
                     if (refreshing) {
                         LoadingIndicator(Modifier.padding(12.dp).size(24.dp))

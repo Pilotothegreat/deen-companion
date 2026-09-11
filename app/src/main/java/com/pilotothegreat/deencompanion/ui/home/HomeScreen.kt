@@ -38,10 +38,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -84,16 +82,16 @@ fun HomeScreen(
     onOpenSettings: () -> Unit,
     onOpenQibla: () -> Unit,
     onOpenLocation: () -> Unit,
+    onOpenAthkar: (String) -> Unit,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val content by viewModel.content.collectAsStateWithLifecycle()
     val countdown by viewModel.countdown.collectAsStateWithLifecycle()
-    val tasbih by viewModel.tasbihState.collectAsStateWithLifecycle()
+    val athkarNow by viewModel.athkarNow.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val resources = LocalResources.current
     val locale = currentLocale()
-    val haptics = LocalHapticFeedback.current
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -116,20 +114,11 @@ fun HomeScreen(
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when (event) {
-                HomeEvent.RoundCompleted -> haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                 HomeEvent.LocationUnavailable -> scope.launch {
                     snackbar.showSnackbar(resources.getString(R.string.location_unavailable))
                 }
                 HomeEvent.LocationPermissionMissing -> scope.launch {
                     snackbar.showSnackbar(resources.getString(R.string.location_permission_needed))
-                }
-                is HomeEvent.TasbihReset -> scope.launch {
-                    val result = snackbar.showSnackbar(
-                        message = resources.getString(R.string.tasbih_reset_done),
-                        actionLabel = resources.getString(R.string.undo),
-                        duration = SnackbarDuration.Short,
-                    )
-                    if (result == SnackbarResult.ActionPerformed) viewModel.restoreTasbih(event.previous)
                 }
                 HomeEvent.UpdateAvailable -> scope.launch {
                     val result = snackbar.showSnackbar(
@@ -262,18 +251,10 @@ fun HomeScreen(
                         onToggleMute = viewModel::setMuted,
                     )
                 }
-                item(key = "tasbih") {
-                    TasbihCard(
-                        state = tasbih,
-                        locale = locale,
-                        onTap = {
-                            haptics.performHapticFeedback(HapticFeedbackType.SegmentTick)
-                            viewModel.incrementTasbih()
-                        },
-                        onReset = viewModel::resetTasbih,
-                        onTargetChange = viewModel::setTasbihTarget,
-                        onDhikrChange = viewModel::setDhikr,
-                    )
+                athkarNow?.let { now ->
+                    item(key = "athkar") {
+                        AthkarNowCard(now.category, now.progress, locale, onOpen = { onOpenAthkar(now.category.id) })
+                    }
                 }
                 item(key = "qibla") { QiblaShortcut(current.settings.location, locale, onOpenQibla) }
                 item(key = "inspiration") { InspirationCard(current.inspiration, locale) }

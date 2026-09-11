@@ -3,20 +3,21 @@ package com.pilotothegreat.deencompanion.ui.home
 import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pilotothegreat.deencompanion.core.athkar.AthkarCategory
+import com.pilotothegreat.deencompanion.core.athkar.AthkarSchedule
+import com.pilotothegreat.deencompanion.core.athkar.DayProgress
 import com.pilotothegreat.deencompanion.core.calendar.HijriCalendar
 import com.pilotothegreat.deencompanion.core.prayer.DaySchedule
 import com.pilotothegreat.deencompanion.core.prayer.NextPrayer
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
 import com.pilotothegreat.deencompanion.core.prayer.PrayerSchedule
-import com.pilotothegreat.deencompanion.core.tasbih.Dhikr
-import com.pilotothegreat.deencompanion.core.tasbih.TasbihState
 import com.pilotothegreat.deencompanion.core.text.Inspiration
 import com.pilotothegreat.deencompanion.core.text.Inspirations
+import com.pilotothegreat.deencompanion.data.athkar.AthkarRepository
 import com.pilotothegreat.deencompanion.data.location.LocationRepository
 import com.pilotothegreat.deencompanion.data.settings.AppSettings
 import com.pilotothegreat.deencompanion.data.settings.LocationSource
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
-import com.pilotothegreat.deencompanion.data.tasbih.TasbihRepository
 import com.pilotothegreat.deencompanion.data.update.UpdateChecker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -29,7 +30,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -54,18 +54,19 @@ data class HomeContent(
 
 data class Countdown(val next: NextPrayer, val remaining: Duration)
 
+/** The athkar that fit the time of day, with today's progress. */
+data class AthkarNow(val category: AthkarCategory, val progress: DayProgress)
+
 sealed interface HomeEvent {
     data object LocationUnavailable : HomeEvent
     data object LocationPermissionMissing : HomeEvent
-    data object RoundCompleted : HomeEvent
-    data class TasbihReset(val previous: TasbihState) : HomeEvent
     data object UpdateAvailable : HomeEvent
 }
 
 class HomeViewModel(
     private val settings: SettingsRepository,
     private val location: LocationRepository,
-    private val tasbih: TasbihRepository,
+    private val athkar: AthkarRepository,
     private val updates: UpdateChecker,
 ) : ViewModel() {
 
@@ -75,6 +76,8 @@ class HomeViewModel(
             delay(1_000 - System.currentTimeMillis() % 1_000)
         }
     }
+
+    private val minutes = seconds.map { System.currentTimeMillis() / 60_000 }.distinctUntilChanged()
 
     val content: StateFlow<HomeContent?> = combine(settings.settings, seconds) { s, _ -> s to LocalDate.now(s.zone) }
         .distinctUntilChanged()
@@ -98,8 +101,13 @@ class HomeViewModel(
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    val tasbihState: StateFlow<TasbihState> =
-        tasbih.state.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TasbihState())
+    val athkarNow: StateFlow<AthkarNow?> = combine(settings.settings, athkar.progress, minutes) { s, progress, _ ->
+        val now = ZonedDateTime.now(s.zone)
+        val suggested = AthkarSchedule.suggest(now, DaySchedule.forDate(now.toLocalDate(), s.prayerConfig))
+        athkar.library().category(suggested)?.let { AthkarNow(it, progress.on(now.toLocalDate())) }
+    }
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
@@ -140,32 +148,6 @@ class HomeViewModel(
 
     fun setMuted(prayer: Prayer, muted: Boolean) {
         viewModelScope.launch { settings.setPrayerMuted(prayer, muted) }
-    }
-
-    fun incrementTasbih() {
-        viewModelScope.launch {
-            if (tasbih.increment().roundCompleted) _events.emit(HomeEvent.RoundCompleted)
-        }
-    }
-
-    fun resetTasbih() {
-        viewModelScope.launch {
-            val previous = tasbih.state.first()
-            tasbih.reset()
-            if (previous.count > 0) _events.emit(HomeEvent.TasbihReset(previous))
-        }
-    }
-
-    fun restoreTasbih(state: TasbihState) {
-        viewModelScope.launch { tasbih.restore(state) }
-    }
-
-    fun setTasbihTarget(target: Int) {
-        viewModelScope.launch { tasbih.setTarget(target) }
-    }
-
-    fun setDhikr(dhikr: Dhikr) {
-        viewModelScope.launch { tasbih.setDhikr(dhikr) }
     }
 
     fun dismissRamadan(hijriYear: Int) {

@@ -12,6 +12,8 @@ import com.pilotothegreat.deencompanion.data.settings.createAppDataStore
 import com.pilotothegreat.deencompanion.data.tasbih.TasbihRepository
 import com.pilotothegreat.deencompanion.data.update.UpdateChecker
 import com.pilotothegreat.deencompanion.playback.QuranPlayer
+import com.pilotothegreat.deencompanion.ui.athkar.AthkarSessionViewModel
+import com.pilotothegreat.deencompanion.ui.athkar.AthkarViewModel
 import com.pilotothegreat.deencompanion.ui.hadith.HadithBookViewModel
 import com.pilotothegreat.deencompanion.ui.hadith.HadithViewModel
 import com.pilotothegreat.deencompanion.ui.home.HomeViewModel
@@ -49,4 +51,6 @@ val appModule = module {
     viewModelOf(::QiblaViewModel)
     viewModelOf(::SettingsViewModel)
     viewModelOf(::LocationViewModel)
+    viewModelOf(::AthkarViewModel)
+    viewModel { params -> AthkarSessionViewModel(params.get(), get(), get()) }
 }

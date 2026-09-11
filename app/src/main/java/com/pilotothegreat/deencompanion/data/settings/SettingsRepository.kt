@@ -113,6 +113,15 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
     suspend fun setDismissedRamadanYear(hijriYear: Int) = edit { it[Keys.DISMISSED_RAMADAN_YEAR] = hijriYear }
 
+    suspend fun setAthkarReminders(enabled: Boolean) = edit { it[Keys.ATHKAR_REMINDERS] = enabled }
+
+    suspend fun setAthkarFontSize(size: Int) =
+        edit { it[Keys.ATHKAR_FONT_SIZE] = size.coerceIn(Defaults.ATHKAR_FONT_RANGE) }
+
+    suspend fun setAthkarShowTranslation(show: Boolean) = edit { it[Keys.ATHKAR_TRANSLATION] = show }
+
+    suspend fun setAthkarShowTransliteration(show: Boolean) = edit { it[Keys.ATHKAR_TRANSLITERATION] = show }
+
     /** Timestamp and latest release tag of the last update check. */
     suspend fun lastUpdateCheck(): Pair<Long, String> = dataStore.data.first().let {
         (it[Keys.UPDATE_CHECKED_AT] ?: 0L) to (it[Keys.UPDATE_LATEST] ?: "")
@@ -174,6 +183,10 @@ internal object Keys {
     val LANGUAGE = stringPreferencesKey("app_language")
     val COUNTRY_CODE = stringPreferencesKey("country_code")
     val LOCATION_SOURCE = stringPreferencesKey("location_source")
+    val ATHKAR_REMINDERS = booleanPreferencesKey("athkar_reminders")
+    val ATHKAR_FONT_SIZE = intPreferencesKey("athkar_font_size")
+    val ATHKAR_TRANSLATION = booleanPreferencesKey("athkar_show_translation")
+    val ATHKAR_TRANSLITERATION = booleanPreferencesKey("athkar_show_transliteration")
     val METHOD_AUTO = booleanPreferencesKey("calc_method_auto")
     val HIGH_LATITUDE = stringPreferencesKey("high_latitude_rule")
 }
@@ -231,6 +244,10 @@ internal fun Preferences.toAppSettings(): AppSettings = AppSettings(
     useIpLocationFallback = this[Keys.IP_FALLBACK] ?: false,
     dismissedRamadanYear = this[Keys.DISMISSED_RAMADAN_YEAR] ?: 0,
     appLanguage = this[Keys.LANGUAGE] ?: AppLanguage.SYSTEM,
+    athkarReminders = this[Keys.ATHKAR_REMINDERS] ?: false,
+    athkarFontSize = (this[Keys.ATHKAR_FONT_SIZE] ?: Defaults.ATHKAR_FONT_SIZE).coerceIn(Defaults.ATHKAR_FONT_RANGE),
+    athkarShowTranslation = this[Keys.ATHKAR_TRANSLATION],
+    athkarShowTransliteration = this[Keys.ATHKAR_TRANSLITERATION] ?: false,
 )
 
 private inline fun <reified T : Enum<T>> enumOrNull(name: String?): T? =

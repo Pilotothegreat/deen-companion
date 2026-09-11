@@ -6,14 +6,13 @@ import androidx.compose.material.icons.automirrored.outlined.LibraryBooks
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.automirrored.rounded.LibraryBooks
 import androidx.compose.material.icons.automirrored.rounded.MenuBook
-import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.WbSunny
-import androidx.compose.material.icons.rounded.Explore
 import androidx.compose.material.icons.rounded.WbSunny
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import com.pilotothegreat.deencompanion.R
+import com.pilotothegreat.deencompanion.ui.common.AthkarIcon
 import kotlinx.serialization.Serializable
 
 @Serializable data object HomeKey : NavKey
@@ -22,6 +21,10 @@ import kotlinx.serialization.Serializable
 @Serializable data object QiblaKey : NavKey
 @Serializable data object SettingsKey : NavKey
 @Serializable data object LocationKey : NavKey
+@Serializable data object AthkarKey : NavKey
+
+/** One athkar category, counted item by item. */
+@Serializable data class AthkarSessionKey(val categoryId: String) : NavKey
 
 /** Opens the mushaf at [page]; [surah]/[ayah] (when non-zero) mark the ayah to highlight. */
 @Serializable data class ReaderKey(val page: Int, val surah: Int = 0, val ayah: Int = 0) : NavKey
@@ -36,8 +39,8 @@ enum class TopLevel(
 ) {
     HOME(HomeKey, R.string.today, Icons.Outlined.WbSunny, Icons.Rounded.WbSunny),
     QURAN(QuranKey, R.string.quran, Icons.AutoMirrored.Outlined.MenuBook, Icons.AutoMirrored.Rounded.MenuBook),
+    ATHKAR(AthkarKey, R.string.athkar, AthkarIcon, AthkarIcon),
     HADITH(HadithKey, R.string.hadith, Icons.AutoMirrored.Outlined.LibraryBooks, Icons.AutoMirrored.Rounded.LibraryBooks),
-    QIBLA(QiblaKey, R.string.qibla_compass, Icons.Outlined.Explore, Icons.Rounded.Explore),
 }
 
 /**
@@ -63,6 +66,17 @@ class Navigator(val backStack: NavBackStack<NavKey>) {
 
     fun navigate(key: NavKey) {
         backStack.add(key)
+    }
+
+    /** Opens [key] on top of the tab it belongs to, e.g. from a notification or widget. */
+    fun open(key: NavKey) {
+        val tab = when (key) {
+            is AthkarSessionKey -> TopLevel.ATHKAR
+            is ReaderKey -> TopLevel.QURAN
+            else -> TopLevel.entries.firstOrNull { it.key == key } ?: TopLevel.HOME
+        }
+        selectTab(tab)
+        if (TopLevel.entries.none { it.key == key }) navigate(key)
     }
 
     fun back() {

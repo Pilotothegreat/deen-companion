@@ -50,8 +50,12 @@ class PrayerAlarmReceiver : BroadcastReceiver(), KoinComponent {
             val current = settings.current()
             // Alarms delivered long after their time (e.g. held while the device was off) are skipped.
             val onTime = System.currentTimeMillis() - scheduledAt < STALE_AFTER_MILLIS
-            if (prayer != null && kind != null && onTime && current.notificationsEnabled && prayer !in current.mutedPrayers) {
-                Notifications.showPrayer(context, current.appLanguage, kind, prayer)
+            if (prayer != null && kind != null && onTime) {
+                when {
+                    kind.isAthkar -> if (current.athkarReminders) Notifications.showAthkar(context, current.appLanguage, kind)
+                    current.notificationsEnabled && prayer !in current.mutedPrayers ->
+                        Notifications.showPrayer(context, current.appLanguage, kind, prayer)
+                }
             }
             scheduler.reschedule()
             WidgetUpdater.updateAll(context)

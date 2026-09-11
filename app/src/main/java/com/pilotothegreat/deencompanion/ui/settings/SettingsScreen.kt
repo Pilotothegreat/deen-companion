@@ -20,6 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.OpenInNew
+import androidx.compose.material.icons.rounded.Abc
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Alarm
 import androidx.compose.material.icons.rounded.AppSettingsAlt
@@ -43,6 +44,7 @@ import androidx.compose.material.icons.rounded.RecordVoiceOver
 import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material.icons.rounded.TextFields
+import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material.icons.rounded.VolumeUp
 import androidx.compose.material3.AlertDialog
@@ -82,6 +84,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -107,6 +110,7 @@ import com.pilotothegreat.deencompanion.ui.common.Formatters
 import com.pilotothegreat.deencompanion.ui.common.SystemIntents
 import com.pilotothegreat.deencompanion.ui.common.currentLocale
 import com.pilotothegreat.deencompanion.ui.common.icon
+import com.pilotothegreat.deencompanion.ui.common.isArabic
 import com.pilotothegreat.deencompanion.ui.common.labelRes
 import com.pilotothegreat.deencompanion.ui.common.nameRes
 import com.pilotothegreat.deencompanion.ui.common.startSafely
@@ -114,6 +118,7 @@ import com.pilotothegreat.deencompanion.ui.components.ChoiceDialog
 import com.pilotothegreat.deencompanion.ui.components.ConnectedChoice
 import com.pilotothegreat.deencompanion.ui.components.SectionHeader
 import com.pilotothegreat.deencompanion.ui.location.locationStatus
+import com.pilotothegreat.deencompanion.ui.theme.Amiri
 import com.pilotothegreat.deencompanion.ui.theme.UthmanicHafs
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDate
@@ -188,9 +193,11 @@ fun SettingsScreen(
                     listOf(
                         { shapes ->
                             val city = s.location.cityName ?: stringResource(R.string.default_location)
+                            val status = locationStatus(s.location)
                             NavRow(
                                 shapes, Icons.Rounded.LocationOn, stringResource(R.string.current_location),
-                                "$city · ${locationStatus(s.location)}",
+                                // The default location's name already says it's the default.
+                                if (s.location.isDefault) city else "$city · $status",
                                 onClick = onOpenLocation,
                             )
                         },
@@ -281,6 +288,48 @@ fun SettingsScreen(
                     }
                 }
                 SettingsGroup(stringResource(R.string.notifications), rows)
+            }
+
+            item(key = "athkar") {
+                SettingsGroup(
+                    stringResource(R.string.athkar),
+                    listOf(
+                        { shapes ->
+                            SwitchRow(
+                                shapes, Icons.Rounded.Alarm, stringResource(R.string.athkar_reminders),
+                                stringResource(R.string.athkar_reminders_desc), s.athkarReminders,
+                            ) { enabled ->
+                                if (enabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !Notifications.canPost(context)) {
+                                    notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                }
+                                viewModel.setAthkarReminders(enabled)
+                            }
+                        },
+                        { shapes ->
+                            FontSizeRow(
+                                shapes, s.athkarFontSize, viewModel::setAthkarFontSize,
+                                range = Defaults.ATHKAR_FONT_RANGE,
+                                title = stringResource(R.string.athkar_text_size),
+                                fontFamily = Amiri,
+                                sample = "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+                            )
+                        },
+                        { shapes ->
+                            SwitchRow(
+                                shapes, Icons.Rounded.Translate, stringResource(R.string.athkar_show_translation),
+                                stringResource(R.string.athkar_translation_desc), s.athkarShowTranslation ?: !locale.isArabic,
+                                viewModel::setAthkarShowTranslation,
+                            )
+                        },
+                        { shapes ->
+                            SwitchRow(
+                                shapes, Icons.Rounded.Abc, stringResource(R.string.athkar_show_transliteration),
+                                stringResource(R.string.athkar_transliteration_desc), s.athkarShowTransliteration,
+                                viewModel::setAthkarShowTransliteration,
+                            )
+                        },
+                    ),
+                )
             }
 
             item(key = "quran") {
@@ -524,10 +573,17 @@ private fun HijriAdjustmentRow(shapes: ListItemShapes, settings: AppSettings, on
 }
 
 @Composable
-private fun FontSizeRow(shapes: ListItemShapes, size: Int, onChange: (Int) -> Unit) {
+private fun FontSizeRow(
+    shapes: ListItemShapes,
+    size: Int,
+    onChange: (Int) -> Unit,
+    range: IntRange = Defaults.QURAN_FONT_RANGE,
+    title: String = stringResource(R.string.arabic_text_size),
+    fontFamily: FontFamily = UthmanicHafs,
+    sample: String = "بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ",
+) {
     var value by remember(size) { mutableFloatStateOf(size.toFloat()) }
-    val range = Defaults.QURAN_FONT_RANGE
-    ContentRow(shapes, Icons.Rounded.TextFields, stringResource(R.string.arabic_text_size)) {
+    ContentRow(shapes, Icons.Rounded.TextFields, title) {
         Column {
             Slider(
                 value = value,
@@ -537,8 +593,8 @@ private fun FontSizeRow(shapes: ListItemShapes, size: Int, onChange: (Int) -> Un
                 steps = (range.last - range.first) / 2 - 1,
             )
             Text(
-                "بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ",
-                fontFamily = UthmanicHafs,
+                sample,
+                fontFamily = fontFamily,
                 fontSize = value.sp,
                 lineHeight = (value * 1.8f).sp,
                 textAlign = TextAlign.Center,
@@ -611,7 +667,7 @@ private fun iqamaSummary(setting: IqamaSetting): String {
 
 /** Minutes with a sign, isolated so "+3" keeps its order inside Arabic text. */
 private fun signedMinutes(minutes: Int, locale: Locale): String =
-    "⁦" + Numerals.localize(if (minutes > 0) "+$minutes" else minutes.toString(), locale) + "⁩"
+    Formatters.ltr(Numerals.localize(if (minutes > 0) "+$minutes" else minutes.toString(), locale))
 
 @Composable
 private fun adjustmentSummary(adjustments: Map<Prayer, Int>): String {

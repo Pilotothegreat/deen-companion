@@ -69,6 +69,12 @@ data class AppSettings(
     val dismissedRamadanYear: Int,
     /** BCP 47 tag of the UI language, or [AppLanguage.SYSTEM]. */
     val appLanguage: String,
+    /** Morning and evening athkar reminders, after Fajr and Asr. */
+    val athkarReminders: Boolean,
+    val athkarFontSize: Int,
+    /** Null until chosen: the English meaning is shown by default, except in the Arabic UI. */
+    val athkarShowTranslation: Boolean?,
+    val athkarShowTransliteration: Boolean,
 ) {
     val zone: ZoneId
         get() = runCatching { ZoneId.of(location.timezoneId) }.getOrElse { ZoneId.systemDefault() }
@@ -102,6 +108,8 @@ object Defaults {
     val HIJRI_ADJUSTMENT_RANGE = -2..2
     val IQAMA_OFFSET_RANGE = 0..60
     val ADJUSTMENT_RANGE = -30..30
+    const val ATHKAR_FONT_SIZE = 26
+    val ATHKAR_FONT_RANGE = 20..40
 
     val iqama: Map<Prayer, IqamaSetting> = mapOf(
         Prayer.FAJR to IqamaSetting(fixed = false, offsetMinutes = 25, fixedTime = LocalTime.of(5, 15)),

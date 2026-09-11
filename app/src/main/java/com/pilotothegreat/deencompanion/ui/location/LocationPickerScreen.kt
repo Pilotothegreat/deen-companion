@@ -49,6 +49,7 @@ import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.core.text.Numerals
 import com.pilotothegreat.deencompanion.data.settings.LocationSource
 import com.pilotothegreat.deencompanion.data.settings.SavedLocation
+import com.pilotothegreat.deencompanion.ui.common.Formatters
 import com.pilotothegreat.deencompanion.ui.common.LOCATION_PERMISSIONS
 import com.pilotothegreat.deencompanion.ui.common.currentLocale
 import com.pilotothegreat.deencompanion.ui.common.hasLocationPermission
@@ -189,9 +190,9 @@ fun locationStatus(location: SavedLocation): String = when (location.source) {
     }
 }
 
-/** "UTC+04:00", kept left-to-right inside Arabic text. */
+/** "UTC+04:00" with the locale's digits. */
 private fun utcOffset(timezoneId: String, locale: Locale): String {
     val offset = runCatching { ZoneId.of(timezoneId).rules.getOffset(Instant.now()) }.getOrNull() ?: return timezoneId
     val suffix = if (offset.totalSeconds == 0) "" else offset.id
-    return "⁦" + Numerals.localize("UTC$suffix", locale) + "⁩"
+    return Formatters.ltr(Numerals.localize("UTC$suffix", locale))
 }

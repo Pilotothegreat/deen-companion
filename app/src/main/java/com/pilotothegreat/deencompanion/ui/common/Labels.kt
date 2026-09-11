@@ -91,4 +91,7 @@ object Formatters {
     }
 
     fun number(value: Int, locale: Locale): String = Numerals.format(value, locale)
+
+    /** Keeps [text] (e.g. "+3" or "UTC+04:00") in left-to-right order inside Arabic text. */
+    fun ltr(text: String): String = "\u2066$text\u2069"
 }

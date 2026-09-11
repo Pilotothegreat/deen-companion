@@ -67,12 +67,12 @@ class DeenApplication : Application(), Configuration.Provider {
         }
     }
 
-    private data class AlarmInputs(val config: PrayerConfig, val enabled: Boolean, val muted: Set<Prayer>)
+    private data class AlarmInputs(val config: PrayerConfig, val enabled: Boolean, val muted: Set<Prayer>, val athkar: Boolean)
 
     @OptIn(FlowPreview::class)
     private fun keepAlarmsInSync() = appScope.launch {
         settings.settings
-            .map { AlarmInputs(it.prayerConfig, it.notificationsEnabled, it.mutedPrayers) }
+            .map { AlarmInputs(it.prayerConfig, it.notificationsEnabled, it.mutedPrayers, it.athkarReminders) }
             .distinctUntilChanged()
             .debounce(300)
             .collectLatest { scheduler.reschedule() }

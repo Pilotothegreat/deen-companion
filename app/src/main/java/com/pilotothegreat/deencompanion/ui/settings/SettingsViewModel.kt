@@ -54,6 +54,10 @@ class SettingsViewModel(
     fun setPureBlack(enabled: Boolean) = launch { repository.setPureBlack(enabled) }
     fun setQuranFontSize(size: Int) = launch { repository.setQuranFontSize(size) }
     fun setReciter(reciter: Reciter) = launch { repository.setReciter(reciter) }
+    fun setAthkarReminders(enabled: Boolean) = launch { repository.setAthkarReminders(enabled) }
+    fun setAthkarFontSize(size: Int) = launch { repository.setAthkarFontSize(size) }
+    fun setAthkarShowTranslation(show: Boolean) = launch { repository.setAthkarShowTranslation(show) }
+    fun setAthkarShowTransliteration(show: Boolean) = launch { repository.setAthkarShowTransliteration(show) }
 
     fun setLanguage(tag: String) = launch {
         repository.setAppLanguage(tag)

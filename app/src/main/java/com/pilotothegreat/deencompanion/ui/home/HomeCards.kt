@@ -2,9 +2,6 @@ package com.pilotothegreat.deencompanion.ui.home
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,21 +12,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material.icons.rounded.Explore
 import androidx.compose.material.icons.rounded.NightsStay
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.NotificationsOff
-import androidx.compose.material.icons.rounded.RestartAlt
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularWavyProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialShapes
@@ -38,22 +28,17 @@ import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.ripple
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -61,18 +46,17 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pilotothegreat.deencompanion.R
+import com.pilotothegreat.deencompanion.core.athkar.AthkarCategory
+import com.pilotothegreat.deencompanion.core.athkar.DayProgress
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
 import com.pilotothegreat.deencompanion.core.prayer.PrayerSchedule
 import com.pilotothegreat.deencompanion.core.qibla.QiblaMath
-import com.pilotothegreat.deencompanion.core.tasbih.Dhikr
-import com.pilotothegreat.deencompanion.core.tasbih.TasbihEngine
-import com.pilotothegreat.deencompanion.core.tasbih.TasbihState
 import com.pilotothegreat.deencompanion.core.text.Inspiration
 import com.pilotothegreat.deencompanion.data.settings.SavedLocation
+import com.pilotothegreat.deencompanion.ui.athkar.athkarIcon
 import com.pilotothegreat.deencompanion.ui.common.Formatters
 import com.pilotothegreat.deencompanion.ui.common.icon
 import com.pilotothegreat.deencompanion.ui.common.isArabic
-import com.pilotothegreat.deencompanion.ui.common.labelRes
 import com.pilotothegreat.deencompanion.ui.common.nameRes
 import com.pilotothegreat.deencompanion.ui.theme.Amiri
 import com.pilotothegreat.deencompanion.ui.theme.animatedPolygonShape
@@ -193,100 +177,45 @@ fun PrayerTimesCard(
     }
 }
 
+/** The athkar that fit the time of day, one tap away. */
 @Composable
-fun TasbihCard(
-    state: TasbihState,
-    locale: Locale,
-    onTap: () -> Unit,
-    onReset: () -> Unit,
-    onTargetChange: (Int) -> Unit,
-    onDhikrChange: (Dhikr) -> Unit,
-) {
-    val target = TasbihEngine.roundTarget(state)
-    val progress by animateFloatAsState(
-        targetValue = state.count / target.toFloat(),
-        animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
-        label = "tasbihProgress",
-    )
-    val interaction = remember { MutableInteractionSource() }
-    val pressed by interaction.collectIsPressedAsState()
-    val buttonShape = animatedPolygonShape(
-        target = if (pressed) MaterialShapes.Cookie12Sided else MaterialShapes.Circle,
-        spec = MaterialTheme.motionScheme.fastSpatialSpec(),
-    )
-    val tapDescription = stringResource(R.string.cd_tasbih_button)
-    var menuOpen by remember { mutableStateOf(false) }
-
+fun AthkarNowCard(category: AthkarCategory, progress: DayProgress, locale: Locale, onOpen: () -> Unit) {
+    val fraction by animateFloatAsState(progress.fraction(category), MaterialTheme.motionScheme.slowSpatialSpec(), label = "athkarNow")
     Card(
+        onClick = onOpen,
         shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+        ),
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(R.string.tasbih_counter), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                IconButton(onClick = onReset) {
-                    Icon(Icons.Rounded.RestartAlt, contentDescription = stringResource(R.string.reset_tasbih))
-                }
-            }
-            Box {
-                AssistChip(
-                    onClick = { menuOpen = true },
-                    label = { Text(stringResource(state.dhikr.labelRes)) },
-                    trailingIcon = { Icon(Icons.Rounded.ArrowDropDown, contentDescription = null) },
+        Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Box(Modifier.size(56.dp), contentAlignment = Alignment.Center) {
+                CircularWavyProgressIndicator(
+                    progress = { fraction },
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.tertiary,
+                    trackColor = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.16f),
                 )
-                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                    Dhikr.entries.forEach { dhikr ->
-                        DropdownMenuItem(
-                            text = { Text(stringResource(dhikr.labelRes)) },
-                            onClick = {
-                                onDhikrChange(dhikr)
-                                menuOpen = false
-                            },
-                        )
-                    }
-                }
+                Icon(athkarIcon(category.id), contentDescription = null)
             }
-            Box(Modifier.size(208.dp), contentAlignment = Alignment.Center) {
-                CircularWavyProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxSize())
-                Box(
-                    modifier = Modifier
-                        .size(164.dp)
-                        .clip(buttonShape)
-                        .background(MaterialTheme.colorScheme.primary)
-                        .clickable(interactionSource = interaction, indication = ripple(), onClick = onTap)
-                        .semantics {
-                            contentDescription = tapDescription
-                            role = Role.Button
-                        },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            Formatters.number(state.count, locale),
-                            style = MaterialTheme.typography.displayMediumEmphasized,
-                            color = MaterialTheme.colorScheme.onPrimary,
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.athkar_now), style = MaterialTheme.typography.labelLarge)
+                Text(category.title(locale), style = MaterialTheme.typography.titleMediumEmphasized)
+                Text(
+                    if (progress.isComplete(category)) {
+                        stringResource(R.string.athkar_done_today)
+                    } else {
+                        stringResource(
+                            R.string.athkar_progress,
+                            Formatters.number(progress.completedItems(category), locale),
+                            Formatters.number(category.items.size, locale),
                         )
-                        Text(
-                            stringResource(R.string.tasbih_of_target, Formatters.number(target, locale)),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onPrimary,
-                        )
-                    }
-                }
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                )
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TasbihEngine.targets.forEach { value ->
-                    FilterChip(
-                        selected = state.target == value,
-                        onClick = { onTargetChange(value) },
-                        label = { Text(Formatters.number(value, locale)) },
-                    )
-                }
-            }
+            Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null)
         }
     }
 }
