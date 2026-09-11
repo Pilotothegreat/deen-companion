@@ -59,10 +59,17 @@ Sources are in `branding/` (the icon and mark) and `branding/store/` (the featur
 
 Upload `bilal-1.7.0-play.aab`, built with `./gradlew bundlePlay`. It's the release build without the donation sheet, signed with the key in `~/Documents/bilal-signing/`, which becomes the Play **upload key**.
 
-When Play App Signing asks which key to use, choose to **use the same key** by uploading it with Google's PEPK tool. Then the Play build and the APKs on GitHub have the same signature, and people can move between them without reinstalling. If Google generates its own app-signing key instead, the Play and GitHub builds can't update each other.
+The package already has a Play listing (the old Deen Companion), enrolled in Play App Signing. Its original upload key (SHA1 `4A:55:35:8F:16:20:FB:FB:E6:DA:27:41:C2:06:4B:D5:60:28:F1:EA`) is lost, so the new key must be registered with an **upload key reset**:
+
+1. In the Play Console, go to **Test and release → App integrity → Play app signing** and choose **Request upload key reset → I lost my upload key**.
+2. Upload `upload_certificate.pem`, the new key's public certificate (SHA1 `8E:08:E6:79:84:53:47:90:83:1A:49:C9:2D:60:58:2E:BF:0B:D8:FA`). It's attached to the v1.7.0 GitHub release, and `keytool -printcert -rfc -jarfile bilal-1.7.0-play.aab` recreates it.
+3. Upload the bundle once Google confirms the new key is active.
+
+Google keeps signing Play installs with the listing's app-signing key, so existing users update normally. The APKs on GitHub are signed with the upload key instead, so Play and GitHub installs can't update each other.
 
 ## Before submitting
 
 - **Support development sheet:** the Play build (`bundlePlay`) leaves it out, along with its banking-app queries, because Google Play's payments policy generally requires Play Billing for payments to the developer. The GitHub APK keeps it.
-- **First upload:** Google only accepts a new app's first bundle through the Play Console. Upload it by hand to **Internal testing**; later releases can be uploaded automatically.
+- **Upload key:** Play rejects the bundle until the upload key reset above is approved.
+- **Version code:** 195 must be higher than the last release on Play.
 - **Contact email:** the Play Console requires a public support email for the listing.
