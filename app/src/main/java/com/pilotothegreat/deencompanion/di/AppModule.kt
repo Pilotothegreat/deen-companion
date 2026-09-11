@@ -1,6 +1,7 @@
 package com.pilotothegreat.deencompanion.di
 
 import com.pilotothegreat.deencompanion.alarms.PrayerAlarmScheduler
+import com.pilotothegreat.deencompanion.data.athkar.AthkarRepository
 import com.pilotothegreat.deencompanion.data.db.AppDatabase
 import com.pilotothegreat.deencompanion.data.hadith.HadithRepository
 import com.pilotothegreat.deencompanion.data.location.CityIndex
@@ -28,6 +29,7 @@ val appModule = module {
     single { createAppDataStore(androidContext()) }
     single { SettingsRepository(get()) }
     single { TasbihRepository(get()) }
+    single { AthkarRepository({ androidContext().assets.open("athkar.json").bufferedReader().use { it.readText() } }, get()) }
     single { AppDatabase.build(androidContext()) }
     single { get<AppDatabase>().bookmarkDao() }
     single { get<AppDatabase>().hadithDao() }
