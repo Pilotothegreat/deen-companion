@@ -1,9 +1,22 @@
-Traffic Light is an open-source tool for tracking your network usage while ensuring total privacy. Inspired by Internet Speed Meter and GlassWire.
+Deen Companion brings prayer times, the Quran, hadith, the Qibla and tasbih together in one calm, private app. No accounts, ads or trackers.
 
-Features:
-- Free and open source
-- Uses few permissions
-- Uses less battery
-- No tracking
-- Beautiful UI
-- Fast and modern
+Prayer times and alerts
+- Oman Ministry of Endowments timetable by default, plus Umm al-Qura, Muslim World League, ISNA, Egypt, Karachi, Ja'fari and Tehran
+- Standard or Hanafi Asr
+- Adhan and iqama notifications, with iqama as minutes after the adhan or a fixed time
+- Next-prayer widget with a live countdown
+
+Quran
+- 604-page Madinah mushaf in the Uthmanic Hafs script with the Saheeh International translation
+- Search that ignores diacritics, bookmarks and "continue reading"
+- Ayah-by-ayah recitation with a sleep timer
+
+Hadith
+- Six major collections, with full collections downloaded only when you ask
+- Favorites, grades and search
+
+Qibla and tasbih
+- Compass with calibration help and turn guidance
+- Tasbih counter with the post-prayer 33/33/34 cycle and a home-screen widget
+
+Material 3 Expressive design, dynamic color, light, dark and pure-black themes, in English and Arabic.

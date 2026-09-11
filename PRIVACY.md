@@ -1,37 +1,54 @@
 # Privacy Policy for Deen Companion
 
-Last Updated: June 12, 2026
+Last updated: September 11, 2026
 
-At Deen Companion, we prioritize your privacy above all else. This application is designed to function entirely offline, keeping your personal data safe, secure, and under your control.
+Deen Companion has no accounts, ads, analytics or crash reporting. Everything you set up in the app stays on your device. This page lists exactly what the app stores and every network request it can make.
 
-## 1. Information We Process and How We Use It
+## What stays on your device
 
-### Location Data (GPS & Network coordinates)
-* **Purpose**: Used solely to calculate high-precision offline prayer times and to determine Qibla direction relative to your location.
-* **Storage**: Your coordinates are processed on-device and are never transmitted to our servers or third parties.
-* **IP-based Geolocation Backup**: If GPS signals are unavailable, the application can request geolocation details from privacy-friendly, standard HTTP/HTTPS geolocation providers (such as `ipapi.co` and `ip-api.com`). These requests only process your IP address to return latitude and longitude coordinates. This data is handled in memory, is not saved, and is processed locally.
+- Your location coordinates and city name, used to calculate prayer times and the Qibla direction.
+- Your settings: calculation method, iqama times, notification choices, theme, language and Quran text size.
+- Quran bookmarks, your last-read page, hadith favorites and your tasbih count.
 
-### Voice and Microphone Input (`RECORD_AUDIO`)
-* **Purpose**: Used to record short voice queries for search inputs in the offline Assistant/Lookup screens.
-* **Storage**: Voice data is transcribed locally on your device. Audio files or recordings are never stored, saved, or uploaded to any external servers.
+This data is stored with Android's DataStore and a local Room database. It is never uploaded, and it is excluded from Android cloud backups.
 
-### Settings and Personal Preferences
-* **Purpose**: Reminders, settings (dhikr targets, font configurations, calculations preference, and city overrides) are kept to customize your experience.
-* **Storage**: Stored locally on your device using Android Jetpack DataStore and Room Database.
+## Network requests
 
-## 2. Third-Party Integrations & App Queries
+The app works offline for prayer times, the Quran text, the Qibla compass and tasbih. It only uses the internet for the features below:
 
-### Local Omani Banking Apps
-To allow users in Oman to support developer operations locally, the settings and donation panels provide deep links to launch local banking applications (such as Bank Muscat, bm Wallet, NBO, Bank Dhofar, etc.) on the device.
-* **Data Privacy**: Deen Companion queries if these banking applications are installed to display the shortcut buttons. We do not access, collect, or store any financial details, account credentials, card information, or transaction records. All interactions are handled directly by your installed bank's official security systems.
+| Feature | Service | When | What the service receives |
+| --- | --- | --- | --- |
+| Internet location fallback | ipapi.co, then freeipapi.com | Only when the device can't provide a location and "Internet location fallback" is on (you can turn it off in Settings) | Your IP address |
+| City name | Android's system geocoder | After a location is found | Your coordinates, handled by your device's geocoding provider |
+| Quran recitation | everyayah.com | When you play a recitation | Your IP address and the ayah requested |
+| Full hadith collections | cdn.jsdelivr.net | Only when you tap Download | Your IP address |
+| Update check | api.github.com (sideloaded installs) or Google Play (Play Store installs) | At most once a day, or when you tap the version in Settings | Your IP address |
 
-## 3. Third-Party Analytics and Advertising
-Deen Companion is an open-source, non-commercial app.
-* We do not include any tracking software, analytic trackers (e.g., Firebase Analytics), advertising SDKs (e.g., Google AdMob), or marketing frameworks.
-* There are no background analytic processes sending your usage patterns to external entities.
+No personal information beyond what any web request carries (such as your IP address) is sent with these requests.
 
-## 4. Updates to This Policy
-Since the application operates offline, we do not notify users of privacy updates dynamically. We recommend reviewing the latest policy updates directly in our GitHub repository: [github.com/Pilotothegreat/deen-companion](https://github.com/Pilotothegreat/deen-companion).
+## Permissions
 
-## 5. Contact & Support
-If you have any questions or feedback, please open an issue in our official repository on GitHub.
+| Permission | Why |
+| --- | --- |
+| Location (approximate and precise) | Calculate prayer times and the Qibla for where you are. Requested only when you choose to use your location, and never used in the background. |
+| Notifications | Alert you at adhan and iqama times. |
+| Alarms and reminders (`SCHEDULE_EXACT_ALARM`) | Deliver notifications on time. You grant it in system settings; without it, alerts may be a few minutes late. |
+| Run at startup (`RECEIVE_BOOT_COMPLETED`) | Reschedule prayer alerts after the device restarts. |
+| Internet | The optional features in the table above. |
+| Foreground media playback | Keep recitation playing with media controls when the app is in the background. |
+
+## Banking apps
+
+The optional "Support development" sheet can open Omani banking apps (Bank Muscat, bm Wallet, NBO, Bank Dhofar, Sohar International, Oman Arab Bank, Ahli Bank) if they are installed. The app only checks whether they are installed so it can show a button. It never sees any financial information.
+
+## Children
+
+The app collects no personal data from anyone, including children.
+
+## Changes
+
+Changes to this policy are published in the [GitHub repository](https://github.com/Pilotothegreat/deen-companion) with a new date above.
+
+## Contact
+
+Questions or concerns: open an issue at [github.com/Pilotothegreat/deen-companion/issues](https://github.com/Pilotothegreat/deen-companion/issues).

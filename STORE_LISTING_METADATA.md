@@ -1,118 +1,93 @@
-# Deen Companion — App Store Listing & Metadata (ASO)
+# Deen Companion: Store listing
 
-> **Package Name:** `com.pilotothegreat.deencompanion`  
-> **Version Name:** `1.5.43` (`versionCode = 193`)  
-> **Category:** Lifestyle / Books & Reference  
-> **Content Rating:** Everyone (3+)  
-> **Privacy / Ads:** 100% Free, No Ads, No Remote User Tracking, Offline-First  
+- **Package:** `com.pilotothegreat.deencompanion`
+- **Version:** 1.6.0 (`versionCode` 194)
+- **Category:** Books & Reference
+- **Content rating:** Everyone
+- **Ads / tracking:** none
 
----
+## Title
 
-## 📱 Store Listing Details
+- English: Deen Companion: Prayer Times & Quran
+- Arabic: دين: مواقيت الصلاة والقرآن
 
-### App Title
-- **English:** `Deen Companion - Quran, Hadith & Prayer Times`
-- **Arabic:** `رفيق الدين - القرآن، الحديث ومواقيت الصلاة`
+## Short description (80 characters max)
 
-### Short Description (Max 80 Characters)
-- **English:** `Private, offline Islamic companion: Prayer times, Quran audio, Hadith & Qibla.`
-- **Arabic:** `رفيقك الإسلامي اليومي: مواقيت الصلاة، القرآن الكريم، الأحاديث والقبلة دون إنترنت.`
+- English: Prayer times, adhan alerts, Quran, hadith and Qibla. Private and ad-free.
+- Arabic: مواقيت الصلاة والأذان والقرآن والحديث والقبلة، بخصوصية تامة وبلا إعلانات.
 
----
+## Full description (English)
 
-## 📝 Full Description (English)
+Deen Companion brings prayer times, the Quran, hadith, the Qibla and tasbih together in one calm, private app. There are no accounts, ads or trackers.
 
-Assalamu Alaikum. **Deen Companion** is an elegant, modern, privacy-focused Islamic application designed according to Material 3 Expressive principles. Built for Muslims worldwide, it provides accurate prayer calculations, rich Quran audio recitation, authentic Hadith collections, precise Qibla direction, and interactive Tasbih counters—completely free of advertisements and tracking.
+**Prayer times and alerts**
+- Oman Ministry of Endowments timetable by default, plus Umm al-Qura, Muslim World League, ISNA, Egypt, Karachi, Ja'fari and Tehran
+- Standard or Hanafi Asr
+- Adhan and iqama notifications, with iqama as minutes after the adhan or a fixed time
+- Mute individual prayers
+- Next-prayer widget with a live countdown
 
-### 🌟 Key Features
+**Quran**
+- 604-page Madinah mushaf in the Uthmanic Hafs script
+- Saheeh International English translation
+- Search that ignores diacritics, bookmarks and "continue reading"
+- Ayah-by-ayah recitation by Mishary Alafasy, Mahmoud Khalil Al-Husary or Abdul Basit, with a sleep timer
 
-1. 🕌 **Accurate Prayer Times & Iqama Alarms**
-   - Precise prayer calculations using verified astronomical formulas for all global calculation methods (Oman Endowments, Umm Al-Qura / Makkah, Muslim World League, ISNA, Egypt Survey Authority, Karachi, Tehran, Jafari).
-   - Configurable Asr schools (Standard / Shafi'i / Maliki / Hanbali & Hanafi).
-   - Exact alarm scheduling ensuring Adhan and Iqama alerts ring at the precise second.
-   - Customizable fixed Iqama times or relative offsets per prayer.
-   - Beautiful lock screen and home screen prayer countdown widgets.
+**Hadith**
+- Sahih al-Bukhari, Sahih Muslim, Jami' at-Tirmidhi, Sunan Abu Dawud, Sunan an-Nasa'i and Sunan Ibn Majah
+- A sample of each is included; download full collections when you want them
+- Favorites, grades and search
 
-2. 📖 **Noble Quran with Ayah-by-Ayah Audio & Translation**
-   - Complete 114 Surahs in clear, legible Uthmani script with adjustable typography and AMOLED black reading mode.
-   - Ayah-by-Ayah crystal-clear audio streaming with renowned reciters (Mishary Rashid Alafasy, Abdul Rahman Al-Sudais, Saad Al-Ghamadi, Mahmoud Khalil Al-Husary).
-   - Full English translation with synchronized audio highlighting.
-   - Sleep timer and End-of-Surah automatic playback management.
+**Qibla and tasbih**
+- Compass with calibration help, turn guidance and the distance to Makkah
+- Tasbih counter with the post-prayer 33/33/34 cycle, haptic feedback and a home-screen widget
 
-3. 📚 **Authentic Hadith Library & Instant Search**
-   - Comprehensive collection of major Hadith books (Sahih Bukhari, Sahih Muslim, Sunan Abi Dawud, Jami` at-Tirmidhi, Sunan an-Nasa'i, Sunan Ibn Majah, Muwatta Malik, Musnad Ahmad, 40 Hadith Nawawi).
-   - Arabic normalization search engine matching root words across Arabic narrations and English meanings.
-   - One-tap full-book offline synchronization for uninterrupted reading anywhere.
+**Designed for you**
+- Material 3 Expressive design with dynamic color, light, dark and pure-black themes
+- English and Arabic with a full right-to-left layout
 
-4. 🧭 **Expressive Qibla Compass**
-   - Real-time geomagnetic compass with dynamic 12-point star shape-morphing pointer.
-   - Sensor accuracy indicators and instant calibration feedback.
-   - Direct distance and degree bearing to the Holy Kaaba in Makkah.
+## Full description (Arabic)
 
-5. 📿 **Interactive Tasbih Counter**
-   - Circular wavy progress counter with haptic feedback.
-   - Customizable targets (33, 99, 100, custom) and traditional post-prayer Dhikr cycles.
-   - Quick-increment interactive home screen Tasbih widget.
+يجمع تطبيق «دين» مواقيت الصلاة والقرآن الكريم والحديث الشريف والقبلة والتسبيح في تطبيق هادئ يحترم خصوصيتك: بلا حسابات ولا إعلانات ولا تتبع.
 
-6. 🔒 **100% Private & Ad-Free**
-   - No accounts, no sign-in required, no tracking analytics, and no third-party advertisements.
-   - Fully functional offline.
+**مواقيت الصلاة والتنبيهات**
+- تقويم وزارة الأوقاف والشؤون الدينية بسلطنة عُمان افتراضيًا، إضافة إلى أم القرى ورابطة العالم الإسلامي وغيرها
+- حساب العصر على مذهب الجمهور أو الحنفي
+- تنبيهات الأذان والإقامة، والإقامة بعد الأذان بدقائق أو في وقت ثابت
+- كتم تنبيهات صلاة بعينها
+- ويدجت للصلاة القادمة مع عدّ تنازلي مباشر
 
----
+**القرآن الكريم**
+- مصحف المدينة بصفحاته الـ٦٠٤ وبالرسم العثماني
+- الترجمة الإنجليزية (صحيح إنترناشونال)
+- بحث لا يتأثر بالتشكيل، وعلامات، ومتابعة القراءة
+- تلاوة آية بآية بأصوات مشاري العفاسي ومحمود خليل الحصري وعبد الباسط عبد الصمد، مع مؤقت للنوم
 
-## 📝 الوصف الكامل (باللغة العربية)
+**الحديث الشريف**
+- صحيح البخاري وصحيح مسلم وجامع الترمذي وسنن أبي داود والنسائي وابن ماجه
+- عينة من كل كتاب مضمّنة، وتنزيل الكتاب كاملًا عند الطلب
+- المفضلة والدرجات والبحث
 
-السلام عليكم ورحمة الله وبركاته. **رفيق الدين (Deen Companion)** هو تطبيقك الإسلامي الشامل والمصمم بأحدث معايير **Material 3 Expressive** ليكون رفيقك اليومي في العبادة والأذكار بخصوصية تامة ودون أي إعلانات أو تتبع.
+**القبلة والتسبيح**
+- بوصلة مع إرشادات المعايرة والاتجاه والمسافة إلى مكة
+- عداد تسبيح بدورة أذكار ما بعد الصلاة (٣٣/٣٣/٣٤) مع اهتزاز لمسي وويدجت للشاشة الرئيسية
 
-### 🌟 أهم مميزات التطبيق
+## What's new in 1.6.0
 
-1. 🕌 **مواقيت الصلاة وتنبيهات الإقامة الدقيقة**
-   - حساب فلكي دقيق لمواقيت الصلاة وفق مختلف الهيئات الإسلامية المعتمدة (وزارة الأوقاف والشؤون الدينية بسلطنة عُمان، أم القرى بمكة المكرمة، رابطة العالم الإسلامي، الهيئة المصرية العامة للمساحة، وغيرها).
-   - دعم المذهب القياسي (الشافعي والمالكي والحنبلي) والمذهب الحنفي لحساب صلاة العصر.
-   - تنبيهات أذان وإقامة دقيقة تعمل في الثانية المحددة.
-   - ويدجت أنيق للشاشة الرئيسية مع عداد تنازلي للصلاة القادمة.
+**English**
+- Redesigned throughout with Material 3 Expressive: new navigation, grouped settings and a shape-morphing prayer card
+- Oman prayer times now match the Ministry's published timetable (Isha was previously about 15 minutes late)
+- The notifications switch now really turns alerts off, and muted prayers are no longer scheduled
+- Hadith favorites are kept when a collection is re-downloaded, and collections download only when you ask
+- Quran bookmarks, "continue reading", a verse action sheet and faster page loading
+- More accurate Qibla compass that runs only while it's on screen
+- The prayer widget updates at each prayer instead of every minute, which saves battery
 
-2. 📖 **القرآن الكريم مع التلاوة الصوتية والترجمة**
-   - المصحف الشريف بالرسم العثماني الواضح مع إمكانية تكبير الخط والوضع الليلي الداكن AMOLED.
-   - استماع صوتي آية بآية لأشهر القراء (مشاري راشد العفاسي، عبد الرحمن السديس، سعد الغامدي، محمود خليل الحصري).
-   - مؤقت نوم ذكي وإيقاف تلقائي عند نهاية السورة.
-
-3. 📚 **موسوعة الحديث الشريف والبحث الذكي**
-   - كتب الحديث التسعة (صحيح البخاري، صحيح مسلم، سنن أبي داود، جامع الترمذي، سنن النسائي، سنن ابن ماجه، موطأ مالك، مسند أحمد، والأربعون النووية).
-   - بحث ذكي يدعم تطبيع الحروف العربية والبحث الفوري في المتون والأسانيد.
-   - إمكانية تحميل الكتب كاملة للقراءة دون اتصال بالإنترنت.
-
-4. 🧭 **بوصلة القبلة التفاعلية**
-   - تحديد اتجاه القبلة نحو الكعبة المشرفة في مكة المكرمة بدقة عالية عبر مستشعرات الجهاز.
-   - تصميم تفاعلي مميز بأشكال مادية متحركة ومؤشر معايرة ذكي.
-
-5. 📿 **المسبحة الإلكترونية الذكية**
-   - عداد تسبيح تفاعلي بأشكال متموجة مع اهتزاز لمسي مريح.
-   - تنقل تلقائي بين أذكار ما بعد الصلاة (سبحان الله ×33، الحمد لله ×33، الله أكبر ×34).
-   - ويدجت مسبحة للشاشة الرئيسية للذكر السريع دون فتح التطبيق.
-
-6. 🔒 **خصوصية تامة وبدون إعلانات**
-   - لا يتطلب إنشاء حساب، لا يحتوي على أي إعلانات تجارية، ولا يشارك أي بيانات شخصية عن بُعد.
-
----
-
-## 🏷️ ASO Keyword Strategy (كلمات مفتاحية)
-`prayer times, quran audio, hadith offline, qibla compass, tasbih counter, adhan alarm, islamic companion, iqama reminders, ramadan calendar, athan times, مواقيت الصلاة, القرآن الكريم, الحديث الشريف, اتجاه القبلة, مسبحة إلكترونية, أذكار الصباح والمساء, تنبيهات الأذان, صلاتي`
-
----
-
-## 🚀 Release Notes (What's New in v1.5.43)
-
-### English:
-- **Material 3 Expressive Redesign**: Full integration of Material 3 Expressive components, fluid spring motion schemes, shape-morphing icons, and modern button groups across all 14 screens.
-- **Dual-Distribution Update Engine**: Fully integrated Google Play In-App Updates for Play Store users and direct GitHub APK update verification for sideloaded releases.
-- **Accessibility & TalkBack Upgrades**: 100% localized accessibility labels in English and Arabic for all stepper buttons, prayer rows, and navigation items.
-- **Extended RTL Support**: Comprehensive Right-To-Left layout mirroring for Arabic, Persian, Urdu, Kurdish, Hebrew, and Pashto.
-- **Network & Socket Hardening**: Optimized background resource lifecycle and connection safety guards.
-
-### العربية:
-- **تصميم Material 3 Expressive العصري**: تحديث شامل لكافة واجهات التطبيق وفق أحدث معايير التصميم مع تأثيرات حركية انسيابية وأشكال متغيرة ذكية.
-- **نظام تحديث مزدوج وذكي**: دعم التحديث التلقائي عبر متجر Google Play مع دعم التحديث المباشر لإصدارات GitHub.
-- **تعزيز إمكانية الوصول وTalkBack**: أوصاف صوتية مخصصة باللغتين العربية والإنجليزية لجميع الأزرار وعناصر التحكم.
-- **دعم لغات اليمين إلى اليسار (RTL)**: توافق كامل مع اللغات العربية، الفارسية، الأردية، الكردية، وغيرها.
-- **تحسين استقرار الشبكة والبطارية**: ترقية كفاءة الاتصال وتنبيهات الأذان والإقامة.
+**Arabic**
+- تصميم جديد بالكامل وفق Material 3 Expressive مع تنقل جديد وإعدادات مجمّعة وبطاقة صلاة متحركة
+- مواقيت عُمان تطابق الآن تقويم الوزارة (كان وقت العشاء متأخرًا نحو ١٥ دقيقة)
+- مفتاح التنبيهات يوقف التنبيهات فعلًا، والصلوات المكتومة لم تعد تُجدول
+- الاحتفاظ بالأحاديث المفضلة عند إعادة تنزيل الكتب، ولا تُنزَّل الكتب إلا عند الطلب
+- علامات القرآن ومتابعة القراءة وقائمة إجراءات الآية وتحميل أسرع للصفحات
+- بوصلة قبلة أدق لا تعمل إلا أثناء عرضها
+- ويدجت الصلاة يتحدث عند كل صلاة بدل كل دقيقة لتوفير البطارية
