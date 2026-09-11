@@ -391,7 +391,7 @@ fun SettingsScreen(
             item(key = "about") {
                 SettingsGroup(
                     stringResource(R.string.about),
-                    listOf(
+                    listOfNotNull<SettingsRow>(
                         { shapes ->
                             NavRow(
                                 shapes, Icons.Rounded.Info, stringResource(R.string.app_name), versionSummary(updateState),
@@ -407,11 +407,7 @@ fun SettingsScreen(
                                 else viewModel.checkForUpdates()
                             }
                         },
-                        { shapes ->
-                            NavRow(shapes, Icons.Rounded.Favorite, stringResource(R.string.support_development), stringResource(R.string.support_development_desc)) {
-                                showSupport = true
-                            }
-                        },
+                        if (BuildConfig.SUPPORT_SHEET) supportRow { showSupport = true } else null,
                         { shapes ->
                             SegmentedListItem(
                                 onClick = { context.startSafely(SystemIntents.url(REPOSITORY_URL)) },
@@ -486,6 +482,13 @@ fun SettingsScreen(
         null -> Unit
     }
     if (showSupport) SupportSheet(onDismiss = { showSupport = false })
+}
+
+/** The "Support development" row. The Google Play build leaves it out (BuildConfig.SUPPORT_SHEET). */
+private fun supportRow(onOpen: () -> Unit): SettingsRow = { shapes ->
+    NavRow(shapes, Icons.Rounded.Favorite, stringResource(R.string.support_development), stringResource(R.string.support_development_desc)) {
+        onOpen()
+    }
 }
 
 @Composable

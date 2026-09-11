@@ -41,6 +41,8 @@ android {
         versionCode = 195
         versionName = "1.7.0"
         base.archivesName = "bilal-$versionName"
+        // The donation sheet opens banking apps; the Google Play build leaves it out (see the play build type).
+        buildConfigField("boolean", "SUPPORT_SHEET", "true")
     }
 
     signingConfigs {
@@ -61,6 +63,13 @@ android {
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             val release = signingConfigs.getByName("release")
             signingConfig = if (release.storeFile != null) release else signingConfigs.getByName("debug")
+        }
+        // The Google Play build: the release build without the donation sheet, which Play's payments
+        // policy doesn't allow. `./gradlew bundlePlay` makes the App Bundle for the Play Console.
+        create("play") {
+            initWith(getByName("release"))
+            buildConfigField("boolean", "SUPPORT_SHEET", "false")
+            matchingFallbacks += listOf("release")
         }
         debug {
             applicationIdSuffix = ".debug"

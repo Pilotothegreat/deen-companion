@@ -57,11 +57,12 @@ Sources are in `branding/` (the icon and mark) and `branding/store/` (the featur
 
 ## App signing
 
-Upload `bilal-1.7.0-release.aab`. It's signed with the key in `~/Documents/bilal-signing/`, which becomes the Play **upload key**.
+Upload `bilal-1.7.0-play.aab`, built with `./gradlew bundlePlay`. It's the release build without the donation sheet, signed with the key in `~/Documents/bilal-signing/`, which becomes the Play **upload key**.
 
 When Play App Signing asks which key to use, choose to **use the same key** by uploading it with Google's PEPK tool. Then the Play build and the APKs on GitHub have the same signature, and people can move between them without reinstalling. If Google generates its own app-signing key instead, the Play and GitHub builds can't update each other.
 
 ## Before submitting
 
-- **Support development sheet:** it opens Omani banking apps to accept donations. Google Play's payments policy generally requires Google Play Billing for payments that support the developer. Hide this sheet in the Play build, or check the policy first, before submitting.
+- **Support development sheet:** the Play build (`bundlePlay`) leaves it out, along with its banking-app queries, because Google Play's payments policy generally requires Play Billing for payments to the developer. The GitHub APK keeps it.
+- **First upload:** Google only accepts a new app's first bundle through the Play Console. Upload it by hand to **Internal testing**; later releases can be uploaded automatically.
 - **Contact email:** the Play Console requires a public support email for the listing.

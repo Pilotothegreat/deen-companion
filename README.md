@@ -27,6 +27,8 @@ Requirements: JDK 17 or newer (21 recommended) and the Android SDK with platform
 ```bash
 ./gradlew assembleDebug                 # build a debug APK
 ./gradlew testDebugUnitTest lintDebug   # unit tests and lint
+./gradlew assembleRelease               # the release APK published on GitHub
+./gradlew bundlePlay                    # the Google Play App Bundle (no donation sheet)
 ```
 
 Release builds read signing details from an untracked `keystore.properties` in the project root:
