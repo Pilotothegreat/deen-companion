@@ -90,8 +90,9 @@ android {
             isIncludeAndroidResources = true
         }
     }
+    // Robolectric migration tests read exported Room schemas from the tested variant's assets.
     sourceSets {
-        getByName("test").assets.srcDir("$projectDir/schemas")
+        getByName("debug").assets.srcDir("$projectDir/schemas")
     }
 }
 

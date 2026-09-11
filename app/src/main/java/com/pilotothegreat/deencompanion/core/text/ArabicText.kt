@@ -1,5 +1,6 @@
 package com.pilotothegreat.deencompanion.core.text
 
+import java.text.DecimalFormatSymbols
 import java.util.Locale
 
 /** Search-oriented text folding for Arabic (diacritics, letter variants) and Latin (case). */
@@ -51,9 +52,14 @@ object Numerals {
         for (c in text) append(if (c in '0'..'9') '٠' + (c - '0') else c)
     }
 
-    /** Arabic-Indic digits for Arabic UI, unchanged otherwise. */
-    fun localize(text: String, locale: Locale): String =
-        if (locale.language == "ar") toArabicIndic(text) else text
+    /** Uses the locale's own digits (e.g. Arabic-Indic for ar-OM), as the platform formats times. */
+    fun localize(text: String, locale: Locale): String {
+        val zero = DecimalFormatSymbols.getInstance(locale).zeroDigit
+        if (zero == '0') return text
+        return buildString(text.length) {
+            for (c in text) append(if (c in '0'..'9') zero + (c - '0') else c)
+        }
+    }
 
     fun format(number: Int, locale: Locale): String = localize(number.toString(), locale)
 }
