@@ -17,6 +17,10 @@ enum class Revelation { MECCAN, MEDINAN }
 
 data class Verse(val surah: Int, val number: Int, val text: String, val translation: String) {
     val isSajdah: Boolean get() = (surah to number) in MushafLayout.sajdahs
+
+    /** The translation as a standalone excerpt: a quote that runs on into the next ayah is closed. */
+    val standaloneTranslation: String
+        get() = if (translation.count { it == '"' } % 2 == 1) "$translation\"" else translation
 }
 
 data class Surah(

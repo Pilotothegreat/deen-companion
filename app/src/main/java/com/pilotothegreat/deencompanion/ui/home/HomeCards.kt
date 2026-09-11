@@ -308,12 +308,7 @@ fun VerseOfDayCard(verse: VerseOfDay, locale: Locale, onOpen: () -> Unit, modifi
                 modifier = Modifier.fillMaxWidth(),
             )
             if (!locale.isArabic) {
-                // A quote can run on into the next ayah; close it so the excerpt stands alone.
-                val translation = verse.verse.translation
-                Text(
-                    if (translation.count { it == '"' } % 2 == 1) "$translation\"" else translation,
-                    style = MaterialTheme.typography.bodyLarge,
-                )
+                Text(verse.verse.standaloneTranslation, style = MaterialTheme.typography.bodyLarge)
             }
             Text(
                 verseReference(verse.surah, verse.verse.number, locale),

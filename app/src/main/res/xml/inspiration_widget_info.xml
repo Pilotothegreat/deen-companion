@@ -10,7 +10,7 @@
     android:maxResizeWidth="360dp"
     android:maxResizeHeight="220dp"
     android:updatePeriodMillis="3600000"
-    android:initialLayout="@layout/inspiration_widget_layout"
+    android:initialLayout="@layout/glance_default_loading_layout"
     android:previewLayout="@layout/inspiration_widget_layout"
     android:description="@string/widget_inspiration_desc"
     android:resizeMode="horizontal|vertical"

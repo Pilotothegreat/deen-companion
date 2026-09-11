@@ -320,5 +320,9 @@
     <string name="widget_next_prayer_title">Next prayer</string>
     <string name="widget_next_prayer_desc">The next prayer with a live countdown</string>
     <string name="widget_tasbih_desc">Count dhikr from your home screen</string>
-    <string name="widget_inspiration_desc">A verse or hadith for each day</string>
+    <string name="widget_inspiration_desc">A hadith or dua for each day</string>
+    <string name="widget_prayer_times_title">Prayer times</string>
+    <string name="widget_prayer_times_desc">Today\'s prayer times with the next one highlighted</string>
+    <string name="widget_verse_desc">A short ayah for each day</string>
+    <string name="widget_athkar_desc">The athkar for this time of day and your progress</string>
 </resources>

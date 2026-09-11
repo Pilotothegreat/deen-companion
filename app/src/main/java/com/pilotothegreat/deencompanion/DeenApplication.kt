@@ -8,6 +8,7 @@ import com.pilotothegreat.deencompanion.alarms.PrayerAlarmScheduler
 import com.pilotothegreat.deencompanion.alarms.RescheduleWorker
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
 import com.pilotothegreat.deencompanion.core.prayer.PrayerConfig
+import com.pilotothegreat.deencompanion.data.athkar.AthkarRepository
 import com.pilotothegreat.deencompanion.data.settings.AppLanguage
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
 import com.pilotothegreat.deencompanion.data.tasbih.TasbihRepository
@@ -34,6 +35,7 @@ class DeenApplication : Application(), Configuration.Provider {
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val settings: SettingsRepository by inject()
     private val tasbih: TasbihRepository by inject()
+    private val athkar: AthkarRepository by inject()
     private val scheduler: PrayerAlarmScheduler by inject()
 
     // WorkManager initializes on first use instead of through its startup provider.
@@ -85,10 +87,18 @@ class DeenApplication : Application(), Configuration.Provider {
     }
 
     @OptIn(FlowPreview::class)
-    private fun keepWidgetsInSync() = appScope.launch {
-        combine(settings.settings, tasbih.state) { s, t -> s to t }
-            .distinctUntilChanged()
-            .debounce(500)
-            .collectLatest { WidgetUpdater.updateAll(this@DeenApplication) }
+    private fun keepWidgetsInSync() {
+        appScope.launch {
+            combine(settings.settings, tasbih.state, athkar.progress) { s, t, p -> Triple(s, t, p) }
+                .distinctUntilChanged()
+                .debounce(500)
+                .collectLatest { WidgetUpdater.updateAll(this@DeenApplication) }
+        }
+        // The widget picker's previews are in the app's language and colours, so they follow both.
+        appScope.launch {
+            settings.settings.map { it.appLanguage to it.dynamicColor }
+                .distinctUntilChanged()
+                .collectLatest { WidgetUpdater.publishPreviews(this@DeenApplication) }
+        }
     }
 }

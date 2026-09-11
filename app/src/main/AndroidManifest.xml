@@ -66,7 +66,8 @@
 
         <receiver
             android:name=".widget.PrayerWidgetProvider"
-            android:exported="true">
+            android:exported="true"
+            android:label="@string/widget_next_prayer_title">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -77,7 +78,8 @@
 
         <receiver
             android:name=".widget.TasbihWidgetProvider"
-            android:exported="true">
+            android:exported="true"
+            android:label="@string/tasbih_counter">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -88,7 +90,8 @@
 
         <receiver
             android:name=".widget.InspirationWidgetProvider"
-            android:exported="true">
+            android:exported="true"
+            android:label="@string/daily_inspiration">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -96,6 +99,46 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/inspiration_widget_info" />
         </receiver>
+
+        <receiver
+            android:name=".widget.PrayerTimesWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_prayer_times_title">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_prayer_times_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.VerseWidgetProvider"
+            android:exported="true"
+            android:label="@string/verse_of_the_day">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_verse_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.AthkarWidgetProvider"
+            android:exported="true"
+            android:label="@string/athkar">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_athkar_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.WidgetRefreshReceiver"
+            android:exported="false" />
 
         <service
             android:name=".playback.QuranPlaybackService"

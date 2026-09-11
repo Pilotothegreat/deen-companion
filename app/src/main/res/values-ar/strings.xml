@@ -344,5 +344,9 @@
     <string name="widget_next_prayer_title">الصلاة القادمة</string>
     <string name="widget_next_prayer_desc">الصلاة القادمة مع عدّ تنازلي مباشر</string>
     <string name="widget_tasbih_desc">عدّ الذكر من الشاشة الرئيسية</string>
-    <string name="widget_inspiration_desc">آية أو حديث لكل يوم</string>
+    <string name="widget_inspiration_desc">حديث أو دعاء لكل يوم</string>
+    <string name="widget_prayer_times_title">مواقيت الصلاة</string>
+    <string name="widget_prayer_times_desc">مواقيت اليوم مع إبراز الصلاة القادمة</string>
+    <string name="widget_verse_desc">آية قصيرة لكل يوم</string>
+    <string name="widget_athkar_desc">أذكار هذا الوقت وتقدمك فيها</string>
 </resources>

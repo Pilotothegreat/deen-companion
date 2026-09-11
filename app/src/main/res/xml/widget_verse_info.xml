@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The widget schedules its own redraw at each prayer; the hourly update is only a safety net. -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:minWidth="140dp"
-    android:minHeight="80dp"
-    android:targetCellWidth="2"
+    android:minWidth="250dp"
+    android:minHeight="110dp"
+    android:targetCellWidth="3"
     android:targetCellHeight="2"
     android:minResizeWidth="110dp"
-    android:minResizeHeight="70dp"
+    android:minResizeHeight="90dp"
     android:maxResizeWidth="400dp"
-    android:maxResizeHeight="260dp"
+    android:maxResizeHeight="300dp"
     android:updatePeriodMillis="3600000"
     android:initialLayout="@layout/glance_default_loading_layout"
-    android:previewLayout="@layout/prayer_widget_layout"
-    android:description="@string/widget_next_prayer_desc"
+    android:previewLayout="@layout/verse_widget_preview"
+    android:description="@string/widget_verse_desc"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen">
 </appwidget-provider>
