@@ -1,5 +1,6 @@
 package com.pilotothegreat.deencompanion.alarms
 
+import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -86,6 +87,8 @@ class SystemEventsReceiver : BroadcastReceiver(), KoinComponent {
     }
 
     private companion object {
+        // The exact-alarm action is only broadcast on API 31+; on older versions it simply never arrives.
+        @SuppressLint("InlinedApi")
         val HANDLED_ACTIONS = setOf(
             Intent.ACTION_BOOT_COMPLETED,
             Intent.ACTION_TIME_CHANGED,

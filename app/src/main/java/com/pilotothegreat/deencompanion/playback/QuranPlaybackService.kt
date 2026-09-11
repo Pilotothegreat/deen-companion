@@ -2,8 +2,10 @@ package com.pilotothegreat.deencompanion.playback
 
 import android.app.PendingIntent
 import android.content.Intent
+import androidx.annotation.OptIn
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
@@ -13,6 +15,7 @@ import com.pilotothegreat.deencompanion.BuildConfig
 import com.pilotothegreat.deencompanion.MainActivity
 
 /** Hosts the recitation player so audio continues in the background with media controls. */
+@OptIn(UnstableApi::class)
 class QuranPlaybackService : MediaSessionService() {
 
     private var session: MediaSession? = null

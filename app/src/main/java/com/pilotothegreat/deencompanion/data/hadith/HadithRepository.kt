@@ -7,19 +7,29 @@ import com.pilotothegreat.deencompanion.data.db.HadithBookEntity
 import com.pilotothegreat.deencompanion.data.db.HadithDao
 import com.pilotothegreat.deencompanion.data.db.HadithEntity
 import com.pilotothegreat.deencompanion.data.net.Http
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
+import timber.log.Timber
 import java.util.Locale
+import java.util.concurrent.ConcurrentHashMap
 
 data class HadithBookInfo(
     val id: String,
@@ -82,9 +92,41 @@ class HadithRepository(private val context: Context, private val dao: HadithDao)
     /** Book id to download progress (0..1), or null while the size is unknown. */
     val downloads: StateFlow<Map<String, Float?>> = _downloads.asStateFlow()
 
+    // Downloads outlive the screen that started them.
+    private val downloadScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val downloadJobs = ConcurrentHashMap<String, Job>()
+    private val _failures = MutableSharedFlow<String>(extraBufferCapacity = 4)
+
+    /** Emits the id of a book whose download failed. */
+    val failures: SharedFlow<String> = _failures.asSharedFlow()
+
+    fun startDownload(bookId: String) {
+        if (downloadJobs[bookId]?.isActive == true) return
+        downloadJobs[bookId] = downloadScope.launch {
+            try {
+                download(bookId)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Timber.w(e, "Download failed for %s", bookId)
+                _failures.emit(bookId)
+            } finally {
+                downloadJobs.remove(bookId)
+            }
+        }
+    }
+
+    fun cancelDownload(bookId: String) {
+        downloadJobs.remove(bookId)?.cancel()
+    }
+
+    /** Every catalog collection, including ones with nothing stored yet, so all of them can be downloaded. */
     val books: Flow<List<HadithBook>> = dao.observeBooks().map { entities ->
-        entities.mapNotNull { e -> HadithBooks.info(e.id)?.let { HadithBook(it, e.hadithCount, e.isComplete) } }
-            .sortedBy { HadithBooks.all.indexOf(it.info) }
+        val stored = entities.associateBy { it.id }
+        HadithBooks.all.map { info ->
+            val entity = stored[info.id]
+            HadithBook(info, entity?.hadithCount ?: 0, entity?.isComplete ?: false)
+        }
     }
 
     val favoriteIds: Flow<Set<String>> = dao.observeFavoriteIds().map { it.toSet() }

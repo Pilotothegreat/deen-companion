@@ -38,8 +38,8 @@ android {
         applicationId = "com.pilotothegreat.deencompanion"
         minSdk = 26
         targetSdk = 37
-        versionCode = 193
-        versionName = "1.5.43"
+        versionCode = 194
+        versionName = "1.6.0"
         base.archivesName = "deen-$versionName"
     }
 
@@ -70,6 +70,12 @@ android {
     androidResources {
         generateLocaleConfig = true
     }
+    // The language can be changed inside the app, so every install needs all translations.
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -83,7 +89,8 @@ android {
         includeInBundle = false
     }
     lint {
-        abortOnError = false
+        abortOnError = true
+        warningsAsErrors = false
     }
     testOptions {
         unitTests {
@@ -132,13 +139,6 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.timber)
     implementation(libs.play.app.update.ktx)
-
-    // Legacy UI dependencies, removed once the screens are rebuilt.
-    implementation("dev.chrisbanes.haze:haze:1.7.2")
-    implementation("dev.chrisbanes.haze:haze-materials:1.7.2")
-    implementation("io.coil-kt.coil3:coil-compose:3.4.0")
-    implementation("androidx.compose.ui:ui-text-google-fonts")
-    implementation("androidx.compose.material3.adaptive:adaptive:1.3.0")
 
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)

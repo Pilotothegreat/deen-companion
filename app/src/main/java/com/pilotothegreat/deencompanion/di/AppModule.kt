@@ -1,0 +1,46 @@
+package com.pilotothegreat.deencompanion.di
+
+import com.pilotothegreat.deencompanion.alarms.PrayerAlarmScheduler
+import com.pilotothegreat.deencompanion.data.db.AppDatabase
+import com.pilotothegreat.deencompanion.data.hadith.HadithRepository
+import com.pilotothegreat.deencompanion.data.location.LocationRepository
+import com.pilotothegreat.deencompanion.data.quran.QuranRepository
+import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
+import com.pilotothegreat.deencompanion.data.settings.createAppDataStore
+import com.pilotothegreat.deencompanion.data.tasbih.TasbihRepository
+import com.pilotothegreat.deencompanion.data.update.UpdateChecker
+import com.pilotothegreat.deencompanion.playback.QuranPlayer
+import com.pilotothegreat.deencompanion.ui.hadith.HadithBookViewModel
+import com.pilotothegreat.deencompanion.ui.hadith.HadithViewModel
+import com.pilotothegreat.deencompanion.ui.home.HomeViewModel
+import com.pilotothegreat.deencompanion.ui.qibla.QiblaViewModel
+import com.pilotothegreat.deencompanion.ui.quran.QuranViewModel
+import com.pilotothegreat.deencompanion.ui.reader.ReaderViewModel
+import com.pilotothegreat.deencompanion.ui.settings.SettingsViewModel
+import org.koin.android.ext.koin.androidContext
+import org.koin.core.module.dsl.viewModel
+import org.koin.core.module.dsl.viewModelOf
+import org.koin.dsl.module
+
+val appModule = module {
+    single { createAppDataStore(androidContext()) }
+    single { SettingsRepository(get()) }
+    single { TasbihRepository(get()) }
+    single { AppDatabase.build(androidContext()) }
+    single { get<AppDatabase>().bookmarkDao() }
+    single { get<AppDatabase>().hadithDao() }
+    single { QuranRepository(androidContext(), get()) }
+    single { HadithRepository(androidContext(), get()) }
+    single { LocationRepository(androidContext(), get()) }
+    single { UpdateChecker(androidContext(), get()) }
+    single { PrayerAlarmScheduler(androidContext(), get()) }
+    single { QuranPlayer(androidContext()) }
+
+    viewModelOf(::HomeViewModel)
+    viewModelOf(::QuranViewModel)
+    viewModel { params -> ReaderViewModel(params.get(), get(), get(), get()) }
+    viewModelOf(::HadithViewModel)
+    viewModel { params -> HadithBookViewModel(params.get(), get()) }
+    viewModelOf(::QiblaViewModel)
+    viewModelOf(::SettingsViewModel)
+}

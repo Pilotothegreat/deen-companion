@@ -1,268 +1,270 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">دين</string>
-    <string name="app_name_short">دين</string>
-    <string name="today">اليوم</string>
-    <string name="settings">الإعدادات</string>
-    <string name="about">حول</string>
-    <string name="ui">الواجهة</string>
-    <string name="auto">تلقائي</string>
-    <string name="light">فاتح</string>
-    <string name="dark">داكن</string>
-    <string name="default_theme">افتراضي</string>
-    <string name="help">مساعدة</string>
-    <string name="version">الإصدار %1$s</string>
-    <string name="go_back">ارجع</string>
-    <string name="close">أغلِق</string>
 
-    <string name="prayer_times">مواقيت الصلاة</string>
+    <!-- Common -->
+    <string name="today">اليوم</string>
+    <string name="quran">القرآن</string>
+    <string name="hadith">الحديث</string>
+    <string name="qibla_compass">القبلة</string>
+    <string name="settings">الإعدادات</string>
+    <string name="go_back">رجوع</string>
+    <string name="cancel">إلغاء</string>
+    <string name="save">حفظ</string>
+    <string name="undo">تراجع</string>
+    <string name="allow">سماح</string>
+    <string name="dismiss">إخفاء</string>
+    <string name="open_settings">فتح الإعدادات</string>
+    <string name="clear_search">مسح البحث</string>
+    <string name="copy">نسخ</string>
+    <string name="copied">تم النسخ</string>
+    <string name="share">مشاركة</string>
+    <string name="decrease">إنقاص</string>
+    <string name="increase">زيادة</string>
+    <string name="no_results">لا توجد نتائج</string>
+    <string name="default_location">مسقط، عُمان (افتراضي)</string>
+    <string name="refresh_location">تحديث الموقع</string>
+    <string name="location_unavailable">تعذّر تحديد موقعك. فعّل خدمة الموقع أو حاول مجددًا في مكان مفتوح.</string>
+    <string name="location_permission_needed">اسمح بالوصول إلى الموقع لاستخدام موقعك الحالي.</string>
+    <string name="degrees">%1$s°</string>
+    <string name="kilometers">%1$s كم</string>
+    <plurals name="minutes">
+        <item quantity="zero">%1$s دقيقة</item>
+        <item quantity="one">دقيقة واحدة</item>
+        <item quantity="two">دقيقتان</item>
+        <item quantity="few">%1$s دقائق</item>
+        <item quantity="many">%1$s دقيقة</item>
+        <item quantity="other">%1$s دقيقة</item>
+    </plurals>
+
+    <!-- Prayers -->
     <string name="fajr">الفجر</string>
     <string name="sunrise">الشروق</string>
     <string name="dhuhr">الظهر</string>
     <string name="asr">العصر</string>
     <string name="maghrib">المغرب</string>
     <string name="isha">العشاء</string>
-    <string name="quran_browser">متصفح القرآن</string>
-    <string name="hadith_library">مكتبة الحديث</string>
-    <string name="daily_inspiration">الإلهام اليومي</string>
-    <string name="tasbih_counter">عداد التسبيح</string>
-    <string name="bookmarks">المفضلة</string>
-    <string name="next_prayer">حتى صلاة %s</string>
-    <string name="next_at">التالية في %s</string>
-    <string name="iqama">الإقامة</string>
-    <string name="qibla_direction">اتجاه القبلة</string>
-    <string name="tasbih_count_label">عدد التسبيح</string>
-    <string name="tasbih_tap_hint">اضغط للعدّ</string>
-    <string name="iqama_time">الإقامة: %s</string>
+
+    <!-- Today -->
+    <string name="hijri_date">%1$s هـ</string>
+    <string name="next_prayer_label">الصلاة القادمة</string>
+    <string name="adhan_at">الأذان %1$s</string>
+    <string name="iqama_at">الإقامة %1$s</string>
+    <string name="not_downloaded">غير منزّل</string>
+    <string name="cd_countdown">%1$s بعد %2$s</string>
+    <string name="mute_prayer">كتم تنبيهات %1$s</string>
+    <string name="unmute_prayer">تفعيل تنبيهات %1$s</string>
+    <string name="calculated_with">مواقيت الصلاة: %1$s</string>
+    <string name="permission_location_title">استخدم موقعك</string>
+    <string name="permission_location_body">تُحسب مواقيت الصلاة واتجاه القبلة حسب مكانك، ويبقى موقعك على جهازك.</string>
+    <string name="permission_notifications_title">فعّل تنبيهات الصلاة</string>
+    <string name="permission_notifications_body">احصل على تنبيه عند دخول وقت الأذان والإقامة.</string>
+    <string name="permission_exact_title">اسمح بالتنبيهات في وقتها</string>
+    <string name="permission_exact_body">بدون هذا الإذن قد يؤخر أندرويد تنبيهات الصلاة بضع دقائق.</string>
+    <string name="update_available_short">يتوفر إصدار جديد</string>
+    <string name="update_action">تحديث</string>
+    <string name="ramadan_approaching">اقترب شهر رمضان</string>
+    <plurals name="days_until_ramadan">
+        <item quantity="zero">%1$s يوم متبقٍ</item>
+        <item quantity="one">يوم واحد متبقٍ</item>
+        <item quantity="two">يومان متبقيان</item>
+        <item quantity="few">%1$s أيام متبقية</item>
+        <item quantity="many">%1$s يومًا متبقيًا</item>
+        <item quantity="other">%1$s يوم متبقٍ</item>
+    </plurals>
+    <string name="ramadan_sighting_note">يُعلن بدء الشهر رسميًا بعد تحري رؤية الهلال.</string>
+    <string name="daily_inspiration">إلهام اليوم</string>
+    <string name="qibla_summary">%1$s° من الشمال · %2$s كم إلى مكة</string>
+
+    <!-- Tasbih -->
+    <string name="tasbih_counter">التسبيح</string>
+    <string name="reset_tasbih">تصفير العداد</string>
+    <string name="tasbih_reset_done">تم تصفير العداد</string>
+    <string name="tasbih_of_target">من %1$s</string>
+    <string name="cd_tasbih_button">عدّ الذكر</string>
+    <string name="tasbih_dhikr_subhanallah">سبحان الله</string>
+    <string name="tasbih_dhikr_alhamdulillah">الحمد لله</string>
+    <string name="tasbih_dhikr_allahuakbar">الله أكبر</string>
+    <string name="tasbih_dhikr_lailahaillallah">لا إله إلا الله</string>
+
+    <!-- Quran -->
+    <string name="search_quran_hint">ابحث في السور والآيات</string>
+    <string name="surahs">السور</string>
+    <string name="ayahs">الآيات</string>
+    <string name="bookmarks">العلامات</string>
+    <string name="continue_reading">متابعة القراءة</string>
+    <string name="page_of_surah">صفحة %1$s · %2$s</string>
+    <string name="surah_title">سورة %1$s</string>
+    <string name="meccan">مكية</string>
+    <string name="medinan">مدنية</string>
+    <plurals name="verse_count">
+        <item quantity="zero">%1$s آية</item>
+        <item quantity="one">آية واحدة</item>
+        <item quantity="two">آيتان</item>
+        <item quantity="few">%1$s آيات</item>
+        <item quantity="many">%1$s آية</item>
+        <item quantity="other">%1$s آية</item>
+    </plurals>
+    <string name="no_bookmarks">لا توجد علامات بعد</string>
+    <string name="no_bookmarks_body">المس أي آية أثناء القراءة واختر «علامة».</string>
+    <string name="bookmark">علامة</string>
+    <string name="remove_bookmark">إزالة العلامة</string>
+    <string name="page_juz">صفحة %1$s · الجزء %2$s</string>
+    <string name="show_translation">الترجمة</string>
+    <string name="play_from_here">التلاوة من هذه الآية</string>
+    <string name="playback_error">تعذّر تحميل التلاوة. تحقق من اتصالك.</string>
+    <string name="player_position">%1$s من %2$s</string>
+    <string name="play_pause">تشغيل أو إيقاف مؤقت</string>
+    <string name="previous_ayah">الآية السابقة</string>
+    <string name="next_ayah">الآية التالية</string>
+    <string name="stop_playback">إيقاف التلاوة</string>
+    <string name="playback_options">خيارات التلاوة</string>
+    <string name="reciter">القارئ</string>
+    <string name="reciter_mishary">مشاري العفاسي</string>
+    <string name="reciter_husary">محمود خليل الحصري</string>
+    <string name="reciter_abdul_basit">عبد الباسط عبد الصمد</string>
+    <string name="sleep_timer">مؤقت النوم</string>
+    <string name="timer_off">إيقاف</string>
+
+    <!-- Hadith -->
+    <string name="search_hadith_hint">ابحث في الأحاديث</string>
+    <string name="collections_tab">الكتب</string>
+    <string name="favorites_tab">المفضلة</string>
+    <plurals name="hadith_count">
+        <item quantity="zero">%1$s حديث</item>
+        <item quantity="one">حديث واحد</item>
+        <item quantity="two">حديثان</item>
+        <item quantity="few">%1$s أحاديث</item>
+        <item quantity="many">%1$s حديثًا</item>
+        <item quantity="other">%1$s حديث</item>
+    </plurals>
+    <string name="sample_hadiths">عينة من %1$s حديث</string>
+    <string name="download_collection">تنزيل الكتاب كاملًا</string>
+    <string name="cancel_download">إلغاء التنزيل</string>
+    <string name="download_failed">تعذّر تنزيل %1$s. تحقق من اتصالك.</string>
+    <string name="downloads_note">لا تُنزَّل الكتب الكاملة إلا عند طلبك، من jsDelivr (بضعة ميغابايت لكل كتاب).</string>
+    <string name="sample_banner">أنت تقرأ عينة من هذا الكتاب. نزّله لقراءة جميع الأحاديث والبحث فيها.</string>
+    <string name="search_incomplete">البحث في الكتب غير المنزّلة جزئي.</string>
+    <string name="favorites_empty">لا توجد أحاديث مفضلة بعد</string>
+    <string name="favorites_empty_body">المس القلب في أي حديث لحفظه هنا.</string>
+    <string name="hadith_number">حديث %1$s</string>
+    <string name="narrated_by">عن %1$s</string>
+    <string name="add_favorite">إضافة إلى المفضلة</string>
+    <string name="remove_favorite">إزالة من المفضلة</string>
+    <string name="grade_sahih">صحيح</string>
+    <string name="grade_hasan">حسن</string>
+    <string name="grade_hasan_sahih">حسن صحيح</string>
+    <string name="grade_daif">ضعيف</string>
+    <string name="grade_mawdu">موضوع</string>
+
+    <!-- Qibla -->
+    <string name="qibla_facing">أنت متجه إلى القبلة</string>
+    <string name="qibla_turn_right">استدر يمينًا %1$s°</string>
+    <string name="qibla_turn_left">استدر يسارًا %1$s°</string>
+    <string name="qibla_bearing_info">القبلة على بعد %1$s° من الشمال باتجاه عقارب الساعة</string>
+    <string name="qibla_bearing_label">اتجاه القبلة</string>
+    <string name="qibla_distance_label">المسافة إلى مكة</string>
+    <string name="compass_unavailable_title">لا توجد بوصلة في هذا الجهاز</string>
+    <string name="compass_unavailable_body">اتجه %1$s° من الشمال باتجاه عقارب الساعة لتكون متجهًا إلى القبلة.</string>
+    <string name="compass_calibration_title">البوصلة تحتاج إلى معايرة</string>
+    <string name="compass_calibration_desc">حرّك هاتفك على شكل الرقم 8 عدة مرات بعيدًا عن المعادن والمغناطيس.</string>
+    <string name="using_default_location">يُستخدم الموقع الافتراضي (مسقط). حدّث الموقع لاستخدام موقعك.</string>
+    <string name="cd_qibla_compass">علامة اتجاه الكعبة</string>
+    <string name="compass_n">ش</string>
+    <string name="compass_e">ق</string>
+    <string name="compass_s">ج</string>
+    <string name="compass_w">غ</string>
 
     <!-- Settings -->
-    <string name="prayer_calculations">حسابات الصلاة</string>
+    <string name="settings_location">الموقع</string>
+    <string name="current_location">الموقع الحالي</string>
+    <string name="ip_location_fallback_title">تحديد الموقع عبر الإنترنت</string>
+    <string name="ip_location_fallback_desc">عند تعذّر GPS، تقدير مدينتك من عنوان IP. يُرسَل عنوان IP إلى ipapi.co أو freeipapi.com.</string>
+    <string name="prayer_times">مواقيت الصلاة</string>
     <string name="calculation_method">طريقة الحساب</string>
-    <string name="asr_juristic_method">المذهب في صلاة العصر</string>
-    <string name="iqama_offsets">فترات الإقامة</string>
-    <string name="minutes_after_adhan">الدقائق بعد الأذان لكل صلاة</string>
-    <string name="iqama_reminders">تنبيهات الإقامة</string>
-    <string name="iqama_reminders_summary">إرسال تنبيهات عند بدء وقت الإقامة</string>
-    <string name="notification_volume">صوت التنبيهات</string>
-    <string name="hijri_calendar">التقويم الهجري</string>
-    <string name="regional_moon_sighting">رؤية الهلال المحلية</string>
-    <string name="regional_moon_sighting_summary">اتبع رؤية الهلال المحلية بدلاً من أم القرى</string>
-    <string name="hijri_correction">تعديل التاريخ الهجري</string>
-    <string name="hijri_correction_summary">تعديل التاريخ الهجري يدوياً بزيادة أو نقصان الأيام</string>
-    <string name="quran_customization">تخصيص المصحف</string>
-    <string name="arabic_text_size">حجم النص العربي</string>
-    <string name="app_language_title">لغة التطبيق</string>
-    <string name="app_theme">مظهر التطبيق</string>
-    <string name="support_developer">دعم المطور</string>
-    <string name="support_deen_companion">دعم تطبيق دين</string>
-    <string name="support_deen_summary">إذا كان هذا التطبيق يفيدك، يرجى التفكير في دعم تطويره.</string>
-    <string name="bank_transfer_phone_pay">التحويل البنكي / الدفع بالهاتف</string>
-    <string name="payment_tap_hint">اضغط للنسخ • يعمل مع بنك مسقط، عمان نت وغيرها</string>
-    <string name="github_repository">مستودع GitHub</string>
-    <string name="github_repository_summary">github.com/Pilotothegreat/deen-companion</string>
-    <string name="update_available">يتوفر تحديث جديد: %1$s</string>
-    <string name="application_settings">إعدادات التطبيق</string>
-    <string name="minutes_after_adhan_detail">دقيقة بعد الأذان</string>
-    <string name="minutes_format">%1$d دقيقة</string>
-    <string name="arabic_text_size_sp">حجم الخط العربي بالنقاط (sp)</string>
-    <string name="volume_percent">مستوى الصوت: %1$d%%</string>
-    <string name="notifications">التنبيهات</string>
-    <string name="notifications_sound">التنبيهات &gt; الصوت</string>
-    <string name="about_desc">تطبيق إسلامي مفتوح المصدر للمسلمين.</string>
-    <string name="about_credits">تم تطويره باستخدام Material Design 3 و Jetpack Compose.</string>
-    <string name="last_updated">تم التحديث: %1$s</string>
+    <string name="asr_juristic_method">وقت العصر</string>
+    <string name="asr_standard">الجمهور (الشافعي والمالكي والحنبلي)</string>
+    <string name="asr_hanafi">الحنفي</string>
+    <string name="calc_oman">وزارة الأوقاف والشؤون الدينية، عُمان</string>
     <string name="calc_mwl">رابطة العالم الإسلامي</string>
     <string name="calc_isna">الجمعية الإسلامية لأمريكا الشمالية</string>
     <string name="calc_egypt">الهيئة المصرية العامة للمساحة</string>
     <string name="calc_makkah">جامعة أم القرى، مكة</string>
-    <string name="calc_oman">سلطنة عمان (وزارة الأوقاف والشؤون الدينية)</string>
     <string name="calc_karachi">جامعة العلوم الإسلامية، كراتشي</string>
-    <string name="calc_jafari">شيعة إثنا عشرية (جعفري)</string>
-    <string name="calc_tehran">مؤسسة الجيوفيزياء، جامعة طهران</string>
-    <string name="asr_standard">الجمهور (الشافعي، المالكي، الحنبلي)</string>
-    <string name="asr_hanafi">المذهب الحنفي</string>
+    <string name="calc_jafari">الشيعة الإثنا عشرية (الجعفري)</string>
+    <string name="calc_tehran">معهد الجيوفيزياء، جامعة طهران</string>
+    <string name="hijri_adjustment">تعديل التاريخ الهجري</string>
+    <string name="iqama">الإقامة</string>
+    <string name="iqama_for">إقامة %1$s</string>
+    <string name="iqama_offset_mode">بعد الأذان</string>
+    <string name="iqama_fixed_mode">وقت ثابت</string>
+    <string name="iqama_fixed_at">ثابتة عند %1$s</string>
+    <plurals name="iqama_minutes_after">
+        <item quantity="zero">%1$s دقيقة بعد الأذان</item>
+        <item quantity="one">دقيقة واحدة بعد الأذان</item>
+        <item quantity="two">دقيقتان بعد الأذان</item>
+        <item quantity="few">%1$s دقائق بعد الأذان</item>
+        <item quantity="many">%1$s دقيقة بعد الأذان</item>
+        <item quantity="other">%1$s دقيقة بعد الأذان</item>
+    </plurals>
+    <string name="iqama_offset_hint">إذا كان الوقت الثابت قبل الأذان فسيُستخدم وقت الأذان.</string>
+    <string name="notifications">التنبيهات</string>
+    <string name="prayer_notifications">تنبيهات الصلاة</string>
+    <string name="prayer_notifications_desc">تنبيهات الأذان والإقامة</string>
+    <string name="exact_alarms">التنبيه في الوقت المحدد</string>
+    <string name="exact_alarms_granted">مسموح</string>
+    <string name="exact_alarms_denied">غير مسموح، لذا قد تتأخر التنبيهات بضع دقائق</string>
+    <string name="adhan_sound">صوت الأذان</string>
+    <string name="iqama_sound">صوت الإقامة</string>
+    <string name="sound_desc">الصوت والاهتزاز في إعدادات النظام</string>
+    <string name="quran_settings">القرآن</string>
+    <string name="arabic_text_size">حجم النص العربي</string>
+    <string name="appearance">المظهر</string>
+    <string name="theme">السمة</string>
+    <string name="theme_system">النظام</string>
+    <string name="theme_light">فاتح</string>
+    <string name="theme_dark">داكن</string>
+    <string name="dynamic_color">الألوان الديناميكية</string>
+    <string name="dynamic_color_desc">استخدام ألوان الخلفية</string>
+    <string name="pure_black">أسود خالص</string>
+    <string name="pure_black_desc">خلفية سوداء في السمة الداكنة</string>
+    <string name="language">اللغة</string>
+    <string name="language_system">النظام</string>
+    <string name="about">حول التطبيق</string>
+    <string name="version">الإصدار %1$s</string>
+    <string name="update_checking">جارٍ التحقق من التحديثات…</string>
+    <string name="up_to_date">التطبيق محدّث</string>
+    <string name="update_available_version">يتوفر تحديث: %1$s</string>
+    <string name="update_available_generic">يتوفر تحديث</string>
+    <string name="update_check_failed">تعذّر التحقق من التحديثات</string>
+    <string name="support_development">ادعم التطوير</string>
+    <string name="support_development_desc">تطبيق دين مجاني وبلا إعلانات</string>
+    <string name="source_code">الشيفرة المصدرية</string>
+    <string name="privacy_policy">سياسة الخصوصية</string>
+    <string name="app_info">معلومات التطبيق</string>
+    <string name="app_info_desc">الأذونات والتخزين</string>
 
-    <!-- Overview -->
-    <string name="location_not_detected">لم يتم تحديد الموقع</string>
-    <string name="location_makkah_fallback">مواقيت الصلاة تستخدم موقع مكة الافتراضي. اضغط للتحديث.</string>
-    <string name="clockwise_from_true_north">مع اتجاه عقارب الساعة من الشمال الحقيقي</string>
-    <string name="reset_count">إعادة ضبط العداد</string>
+    <!-- Support sheet -->
+    <string name="support_title">ادعم تطبيق دين</string>
+    <string name="support_body">أنا مطور مستقل وطالب جامعي. التطبيق مجاني بالكامل، وإن نفعك ففكّر في دعم تطويره ليستمر.</string>
+    <string name="palestine_note">جزء من كل تبرع يذهب لدعم القضية الفلسطينية.</string>
+    <string name="bank_transfer_phone_pay">تحويل بنكي / الدفع برقم الهاتف</string>
+    <string name="payment_tap_hint">المس للنسخ · يعمل مع بنك مسقط وعمان نت وغيرها</string>
+    <string name="open_bank_app_label">افتح تطبيق البنك</string>
 
-    <!-- Payment Bottom Sheet -->
-    <string name="payment_sheet_title">الدفع برقم الهاتف</string>
-    <string name="payment_sheet_desc">تم نسخ رقم الهاتف إلى الحافظة. اختر تطبيق البنك الخاص بك لفتحه ولصق الرقم:</string>
-    <string name="open_bank_app">فتح %1$s</string>
-    <string name="bank_not_installed">%1$s غير مثبت. يمكنك فتح تطبيق البنك الخاص بك يدويًا لإتمام التحويل.</string>
-    <string name="copied_to_clipboard">تم النسخ إلى الحافظة!</string>
-    <string name="reciter_mishary">مشاري العفاسي</string>
-    <string name="reciter_husary">الحصري</string>
-    <string name="reciter_abdul_basit">عبد الباسط عبد الصمد</string>
-    <string name="ramadan_approaching">اقترب شهر رمضان المبارك</string>
-    <string name="days_until_ramadan">متبقي %1$d يوم على شهر رمضان</string>
-    <string name="ramadan_hilal_sighting_subtitle">ترقبوا إعلان رؤية الهلال من وزارة الأوقاف والشؤون الدينية بسلطنة عُمان.</string>
-
-    <!-- Hadith Library -->
-    <string name="collections_tab">المجموعات</string>
-    <string name="favorites_tab">المفضلة</string>
-    <string name="search_results_count">نتائج البحث (%1$d)</string>
-    <string name="search_empty_state">لم يتم العثور على نتائج</string>
-    <string name="compiled_by_prefix">جمع وإعداد: %1$s</string>
-    <string name="hadiths_count_suffix">%1$d حديثاً</string>
-    <string name="favorites_empty_state">لا توجد أحاديث مفضلة بعد.\nاضغط على أيقونة القلب في أي حديث لحفظه هنا.</string>
-    <string name="hadith_number_prefix">حديث رقم %1$d</string>
-    <string name="narrated_by_prefix">راوي الحديث: %1$s</string>
-    <string name="hadith_library_title">مكتبة الحديث</string>
-    <string name="adhan_notification_title">الأذان — %1$s</string>
-    <string name="adhan_notification_body">حان الآن وقت صلاة %1$s</string>
-    <string name="iqama_notification_title">الإقامة — %1$s</string>
-    <string name="iqama_notification_body">إقامة صلاة %1$s قد بدأت</string>
-    <string name="search_quran_hint">البحث في القرآن (سورة أو آية)...</string>
-    <string name="search_hadith_hint">البحث في الأحاديث...</string>
-    <string name="search_hint">بحث...</string>
-
-    <!-- Quran Reader & Player -->
-    <string name="surah_not_found">السورة غير موجودة</string>
-    <string name="timer_off">إيقاف</string>
-    <string name="timer_10m">10 دقائق</string>
-    <string name="timer_15m">15 دقيقة</string>
-    <string name="timer_30m">30 دقيقة</string>
-    <string name="timer_45m">45 دقيقة</string>
-    <string name="timer_60m">60 دقيقة</string>
-    <string name="player_ayah_progress">الآية %1$d من %2$d</string>
-
-    <!-- Qibla Compass -->
-    <string name="qibla_compass">القبلة</string>
-    <string name="compass_calibration_title">تنبيه المعايرة</string>
-    <string name="compass_calibration_desc">احمل الجهاز بشكل مسطح وحركه في مسار على شكل رقم 8 لمعايرة المستشعرات.</string>
-    <string name="qibla_aligned">محاذاة مع القبلة!</string>
-    <string name="device_heading">الاتجاه</string>
-    <string name="qibla_bearing">زاوية القبلة</string>
-    <string name="degrees_symbol">%1$.0f°</string>
-
-    <!-- Update Checker -->
-    <string name="check_for_updates">التحقق من التحديثات</string>
-    <string name="checking_updates">جاري التحقق من وجود تحديثات...</string>
-    <string name="up_to_date">التطبيق محدث إلى آخر إصدار</string>
-    <string name="update_check_failed">فشل التحقق من التحديثات</string>
-    <string name="last_checked">آخر تحقق: %s</string>
-
-    <!-- Tasbih -->
-    <string name="tasbih_target">الهدف: %1$d</string>
-    <string name="tasbih_dhikr_subhanallah">سبحان الله</string>
-    <string name="tasbih_dhikr_alhamdulillah">الحمد لله</string>
-    <string name="tasbih_dhikr_lailahaillallah">لا إله إلا الله</string>
-    <string name="tasbih_dhikr_allahuakbar">الله أكبر</string>
-    <string name="tasbih_custom">هدف مخصص</string>
-    <string name="tasbih_history">سجل الجلسة</string>
-    <string name="tasbih_milestone">ما شاء الله! تم الوصول للهدف!</string>
-    <string name="tasbih_select_dhikr">اختر الذكر</string>
-
-    <!-- Donation -->
-    <string name="donation_dialog_title">دعم تطبيق دين</string>
-    <string name="donation_dialog_desc">ساهم في استمرار تطوير التطبيق! يرجى العلم بأن جزءاً من التبرعات مخصص لدعم القضية الفلسطينية والعمل الإنساني في فلسطين.</string>
-    <string name="palestine_cause_support">جزء من التبرعات يدعم القضية الفلسطينية والعمل الإنساني في فلسطين بشكل مباشر.</string>
-    <string name="palestine_badge">دعم فلسطين</string>
-    <string name="dismiss">تجاهل</string>
-    <string name="donate_now">تبرع الآن</string>
-    <string name="later">لاحقاً</string>
-    <string name="never_show_again">عدم الإظهار مجدداً</string>
-    <string name="ok">موافق</string>
-    <string name="cancel">إلغاء</string>
-    <string name="timer_end_of_surah">نهاية السورة</string>
-    <string name="app_language_subtitle">لغة التطبيق</string>
-    <string name="installed_status">جاهز</string>
-    <string name="not_installed_status">غير مثبت</string>
-    <string name="amoled_black_mode_title">وضع AMOLED الأسود</string>
-    <string name="amoled_black_mode_desc">استخدام خلفية سوداء داكنة في الوضع الليلي لتوفير الطاقة القصوى</string>
-    <string name="previous_verse">الآية السابقة</string>
-    <string name="next_verse">الآية التالية</string>
-    <string name="play_pause">تشغيل / إيقاف مؤقت</string>
-    <string name="sync_full_book">مزامنة الكتاب كاملاً</string>
-    <string name="favorite">المفضلة</string>
-    <string name="grade_sahih">صحيح</string>
-    <string name="grade_hasan">حسن</string>
-    <string name="grade_daif">ضعيف</string>
-    <string name="grade_mawdu">موضوع</string>
-    <string name="widget_placeholder_initialize">افتح التطبيق للبدء</string>
-    <string name="widget_next_prayer_desc">يعرض وقت الصلاة القادمة والعد التنازلي المباشر.</string>
-    <string name="widget_tasbih_desc">وصول سريع لعرض وزيادة عداد التسبيح الخاص بك.</string>
-    <string name="widget_inspiration_desc">يعرض آية قرآنية أو حديثاً شريفاً ملهماً يومياً.</string>
-    <string name="juz_number">الجزء %d</string>
-    <string name="verse_number_prefix">%1$d. </string>
-    <string name="english_translation">الترجمة الإنجليزية</string>
-    <string name="show_translation">عرض الترجمة</string>
-    <string name="hide_translation">إخفاء الترجمة</string>
-    <string name="juz_arabic_label">الجزء %s</string>
-    <string name="surah_page_indicator">صفحة %1$s من %2$s</string>
-    <string name="sleep_mode">مؤقت النوم</string>
-    <string name="default_location">مكة المكرمة، المملكة العربية السعودية</string>
-    <string name="pull_refresh_hint">اسحب للتحديث</string>
-    <string name="surah_label">سورة</string>
-    <string name="meccan_type">مكية</string>
-    <string name="medinan_type">مدنية</string>
-    <string name="quran">القرآن</string>
-    <string name="hadith">الحديث</string>
-    <string name="permissions_required">الصلاحيات المطلوبة</string>
-    <string name="permissions_required_desc">يحتاج هذا التطبيق إلى الوصول للموقع لعرض مواقيت صلاة دقيقة ولتنبيهات الإقامة.</string>
-    <string name="exact_alarm_permission_required">صلاحية التنبيه الدقيق مطلوبة</string>
-    <string name="exact_alarm_permission_required_desc">يحتاج هذا التطبيق إلى صلاحية التنبيه الدقيق لإرسال تنبيهات الإقامة في وقتها.</string>
-    <string name="grant">منح الصلاحية</string>
-
-    <!-- Onboarding -->
-    <string name="onboarding_welcome_title">السلام عليكم 🌙</string>
-    <string name="onboarding_welcome_subtitle">رفيقك الإسلامي الخاص، يعمل دون اتصال.\nلا حسابات. لا إعلانات. لا تتبع.</string>
-    <string name="onboarding_permissions_title">نحتاج بعض الصلاحيات</string>
-    <string name="onboarding_location_title">📍 الموقع</string>
-    <string name="onboarding_location_desc">يُستخدم فقط لحساب مواقيت الصلاة الدقيقة واتجاه القبلة. لا يُشارك أو يُخزَّن عن بُعد.</string>
-    <string name="onboarding_notifications_title">🔔 الإشعارات</string>
-    <string name="onboarding_notifications_desc">مطلوبة لإرسال تنبيهات الأذان والإقامة في أوقاتها.</string>
-    <string name="onboarding_alarm_title">⏰ التنبيهات الدقيقة</string>
-    <string name="onboarding_alarm_desc">مطلوبة حتى تُطلق تنبيهات الصلاة في الثانية المحددة — دون تأخير من توفير الطاقة.</string>
-    <string name="onboarding_battery_title">🔋 تحسين البطارية</string>
-    <string name="onboarding_battery_desc">يسمح للتطبيق بإعادة جدولة التنبيهات الفائتة بعد استيقاظ الجهاز. يضمن عدم تفويت تنبيه صلاة.</string>
-    <string name="onboarding_grant_permissions">منح الصلاحيات</string>
-    <string name="onboarding_allow_battery">السماح باستثناء البطارية</string>
-    <string name="onboarding_ready_title">أنت جاهز!</string>
-    <string name="onboarding_ready_subtitle">بسم الله. تقبّل الله منك.</string>
-    <string name="onboarding_start">ابدأ</string>
-    <string name="onboarding_next">التالي</string>
-    <string name="onboarding_skip">تخطي</string>
-
-
-    <!-- IP Location Toggle -->
-    <string name="ip_location_fallback_title">تحديد الموقع عبر الإنترنت</string>
-    <string name="ip_location_fallback_desc">إذا كان GPS غير متاح، استخدم تحديد الموقع عبر عنوان IP للحصول على المدينة. يتطلب اتصالاً بالإنترنت. عطّله للوضع دون اتصال الكامل.</string>
-
-    <!-- Accessibility content descriptions -->
-    <string name="cd_prayer_countdown">مؤقت العد التنازلي للصلاة يُظهر الوقت المتبقي</string>
-    <string name="cd_tasbih_button">عداد التسبيح. اضغط للعدّ</string>
-    <string name="cd_play_quran">تشغيل أو إيقاف تلاوة القرآن</string>
-    <string name="cd_next_verse">الانتقال إلى الآية التالية</string>
-    <string name="cd_prev_verse">الرجوع إلى الآية السابقة</string>
-    <string name="cd_qibla_compass">بوصلة القبلة تُظهر اتجاه مكة المكرمة</string>
-    <string name="increase_font_size">تكبير حجم الخط</string>
-    <string name="decrease_font_size">تصغير حجم الخط</string>
-    <string name="increase_offset">زيادة الفارق الزمني</string>
-    <string name="decrease_offset">تقليل الفارق الزمني</string>
-    <string name="change_dhikr">تغيير الذكر</string>
-    <string name="reset_tasbih">إعادة ضبط العداد</string>
-    <string name="update_now">تحديث الآن</string>
-    <string name="toggle_mute_notification">تبديل كتم الإشعار</string>
-    <string name="muted">مكتوم</string>
-    <string name="copy">نسخ</string>
-    <string name="refresh_location">تحديث الموقع</string>
-    <string name="update_available_title">تحديث جديد متوفر (%1$s)</string>
-    <string name="update_available_desc_playstore">يتوفر إصدار جديد من تطبيق رفيق الدين على متجر Google Play. يرجى التحديث للحصول على أحدث المميزات والتحسينات.</string>
-    <string name="update_available_desc_github">يتوفر إصدار جديد (%1$s) من تطبيق رفيق الدين. يرجى التحديث للحصول على أحدث المميزات والتحسينات.</string>
-    <string name="update_playstore_btn">التحديث عبر Google Play</string>
-
-    <string name="syncing_full_collection">جاري تحميل المجموعة كاملة...</string>
-    <string name="collections_load_error">لم يتم تحميل المجموعات. تحقق من اتصالك بالإنترنت وافتح التطبيق مرة أخرى.</string>
-
+    <!-- Notifications -->
     <string name="channel_adhan">الأذان</string>
     <string name="channel_adhan_desc">تنبيه عند دخول وقت كل صلاة</string>
     <string name="channel_iqama">الإقامة</string>
     <string name="channel_iqama_desc">تذكير عند إقامة الصلاة</string>
-    <string name="widget_next_prayer_title">الصلاة القادمة</string>
-</resources>
+    <string name="adhan_notification_title">%1$s</string>
+    <string name="adhan_notification_body">حان الآن وقت صلاة %1$s</string>
+    <string name="iqama_notification_title">إقامة %1$s</string>
+    <string name="iqama_notification_body">حان وقت إقامة صلاة %1$s</string>
 
+    <!-- Widgets -->
+    <string name="widget_next_prayer_title">الصلاة القادمة</string>
+    <string name="widget_next_prayer_desc">الصلاة القادمة مع عدّ تنازلي مباشر</string>
+    <string name="widget_tasbih_desc">عدّ الذكر من الشاشة الرئيسية</string>
+    <string name="widget_inspiration_desc">آية أو حديث لكل يوم</string>
+</resources>
