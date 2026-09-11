@@ -6,7 +6,8 @@ Everything Google Play asks for, in one place. The listing text itself lives in 
 
 | Field | Value |
 | --- | --- |
-| Package | `com.pilotothegreat.deencompanion` |
+| Package (Google Play) | `com.pilotothegreat.bilal`, a new listing |
+| Package (GitHub APK) | `com.pilotothegreat.deencompanion` |
 | Version | 1.7.0 (`versionCode` 195) |
 | Category | Books & Reference |
 | Tags | Prayer times, Quran, Islam |
@@ -57,19 +58,14 @@ Sources are in `branding/` (the icon and mark) and `branding/store/` (the featur
 
 ## App signing
 
-Upload `bilal-1.7.0-play.aab`, built with `./gradlew bundlePlay`. It's the release build without the donation sheet, signed with the key in `~/Documents/bilal-signing/`, which becomes the Play **upload key**.
+Upload `bilal-1.7.0-play.aab`, built with `./gradlew bundlePlay`. It's the release build without the donation sheet, packaged as `com.pilotothegreat.bilal` and signed with the key in `~/Documents/bilal-signing/`, which becomes the Play **upload key**. When Play asks about app signing, choose **Use Google-generated key**.
 
-The package already has a Play listing (the old Deen Companion), enrolled in Play App Signing. Its original upload key (SHA1 `4A:55:35:8F:16:20:FB:FB:E6:DA:27:41:C2:06:4B:D5:60:28:F1:EA`) is lost, so the new key must be registered with an **upload key reset**:
+The old Deen Companion listing (`com.pilotothegreat.deencompanion`) can't take updates, because its upload key (SHA1 `4A:55:35:8F:16:20:FB:FB:E6:DA:27:41:C2:06:4B:D5:60:28:F1:EA`) is lost. Its text can still be edited, so point its users to Bilal once the new app is live, then unpublish it. If that listing is ever needed again, `upload_certificate.pem` on the v1.7.0 release can register the new key there through an upload key reset.
 
-1. In the Play Console, go to **Test and release → App integrity → Play app signing** and choose **Request upload key reset → I lost my upload key**.
-2. Upload `upload_certificate.pem`, the new key's public certificate (SHA1 `8E:08:E6:79:84:53:47:90:83:1A:49:C9:2D:60:58:2E:BF:0B:D8:FA`). It's attached to the v1.7.0 GitHub release, and `keytool -printcert -rfc -jarfile bilal-1.7.0-play.aab` recreates it.
-3. Upload the bundle once Google confirms the new key is active.
-
-Google keeps signing Play installs with the listing's app-signing key, so existing users update normally. The APKs on GitHub are signed with the upload key instead, so Play and GitHub installs can't update each other.
+Play installs are signed by Google and use a different package from the GitHub APK, so the two are separate apps that can sit side by side.
 
 ## Before submitting
 
 - **Support development sheet:** the Play build (`bundlePlay`) leaves it out, along with its banking-app queries, because Google Play's payments policy generally requires Play Billing for payments to the developer. The GitHub APK keeps it.
-- **Upload key:** Play rejects the bundle until the upload key reset above is approved.
-- **Version code:** 195 must be higher than the last release on Play.
+- **Testing requirement:** personal developer accounts created after November 2023 must run a closed test with at least 12 testers for 14 days before a new app can go to production.
 - **Contact email:** the Play Console requires a public support email for the listing.

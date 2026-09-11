@@ -112,6 +112,14 @@ android {
     }
 }
 
+// Google Play has its own listing under a new package, because the original listing's upload key is lost.
+// GitHub builds keep the original package, so sideloaded installs keep updating.
+androidComponents {
+    onVariants(selector().withBuildType("play")) { variant ->
+        variant.applicationId.set("com.pilotothegreat.bilal")
+    }
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
