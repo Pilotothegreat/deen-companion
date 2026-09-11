@@ -31,7 +31,15 @@ class LocationRepository(
 ) {
     enum class Result { UPDATED, PERMISSION_MISSING, UNAVAILABLE }
 
-    private data class Resolved(val latitude: Double, val longitude: Double, val city: String?, val timezoneId: String)
+    private data class Resolved(
+        val latitude: Double,
+        val longitude: Double,
+        val city: String?,
+        val countryCode: String?,
+        val timezoneId: String,
+    )
+
+    private data class Place(val city: String?, val countryCode: String?)
 
     fun hasPermission(): Boolean = listOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
         .any { ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED }
@@ -44,12 +52,15 @@ class LocationRepository(
         val allowIp = settings.current().useIpLocationFallback
         val fix = if (hasPermission()) deviceLocation() else null
         val resolved = when {
-            fix != null -> Resolved(fix.latitude, fix.longitude, geocode(fix.latitude, fix.longitude), TimeZone.getDefault().id)
+            fix != null -> {
+                val place = geocode(fix.latitude, fix.longitude)
+                Resolved(fix.latitude, fix.longitude, place?.city, place?.countryCode, TimeZone.getDefault().id)
+            }
             allowIp -> ipLocation()
             else -> null
         } ?: return if (hasPermission()) Result.UNAVAILABLE else Result.PERMISSION_MISSING
 
-        settings.setLocation(resolved.latitude, resolved.longitude, resolved.city, resolved.timezoneId)
+        settings.setLocation(resolved.latitude, resolved.longitude, resolved.city, resolved.timezoneId, resolved.countryCode)
         return Result.UPDATED
     }
 
@@ -65,7 +76,7 @@ class LocationRepository(
     suspend fun relocalizeCity() {
         val location = settings.current().location
         if (location.isDefault) return
-        geocode(location.latitude, location.longitude)?.let { settings.setCityName(it) }
+        geocode(location.latitude, location.longitude)?.city?.let { settings.setCityName(it) }
     }
 
     @SuppressLint("MissingPermission")
@@ -95,7 +106,7 @@ class LocationRepository(
         return fresh ?: lastKnown.maxByOrNull { it.time }
     }
 
-    private suspend fun geocode(latitude: Double, longitude: Double): String? {
+    private suspend fun geocode(latitude: Double, longitude: Double): Place? {
         if (!Geocoder.isPresent()) return null
         val geocoder = Geocoder(context, appLocale())
         val address: Address? = withTimeoutOrNull(10_000) {
@@ -119,10 +130,11 @@ class LocationRepository(
             }
         }
         return address?.let {
-            listOfNotNull(it.locality ?: it.subAdminArea ?: it.adminArea, it.countryName)
+            val city = listOfNotNull(it.locality ?: it.subAdminArea ?: it.adminArea, it.countryName)
                 .distinct()
                 .joinToString(", ")
                 .ifBlank { null }
+            Place(city, it.countryCode)
         }
     }
 
@@ -132,12 +144,14 @@ class LocationRepository(
                 val json = JSONObject(Http.getText(provider.url, timeoutMs = 5_000))
                 val latitude = json.getDouble(provider.latitude)
                 val longitude = json.getDouble(provider.longitude)
-                val city = geocode(latitude, longitude) ?: listOf(json.optString(provider.city), json.optString(provider.country))
+                val place = geocode(latitude, longitude)
+                val city = place?.city ?: listOf(json.optString(provider.city), json.optString(provider.country))
                     .filter { it.isNotBlank() }
                     .joinToString(", ")
                     .ifBlank { null }
+                val country = place?.countryCode ?: json.optString(provider.countryCode).ifBlank { null }
                 val timezone = json.optString(provider.timezone).ifBlank { TimeZone.getDefault().id }
-                return Resolved(latitude, longitude, city, timezone)
+                return Resolved(latitude, longitude, city, country, timezone)
             } catch (e: Exception) {
                 Timber.w(e, "IP location lookup failed: %s", provider.url)
             }
@@ -153,14 +167,15 @@ class LocationRepository(
         val longitude: String,
         val city: String,
         val country: String,
+        val countryCode: String,
         val timezone: String,
     )
 
     private companion object {
         const val TWO_HOURS = 2 * 60 * 60 * 1000L
         val IP_PROVIDERS = listOf(
-            IpProvider("https://ipapi.co/json/", "latitude", "longitude", "city", "country_name", "timezone"),
-            IpProvider("https://freeipapi.com/api/json", "latitude", "longitude", "cityName", "countryName", "timeZone"),
+            IpProvider("https://ipapi.co/json/", "latitude", "longitude", "city", "country_name", "country_code", "timezone"),
+            IpProvider("https://freeipapi.com/api/json", "latitude", "longitude", "cityName", "countryName", "countryCode", "timeZone"),
         )
     }
 }

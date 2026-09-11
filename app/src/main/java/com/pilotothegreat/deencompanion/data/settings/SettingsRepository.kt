@@ -16,6 +16,7 @@ import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStoreFile
 import com.pilotothegreat.deencompanion.core.prayer.AsrSchool
 import com.pilotothegreat.deencompanion.core.prayer.CalculationMethod
+import com.pilotothegreat.deencompanion.core.prayer.HighLatitudeMode
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
 import com.pilotothegreat.deencompanion.data.quran.Reciter
 import kotlinx.coroutines.flow.Flow
@@ -42,20 +43,35 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         longitude: Double,
         cityName: String?,
         timezoneId: String,
+        countryCode: String? = null,
         updatedAt: Long = System.currentTimeMillis(),
     ) = edit {
         it[Keys.LATITUDE] = latitude.coerceIn(-90.0, 90.0)
         it[Keys.LONGITUDE] = longitude.coerceIn(-180.0, 180.0)
         if (cityName.isNullOrBlank()) it.remove(Keys.CITY_NAME) else it[Keys.CITY_NAME] = cityName
+        if (countryCode.isNullOrBlank()) it.remove(Keys.COUNTRY_CODE) else it[Keys.COUNTRY_CODE] = countryCode.uppercase()
         it[Keys.TIMEZONE_ID] = timezoneId
         it[Keys.LOCATION_UPDATED_AT] = updatedAt
     }
 
     suspend fun setCityName(name: String) = edit { it[Keys.CITY_NAME] = name }
 
-    suspend fun setMethod(value: CalculationMethod) = edit { it[Keys.CALC_METHOD] = value.name }
+    /** Picking a method by hand turns off automatic selection. */
+    suspend fun setMethod(value: CalculationMethod) = edit {
+        it[Keys.CALC_METHOD] = value.name
+        it[Keys.METHOD_AUTO] = false
+    }
+
+    suspend fun setMethodAuto() = edit { it[Keys.METHOD_AUTO] = true }
 
     suspend fun setAsrSchool(value: AsrSchool) = edit { it[Keys.ASR_SCHOOL] = value.name }
+
+    suspend fun setHighLatitude(value: HighLatitudeMode) = edit { it[Keys.HIGH_LATITUDE] = value.name }
+
+    suspend fun setAdjustment(prayer: Prayer, minutes: Int) =
+        edit { it[adjustmentKey(prayer)] = minutes.coerceIn(Defaults.ADJUSTMENT_RANGE) }
+
+    suspend fun resetAdjustments() = edit { prefs -> Prayer.entries.forEach { prefs.remove(adjustmentKey(it)) } }
 
     suspend fun setIqama(prayer: Prayer, value: IqamaSetting) = edit {
         val keys = IqamaKeys(prayer)
@@ -152,7 +168,12 @@ internal object Keys {
     val UPDATE_LATEST = stringPreferencesKey("github_check_latest_version")
     val LANGUAGE_MIGRATED = booleanPreferencesKey("language_migrated")
     val LANGUAGE = stringPreferencesKey("app_language")
+    val COUNTRY_CODE = stringPreferencesKey("country_code")
+    val METHOD_AUTO = booleanPreferencesKey("calc_method_auto")
+    val HIGH_LATITUDE = stringPreferencesKey("high_latitude_rule")
 }
+
+internal fun adjustmentKey(prayer: Prayer) = intPreferencesKey("${prayer.key.lowercase()}_adjustment")
 
 /** Per-prayer iqama keys, named as in earlier versions. */
 internal class IqamaKeys(prayer: Prayer) {
@@ -170,11 +191,16 @@ internal fun Preferences.toAppSettings(): AppSettings = AppSettings(
         longitude = this[Keys.LONGITUDE] ?: Defaults.LONGITUDE,
         cityName = this[Keys.CITY_NAME]?.takeIf { it.isNotBlank() },
         timezoneId = this[Keys.TIMEZONE_ID] ?: Defaults.TIMEZONE,
+        countryCode = this[Keys.COUNTRY_CODE] ?: Defaults.COUNTRY.takeIf { this[Keys.LATITUDE] == null },
         updatedAt = this[Keys.LOCATION_UPDATED_AT] ?: 0L,
         isDefault = this[Keys.LATITUDE] == null,
     ),
     method = enumOrNull<CalculationMethod>(this[Keys.CALC_METHOD]) ?: Defaults.METHOD,
+    // Installs that already chose a method keep it; everyone else follows their location.
+    methodAuto = this[Keys.METHOD_AUTO] ?: (this[Keys.CALC_METHOD] == null),
     asrSchool = enumOrNull<AsrSchool>(this[Keys.ASR_SCHOOL]) ?: AsrSchool.STANDARD,
+    highLatitude = enumOrNull<HighLatitudeMode>(this[Keys.HIGH_LATITUDE]) ?: HighLatitudeMode.AUTO,
+    adjustments = Prayer.entries.associateWith { this[adjustmentKey(it)] ?: 0 }.filterValues { it != 0 },
     iqama = Prayer.obligatory.associateWith { prayer ->
         val keys = IqamaKeys(prayer)
         val default = Defaults.iqama.getValue(prayer)

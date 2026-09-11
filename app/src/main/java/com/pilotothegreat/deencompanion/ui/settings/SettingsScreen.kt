@@ -13,7 +13,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.OpenInNew
@@ -30,6 +33,7 @@ import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.NightsStay
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.Palette
@@ -40,6 +44,7 @@ import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material.icons.rounded.TextFields
+import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material.icons.rounded.VolumeUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilledTonalIconButton
@@ -90,6 +95,7 @@ import com.pilotothegreat.deencompanion.alarms.Notifications
 import com.pilotothegreat.deencompanion.core.calendar.HijriCalendar
 import com.pilotothegreat.deencompanion.core.prayer.AsrSchool
 import com.pilotothegreat.deencompanion.core.prayer.CalculationMethod
+import com.pilotothegreat.deencompanion.core.prayer.HighLatitudeMode
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
 import com.pilotothegreat.deencompanion.core.text.Numerals
 import com.pilotothegreat.deencompanion.data.location.LocationRepository
@@ -116,6 +122,7 @@ import com.pilotothegreat.deencompanion.ui.theme.UthmanicHafs
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDate
 import java.time.LocalTime
+import java.util.Locale
 import kotlin.math.roundToInt
 
 private const val REPOSITORY_URL = "https://github.com/Pilotothegreat/deen-companion"
@@ -126,6 +133,8 @@ private typealias SettingsRow = @Composable (ListItemShapes) -> Unit
 private sealed interface SettingsDialog {
     data object Method : SettingsDialog
     data object Asr : SettingsDialog
+    data object HighLatitude : SettingsDialog
+    data object FineTune : SettingsDialog
     data object ReciterChoice : SettingsDialog
     data class Iqama(val prayer: Prayer) : SettingsDialog
 }
@@ -220,13 +229,25 @@ fun SettingsScreen(settings: AppSettings, onBack: () -> Unit, viewModel: Setting
                     stringResource(R.string.prayer_times),
                     listOf(
                         { shapes ->
-                            NavRow(shapes, Icons.Rounded.Calculate, stringResource(R.string.calculation_method), stringResource(s.method.labelRes)) {
-                                dialog = SettingsDialog.Method
-                            }
+                            val methodName = stringResource(s.effectiveMethod.labelRes)
+                            NavRow(
+                                shapes, Icons.Rounded.Calculate, stringResource(R.string.calculation_method),
+                                if (s.methodAuto) stringResource(R.string.method_automatic_desc, methodName) else methodName,
+                            ) { dialog = SettingsDialog.Method }
                         },
                         { shapes ->
                             NavRow(shapes, Icons.Rounded.Brightness5, stringResource(R.string.asr_juristic_method), stringResource(s.asrSchool.labelRes)) {
                                 dialog = SettingsDialog.Asr
+                            }
+                        },
+                        { shapes ->
+                            NavRow(shapes, Icons.Rounded.Tune, stringResource(R.string.fine_tune), adjustmentSummary(s.adjustments)) {
+                                dialog = SettingsDialog.FineTune
+                            }
+                        },
+                        { shapes ->
+                            NavRow(shapes, Icons.Rounded.NightsStay, stringResource(R.string.high_latitude_rule), stringResource(s.highLatitude.labelRes)) {
+                                dialog = SettingsDialog.HighLatitude
                             }
                         },
                         { shapes -> HijriAdjustmentRow(shapes, s, viewModel::setHijriAdjustment) },
@@ -390,10 +411,25 @@ fun SettingsScreen(settings: AppSettings, onBack: () -> Unit, viewModel: Setting
     when (val current = dialog) {
         SettingsDialog.Method -> ChoiceDialog(
             title = stringResource(R.string.calculation_method),
-            options = CalculationMethod.entries,
-            selected = s.method,
+            // null stands for "Automatic".
+            options = listOf<CalculationMethod?>(null) + CalculationMethod.entries,
+            selected = if (s.methodAuto) null else s.method,
+            label = { method -> method?.let { stringResource(it.labelRes) } ?: stringResource(R.string.method_automatic) },
+            onSelect = { method -> if (method == null) viewModel.setMethodAuto() else viewModel.setMethod(method) },
+            onDismiss = { dialog = null },
+        )
+        SettingsDialog.HighLatitude -> ChoiceDialog(
+            title = stringResource(R.string.high_latitude_rule),
+            options = HighLatitudeMode.entries,
+            selected = s.highLatitude,
             label = { stringResource(it.labelRes) },
-            onSelect = viewModel::setMethod,
+            onSelect = viewModel::setHighLatitude,
+            onDismiss = { dialog = null },
+        )
+        SettingsDialog.FineTune -> FineTuneDialog(
+            adjustments = s.adjustments,
+            onChange = viewModel::setAdjustment,
+            onReset = viewModel::resetAdjustments,
             onDismiss = { dialog = null },
         )
         SettingsDialog.Asr -> ChoiceDialog(
@@ -591,6 +627,59 @@ private fun iqamaSummary(setting: IqamaSetting): String {
     } else {
         pluralStringResource(R.plurals.iqama_minutes_after, setting.offsetMinutes, Formatters.number(setting.offsetMinutes, locale))
     }
+}
+
+/** Minutes with a sign, isolated so "+3" keeps its order inside Arabic text. */
+private fun signedMinutes(minutes: Int, locale: Locale): String =
+    "⁦" + Numerals.localize(if (minutes > 0) "+$minutes" else minutes.toString(), locale) + "⁩"
+
+@Composable
+private fun adjustmentSummary(adjustments: Map<Prayer, Int>): String {
+    if (adjustments.isEmpty()) return stringResource(R.string.fine_tune_none)
+    val locale = currentLocale()
+    val names = Prayer.entries.associateWith { stringResource(it.nameRes) }
+    val minutes = adjustments.mapValues { stringResource(R.string.minutes_signed, signedMinutes(it.value, locale)) }
+    return Prayer.entries.filter { it in adjustments }.joinToString(" · ") { "${names.getValue(it)} ${minutes.getValue(it)}" }
+}
+
+@Composable
+private fun FineTuneDialog(
+    adjustments: Map<Prayer, Int>,
+    onChange: (Prayer, Int) -> Unit,
+    onReset: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val locale = currentLocale()
+    val range = Defaults.ADJUSTMENT_RANGE
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.fine_tune)) },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
+                Text(stringResource(R.string.fine_tune_desc), style = MaterialTheme.typography.bodyMedium)
+                Prayer.entries.forEach { prayer ->
+                    val value = adjustments[prayer] ?: 0
+                    Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(prayer.nameRes), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+                        IconButton(onClick = { onChange(prayer, value - 1) }, enabled = value > range.first) {
+                            Icon(Icons.Rounded.Remove, contentDescription = stringResource(R.string.decrease))
+                        }
+                        Text(
+                            stringResource(R.string.minutes_signed, signedMinutes(value, locale)),
+                            style = MaterialTheme.typography.titleMedium,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.widthIn(min = 64.dp),
+                        )
+                        IconButton(onClick = { onChange(prayer, value + 1) }, enabled = value < range.last) {
+                            Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.increase))
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.fine_tune_done)) } },
+        dismissButton = { TextButton(onClick = onReset, enabled = adjustments.isNotEmpty()) { Text(stringResource(R.string.reset)) } },
+    )
 }
 
 @Composable

@@ -6,6 +6,7 @@ import androidx.annotation.StringRes
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.core.prayer.AsrSchool
 import com.pilotothegreat.deencompanion.core.prayer.CalculationMethod
+import com.pilotothegreat.deencompanion.core.prayer.HighLatitudeMode
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
 import com.pilotothegreat.deencompanion.core.tasbih.Dhikr
 import com.pilotothegreat.deencompanion.core.text.Numerals
@@ -46,6 +47,21 @@ val CalculationMethod.labelRes: Int
         CalculationMethod.KARACHI -> R.string.calc_karachi
         CalculationMethod.JAFARI -> R.string.calc_jafari
         CalculationMethod.TEHRAN -> R.string.calc_tehran
+        CalculationMethod.DUBAI -> R.string.calc_dubai
+        CalculationMethod.KUWAIT -> R.string.calc_kuwait
+        CalculationMethod.QATAR -> R.string.calc_qatar
+        CalculationMethod.SINGAPORE -> R.string.calc_singapore
+        CalculationMethod.TURKEY -> R.string.calc_turkey
+        CalculationMethod.MOONSIGHTING -> R.string.calc_moonsighting
+    }
+
+@get:StringRes
+val HighLatitudeMode.labelRes: Int
+    get() = when (this) {
+        HighLatitudeMode.AUTO -> R.string.high_latitude_auto
+        HighLatitudeMode.MIDDLE_OF_NIGHT -> R.string.high_latitude_middle
+        HighLatitudeMode.SEVENTH_OF_NIGHT -> R.string.high_latitude_seventh
+        HighLatitudeMode.TWILIGHT_ANGLE -> R.string.high_latitude_twilight
     }
 
 @get:StringRes

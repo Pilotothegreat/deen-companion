@@ -26,6 +26,9 @@ class SettingsMappingTest {
         val settings = emptyPreferences().toAppSettings()
         assertTrue(settings.location.isDefault)
         assertEquals(CalculationMethod.OMAN, settings.method)
+        assertTrue(settings.methodAuto)
+        assertEquals(CalculationMethod.OMAN, settings.effectiveMethod)
+        assertTrue(settings.adjustments.isEmpty())
         assertEquals(ThemeMode.SYSTEM, settings.themeMode)
         assertTrue(settings.dynamicColor)
         assertTrue(settings.notificationsEnabled)
@@ -53,6 +56,9 @@ class SettingsMappingTest {
         assertEquals(setOf(Prayer.ASR), settings.mutedPrayers)
         assertEquals(IqamaRule.Fixed(LocalTime.of(13, 5)), settings.iqama.getValue(Prayer.DHUHR).rule)
         assertEquals(CalculationMethod.MWL, settings.method)
+        // A method chosen in an earlier version is kept rather than replaced by the automatic one.
+        assertFalse(settings.methodAuto)
+        assertEquals(CalculationMethod.MWL, settings.effectiveMethod)
         assertNull(migrated[intPreferencesKey("app_launch_count")])
         assertFalse(LegacySettingsMigration.shouldMigrate(migrated))
     }

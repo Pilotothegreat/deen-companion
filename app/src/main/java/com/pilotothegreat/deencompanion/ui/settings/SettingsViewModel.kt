@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.pilotothegreat.deencompanion.alarms.PrayerAlarmScheduler
 import com.pilotothegreat.deencompanion.core.prayer.AsrSchool
 import com.pilotothegreat.deencompanion.core.prayer.CalculationMethod
+import com.pilotothegreat.deencompanion.core.prayer.HighLatitudeMode
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
 import com.pilotothegreat.deencompanion.data.location.LocationRepository
 import com.pilotothegreat.deencompanion.data.quran.Reciter
@@ -63,7 +64,11 @@ class SettingsViewModel(
 
     fun setUseIpLocationFallback(enabled: Boolean) = launch { repository.setUseIpLocationFallback(enabled) }
     fun setMethod(method: CalculationMethod) = launch { repository.setMethod(method) }
+    fun setMethodAuto() = launch { repository.setMethodAuto() }
     fun setAsrSchool(school: AsrSchool) = launch { repository.setAsrSchool(school) }
+    fun setHighLatitude(mode: HighLatitudeMode) = launch { repository.setHighLatitude(mode) }
+    fun setAdjustment(prayer: Prayer, minutes: Int) = launch { repository.setAdjustment(prayer, minutes) }
+    fun resetAdjustments() = launch { repository.resetAdjustments() }
     fun setIqama(prayer: Prayer, value: IqamaSetting) = launch { repository.setIqama(prayer, value) }
     fun setHijriAdjustment(days: Int) = launch { repository.setHijriAdjustment(days) }
     fun setNotificationsEnabled(enabled: Boolean) = launch { repository.setNotificationsEnabled(enabled) }

@@ -135,6 +135,7 @@ fun PrayerTimesCard(
     onToggleMute: (Prayer, Boolean) -> Unit,
 ) {
     val context = LocalContext.current
+    val rowCount = Prayer.entries.size + 1
     Column(verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
         Prayer.entries.forEachIndexed { index, prayer ->
             val isNext = prayer == nextPrayer
@@ -142,7 +143,7 @@ fun PrayerTimesCard(
             val adhan = schedule.adhan.getValue(prayer)
             val iqama = schedule.iqama[prayer]?.takeIf { it != adhan }
             SegmentedListItem(
-                shapes = ListItemDefaults.segmentedShapes(index, Prayer.entries.size),
+                shapes = ListItemDefaults.segmentedShapes(index, rowCount),
                 colors = if (isNext) {
                     ListItemDefaults.segmentedColors(
                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -175,6 +176,19 @@ fun PrayerTimesCard(
             ) {
                 Text(name, style = if (isNext) MaterialTheme.typography.titleMediumEmphasized else MaterialTheme.typography.titleMedium)
             }
+        }
+        // Night times for qiyam, after the five prayers.
+        SegmentedListItem(
+            shapes = ListItemDefaults.segmentedShapes(rowCount - 1, rowCount),
+            leadingContent = { Icon(Icons.Rounded.NightsStay, contentDescription = null) },
+            supportingContent = {
+                Text(stringResource(R.string.middle_of_night_at, Formatters.time(context, schedule.middleOfNight.toLocalTime(), locale)))
+            },
+            trailingContent = {
+                Text(Formatters.time(context, schedule.lastThirdOfNight.toLocalTime(), locale), style = MaterialTheme.typography.titleMedium)
+            },
+        ) {
+            Text(stringResource(R.string.last_third_of_night), style = MaterialTheme.typography.titleMedium)
         }
     }
 }

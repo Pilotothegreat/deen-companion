@@ -33,12 +33,17 @@ data class PrayerConfig(
     val method: CalculationMethod,
     val asrSchool: AsrSchool,
     val iqama: Map<Prayer, IqamaRule> = emptyMap(),
+    val highLatitude: HighLatitudeMode = HighLatitudeMode.AUTO,
+    /** Minutes added to each computed time to match the local mosque. */
+    val adjustments: Map<Prayer, Int> = emptyMap(),
 )
 
 data class PrayerSchedule(
     val date: LocalDate,
     val adhan: Map<Prayer, ZonedDateTime>,
     val iqama: Map<Prayer, ZonedDateTime>,
+    val middleOfNight: ZonedDateTime,
+    val lastThirdOfNight: ZonedDateTime,
 )
 
 data class NextPrayer(
@@ -50,17 +55,18 @@ data class NextPrayer(
 object DaySchedule {
 
     fun forDate(date: LocalDate, config: PrayerConfig): PrayerSchedule {
-        val times = PrayerTimeCalculator.calculate(
+        val times = PrayerEngine.calculate(
             date, config.latitude, config.longitude, config.zone, config.method, config.asrSchool,
+            config.highLatitude, config.adjustments,
         )
-        val adhan = Prayer.entries.associateWith { ZonedDateTime.of(date, times[it], config.zone) }
+        val adhan = times.adhan
         val iqama = buildMap {
             for (prayer in Prayer.obligatory) {
                 val rule = config.iqama[prayer] ?: continue
                 put(prayer, iqamaTime(adhan.getValue(prayer), rule))
             }
         }
-        return PrayerSchedule(date, adhan, iqama)
+        return PrayerSchedule(date, adhan, iqama, times.middleOfNight, times.lastThirdOfNight)
     }
 
     /** A fixed iqama earlier than the adhan (e.g. long summer days) is moved to the adhan. */
