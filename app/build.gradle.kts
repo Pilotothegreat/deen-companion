@@ -38,8 +38,8 @@ android {
         applicationId = "com.pilotothegreat.deencompanion"
         minSdk = 26
         targetSdk = 37
-        versionCode = 194
-        versionName = "1.6.0"
+        versionCode = 195
+        versionName = "1.7.0"
         base.archivesName = "bilal-$versionName"
     }
 

@@ -69,7 +69,7 @@
   <ul>
     <li>Your location coordinates and city name, used for prayer times and the Qibla direction.</li>
     <li>Your settings: calculation method, iqama times, notification choices, theme, language and Quran text size.</li>
-    <li>Quran bookmarks, your last-read page, hadith favorites and your tasbih count.</li>
+    <li>Quran bookmarks, your last-read page, hadith favorites, your tasbih count, and today's athkar progress and streak.</li>
   </ul>
   <p>This data is stored locally with Android's DataStore and a Room database. It is never uploaded and is excluded from Android cloud backups.</p>
 
@@ -77,8 +77,8 @@
   <div class="table-wrap">
     <table>
       <tr><th>Feature</th><th>Service</th><th>When</th><th>What the service receives</th></tr>
-      <tr><td>Internet location fallback</td><td>ipapi.co, then freeipapi.com</td><td>Only when the device can't provide a location and the setting is on (it can be turned off)</td><td>Your IP address</td></tr>
-      <tr><td>City name</td><td>Android's system geocoder</td><td>After a location is found</td><td>Your coordinates, handled by your device's geocoding provider</td></tr>
+      <tr><td>Internet location fallback</td><td>ipapi.co, then freeipapi.com</td><td>Only when the device can't provide a location and you've turned on "Internet location fallback" in Settings (it's off by default)</td><td>Your IP address</td></tr>
+      <tr><td>City name</td><td>Android's system geocoder</td><td>After a location is found. Without it, the name comes from the city list bundled with the app</td><td>Your coordinates, handled by your device's geocoding provider</td></tr>
       <tr><td>Quran recitation</td><td>everyayah.com</td><td>When you play a recitation</td><td>Your IP address and the ayah requested</td></tr>
       <tr><td>Full hadith collections</td><td>cdn.jsdelivr.net</td><td>Only when you tap Download</td><td>Your IP address</td></tr>
       <tr><td>Update check</td><td>api.github.com or Google Play</td><td>At most once a day, or when you check manually</td><td>Your IP address</td></tr>

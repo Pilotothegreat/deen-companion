@@ -6,20 +6,20 @@ Bilal has no accounts, ads, analytics or crash reporting. Everything you set up 
 
 ## What stays on your device
 
-- Your location coordinates and city name, used to calculate prayer times and the Qibla direction.
-- Your settings: calculation method, iqama times, notification choices, theme, language and Quran text size.
-- Quran bookmarks, your last-read page, hadith favorites and your tasbih count.
+- Your location coordinates and city name, or the city you picked, used to calculate prayer times and the Qibla direction.
+- Your settings: calculation method, time adjustments, iqama times, notification and reminder choices, theme, language and text sizes.
+- Quran bookmarks, your last-read page, hadith favorites, your tasbih count, and today's athkar progress and streak.
 
 This data is stored with Android's DataStore and a local Room database. It is never uploaded, and it is excluded from Android cloud backups.
 
 ## Network requests
 
-The app works offline for prayer times, the Quran text, the Qibla compass and tasbih. It only uses the internet for the features below:
+The app works offline for prayer times, city search, the Quran text, athkar, the Qibla compass, tasbih and the widgets. It only uses the internet for the features below:
 
 | Feature | Service | When | What the service receives |
 | --- | --- | --- | --- |
-| Internet location fallback | ipapi.co, then freeipapi.com | Only when the device can't provide a location and "Internet location fallback" is on (you can turn it off in Settings) | Your IP address |
-| City name | Android's system geocoder | After a location is found | Your coordinates, handled by your device's geocoding provider |
+| Internet location fallback | ipapi.co, then freeipapi.com | Only when the device can't provide a location and you've turned on "Internet location fallback" in Settings (it's off by default) | Your IP address |
+| City name | Android's system geocoder | After a location is found. Without it, the name comes from the city list bundled with the app | Your coordinates, handled by your device's geocoding provider |
 | Quran recitation | everyayah.com | When you play a recitation | Your IP address and the ayah requested |
 | Full hadith collections | cdn.jsdelivr.net | Only when you tap Download | Your IP address |
 | Update check | api.github.com (sideloaded installs) or Google Play (Play Store installs) | At most once a day, or when you tap the version in Settings | Your IP address |

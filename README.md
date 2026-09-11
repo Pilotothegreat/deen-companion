@@ -4,14 +4,17 @@ A private, offline-first Islamic companion for Android, built with Jetpack Compo
 
 ## Features
 
-- **Prayer times.** Oman Ministry of Endowments (the default, checked against the official mara.gov.om timetable), Umm al-Qura, Muslim World League, ISNA, Egypt, Karachi, Ja'fari and Tehran methods, with Standard or Hanafi Asr and high-latitude handling.
+- **Prayer times.** Calculated with the [Adhan](https://github.com/batoulapps/adhan-kotlin) library. Fourteen methods, including Oman's Ministry of Endowments (checked against the official mara.gov.om timetable), Umm al-Qura, Dubai, Kuwait, Qatar, Singapore, Turkey, Moonsighting Committee, Ja'fari and Tehran. By default the method follows your country. Also offers Standard or Hanafi Asr, per-prayer fine-tuning, a choice of high-latitude rule, and the middle and last third of the night.
+- **Location.** GPS or network location with travel detection, or an offline search of about 11,600 cities in English and Arabic. A chosen city keeps its own time zone.
 - **Adhan and iqama notifications.** Per-prayer mute, iqama as an offset or a fixed time, exact alarms when allowed, and automatic rescheduling after reboots, clock changes and time-zone changes.
+- **Athkar.** Morning and evening, after prayer, sleep and waking, plus 31 everyday situations. Each dhikr has its count, virtue and source, with a big tap counter, a daily streak, optional morning and evening reminders, and a time-aware suggestion on Today.
 - **Quran.** The 604-page Madinah mushaf layout in the Uthmanic Hafs script with the Saheeh International translation, diacritic-insensitive search, bookmarks, "continue reading", and ayah-by-ayah recitation (Mishary Alafasy, Al-Husary, Abdul Basit) with a sleep timer.
 - **Hadith.** Six major collections with a bundled sample. Full collections download only when you ask. Includes favorites, grades and search.
 - **Qibla.** True-north compass with calibration guidance, turn-by-turn directions and the distance to Makkah.
 - **Tasbih.** The post-prayer 33/33/34 cycle or 99/100 goals, with haptic feedback.
-- **Widgets.** Next prayer with a live countdown, tasbih counter, and a daily verse or hadith.
-- **Personalization.** Dynamic color, light/dark/system theme, pure black, and a per-app language with full right-to-left layout.
+- **Daily reading.** A verse of the day that opens in the mushaf, and a daily hadith or prophetic dua.
+- **Widgets.** Next prayer with a live countdown, designed like the Today card. Also a prayer-times table, the verse of the day, the daily hadith or dua, athkar progress, and a tasbih counter.
+- **Personalization.** Dynamic color, light/dark/system theme, pure black, a floating navigation bar on phones, and a per-app language with full right-to-left layout.
 
 ## Privacy
 
@@ -41,11 +44,11 @@ The same values can come from the `RELEASE_KEYSTORE_FILE`, `RELEASE_KEYSTORE_PAS
 
 | Package | Contents |
 | --- | --- |
-| `core` | Pure Kotlin, unit-tested logic: prayer times, iqama and next-prayer rules, Qibla math, Hijri calendar, Arabic text matching, tasbih |
-| `data` | DataStore settings, Room database and migrations, Quran, hadith, location and update repositories |
+| `core` | Pure Kotlin, unit-tested logic: prayer times, iqama and next-prayer rules, athkar progress and streaks, Qibla math, Hijri calendar, Arabic text matching, tasbih |
+| `data` | DataStore settings, Room database and migrations, Quran, hadith, athkar, city search, location and update repositories |
 | `alarms` | Adhan/iqama scheduling, notifications and system-event receivers |
 | `playback` | Media3 recitation service and player |
-| `widget` | Home-screen widgets |
+| `widget` | Home-screen widgets built with Jetpack Glance |
 | `ui` | Compose screens, navigation and the Material 3 Expressive theme |
 
 ## Data sources
@@ -53,7 +56,10 @@ The same values can come from the `RELEASE_KEYSTORE_FILE`, `RELEASE_KEYSTORE_PAS
 - Quran text and translation: bundled in `app/src/main/assets/quran.json`.
 - Recitation: streamed from [everyayah.com](https://everyayah.com).
 - Hadith collections: [fawazahmed0/hadith-api](https://github.com/fawazahmed0/hadith-api) via jsDelivr.
+- Athkar: [Morning & Evening Adhkar DB](https://github.com/Seen-Arabic/Morning-And-Evening-Adhkar-DB) and Hisn al-Muslim via [hisnmuslim.com](https://hisnmuslim.com), bundled in `app/src/main/assets/athkar.json` (rebuilt with `scripts/athkar/build_athkar.py`).
+- Cities: [GeoNames](https://www.geonames.org), bundled in `app/src/main/assets/cities.json` (rebuilt with `scripts/cities/build_cities.py`).
 - Fonts: KFGQPC Uthmanic Hafs, Amiri and Google Sans Flex.
+- Icon: the Kufic بلال mark, with its sources in `branding/`.
 
 ## License
 

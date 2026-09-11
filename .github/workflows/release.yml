@@ -1,0 +1,54 @@
+name: Release
+# Pushing a version tag (v1.7.0) builds the release APK with the signing secrets and publishes it as a GitHub release.
+permissions:
+  contents: write
+
+on:
+  push:
+    tags: [ "v*" ]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+      RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+      RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+      RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      # A debug-signed APK can't update an installed copy, so a release without the key fails instead.
+      - name: Restore release keystore
+        run: |
+          if [ -z "$RELEASE_KEYSTORE_BASE64" ]; then
+            echo "::error::The RELEASE_KEYSTORE_BASE64 secret is not set, so the APK can't be signed."
+            exit 1
+          fi
+          echo "$RELEASE_KEYSTORE_BASE64" | base64 -d > release.jks
+          echo "RELEASE_KEYSTORE_FILE=release.jks" >> "$GITHUB_ENV"
+
+      - name: Lint, test and build
+        run: ./gradlew lintDebug testDebugUnitTest assembleRelease
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          code=$(grep -oP 'versionCode = \K\d+' app/build.gradle.kts)
+          notes="fastlane/metadata/android/en-US/changelogs/$code.txt"
+          [ -f "$notes" ] || { echo "::error::Missing $notes"; exit 1; }
+          gh release create "$GITHUB_REF_NAME" app/build/outputs/apk/release/*.apk \
+            --title "Bilal $GITHUB_REF_NAME" \
+            --notes-file "$notes"

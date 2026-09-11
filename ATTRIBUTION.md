@@ -12,4 +12,8 @@ Traffic Light is licensed under the GPLv3, so Bilal is distributed under the sam
 - **Recitation audio:** streamed from [everyayah.com](https://everyayah.com).
 - **Hadith collections:** [fawazahmed0/hadith-api](https://github.com/fawazahmed0/hadith-api), served by jsDelivr.
 - **Fonts:** KFGQPC Uthmanic Hafs (King Fahd Glorious Quran Printing Complex), [Amiri](https://github.com/aliftype/amiri) (OFL) and Google Sans Flex (OFL).
-- **Prayer time algorithm:** based on the method documented at [praytimes.org](https://praytimes.org). The Oman method is calibrated against the Ministry of Endowments and Religious Affairs timetable published at mara.gov.om.
+- **Prayer times:** the [Adhan](https://github.com/batoulapps/adhan-kotlin) library by Batoul Apps (MIT). The Oman method is calibrated against the Ministry of Endowments and Religious Affairs timetable published at mara.gov.om. The Ja'fari and Tehran Maghrib angle follows the formulas documented at [praytimes.org](https://praytimes.org).
+- **Morning and evening athkar:** [Morning & Evening Adhkar DB](https://github.com/Seen-Arabic/Morning-And-Evening-Adhkar-DB) by Seen Arabic (MIT), including virtues and sources.
+- **Other athkar:** *Hisn al-Muslim* by Sa'id ibn Wahf al-Qahtani, as published by [hisnmuslim.com](https://hisnmuslim.com), with the translation and transliteration from that site.
+- **Cities:** [GeoNames](https://www.geonames.org) (CC BY 4.0): the cities15000 list with Arabic names from the alternate-names data.
+- **Icon:** the Kufic بلال mark was drawn for this app; its sources are in `branding/`.
