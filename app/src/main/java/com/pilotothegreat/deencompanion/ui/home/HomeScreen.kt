@@ -60,6 +60,7 @@ import com.pilotothegreat.deencompanion.ui.common.labelRes
 import com.pilotothegreat.deencompanion.ui.common.startSafely
 import com.pilotothegreat.deencompanion.ui.components.LoadingBox
 import com.pilotothegreat.deencompanion.ui.components.PermissionCard
+import com.pilotothegreat.deencompanion.ui.navigation.LocalBottomBarPadding
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDate
@@ -158,7 +159,7 @@ fun HomeScreen(
                 scrollBehavior = scrollBehavior,
             )
         },
-        snackbarHost = { SnackbarHost(snackbar) },
+        snackbarHost = { SnackbarHost(snackbar, Modifier.padding(bottom = LocalBottomBarPadding.current)) },
     ) { padding ->
         if (current == null) {
             LoadingBox(Modifier.padding(padding))
@@ -183,7 +184,7 @@ fun HomeScreen(
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp + LocalBottomBarPadding.current),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 if (!permissions.location && current.settings.location.isDefault) {

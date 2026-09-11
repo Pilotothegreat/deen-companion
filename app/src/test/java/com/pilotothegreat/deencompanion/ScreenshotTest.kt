@@ -2,6 +2,7 @@ package com.pilotothegreat.deencompanion
 
 import android.graphics.Bitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -11,6 +12,7 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeUp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.pilotothegreat.deencompanion.core.text.Numerals
@@ -126,7 +128,13 @@ class ScreenshotTest {
     }
 
     private fun tab(label: String) {
-        compose.onAllNodesWithText(label).onFirst().performClick()
+        val node = compose.onAllNodesWithText(label).onFirst()
+        // The floating bar hides after scrolling down; a small swipe down brings it back.
+        if (runCatching { node.assertIsDisplayed() }.isFailure) {
+            compose.onAllNodes(hasScrollAction()).onFirst().performTouchInput { swipeDown() }
+            settle()
+        }
+        node.performClick()
         settle()
     }
 

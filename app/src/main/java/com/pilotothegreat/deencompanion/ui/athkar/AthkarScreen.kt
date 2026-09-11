@@ -63,6 +63,7 @@ import com.pilotothegreat.deencompanion.ui.components.EmptyState
 import com.pilotothegreat.deencompanion.ui.components.LoadingBox
 import com.pilotothegreat.deencompanion.ui.components.SearchField
 import com.pilotothegreat.deencompanion.ui.components.SectionHeader
+import com.pilotothegreat.deencompanion.ui.navigation.LocalBottomBarPadding
 import com.pilotothegreat.deencompanion.ui.theme.pressScale
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -100,7 +101,7 @@ fun AthkarScreen(onOpenCategory: (String) -> Unit, viewModel: AthkarViewModel = 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = { LargeFlexibleTopAppBar(title = { Text(stringResource(R.string.athkar)) }, scrollBehavior = scrollBehavior) },
-        snackbarHost = { SnackbarHost(snackbar) },
+        snackbarHost = { SnackbarHost(snackbar, Modifier.padding(bottom = LocalBottomBarPadding.current)) },
     ) { padding ->
         val home = state ?: run {
             LoadingBox(Modifier.padding(padding))
@@ -108,7 +109,7 @@ fun AthkarScreen(onOpenCategory: (String) -> Unit, viewModel: AthkarViewModel = 
         }
         LazyColumn(
             modifier = Modifier.padding(padding).fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp + LocalBottomBarPadding.current),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item(key = "search") {

@@ -60,6 +60,7 @@ import com.pilotothegreat.deencompanion.ui.components.EmptyState
 import com.pilotothegreat.deencompanion.ui.components.LoadingBox
 import com.pilotothegreat.deencompanion.ui.components.SearchField
 import com.pilotothegreat.deencompanion.ui.components.ShapeBadge
+import com.pilotothegreat.deencompanion.ui.navigation.LocalBottomBarPadding
 import com.pilotothegreat.deencompanion.ui.navigation.HadithBookKey
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -85,7 +86,7 @@ fun HadithScreen(onOpenBook: (String) -> Unit, viewModel: HadithViewModel = koin
 
     Scaffold(
         topBar = { TopAppBar(title = { Text(stringResource(R.string.hadith)) }) },
-        snackbarHost = { SnackbarHost(snackbar) },
+        snackbarHost = { SnackbarHost(snackbar, Modifier.padding(bottom = LocalBottomBarPadding.current)) },
     ) { padding ->
         Column(Modifier.padding(padding).fillMaxSize()) {
             SearchField(
@@ -125,7 +126,7 @@ private fun BookList(
 ) {
     val locale = currentLocale()
     LazyColumn(
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 24.dp),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 24.dp + LocalBottomBarPadding.current),
         verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
     ) {
         itemsIndexed(books, key = { _, book -> book.info.id }) { index, book ->
@@ -195,7 +196,7 @@ private fun FavoriteList(favorites: List<Hadith>, bookNames: Map<String, String>
         return
     }
     LazyColumn(
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 24.dp),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 24.dp + LocalBottomBarPadding.current),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         items(favorites, key = { it.id }) { hadith ->
@@ -220,7 +221,7 @@ private fun SearchResults(
             body = if (someIncomplete) stringResource(R.string.search_incomplete) else null,
         )
         else -> LazyColumn(
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp + LocalBottomBarPadding.current),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             if (someIncomplete) {
@@ -274,11 +275,11 @@ fun HadithBookScreen(
                 },
             )
         },
-        snackbarHost = { SnackbarHost(snackbar) },
+        snackbarHost = { SnackbarHost(snackbar, Modifier.padding(bottom = LocalBottomBarPadding.current)) },
     ) { padding ->
         LazyColumn(
             modifier = Modifier.padding(padding).fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp + LocalBottomBarPadding.current),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             val current = book

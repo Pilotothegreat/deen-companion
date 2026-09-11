@@ -58,6 +58,7 @@ import com.pilotothegreat.deencompanion.ui.components.LoadingBox
 import com.pilotothegreat.deencompanion.ui.components.SearchField
 import com.pilotothegreat.deencompanion.ui.components.SectionHeader
 import com.pilotothegreat.deencompanion.ui.components.ShapeBadge
+import com.pilotothegreat.deencompanion.ui.navigation.LocalBottomBarPadding
 import com.pilotothegreat.deencompanion.ui.navigation.ReaderKey
 import com.pilotothegreat.deencompanion.ui.theme.UthmanicHafs
 import org.koin.androidx.compose.koinViewModel
@@ -104,7 +105,7 @@ fun QuranScreen(onOpenReader: (ReaderKey) -> Unit, viewModel: QuranViewModel = k
 private fun SurahList(quran: Quran, lastReadPage: Int, onOpenReader: (ReaderKey) -> Unit) {
     val locale = currentLocale()
     LazyColumn(
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 24.dp),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 24.dp + LocalBottomBarPadding.current),
         verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
     ) {
         if (lastReadPage > 0) {
@@ -183,7 +184,7 @@ private fun BookmarkList(
     }
     val locale = currentLocale()
     LazyColumn(
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 24.dp),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 24.dp + LocalBottomBarPadding.current),
         verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
     ) {
         itemsIndexed(bookmarks, key = { _, b -> "${b.surah}:${b.ayah}" }) { index, bookmark ->
@@ -224,7 +225,7 @@ private fun SearchResults(results: QuranSearchResults?, quran: Quran, onOpenRead
                 color = MaterialTheme.colorScheme.onTertiaryContainer,
             )
             LazyColumn(
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp + LocalBottomBarPadding.current),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 if (results.surahs.isNotEmpty()) {
