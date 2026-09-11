@@ -259,5 +259,11 @@
 
     <string name="syncing_full_collection">Downloading entire collection...</string>
     <string name="collections_load_error">Collections could not be loaded. Check your internet connection and reopen the app.</string>
+
+    <string name="channel_adhan">Adhan</string>
+    <string name="channel_adhan_desc">Alerts you when each prayer time begins</string>
+    <string name="channel_iqama">Iqama</string>
+    <string name="channel_iqama_desc">Reminds you when the iqama begins</string>
+    <string name="widget_next_prayer_title">Next prayer</string>
 </resources>
 

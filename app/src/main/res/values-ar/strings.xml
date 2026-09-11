@@ -258,5 +258,11 @@
 
     <string name="syncing_full_collection">جاري تحميل المجموعة كاملة...</string>
     <string name="collections_load_error">لم يتم تحميل المجموعات. تحقق من اتصالك بالإنترنت وافتح التطبيق مرة أخرى.</string>
+
+    <string name="channel_adhan">الأذان</string>
+    <string name="channel_adhan_desc">تنبيه عند دخول وقت كل صلاة</string>
+    <string name="channel_iqama">الإقامة</string>
+    <string name="channel_iqama_desc">تذكير عند إقامة الصلاة</string>
+    <string name="widget_next_prayer_title">الصلاة القادمة</string>
 </resources>
 
