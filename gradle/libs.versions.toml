@@ -1,7 +1,7 @@
 [versions]
 agp = "9.2.1"
-kotlin = "2.3.21"
-ksp = "2.3.4"
+kotlin = "2.4.20"
+ksp = "2.3.12"
 composeBom = "2026.09.00"
 material3 = "1.5.0-alpha28"
 graphicsShapes = "1.1.0"
@@ -19,6 +19,8 @@ coroutines = "1.11.0"
 kotlinxSerializationJson = "1.11.0"
 timber = "5.0.1"
 playAppUpdate = "2.1.0"
+adhan = "0.0.7"
+glance = "1.2.0"
 junit = "4.13.2"
 robolectric = "4.16.1"
 androidxTestCore = "1.7.0"
@@ -64,6 +66,10 @@ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-t
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 play-app-update-ktx = { module = "com.google.android.play:app-update-ktx", version.ref = "playAppUpdate" }
+adhan = { module = "com.batoulapps.adhan:adhan2", version.ref = "adhan" }
+glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "glance" }
+glance-material3 = { module = "androidx.glance:glance-material3", version.ref = "glance" }
+glance-appwidget-testing = { module = "androidx.glance:glance-appwidget-testing", version.ref = "glance" }
 
 junit = { module = "junit:junit", version.ref = "junit" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
