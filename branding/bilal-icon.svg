@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="18 18 72 72" width="512" height="512">
+  <!-- Bilal launcher icon: the visible 72-unit middle of the 108-unit adaptive icon canvas. -->
+  <rect x="0" y="0" width="108" height="108" fill="#156C44"/>
+  <g transform="translate(8.386 2.684) scale(0.8772)">
+    <path d="M77 61V70H49M63 70V36M49 70V36M36 36V70H27V62" fill="none" stroke="#FFF8F3" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="70" cy="80" r="4.5" fill="#F2C572"/>
+  </g>
+</svg>

@@ -40,7 +40,7 @@ android {
         targetSdk = 37
         versionCode = 194
         versionName = "1.6.0"
-        base.archivesName = "deen-$versionName"
+        base.archivesName = "bilal-$versionName"
     }
 
     signingConfigs {

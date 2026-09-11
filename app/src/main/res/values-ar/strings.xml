@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">دين</string>
+    <string name="app_name">بلال</string>
 
     <!-- Common -->
     <string name="today">اليوم</string>
@@ -316,14 +316,14 @@
     <string name="update_available_generic">يتوفر تحديث</string>
     <string name="update_check_failed">تعذّر التحقق من التحديثات</string>
     <string name="support_development">ادعم التطوير</string>
-    <string name="support_development_desc">تطبيق دين مجاني وبلا إعلانات</string>
+    <string name="support_development_desc">تطبيق بلال مجاني وبلا إعلانات</string>
     <string name="source_code">الشيفرة المصدرية</string>
     <string name="privacy_policy">سياسة الخصوصية</string>
     <string name="app_info">معلومات التطبيق</string>
     <string name="app_info_desc">الأذونات والتخزين</string>
 
     <!-- Support sheet -->
-    <string name="support_title">ادعم تطبيق دين</string>
+    <string name="support_title">ادعم تطبيق بلال</string>
     <string name="support_body">أنا مطور مستقل وطالب جامعي. التطبيق مجاني بالكامل، وإن نفعك ففكّر في دعم تطويره ليستمر.</string>
     <string name="palestine_note">جزء من كل تبرع يذهب لدعم القضية الفلسطينية.</string>
     <string name="bank_transfer_phone_pay">تحويل بنكي / الدفع برقم الهاتف</string>

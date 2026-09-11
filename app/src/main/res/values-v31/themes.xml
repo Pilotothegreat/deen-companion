@@ -4,5 +4,7 @@
         <item name="android:windowBackground">@color/window_background</item>
         <item name="android:windowSplashScreenBackground">@color/window_background</item>
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <!-- The mark is cream, so it sits on a green disc like the launcher icon. -->
+        <item name="android:windowSplashScreenIconBackgroundColor">#FF156C44</item>
     </style>
 </resources>

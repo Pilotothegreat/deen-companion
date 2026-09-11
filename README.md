@@ -1,4 +1,4 @@
-# Deen Companion
+# Bilal · بلال
 
 A private, offline-first Islamic companion for Android, built with Jetpack Compose and Material 3 Expressive. Available in English and Arabic.
 
@@ -57,4 +57,4 @@ The same values can come from the `RELEASE_KEYSTORE_FILE`, `RELEASE_KEYSTORE_PAS
 
 ## License
 
-GPL-3.0. Deen Companion started from the open-source [Traffic Light](https://github.com/leekleak/traffic-light) app by leekleak; see [ATTRIBUTION.md](ATTRIBUTION.md).
+GPL-3.0. Bilal (formerly Deen Companion) started from the open-source [Traffic Light](https://github.com/leekleak/traffic-light) app by leekleak; see [ATTRIBUTION.md](ATTRIBUTION.md).

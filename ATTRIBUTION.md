@@ -2,9 +2,9 @@
 
 ## Traffic Light
 
-Deen Companion started as a fork of [Traffic Light](https://github.com/leekleak/traffic-light), a privacy-focused network usage tracker by [leekleak](https://github.com/leekleak), licensed under the GNU General Public License v3.0. Thanks to its author for the original Jetpack Compose foundation.
+Bilal (formerly Deen Companion) started as a fork of [Traffic Light](https://github.com/leekleak/traffic-light), a privacy-focused network usage tracker by [leekleak](https://github.com/leekleak), licensed under the GNU General Public License v3.0. Thanks to its author for the original Jetpack Compose foundation.
 
-Traffic Light is licensed under the GPLv3, so Deen Companion is distributed under the same license (see [LICENSE](LICENSE)).
+Traffic Light is licensed under the GPLv3, so Bilal is distributed under the same license (see [LICENSE](LICENSE)).
 
 ## Content and assets
 

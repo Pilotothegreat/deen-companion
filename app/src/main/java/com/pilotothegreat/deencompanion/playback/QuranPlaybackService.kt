@@ -23,7 +23,7 @@ class QuranPlaybackService : MediaSessionService() {
     override fun onCreate() {
         super.onCreate()
         val dataSource = DefaultHttpDataSource.Factory()
-            .setUserAgent("DeenCompanion/${BuildConfig.VERSION_NAME} (Android; Media3)")
+            .setUserAgent("Bilal/${BuildConfig.VERSION_NAME} (Android; Media3)")
             .setConnectTimeoutMs(15_000)
             .setReadTimeoutMs(15_000)
             .setAllowCrossProtocolRedirects(true)

@@ -1,4 +1,4 @@
-# Deen Companion: Store listing
+# Bilal: Store listing
 
 - **Package:** `com.pilotothegreat.deencompanion`
 - **Version:** 1.6.0 (`versionCode` 194)
@@ -8,8 +8,8 @@
 
 ## Title
 
-- English: Deen Companion: Prayer Times & Quran
-- Arabic: دين: مواقيت الصلاة والقرآن
+- English: Bilal: Prayer Times & Quran
+- Arabic: بلال: مواقيت الصلاة والقرآن
 
 ## Short description (80 characters max)
 
@@ -18,7 +18,7 @@
 
 ## Full description (English)
 
-Deen Companion brings prayer times, the Quran, hadith, the Qibla and tasbih together in one calm, private app. There are no accounts, ads or trackers.
+Bilal brings prayer times, the Quran, hadith, the Qibla and tasbih together in one calm, private app. There are no accounts, ads or trackers.
 
 **Prayer times and alerts**
 - Oman Ministry of Endowments timetable by default, plus Umm al-Qura, Muslim World League, ISNA, Egypt, Karachi, Ja'fari and Tehran
@@ -48,7 +48,7 @@ Deen Companion brings prayer times, the Quran, hadith, the Qibla and tasbih toge
 
 ## Full description (Arabic)
 
-يجمع تطبيق «دين» مواقيت الصلاة والقرآن الكريم والحديث الشريف والقبلة والتسبيح في تطبيق هادئ يحترم خصوصيتك: بلا حسابات ولا إعلانات ولا تتبع.
+يجمع تطبيق «بلال» مواقيت الصلاة والقرآن الكريم والحديث الشريف والقبلة والتسبيح في تطبيق هادئ يحترم خصوصيتك: بلا حسابات ولا إعلانات ولا تتبع.
 
 **مواقيت الصلاة والتنبيهات**
 - تقويم وزارة الأوقاف والشؤون الدينية بسلطنة عُمان افتراضيًا، إضافة إلى أم القرى ورابطة العالم الإسلامي وغيرها

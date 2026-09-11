@@ -10,7 +10,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 object Http {
-    private val userAgent = "DeenCompanion/${BuildConfig.VERSION_NAME} (Android)"
+    private val userAgent = "Bilal/${BuildConfig.VERSION_NAME} (Android)"
 
     /**
      * Downloads [url] as UTF-8 text. [onProgress] receives 0..1 when the server reports a size.

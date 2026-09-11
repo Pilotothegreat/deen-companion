@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Deen Companion</string>
+    <string name="app_name">Bilal</string>
 
     <!-- Common -->
     <string name="today">Today</string>
@@ -291,7 +291,7 @@
     <string name="update_available_generic">Update available</string>
     <string name="update_check_failed">Couldn\'t check for updates</string>
     <string name="support_development">Support development</string>
-    <string name="support_development_desc">Deen Companion is free and ad-free</string>
+    <string name="support_development_desc">Bilal is free and ad-free</string>
     <string name="source_code">Source code</string>
     <string name="source_code_desc" translatable="false">github.com/Pilotothegreat/deen-companion</string>
     <string name="privacy_policy">Privacy policy</string>
@@ -299,7 +299,7 @@
     <string name="app_info_desc">Permissions and storage</string>
 
     <!-- Support sheet -->
-    <string name="support_title">Support Deen Companion</string>
+    <string name="support_title">Support Bilal</string>
     <string name="support_body">I\'m an independent developer and university student. The app is completely free; if it benefits you, please consider supporting its development so it can continue.</string>
     <string name="palestine_note">Part of every donation goes to support the Palestinian cause.</string>
     <string name="bank_transfer_phone_pay">Bank transfer / pay by phone number</string>

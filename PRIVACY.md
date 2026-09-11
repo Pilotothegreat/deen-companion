@@ -1,8 +1,8 @@
-# Privacy Policy for Deen Companion
+# Privacy Policy for Bilal
 
 Last updated: September 11, 2026
 
-Deen Companion has no accounts, ads, analytics or crash reporting. Everything you set up in the app stays on your device. This page lists exactly what the app stores and every network request it can make.
+Bilal has no accounts, ads, analytics or crash reporting. Everything you set up in the app stays on your device. This page lists exactly what the app stores and every network request it can make.
 
 ## What stays on your device
 

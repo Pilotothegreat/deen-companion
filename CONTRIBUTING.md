@@ -1,6 +1,6 @@
-# Contributing to Deen Companion
+# Contributing to Bilal
 
-Thank you for helping improve Deen Companion. Bug reports, translations and pull requests are all welcome.
+Thank you for helping improve Bilal. Bug reports, translations and pull requests are all welcome.
 
 ## Before you start
 
@@ -25,4 +25,4 @@ Thank you for helping improve Deen Companion. Bug reports, translations and pull
 
 ## License
 
-Deen Companion is licensed under the GNU General Public License v3.0. By contributing, you agree that your contribution is licensed under the same terms.
+Bilal is licensed under the GNU General Public License v3.0. By contributing, you agree that your contribution is licensed under the same terms.
