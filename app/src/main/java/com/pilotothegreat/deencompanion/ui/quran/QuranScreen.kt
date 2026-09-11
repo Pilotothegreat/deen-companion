@@ -116,7 +116,7 @@ private fun SurahList(quran: Quran, lastReadPage: Int, onOpenReader: (ReaderKey)
                     surahName = surahName(quran.surah(firstVerse.surah), locale),
                     locale = locale,
                     onClick = { onOpenReader(ReaderKey(lastReadPage)) },
-                    modifier = Modifier.padding(bottom = 12.dp),
+                    modifier = Modifier.animateItem().padding(bottom = 12.dp),
                 )
             }
         }
@@ -124,6 +124,7 @@ private fun SurahList(quran: Quran, lastReadPage: Int, onOpenReader: (ReaderKey)
             SegmentedListItem(
                 onClick = { onOpenReader(ReaderKey(quran.pageOf(surah.number, 1))) },
                 shapes = ListItemDefaults.segmentedShapes(index, quran.surahs.size),
+                modifier = Modifier.animateItem(),
                 leadingContent = { ShapeBadge(Formatters.number(surah.number, locale)) },
                 supportingContent = { Text(surahDetails(surah, locale)) },
                 trailingContent = if (locale.isArabic) {
@@ -192,6 +193,7 @@ private fun BookmarkList(
             SegmentedListItem(
                 onClick = { onOpenReader(ReaderKey(quran.pageOf(bookmark.surah, bookmark.ayah), bookmark.surah, bookmark.ayah)) },
                 shapes = ListItemDefaults.segmentedShapes(index, bookmarks.size),
+                modifier = Modifier.animateItem(),
                 supportingContent = {
                     Text(
                         quran.verse(bookmark.surah, bookmark.ayah)?.text.orEmpty(),
@@ -234,6 +236,7 @@ private fun SearchResults(results: QuranSearchResults?, quran: Quran, onOpenRead
                         SegmentedListItem(
                             onClick = { onOpenReader(ReaderKey(quran.pageOf(surah.number, 1))) },
                             shapes = ListItemDefaults.segmentedShapes(index, results.surahs.size),
+                            modifier = Modifier.animateItem(),
                             leadingContent = { ShapeBadge(Formatters.number(surah.number, locale)) },
                             supportingContent = { Text(surahDetails(surah, locale)) },
                         ) { Text(surahName(surah, locale)) }
@@ -245,6 +248,7 @@ private fun SearchResults(results: QuranSearchResults?, quran: Quran, onOpenRead
                         val verse = match.verse
                         Card(
                             onClick = { onOpenReader(ReaderKey(quran.pageOf(verse.surah, verse.number), verse.surah, verse.number)) },
+                            modifier = Modifier.animateItem(),
                             shape = MaterialTheme.shapes.large,
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
                         ) {

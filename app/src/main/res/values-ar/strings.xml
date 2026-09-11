@@ -74,6 +74,7 @@
     </plurals>
     <string name="ramadan_sighting_note">يُعلن بدء الشهر رسميًا بعد تحري رؤية الهلال.</string>
     <string name="daily_inspiration">إلهام اليوم</string>
+    <string name="verse_of_the_day">آية اليوم</string>
     <string name="qibla_summary">%1$s° من الشمال · %2$s كم إلى مكة</string>
 
     <!-- Tasbih -->

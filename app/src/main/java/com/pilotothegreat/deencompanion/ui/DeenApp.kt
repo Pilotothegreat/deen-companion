@@ -133,6 +133,7 @@ fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpe
                                 onOpenQibla = { navigator.navigate(QiblaKey) },
                                 onOpenLocation = { navigator.navigate(LocationKey) },
                                 onOpenAthkar = { navigator.navigate(AthkarSessionKey(it)) },
+                                onOpenReader = navigator::navigate,
                             )
                         }
                         entry<QuranKey>(metadata = TabTransition) { QuranScreen(onOpenReader = navigator::navigate) }

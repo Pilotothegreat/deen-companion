@@ -1,6 +1,14 @@
 package com.pilotothegreat.deencompanion.ui.home
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,7 +20,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material.icons.rounded.Explore
+import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.NightsStay
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.NotificationsOff
@@ -30,19 +40,26 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pilotothegreat.deencompanion.R
@@ -58,8 +75,12 @@ import com.pilotothegreat.deencompanion.ui.common.Formatters
 import com.pilotothegreat.deencompanion.ui.common.icon
 import com.pilotothegreat.deencompanion.ui.common.isArabic
 import com.pilotothegreat.deencompanion.ui.common.nameRes
+import com.pilotothegreat.deencompanion.ui.location.locationStatus
+import com.pilotothegreat.deencompanion.ui.quran.verseReference
 import com.pilotothegreat.deencompanion.ui.theme.Amiri
+import com.pilotothegreat.deencompanion.ui.theme.UthmanicHafs
 import com.pilotothegreat.deencompanion.ui.theme.animatedPolygonShape
+import com.pilotothegreat.deencompanion.ui.theme.rememberReducedMotion
 import com.pilotothegreat.deencompanion.ui.theme.shape
 import java.util.Locale
 import kotlin.math.roundToInt
@@ -80,16 +101,17 @@ fun NextPrayerHero(countdown: Countdown, locale: Locale, modifier: Modifier = Mo
         shape = MaterialTheme.shapes.extraLargeIncreased,
         color = MaterialTheme.colorScheme.primaryContainer,
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        modifier = modifier.fillMaxWidth(),
+        // One focus stop for screen readers: label, prayer, time left and times together.
+        modifier = modifier.fillMaxWidth().semantics(mergeDescendants = true) {},
     ) {
         Row(Modifier.padding(24.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(stringResource(R.string.next_prayer_label), style = MaterialTheme.typography.labelLarge)
                 Text(name, style = MaterialTheme.typography.headlineMediumEmphasized)
-                Text(
+                Odometer(
                     text = remaining,
                     style = MaterialTheme.typography.displayMediumEmphasized.copy(fontFeatureSettings = "tnum"),
-                    modifier = Modifier.semantics { contentDescription = countdownDescription },
+                    modifier = Modifier.clearAndSetSemantics { contentDescription = countdownDescription },
                 )
                 Text(stringResource(R.string.adhan_at, adhanTime), style = MaterialTheme.typography.bodyLarge)
                 if (iqama != null) {
@@ -109,6 +131,34 @@ fun NextPrayerHero(countdown: Countdown, locale: Locale, modifier: Modifier = Mo
     }
 }
 
+/** Each changed character rolls up into place like an odometer; plain text when animations are off. */
+@Composable
+private fun Odometer(text: String, style: TextStyle, modifier: Modifier = Modifier) {
+    if (rememberReducedMotion()) {
+        Text(text, style = style, modifier = modifier)
+        return
+    }
+    val slide = MaterialTheme.motionScheme.fastSpatialSpec<IntOffset>()
+    // Clock times read left to right in Arabic too.
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+        Row(modifier) {
+            text.forEachIndexed { index, char ->
+                // Keyed from the end so the seconds keep their slot when the hours lose a digit.
+                key(text.length - index) {
+                    AnimatedContent(
+                        targetState = char,
+                        transitionSpec = {
+                            (slideInVertically(slide) { it } + fadeIn()) togetherWith
+                                (slideOutVertically(slide) { -it } + fadeOut()) using SizeTransform(clip = true)
+                        },
+                        label = "odometer",
+                    ) { Text(it.toString(), style = style) }
+                }
+            }
+        }
+    }
+}
+
 @Composable
 fun PrayerTimesCard(
     schedule: PrayerSchedule,
@@ -120,21 +170,25 @@ fun PrayerTimesCard(
 ) {
     val context = LocalContext.current
     val rowCount = Prayer.entries.size + 1
+    val defaultColors = ListItemDefaults.segmentedColors()
     Column(verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
         Prayer.entries.forEachIndexed { index, prayer ->
             val isNext = prayer == nextPrayer
             val name = stringResource(prayer.nameRes)
             val adhan = schedule.adhan.getValue(prayer)
             val iqama = schedule.iqama[prayer]?.takeIf { it != adhan }
+            // The highlight fades across to the next prayer when one passes.
+            val container by animateColorAsState(
+                if (isNext) MaterialTheme.colorScheme.secondaryContainer else defaultColors.containerColor,
+                MaterialTheme.motionScheme.slowEffectsSpec(),
+                label = "nextPrayer",
+            )
             SegmentedListItem(
                 shapes = ListItemDefaults.segmentedShapes(index, rowCount),
                 colors = if (isNext) {
-                    ListItemDefaults.segmentedColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    )
+                    ListItemDefaults.segmentedColors(containerColor = container, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
                 } else {
-                    ListItemDefaults.segmentedColors()
+                    ListItemDefaults.segmentedColors(containerColor = container)
                 },
                 leadingContent = { Icon(prayer.icon, contentDescription = null) },
                 supportingContent = iqama?.let {
@@ -220,6 +274,53 @@ fun AthkarNowCard(category: AthkarCategory, progress: DayProgress, locale: Local
     }
 }
 
+/** Today's ayah in the mushaf script; opens the mushaf at it. */
+@Composable
+fun VerseOfDayCard(verse: VerseOfDay, locale: Locale, onOpen: () -> Unit, modifier: Modifier = Modifier) {
+    Card(
+        onClick = onOpen,
+        modifier = modifier,
+        shape = MaterialTheme.shapes.extraLarge,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+    ) {
+        Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Icon(
+                    Icons.AutoMirrored.Rounded.MenuBook,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(18.dp),
+                )
+                Text(
+                    stringResource(R.string.verse_of_the_day),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.weight(1f),
+                )
+                Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null)
+            }
+            Text(
+                text = verse.verse.text,
+                fontFamily = UthmanicHafs,
+                fontSize = 24.sp,
+                lineHeight = 44.sp,
+                style = MaterialTheme.typography.bodyLarge.copy(textDirection = TextDirection.Rtl),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            if (!locale.isArabic) {
+                Text(verse.verse.translation, style = MaterialTheme.typography.bodyLarge)
+            }
+            Text(
+                verseReference(verse.surah, verse.verse.number, locale),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.End,
+            )
+        }
+    }
+}
+
 @Composable
 fun QiblaShortcut(location: SavedLocation, locale: Locale, onOpen: () -> Unit) {
     val bearing = remember(location) { QiblaMath.bearing(location.latitude, location.longitude) }
@@ -250,6 +351,38 @@ fun QiblaShortcut(location: SavedLocation, locale: Locale, onOpen: () -> Unit) {
                         Formatters.number(distance.roundToInt(), locale),
                     ),
                     style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null)
+        }
+    }
+}
+
+/** Where and how prayer times are calculated; opens the location picker. */
+@Composable
+fun LocationCard(location: SavedLocation, methodLabel: String, onOpen: () -> Unit, modifier: Modifier = Modifier) {
+    Card(
+        onClick = onOpen,
+        modifier = modifier,
+        shape = MaterialTheme.shapes.extraLarge,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+    ) {
+        Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Surface(
+                shape = MaterialShapes.Clover4Leaf.toShape(),
+                color = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.size(48.dp),
+            ) {
+                Box(contentAlignment = Alignment.Center) { Icon(Icons.Rounded.LocationOn, contentDescription = null) }
+            }
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(location.cityName ?: stringResource(R.string.default_location), style = MaterialTheme.typography.titleMedium)
+                if (!location.isDefault) Text(locationStatus(location), style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    stringResource(R.string.calculated_with, methodLabel),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null)

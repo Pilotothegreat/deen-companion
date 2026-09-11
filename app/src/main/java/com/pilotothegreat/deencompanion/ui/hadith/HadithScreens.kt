@@ -137,6 +137,7 @@ private fun BookList(
                 // A collection with nothing stored yet has nothing to open, so a tap downloads it.
                 onClick = { if (book.hadithCount > 0) onOpen(id) else if (!downloading) onDownload(id) },
                 shapes = ListItemDefaults.segmentedShapes(index, books.size),
+                modifier = Modifier.animateItem(),
                 leadingContent = {
                     ShapeBadge(
                         text = Formatters.number(index + 1, locale),
@@ -200,7 +201,7 @@ private fun FavoriteList(favorites: List<Hadith>, bookNames: Map<String, String>
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         items(favorites, key = { it.id }) { hadith ->
-            HadithCard(hadith, bookNames[hadith.bookId], isFavorite = true, onFavoriteChange = { onFavorite(hadith.id, it) })
+            HadithCard(hadith, bookNames[hadith.bookId], isFavorite = true, onFavoriteChange = { onFavorite(hadith.id, it) }, Modifier.animateItem())
         }
     }
 }
@@ -235,7 +236,7 @@ private fun SearchResults(
                 }
             }
             items(results, key = { it.id }) { hadith ->
-                HadithCard(hadith, bookNames[hadith.bookId], hadith.id in favoriteIds, onFavoriteChange = { onFavorite(hadith.id, it) })
+                HadithCard(hadith, bookNames[hadith.bookId], hadith.id in favoriteIds, onFavoriteChange = { onFavorite(hadith.id, it) }, Modifier.animateItem())
             }
         }
     }
@@ -293,7 +294,7 @@ fun HadithBookScreen(
                 }
             }
             items(hadiths, key = { it.id }) { hadith ->
-                HadithCard(hadith, bookName = null, isFavorite = hadith.id in favoriteIds, onFavoriteChange = { viewModel.setFavorite(hadith.id, it) })
+                HadithCard(hadith, bookName = null, isFavorite = hadith.id in favoriteIds, onFavoriteChange = { viewModel.setFavorite(hadith.id, it) }, modifier = Modifier.animateItem())
             }
             if (!endReached) {
                 item(key = "loading") {

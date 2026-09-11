@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Alarm
+import androidx.compose.material.icons.rounded.Explore
 import androidx.compose.material.icons.rounded.MyLocation
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Settings
@@ -61,6 +62,7 @@ import com.pilotothegreat.deencompanion.ui.common.startSafely
 import com.pilotothegreat.deencompanion.ui.components.LoadingBox
 import com.pilotothegreat.deencompanion.ui.components.PermissionCard
 import com.pilotothegreat.deencompanion.ui.navigation.LocalBottomBarPadding
+import com.pilotothegreat.deencompanion.ui.navigation.ReaderKey
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDate
@@ -84,11 +86,13 @@ fun HomeScreen(
     onOpenQibla: () -> Unit,
     onOpenLocation: () -> Unit,
     onOpenAthkar: (String) -> Unit,
+    onOpenReader: (ReaderKey) -> Unit,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val content by viewModel.content.collectAsStateWithLifecycle()
     val countdown by viewModel.countdown.collectAsStateWithLifecycle()
     val athkarNow by viewModel.athkarNow.collectAsStateWithLifecycle()
+    val verseOfDay by viewModel.verseOfDay.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val resources = LocalResources.current
@@ -152,6 +156,9 @@ fun HomeScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = onOpenQibla) {
+                        Icon(Icons.Rounded.Explore, contentDescription = stringResource(R.string.qibla_compass))
+                    }
                     IconButton(onClick = onOpenSettings) {
                         Icon(Icons.Rounded.Settings, contentDescription = stringResource(R.string.settings))
                     }
@@ -241,7 +248,7 @@ fun HomeScreen(
                         )
                     }
                 }
-                countdown?.let { cd -> item(key = "hero") { NextPrayerHero(cd, locale) } }
+                countdown?.let { cd -> item(key = "hero") { NextPrayerHero(cd, locale, Modifier.animateItem()) } }
                 item(key = "times") {
                     PrayerTimesCard(
                         schedule = current.today,
@@ -257,15 +264,23 @@ fun HomeScreen(
                         AthkarNowCard(now.category, now.progress, locale, onOpen = { onOpenAthkar(now.category.id) })
                     }
                 }
-                item(key = "qibla") { QiblaShortcut(current.settings.location, locale, onOpenQibla) }
+                verseOfDay?.let { verse ->
+                    item(key = "verse") {
+                        VerseOfDayCard(
+                            verse = verse,
+                            locale = locale,
+                            onOpen = { onOpenReader(ReaderKey(verse.page, verse.verse.surah, verse.verse.number)) },
+                            modifier = Modifier.animateItem(),
+                        )
+                    }
+                }
                 item(key = "inspiration") { InspirationCard(current.inspiration, locale) }
-                item(key = "method") {
-                    Text(
-                        text = stringResource(R.string.calculated_with, stringResource(current.settings.method.labelRes)),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxSize().padding(top = 4.dp),
+                item(key = "qibla") { QiblaShortcut(current.settings.location, locale, onOpenQibla) }
+                item(key = "location") {
+                    LocationCard(
+                        location = current.settings.location,
+                        methodLabel = stringResource(current.settings.effectiveMethod.labelRes),
+                        onOpen = onOpenLocation,
                     )
                 }
             }

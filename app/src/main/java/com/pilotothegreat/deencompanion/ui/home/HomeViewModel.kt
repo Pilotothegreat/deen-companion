@@ -11,10 +11,14 @@ import com.pilotothegreat.deencompanion.core.prayer.DaySchedule
 import com.pilotothegreat.deencompanion.core.prayer.NextPrayer
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
 import com.pilotothegreat.deencompanion.core.prayer.PrayerSchedule
+import com.pilotothegreat.deencompanion.core.text.DailyVerse
 import com.pilotothegreat.deencompanion.core.text.Inspiration
 import com.pilotothegreat.deencompanion.core.text.Inspirations
 import com.pilotothegreat.deencompanion.data.athkar.AthkarRepository
 import com.pilotothegreat.deencompanion.data.location.LocationRepository
+import com.pilotothegreat.deencompanion.data.quran.QuranRepository
+import com.pilotothegreat.deencompanion.data.quran.Surah
+import com.pilotothegreat.deencompanion.data.quran.Verse
 import com.pilotothegreat.deencompanion.data.settings.AppSettings
 import com.pilotothegreat.deencompanion.data.settings.LocationSource
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
@@ -30,6 +34,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -57,6 +62,9 @@ data class Countdown(val next: NextPrayer, val remaining: Duration)
 /** The athkar that fit the time of day, with today's progress. */
 data class AthkarNow(val category: AthkarCategory, val progress: DayProgress)
 
+/** Today's ayah with its surah and the mushaf page it sits on. */
+data class VerseOfDay(val verse: Verse, val surah: Surah, val page: Int)
+
 sealed interface HomeEvent {
     data object LocationUnavailable : HomeEvent
     data object LocationPermissionMissing : HomeEvent
@@ -67,6 +75,7 @@ class HomeViewModel(
     private val settings: SettingsRepository,
     private val location: LocationRepository,
     private val athkar: AthkarRepository,
+    private val quran: QuranRepository,
     private val updates: UpdateChecker,
 ) : ViewModel() {
 
@@ -89,6 +98,18 @@ class HomeViewModel(
                 daysUntilRamadan = HijriCalendar.daysUntilRamadan(date, s.hijriAdjustment),
                 inspiration = Inspirations.forDate(date),
             )
+        }
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /** Loaded separately so the prayer times never wait for the Quran text. */
+    val verseOfDay: StateFlow<VerseOfDay?> = content.filterNotNull()
+        .map { it.today.date }
+        .distinctUntilChanged()
+        .map { date ->
+            val ref = DailyVerse.forDate(date)
+            val book = quran.quran()
+            book.verse(ref.surah, ref.ayah)?.let { VerseOfDay(it, book.surah(ref.surah), book.pageOf(ref.surah, ref.ayah)) }
         }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)

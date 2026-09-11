@@ -65,6 +65,7 @@
     </plurals>
     <string name="ramadan_sighting_note">The start of the month is confirmed by the official moon sighting.</string>
     <string name="daily_inspiration">Daily inspiration</string>
+    <string name="verse_of_the_day">Verse of the day</string>
     <string name="qibla_summary">%1$s° from north · %2$s km to Makkah</string>
 
     <!-- Tasbih -->
