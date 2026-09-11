@@ -201,6 +201,17 @@
     <string name="middle_of_night">Middle of the night</string>
     <string name="last_third_of_night">Last third of the night</string>
     <string name="middle_of_night_at">Middle of the night %1$s</string>
+    <string name="location_title">Location</string>
+    <string name="search_city_hint">Search for a city</string>
+    <string name="use_my_location">Use my location</string>
+    <string name="use_my_location_desc">Detected automatically, and updated when you travel</string>
+    <string name="suggested_cities">Suggested cities</string>
+    <string name="search_results">Results</string>
+    <string name="no_cities_found">No matching cities</string>
+    <string name="location_mode_manual">Chosen manually</string>
+    <string name="location_auto_updated">Automatic · updated %1$s</string>
+    <string name="location_not_set">Not set yet</string>
+    <string name="choose_city">Choose a city</string>
     <string name="hijri_adjustment">Hijri date adjustment</string>
     <string name="iqama">Iqama</string>
     <string name="iqama_for">%1$s iqama</string>

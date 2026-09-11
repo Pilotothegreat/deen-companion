@@ -21,6 +21,7 @@ import kotlinx.serialization.Serializable
 @Serializable data object HadithKey : NavKey
 @Serializable data object QiblaKey : NavKey
 @Serializable data object SettingsKey : NavKey
+@Serializable data object LocationKey : NavKey
 
 /** Opens the mushaf at [page]; [surah]/[ayah] (when non-zero) mark the ayah to highlight. */
 @Serializable data class ReaderKey(val page: Int, val surah: Int = 0, val ayah: Int = 0) : NavKey

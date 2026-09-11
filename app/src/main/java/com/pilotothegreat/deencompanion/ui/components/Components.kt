@@ -23,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -54,6 +55,8 @@ fun PermissionCard(
     actionLabel: String,
     onAction: () -> Unit,
     modifier: Modifier = Modifier,
+    secondaryActionLabel: String? = null,
+    onSecondaryAction: () -> Unit = {},
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -71,7 +74,10 @@ fun PermissionCard(
                     Text(body, style = MaterialTheme.typography.bodyMedium)
                 }
             }
-            FilledTonalButton(onClick = onAction, modifier = Modifier.align(Alignment.End)) { Text(actionLabel) }
+            Row(Modifier.align(Alignment.End), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (secondaryActionLabel != null) TextButton(onClick = onSecondaryAction) { Text(secondaryActionLabel) }
+                FilledTonalButton(onClick = onAction) { Text(actionLabel) }
+            }
         }
     }
 }

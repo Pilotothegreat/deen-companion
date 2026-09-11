@@ -216,6 +216,17 @@
     <string name="middle_of_night">منتصف الليل</string>
     <string name="last_third_of_night">الثلث الأخير من الليل</string>
     <string name="middle_of_night_at">منتصف الليل %1$s</string>
+    <string name="location_title">الموقع</string>
+    <string name="search_city_hint">ابحث عن مدينة</string>
+    <string name="use_my_location">استخدم موقعي</string>
+    <string name="use_my_location_desc">يُحدَّد تلقائيًا ويتحدّث عند السفر</string>
+    <string name="suggested_cities">مدن مقترحة</string>
+    <string name="search_results">النتائج</string>
+    <string name="no_cities_found">لا توجد مدن مطابقة</string>
+    <string name="location_mode_manual">محدَّد يدويًا</string>
+    <string name="location_auto_updated">تلقائي · آخر تحديث %1$s</string>
+    <string name="location_not_set">لم يُحدَّد بعد</string>
+    <string name="choose_city">اختر مدينة</string>
     <string name="hijri_adjustment">تعديل التاريخ الهجري</string>
     <string name="iqama">الإقامة</string>
     <string name="iqama_for">إقامة %1$s</string>

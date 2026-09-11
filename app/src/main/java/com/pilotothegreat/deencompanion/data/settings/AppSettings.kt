@@ -12,6 +12,16 @@ import java.time.ZoneId
 
 enum class ThemeMode { SYSTEM, LIGHT, DARK }
 
+/** Where the saved location came from. Enum names are persisted in settings; do not rename. */
+enum class LocationSource {
+    /** Nothing saved yet; the app uses [Defaults]. */
+    DEFAULT,
+    DEVICE,
+    IP,
+    /** Picked from the city list; automatic updates leave it alone. */
+    MANUAL,
+}
+
 data class SavedLocation(
     val latitude: Double,
     val longitude: Double,
@@ -23,6 +33,7 @@ data class SavedLocation(
     val updatedAt: Long,
     /** True until a location has been saved; prayer times then use [Defaults]. */
     val isDefault: Boolean,
+    val source: LocationSource,
 )
 
 data class IqamaSetting(

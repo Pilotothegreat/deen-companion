@@ -44,6 +44,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         cityName: String?,
         timezoneId: String,
         countryCode: String? = null,
+        source: LocationSource = LocationSource.DEVICE,
         updatedAt: Long = System.currentTimeMillis(),
     ) = edit {
         it[Keys.LATITUDE] = latitude.coerceIn(-90.0, 90.0)
@@ -51,10 +52,13 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         if (cityName.isNullOrBlank()) it.remove(Keys.CITY_NAME) else it[Keys.CITY_NAME] = cityName
         if (countryCode.isNullOrBlank()) it.remove(Keys.COUNTRY_CODE) else it[Keys.COUNTRY_CODE] = countryCode.uppercase()
         it[Keys.TIMEZONE_ID] = timezoneId
+        it[Keys.LOCATION_SOURCE] = source.name
         it[Keys.LOCATION_UPDATED_AT] = updatedAt
     }
 
     suspend fun setCityName(name: String) = edit { it[Keys.CITY_NAME] = name }
+
+    suspend fun setTimezone(timezoneId: String) = edit { it[Keys.TIMEZONE_ID] = timezoneId }
 
     /** Picking a method by hand turns off automatic selection. */
     suspend fun setMethod(value: CalculationMethod) = edit {
@@ -169,6 +173,7 @@ internal object Keys {
     val LANGUAGE_MIGRATED = booleanPreferencesKey("language_migrated")
     val LANGUAGE = stringPreferencesKey("app_language")
     val COUNTRY_CODE = stringPreferencesKey("country_code")
+    val LOCATION_SOURCE = stringPreferencesKey("location_source")
     val METHOD_AUTO = booleanPreferencesKey("calc_method_auto")
     val HIGH_LATITUDE = stringPreferencesKey("high_latitude_rule")
 }
@@ -194,6 +199,9 @@ internal fun Preferences.toAppSettings(): AppSettings = AppSettings(
         countryCode = this[Keys.COUNTRY_CODE] ?: Defaults.COUNTRY.takeIf { this[Keys.LATITUDE] == null },
         updatedAt = this[Keys.LOCATION_UPDATED_AT] ?: 0L,
         isDefault = this[Keys.LATITUDE] == null,
+        // Earlier versions only saved device or IP locations.
+        source = enumOrNull<LocationSource>(this[Keys.LOCATION_SOURCE])
+            ?: if (this[Keys.LATITUDE] == null) LocationSource.DEFAULT else LocationSource.DEVICE,
     ),
     method = enumOrNull<CalculationMethod>(this[Keys.CALC_METHOD]) ?: Defaults.METHOD,
     // Installs that already chose a method keep it; everyone else follows their location.
@@ -220,7 +228,7 @@ internal fun Preferences.toAppSettings(): AppSettings = AppSettings(
     showTranslation = this[Keys.SHOW_TRANSLATION] ?: false,
     reciter = enumOrNull<Reciter>(this[Keys.RECITER]) ?: Reciter.MISHARY,
     lastReadPage = this[Keys.LAST_READ_PAGE] ?: 0,
-    useIpLocationFallback = this[Keys.IP_FALLBACK] ?: true,
+    useIpLocationFallback = this[Keys.IP_FALLBACK] ?: false,
     dismissedRamadanYear = this[Keys.DISMISSED_RAMADAN_YEAR] ?: 0,
     appLanguage = this[Keys.LANGUAGE] ?: AppLanguage.SYSTEM,
 )

@@ -40,7 +40,6 @@ import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Policy
 import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material.icons.rounded.RecordVoiceOver
-import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material.icons.rounded.TextFields
@@ -80,7 +79,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -98,7 +96,6 @@ import com.pilotothegreat.deencompanion.core.prayer.CalculationMethod
 import com.pilotothegreat.deencompanion.core.prayer.HighLatitudeMode
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
 import com.pilotothegreat.deencompanion.core.text.Numerals
-import com.pilotothegreat.deencompanion.data.location.LocationRepository
 import com.pilotothegreat.deencompanion.data.quran.Reciter
 import com.pilotothegreat.deencompanion.data.settings.AppLanguage
 import com.pilotothegreat.deencompanion.data.settings.AppSettings
@@ -107,10 +104,8 @@ import com.pilotothegreat.deencompanion.data.settings.IqamaSetting
 import com.pilotothegreat.deencompanion.data.settings.ThemeMode
 import com.pilotothegreat.deencompanion.data.update.UpdateChecker
 import com.pilotothegreat.deencompanion.ui.common.Formatters
-import com.pilotothegreat.deencompanion.ui.common.LOCATION_PERMISSIONS
 import com.pilotothegreat.deencompanion.ui.common.SystemIntents
 import com.pilotothegreat.deencompanion.ui.common.currentLocale
-import com.pilotothegreat.deencompanion.ui.common.hasLocationPermission
 import com.pilotothegreat.deencompanion.ui.common.icon
 import com.pilotothegreat.deencompanion.ui.common.labelRes
 import com.pilotothegreat.deencompanion.ui.common.nameRes
@@ -118,6 +113,7 @@ import com.pilotothegreat.deencompanion.ui.common.startSafely
 import com.pilotothegreat.deencompanion.ui.components.ChoiceDialog
 import com.pilotothegreat.deencompanion.ui.components.ConnectedChoice
 import com.pilotothegreat.deencompanion.ui.components.SectionHeader
+import com.pilotothegreat.deencompanion.ui.location.locationStatus
 import com.pilotothegreat.deencompanion.ui.theme.UthmanicHafs
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDate
@@ -140,13 +136,16 @@ private sealed interface SettingsDialog {
 }
 
 @Composable
-fun SettingsScreen(settings: AppSettings, onBack: () -> Unit, viewModel: SettingsViewModel = koinViewModel()) {
+fun SettingsScreen(
+    settings: AppSettings,
+    onBack: () -> Unit,
+    onOpenLocation: () -> Unit,
+    viewModel: SettingsViewModel = koinViewModel(),
+) {
     val live by viewModel.settings.collectAsStateWithLifecycle()
     val s = live ?: settings
     val updateState by viewModel.updateState.collectAsStateWithLifecycle()
-    val refreshingLocation by viewModel.isRefreshingLocation.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val resources = LocalResources.current
     val locale = currentLocale()
     val snackbar = remember { SnackbarHostState() }
     var dialog by remember { mutableStateOf<SettingsDialog?>(null) }
@@ -156,20 +155,7 @@ fun SettingsScreen(settings: AppSettings, onBack: () -> Unit, viewModel: Setting
         exactAllowed = viewModel.canScheduleExactAlarms()
         onPauseOrDispose { }
     }
-    val locationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
-        if (result.values.any { it }) viewModel.refreshLocation()
-    }
     val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
-
-    LaunchedEffect(viewModel) {
-        viewModel.locationResults.collect { result ->
-            when (result) {
-                LocationRepository.Result.UPDATED -> Unit
-                LocationRepository.Result.PERMISSION_MISSING -> snackbar.showSnackbar(resources.getString(R.string.location_permission_needed))
-                LocationRepository.Result.UNAVAILABLE -> snackbar.showSnackbar(resources.getString(R.string.location_unavailable))
-            }
-        }
-    }
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
@@ -201,17 +187,11 @@ fun SettingsScreen(settings: AppSettings, onBack: () -> Unit, viewModel: Setting
                     stringResource(R.string.settings_location),
                     listOf(
                         { shapes ->
+                            val city = s.location.cityName ?: stringResource(R.string.default_location)
                             NavRow(
                                 shapes, Icons.Rounded.LocationOn, stringResource(R.string.current_location),
-                                s.location.cityName ?: stringResource(R.string.default_location),
-                                onClick = {
-                                    if (hasLocationPermission(context) || s.useIpLocationFallback) viewModel.refreshLocation()
-                                    else locationPermission.launch(LOCATION_PERMISSIONS)
-                                },
-                                trailing = {
-                                    if (refreshingLocation) LoadingIndicator(Modifier.size(24.dp))
-                                    else Icon(Icons.Rounded.Refresh, contentDescription = stringResource(R.string.refresh_location))
-                                },
+                                "$city · ${locationStatus(s.location)}",
+                                onClick = onOpenLocation,
                             )
                         },
                         { shapes ->

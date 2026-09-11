@@ -14,6 +14,7 @@ import com.pilotothegreat.deencompanion.core.text.Inspiration
 import com.pilotothegreat.deencompanion.core.text.Inspirations
 import com.pilotothegreat.deencompanion.data.location.LocationRepository
 import com.pilotothegreat.deencompanion.data.settings.AppSettings
+import com.pilotothegreat.deencompanion.data.settings.LocationSource
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
 import com.pilotothegreat.deencompanion.data.tasbih.TasbihRepository
 import com.pilotothegreat.deencompanion.data.update.UpdateChecker
@@ -107,16 +108,23 @@ class HomeViewModel(
     val events: SharedFlow<HomeEvent> = _events.asSharedFlow()
 
     init {
-        viewModelScope.launch { location.refreshIfStale() }
+        viewModelScope.launch { location.onAppOpened() }
         viewModelScope.launch {
             updates.check()
             if (updates.state.value is UpdateChecker.State.Available) _events.emit(HomeEvent.UpdateAvailable)
         }
     }
 
+    /** Picks up travel since the app was last in front (throttled in the repository). */
+    fun onResume() {
+        viewModelScope.launch { location.onAppOpened() }
+    }
+
     fun refreshLocation() {
         if (_isRefreshing.value) return
         viewModelScope.launch {
+            // A manually chosen city stays put; pull-to-refresh only redraws.
+            if (settings.current().location.source == LocationSource.MANUAL) return@launch
             _isRefreshing.value = true
             try {
                 when (location.refresh()) {

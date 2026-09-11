@@ -16,13 +16,8 @@ import com.pilotothegreat.deencompanion.data.settings.IqamaSetting
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
 import com.pilotothegreat.deencompanion.data.settings.ThemeMode
 import com.pilotothegreat.deencompanion.data.update.UpdateChecker
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -40,27 +35,9 @@ class SettingsViewModel(
     val lastUpdateCheck: StateFlow<Long> =
         updates.lastCheckedAt.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0L)
 
-    private val _isRefreshingLocation = MutableStateFlow(false)
-    val isRefreshingLocation: StateFlow<Boolean> = _isRefreshingLocation.asStateFlow()
-
-    private val _locationResults = MutableSharedFlow<LocationRepository.Result>(extraBufferCapacity = 1)
-    val locationResults: SharedFlow<LocationRepository.Result> = _locationResults.asSharedFlow()
-
     val isPlayInstall: Boolean get() = updates.isPlayInstall
 
     fun canScheduleExactAlarms(): Boolean = scheduler.canScheduleExact()
-
-    fun refreshLocation() {
-        if (_isRefreshingLocation.value) return
-        viewModelScope.launch {
-            _isRefreshingLocation.value = true
-            try {
-                _locationResults.emit(location.refresh())
-            } finally {
-                _isRefreshingLocation.value = false
-            }
-        }
-    }
 
     fun setUseIpLocationFallback(enabled: Boolean) = launch { repository.setUseIpLocationFallback(enabled) }
     fun setMethod(method: CalculationMethod) = launch { repository.setMethod(method) }

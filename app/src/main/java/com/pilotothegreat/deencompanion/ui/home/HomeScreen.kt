@@ -83,6 +83,7 @@ private data class PermissionStatus(val location: Boolean, val notifications: Bo
 fun HomeScreen(
     onOpenSettings: () -> Unit,
     onOpenQibla: () -> Unit,
+    onOpenLocation: () -> Unit,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val content by viewModel.content.collectAsStateWithLifecycle()
@@ -99,6 +100,7 @@ fun HomeScreen(
     var permissions by remember { mutableStateOf(PermissionStatus.of(context)) }
     LifecycleResumeEffect(Unit) {
         permissions = PermissionStatus.of(context)
+        viewModel.onResume()
         onPauseOrDispose { }
     }
     val locationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
@@ -203,6 +205,8 @@ fun HomeScreen(
                             body = stringResource(R.string.permission_location_body),
                             actionLabel = stringResource(R.string.allow),
                             onAction = { locationPermission.launch(LOCATION_PERMISSIONS) },
+                            secondaryActionLabel = stringResource(R.string.choose_city),
+                            onSecondaryAction = onOpenLocation,
                             modifier = Modifier.animateItem(),
                         )
                     }

@@ -11,6 +11,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
+import com.pilotothegreat.deencompanion.data.location.LocationRepository
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
 import com.pilotothegreat.deencompanion.widget.WidgetUpdater
 import kotlinx.coroutines.CoroutineScope
@@ -77,10 +78,12 @@ class PrayerAlarmReceiver : BroadcastReceiver(), KoinComponent {
 /** Rebuilds alarms and widgets after reboot, clock or timezone changes, updates and permission grants. */
 class SystemEventsReceiver : BroadcastReceiver(), KoinComponent {
     private val scheduler: PrayerAlarmScheduler by inject()
+    private val location: LocationRepository by inject()
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action !in HANDLED_ACTIONS) return
         launchAsync {
+            if (intent.action == Intent.ACTION_TIMEZONE_CHANGED) location.onTimezoneChanged()
             scheduler.reschedule()
             WidgetUpdater.updateAll(context)
         }

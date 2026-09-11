@@ -19,9 +19,11 @@ import com.pilotothegreat.deencompanion.data.settings.AppSettings
 import com.pilotothegreat.deencompanion.ui.hadith.HadithBookScreen
 import com.pilotothegreat.deencompanion.ui.hadith.HadithScreen
 import com.pilotothegreat.deencompanion.ui.home.HomeScreen
+import com.pilotothegreat.deencompanion.ui.location.LocationPickerScreen
 import com.pilotothegreat.deencompanion.ui.navigation.HadithBookKey
 import com.pilotothegreat.deencompanion.ui.navigation.HadithKey
 import com.pilotothegreat.deencompanion.ui.navigation.HomeKey
+import com.pilotothegreat.deencompanion.ui.navigation.LocationKey
 import com.pilotothegreat.deencompanion.ui.navigation.Navigator
 import com.pilotothegreat.deencompanion.ui.navigation.QiblaKey
 import com.pilotothegreat.deencompanion.ui.navigation.QuranKey
@@ -71,6 +73,7 @@ fun DeenApp(settings: AppSettings) {
                     HomeScreen(
                         onOpenSettings = { navigator.navigate(SettingsKey) },
                         onOpenQibla = { navigator.selectTab(TopLevel.QIBLA) },
+                        onOpenLocation = { navigator.navigate(LocationKey) },
                     )
                 }
                 entry<QuranKey> { QuranScreen(onOpenReader = navigator::navigate) }
@@ -78,7 +81,10 @@ fun DeenApp(settings: AppSettings) {
                 entry<HadithKey> { HadithScreen(onOpenBook = { navigator.navigate(HadithBookKey(it)) }) }
                 entry<HadithBookKey> { key -> HadithBookScreen(key, onBack = navigator::back) }
                 entry<QiblaKey> { QiblaScreen() }
-                entry<SettingsKey> { SettingsScreen(settings = settings, onBack = navigator::back) }
+                entry<SettingsKey> {
+                    SettingsScreen(settings = settings, onBack = navigator::back, onOpenLocation = { navigator.navigate(LocationKey) })
+                }
+                entry<LocationKey> { LocationPickerScreen(onBack = navigator::back) }
             },
         )
     }
