@@ -1,7 +1,7 @@
 Deen Companion is now Bilal (بلال), with a new icon.
 
 • Athkar tab: morning, evening, after-prayer, sleep and everyday athkar with a tap counter, reminders and a streak
-• New widgets: next prayer like the Today card, prayer times, verse of the day and athkar; refreshed tasbih and inspiration
+• New widgets: next prayer like the Today card, prayer times, verse of the day and athkar
 • More accurate prayer times, the method chosen by country, per-prayer fine-tune and high-latitude rules
 • Offline city search and travel detection
 • Floating navigation bar, springier motion and a verse of the day

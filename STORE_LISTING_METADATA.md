@@ -1,93 +1,67 @@
-# Bilal: Store listing
+# Bilal: Play Store listing
 
-- **Package:** `com.pilotothegreat.deencompanion`
-- **Version:** 1.6.0 (`versionCode` 194)
-- **Category:** Books & Reference
-- **Content rating:** Everyone
-- **Ads / tracking:** none
+Everything Google Play asks for, in one place. The listing text itself lives in `fastlane/metadata/android/` (`en-US` and `ar`), so it can be pasted into the Play Console or uploaded with `fastlane supply`.
 
-## Title
+## App details
 
-- English: Bilal: Prayer Times & Quran
-- Arabic: بلال: مواقيت الصلاة والقرآن
+| Field | Value |
+| --- | --- |
+| Package | `com.pilotothegreat.deencompanion` |
+| Version | 1.7.0 (`versionCode` 195) |
+| Category | Books & Reference |
+| Tags | Prayer times, Quran, Islam |
+| Price | Free, no ads, no in-app purchases |
+| Privacy policy | https://pilotothegreat.github.io/deen-companion/privacy.html |
+| Website | https://github.com/Pilotothegreat/deen-companion |
 
-## Short description (80 characters max)
+## Listing text
 
-- English: Prayer times, adhan alerts, Quran, hadith and Qibla. Private and ad-free.
-- Arabic: مواقيت الصلاة والأذان والقرآن والحديث والقبلة، بخصوصية تامة وبلا إعلانات.
+| Field | Limit | English | Arabic |
+| --- | --- | --- | --- |
+| App name | 30 | Bilal: Prayer Times & Athkar | بلال: مواقيت الصلاة والأذكار |
+| Short description | 80 | `en-US/short_description.txt` | `ar/short_description.txt` |
+| Full description | 4000 | `en-US/full_description.txt` | `ar/full_description.txt` |
+| Release notes | 500 | `en-US/changelogs/195.txt` | `ar/changelogs/195.txt` |
 
-## Full description (English)
+## Graphics
 
-Bilal brings prayer times, the Quran, hadith, the Qibla and tasbih together in one calm, private app. There are no accounts, ads or trackers.
+| Asset | Spec | File |
+| --- | --- | --- |
+| App icon | 512 x 512 PNG | `fastlane/metadata/android/en-US/images/icon.png` |
+| Feature graphic | 1024 x 500 PNG | `…/en-US/images/featureGraphic.png`, `…/ar/images/featureGraphic.png` |
+| Phone screenshots | 1080 x 1920 PNG, 9:16 | `…/en-US/images/phoneScreenshots/`, `…/ar/images/phoneScreenshots/` |
 
-**Prayer times and alerts**
-- Oman Ministry of Endowments timetable by default, plus Umm al-Qura, Muslim World League, ISNA, Egypt, Karachi, Ja'fari and Tehran
-- Standard or Hanafi Asr
-- Adhan and iqama notifications, with iqama as minutes after the adhan or a fixed time
-- Mute individual prayers
-- Next-prayer widget with a live countdown
+Sources are in `branding/` (the icon and mark) and `branding/store/` (the feature graphics). The raw screenshots come from `StoreScreenshotTest`, and `scripts/store/frame_screenshots.py` frames them with captions.
 
-**Quran**
-- 604-page Madinah mushaf in the Uthmanic Hafs script
-- Saheeh International English translation
-- Search that ignores diacritics, bookmarks and "continue reading"
-- Ayah-by-ayah recitation by Mishary Alafasy, Mahmoud Khalil Al-Husary or Abdul Basit, with a sleep timer
+## Play Console answers
 
-**Hadith**
-- Sahih al-Bukhari, Sahih Muslim, Jami' at-Tirmidhi, Sunan Abu Dawud, Sunan an-Nasa'i and Sunan Ibn Majah
-- A sample of each is included; download full collections when you want them
-- Favorites, grades and search
+**App access:** everything works without an account or login.
 
-**Qibla and tasbih**
-- Compass with calibration help, turn guidance and the distance to Makkah
-- Tasbih counter with the post-prayer 33/33/34 cycle, haptic feedback and a home-screen widget
+**Ads:** the app contains no ads.
 
-**Designed for you**
-- Material 3 Expressive design with dynamic color, light, dark and pure-black themes
-- English and Arabic with a full right-to-left layout
+**Content rating (IARC questionnaire):** reference or educational app with no violence, sexual content, profanity, drugs, gambling or user-generated content. Expected rating: Everyone / PEGI 3.
 
-## Full description (Arabic)
+**Target audience:** 13 and over. Choosing a younger age group enrols the app in the Families programme, which has extra requirements.
 
-يجمع تطبيق «بلال» مواقيت الصلاة والقرآن الكريم والحديث الشريف والقبلة والتسبيح في تطبيق هادئ يحترم خصوصيتك: بلا حسابات ولا إعلانات ولا تتبع.
+**Data safety:**
+- *Does your app collect or share any of the required user data types?* **No.**
+  - Location, settings, bookmarks and athkar progress are stored and processed only on the device. Nothing is sent to the developer.
+  - The optional internet location fallback is off by default. When the user turns it on, ipapi.co or freeipapi.com see the device's IP address, the same as any web request, and send back an approximate city.
+- *Is data encrypted in transit?* Yes, every request uses HTTPS.
+- *Can users request deletion?* There's no account and nothing held off the device; uninstalling removes everything.
 
-**مواقيت الصلاة والتنبيهات**
-- تقويم وزارة الأوقاف والشؤون الدينية بسلطنة عُمان افتراضيًا، إضافة إلى أم القرى ورابطة العالم الإسلامي وغيرها
-- حساب العصر على مذهب الجمهور أو الحنفي
-- تنبيهات الأذان والإقامة، والإقامة بعد الأذان بدقائق أو في وقت ثابت
-- كتم تنبيهات صلاة بعينها
-- ويدجت للصلاة القادمة مع عدّ تنازلي مباشر
+**Permissions that need a declaration:**
+- *Foreground service (media playback):* keeps Quran recitation playing with media controls while the app is in the background. Play asks for a short video of starting a recitation and leaving the app.
+- *Exact alarms (`SCHEDULE_EXACT_ALARM`):* adhan and iqama notifications must arrive at the prayer time. The user grants it in system settings, and the app still works without it.
+- *Location:* used only in the foreground to calculate prayer times and the Qibla. It's never used in the background.
 
-**القرآن الكريم**
-- مصحف المدينة بصفحاته الـ٦٠٤ وبالرسم العثماني
-- الترجمة الإنجليزية (صحيح إنترناشونال)
-- بحث لا يتأثر بالتشكيل، وعلامات، ومتابعة القراءة
-- تلاوة آية بآية بأصوات مشاري العفاسي ومحمود خليل الحصري وعبد الباسط عبد الصمد، مع مؤقت للنوم
+## App signing
 
-**الحديث الشريف**
-- صحيح البخاري وصحيح مسلم وجامع الترمذي وسنن أبي داود والنسائي وابن ماجه
-- عينة من كل كتاب مضمّنة، وتنزيل الكتاب كاملًا عند الطلب
-- المفضلة والدرجات والبحث
+Upload `bilal-1.7.0-release.aab`. It's signed with the key in `~/Documents/bilal-signing/`, which becomes the Play **upload key**.
 
-**القبلة والتسبيح**
-- بوصلة مع إرشادات المعايرة والاتجاه والمسافة إلى مكة
-- عداد تسبيح بدورة أذكار ما بعد الصلاة (٣٣/٣٣/٣٤) مع اهتزاز لمسي وويدجت للشاشة الرئيسية
+When Play App Signing asks which key to use, choose to **use the same key** by uploading it with Google's PEPK tool. Then the Play build and the APKs on GitHub have the same signature, and people can move between them without reinstalling. If Google generates its own app-signing key instead, the Play and GitHub builds can't update each other.
 
-## What's new in 1.6.0
+## Before submitting
 
-**English**
-- Redesigned throughout with Material 3 Expressive: new navigation, grouped settings and a shape-morphing prayer card
-- Oman prayer times now match the Ministry's published timetable (Isha was previously about 15 minutes late)
-- The notifications switch now really turns alerts off, and muted prayers are no longer scheduled
-- Hadith favorites are kept when a collection is re-downloaded, and collections download only when you ask
-- Quran bookmarks, "continue reading", a verse action sheet and faster page loading
-- More accurate Qibla compass that runs only while it's on screen
-- The prayer widget updates at each prayer instead of every minute, which saves battery
-
-**Arabic**
-- تصميم جديد بالكامل وفق Material 3 Expressive مع تنقل جديد وإعدادات مجمّعة وبطاقة صلاة متحركة
-- مواقيت عُمان تطابق الآن تقويم الوزارة (كان وقت العشاء متأخرًا نحو ١٥ دقيقة)
-- مفتاح التنبيهات يوقف التنبيهات فعلًا، والصلوات المكتومة لم تعد تُجدول
-- الاحتفاظ بالأحاديث المفضلة عند إعادة تنزيل الكتب، ولا تُنزَّل الكتب إلا عند الطلب
-- علامات القرآن ومتابعة القراءة وقائمة إجراءات الآية وتحميل أسرع للصفحات
-- بوصلة قبلة أدق لا تعمل إلا أثناء عرضها
-- ويدجت الصلاة يتحدث عند كل صلاة بدل كل دقيقة لتوفير البطارية
+- **Support development sheet:** it opens Omani banking apps to accept donations. Google Play's payments policy generally requires Google Play Billing for payments that support the developer. Hide this sheet in the Play build, or check the policy first, before submitting.
+- **Contact email:** the Play Console requires a public support email for the listing.

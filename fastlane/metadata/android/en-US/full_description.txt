@@ -1,22 +1,37 @@
-Bilal brings prayer times, the Quran, hadith, the Qibla and tasbih together in one calm, private app. No accounts, ads or trackers.
+Bilal is a calm, private companion for prayer, remembrance and the Quran, named after Bilal ibn Rabah, the first muezzin. There are no accounts, ads or trackers, and nearly everything works offline.
 
-Prayer times and alerts
-- Oman Ministry of Endowments timetable by default, plus Umm al-Qura, Muslim World League, ISNA, Egypt, Karachi, Ja'fari and Tehran
-- Standard or Hanafi Asr
-- Adhan and iqama notifications, with iqama as minutes after the adhan or a fixed time
-- Next-prayer widget with a live countdown
+PRAYER TIMES AND ALERTS
+• Accurate times with 14 calculation methods, including Oman's Ministry of Endowments, Umm al-Qura, Dubai, Kuwait, Qatar, Singapore, Turkey and the Moonsighting Committee
+• The method follows your country automatically, or choose your own
+• Standard or Hanafi Asr, per-prayer fine-tuning and high-latitude rules
+• Adhan and iqama notifications, with iqama as minutes after the adhan or a fixed time
+• The middle and last third of the night for qiyam
 
-Quran
-- 604-page Madinah mushaf in the Uthmanic Hafs script with the Saheeh International translation
-- Search that ignores diacritics, bookmarks and "continue reading"
-- Ayah-by-ayah recitation with a sleep timer
+ATHKAR
+• Morning and evening, after prayer, sleep and waking, and 31 everyday situations
+• Each dhikr with its count, virtue and source
+• A big tap counter, a daily streak and optional morning and evening reminders
+• The right athkar suggested for the time of day
 
-Hadith
-- Six major collections, with full collections downloaded only when you ask
-- Favorites, grades and search
+QURAN
+• The 604-page Madinah mushaf in the Uthmanic Hafs script, with the Saheeh International translation
+• Search that ignores diacritics, bookmarks and continue reading
+• Ayah-by-ayah recitation by Mishary Alafasy, Mahmoud Khalil Al-Husary or Abdul Basit, with a sleep timer
+• A verse of the day that opens in the mushaf
 
-Qibla and tasbih
-- Compass with calibration help and turn guidance
-- Tasbih counter with the post-prayer 33/33/34 cycle and a home-screen widget
+HADITH
+• Sahih al-Bukhari, Sahih Muslim, Jami' at-Tirmidhi, Sunan Abu Dawud, Sunan an-Nasa'i and Sunan Ibn Majah
+• A sample of each is included; download full collections when you want them
+• A daily hadith or prophetic dua
 
-Material 3 Expressive design, dynamic color, light, dark and pure-black themes, in English and Arabic.
+WIDGETS
+• The next prayer with a live countdown
+• Today's prayer times, the verse of the day, the daily hadith, athkar progress and a tasbih counter
+
+AND MORE
+• Qibla compass with calibration help and the distance to Makkah
+• Offline search of about 11,600 cities in English and Arabic, with travel detection
+• Material 3 Expressive design with dynamic colour and light, dark and pure-black themes
+• English and Arabic, with a full right-to-left layout
+
+Your location and settings stay on your device. Bilal is free and open source (GPL-3.0).

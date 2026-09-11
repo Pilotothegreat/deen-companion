@@ -57,7 +57,7 @@ jobs:
           echo "RELEASE_KEYSTORE_FILE=release.jks" >> "$GITHUB_ENV"
 
       - name: Lint, test and build
-        run: ./gradlew lintDebug testDebugUnitTest assembleRelease
+        run: ./gradlew lintDebug testDebugUnitTest assembleRelease bundleRelease
 
       - name: Publish the release
         env:
@@ -66,6 +66,6 @@ jobs:
           code=$(grep -oP 'versionCode = \K\d+' app/build.gradle.kts)
           notes="fastlane/metadata/android/en-US/changelogs/$code.txt"
           [ -f "$notes" ] || { echo "::error::Missing $notes"; exit 1; }
-          gh release create "$GITHUB_REF_NAME" app/build/outputs/apk/release/*.apk \
+          gh release create "$GITHUB_REF_NAME" app/build/outputs/apk/release/*.apk app/build/outputs/bundle/release/*.aab \
             --title "Bilal $GITHUB_REF_NAME" \
             --notes-file "$notes"
