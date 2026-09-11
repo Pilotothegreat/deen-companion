@@ -113,7 +113,7 @@ interface TasbihDao {
     suspend fun insertRecord(record: TasbihRecord)
 }
 
-@Database(entities = [BookmarkedVerse::class, HadithBookEntity::class, HadithEntity::class, TasbihRecord::class], version = 6, exportSchema = false)
+@Database(entities = [BookmarkedVerse::class, HadithBookEntity::class, HadithEntity::class, TasbihRecord::class], version = 6, exportSchema = true)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun bookmarkedVerseDao(): BookmarkedVerseDao
     abstract fun hadithDao(): HadithDao
