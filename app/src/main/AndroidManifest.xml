@@ -48,6 +48,9 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
         </activity>
 
         <receiver
@@ -162,6 +165,21 @@
         <receiver
             android:name=".widget.WidgetRefreshReceiver"
             android:exported="false" />
+
+        <!-- The next prayer, in the quick settings shade. -->
+        <service
+            android:name=".ui.tile.NextPrayerTileService"
+            android:exported="true"
+            android:icon="@drawable/notification"
+            android:label="@string/tile_next_prayer"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.quicksettings.ACTIVE_TILE"
+                android:value="false" />
+        </service>
 
         <!-- Plays the adhan with alarm audio attributes, which a channel sound cannot do. -->
         <service

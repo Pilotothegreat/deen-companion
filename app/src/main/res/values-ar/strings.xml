@@ -594,4 +594,28 @@
 والتنبيهات: الأذان يُسمع صوتًا حتى في وضع عدم الإزعاج، وفي الإشعار زرّا «صليت» والتأجيل، وشاشة جديدة تبيّن ما يمنع وصول التنبيهات في هاتفك.
 
 وأيضًا: تلاوة تعمل دون اتصال مع التكرار والسرعة، وخطة ختمة، وإعداد للأدوات، وأداة «الآن»، ووضع مبسّط وخط أكبر، ونسخة احتياطية إلى ملف تحتفظ به.</string>
+
+    <!-- Shortcuts and the tile -->
+    <string name="tile_next_prayer">الصلاة القادمة</string>
+    <string name="shortcut_athkar_short">الأذكار</string>
+    <string name="shortcut_athkar_long">أذكار الصباح</string>
+    <string name="shortcut_read_short">القراءة</string>
+    <string name="shortcut_read_long">متابعة القراءة</string>
+    <string name="shortcut_qibla_short">القبلة</string>
+    <string name="shortcut_qibla_long">تحديد القبلة</string>
+    <string name="shortcut_tasbih_short">المسبحة</string>
+    <string name="shortcut_tasbih_long">فتح المسبحة</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_welcome_title">بلال</string>
+    <string name="onboarding_welcome_body">مواقيت الصلاة والمصحف والأذكار والقبلة. بلا حساب ولا إعلانات، ولا يغادر شيء عنك هذا الهاتف إلا بإذنك. ويمكنك تغيير اللغة من الإعدادات.</string>
+    <string name="onboarding_location_title">موقعك</string>
+    <string name="onboarding_location_body">تُحسب المواقيت والقبلة لموقعك داخل الهاتف، ويُستخدم الموقع والتطبيق مفتوح فقط ولا يُستخدم في الخلفية. ويمكنك اختيار المدينة يدويًا.</string>
+    <string name="onboarding_alerts_title">تنبيهات تصل</string>
+    <string name="onboarding_alerts_body">يحتاج أندرويد إذنك لعرض تنبيهات الصلاة، وإذنًا آخر لتصل في وقتها بالدقيقة. وإن تأخرت ففي الإعدادات شاشة تبيّن ما يمنعها في هاتفك.</string>
+    <string name="onboarding_smart_title">تفاعل مع يومك</string>
+    <string name="onboarding_smart_body">يعرف بلال الجمعة وليالي رمضان وعرفة وسائر السنة الهجرية، ويعرض دعاء الطقس. والطقس يُرسل موقعك مقرّبًا إلى نحو كيلومتر إلى Open-Meteo مرة كل ساعة والتطبيق مفتوح، ويمكنك إيقافه متى شئت.</string>
+    <string name="onboarding_skip">تخطّي</string>
+    <string name="onboarding_next">التالي</string>
+    <string name="onboarding_start">ابدأ</string>
 </resources>

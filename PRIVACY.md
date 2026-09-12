@@ -1,6 +1,6 @@
 # Privacy Policy for Bilal
 
-Last updated: September 11, 2026
+Last updated: September 12, 2026
 
 Bilal has no accounts, ads, analytics or crash reporting. Everything you set up in the app stays on your device. This page lists exactly what the app stores and every network request it can make.
 
@@ -41,6 +41,8 @@ No personal information beyond what any web request carries (such as your IP add
 | Alarms and reminders (`SCHEDULE_EXACT_ALARM`) | Deliver notifications on time. You grant it in system settings; without it, alerts may be a few minutes late. |
 | Run at startup (`RECEIVE_BOOT_COMPLETED`) | Reschedule prayer alerts after the device restarts. |
 | Internet | The optional features in the table above. |
+| Install packages (`REQUEST_INSTALL_PACKAGES`) | Only in the version downloaded from GitHub, so it can install its own update after checking it against the published checksum. The Google Play version does not have this permission at all. |
+| Do Not Disturb access | Only if you turn on "silence during prayer". The app asks at that moment and never otherwise. |
 | Foreground media playback | Keep recitation playing with media controls when the app is in the background. |
 
 ## Banking apps

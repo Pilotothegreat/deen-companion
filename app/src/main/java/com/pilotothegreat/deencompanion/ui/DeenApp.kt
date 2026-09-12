@@ -69,6 +69,7 @@ import com.pilotothegreat.deencompanion.ui.navigation.HomeKey
 import com.pilotothegreat.deencompanion.ui.navigation.LocalBottomBarPadding
 import com.pilotothegreat.deencompanion.ui.navigation.LocationKey
 import com.pilotothegreat.deencompanion.ui.navigation.Navigator
+import com.pilotothegreat.deencompanion.ui.onboarding.OnboardingScreen
 import com.pilotothegreat.deencompanion.ui.navigation.QiblaKey
 import com.pilotothegreat.deencompanion.ui.navigation.QuranKey
 import com.pilotothegreat.deencompanion.ui.navigation.ReaderKey
@@ -88,6 +89,25 @@ import org.koin.androidx.compose.koinViewModel
  */
 @Composable
 fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpened: () -> Unit = {}) {
+    // First run, before anything else — including the what's-new sheet, which has nothing to say to
+    // someone who has never had an older version. Someone upgrading has already made these choices,
+    // and a saved location is the proof: showing them a welcome tour would be the update
+    // introducing itself as a stranger.
+    var onboarding by rememberSaveable(settings.onboardingCompleted) {
+        mutableStateOf(!settings.onboardingCompleted && settings.location.isDefault)
+    }
+    var openCityPicker by rememberSaveable { mutableStateOf(false) }
+    if (onboarding) {
+        val onboardingViewModel: SettingsViewModel = koinViewModel()
+        fun finish(withCityPicker: Boolean) {
+            onboardingViewModel.completeOnboarding()
+            openCityPicker = withCityPicker
+            onboarding = false
+        }
+        OnboardingScreen(onOpenLocation = { finish(true) }, onFinish = { finish(false) })
+        return
+    }
+
     // Once, on the first launch of a new version. A changelog that keeps reappearing is an advert.
     val versionCode = BuildConfig.VERSION_CODE
     var showWhatsNew by rememberSaveable(versionCode) {
@@ -108,6 +128,14 @@ fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpe
         destination?.let {
             navigator.open(it)
             onDestinationOpened()
+        }
+    }
+    // "Choose a city" during first run lands on the picker rather than dropping someone on Today
+    // beside the very prompt they just answered.
+    LaunchedEffect(openCityPicker) {
+        if (openCityPicker) {
+            navigator.navigate(LocationKey)
+            openCityPicker = false
         }
     }
 

@@ -17,6 +17,7 @@ import androidx.compose.material.icons.rounded.Alarm
 import androidx.compose.material.icons.rounded.Explore
 import androidx.compose.material.icons.rounded.MyLocation
 import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,6 +52,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pilotothegreat.deencompanion.R
+import com.pilotothegreat.deencompanion.ui.common.nameRes
+import com.pilotothegreat.deencompanion.ui.common.Formatters
+import com.pilotothegreat.deencompanion.core.prayer.Prayer
 import com.pilotothegreat.deencompanion.core.moment.MomentEngine
 import com.pilotothegreat.deencompanion.core.moment.Dismissal
 import com.pilotothegreat.deencompanion.alarms.Notifications
@@ -161,6 +165,15 @@ fun HomeScreen(
                     }
                 },
                 actions = {
+                    // Plain text, so it lands readably in any message rather than as a picture
+                    // nobody can select from. Hidden until the times exist.
+                    content?.let { today ->
+                        IconButton(onClick = {
+                            context.startSafely(SystemIntents.shareText(shareTimes(resources, today, locale, context)))
+                        }) {
+                            Icon(Icons.Rounded.Share, contentDescription = stringResource(R.string.share))
+                        }
+                    }
                     IconButton(onClick = onOpenQibla) {
                         Icon(Icons.Rounded.Explore, contentDescription = stringResource(R.string.qibla_compass))
                     }
@@ -309,4 +322,21 @@ fun HomeScreen(
 private fun gregorianDate(locale: Locale, date: LocalDate): String {
     val pattern = if (locale.language == "ar") "EEEE، d MMMM" else "EEEE, d MMMM"
     return DateTimeFormatter.ofPattern(pattern, locale).withDecimalStyle(DecimalStyle.of(locale)).format(date)
+}
+
+/** Today's times as a message: the date, the place, and one prayer per line. */
+private fun shareTimes(
+    resources: android.content.res.Resources,
+    content: HomeContent,
+    locale: java.util.Locale,
+    context: android.content.Context,
+): String = buildString {
+    appendLine(resources.getString(R.string.app_name))
+    appendLine(Formatters.date(content.today.date.atStartOfDay(content.settings.zone).toInstant().toEpochMilli(), content.settings.zone, locale))
+    content.settings.location.cityName?.let { appendLine(it) }
+    appendLine()
+    Prayer.obligatory.forEach { prayer ->
+        val time = content.today.adhan[prayer] ?: return@forEach
+        appendLine("${resources.getString(prayer.nameRes)}  ${Formatters.time(context, time.toLocalTime(), locale)}")
+    }
 }

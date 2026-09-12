@@ -148,6 +148,8 @@ private val _backupMessage = MutableStateFlow<Int?>(null)
         }
     }
 
+    fun completeOnboarding() = launch { repository.setOnboardingCompleted(true) }
+
     fun markVersionSeen(versionCode: Int) = launch { repository.setLastSeenVersionCode(versionCode) }
 
         fun setSimpleMode(on: Boolean) = launch { repository.setSimpleMode(on) }

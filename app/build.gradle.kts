@@ -38,8 +38,8 @@ android {
         applicationId = "com.pilotothegreat.deencompanion"
         minSdk = 26
         targetSdk = 37
-        versionCode = 195
-        versionName = "1.7.0"
+        versionCode = 196
+        versionName = "1.8.0"
         base.archivesName = "bilal-$versionName"
         // The donation sheet opens banking apps; the Google Play build leaves it out (see the play build type).
         buildConfigField("boolean", "SUPPORT_SHEET", "true")

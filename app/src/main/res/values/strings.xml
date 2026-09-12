@@ -562,4 +562,28 @@ Bilal now notices the day it is in: Jumu\'ah, Ramadan\'s odd nights, Arafah, Ash
 Alerts got serious: the adhan plays as real audio through Do Not Disturb, notifications carry "Prayed" and a snooze, and a new screen shows exactly what on your phone is stopping alerts arriving.
 
 Also: offline recitation with repeat and speed, a khatma plan, widget configuration, a Right Now widget, simple mode and larger text for anyone who needs it, and backup to a file you keep.</string>
+
+    <!-- Shortcuts and the tile -->
+    <string name="tile_next_prayer">Next prayer</string>
+    <string name="shortcut_athkar_short">Athkar</string>
+    <string name="shortcut_athkar_long">Morning athkar</string>
+    <string name="shortcut_read_short">Read</string>
+    <string name="shortcut_read_long">Continue reading</string>
+    <string name="shortcut_qibla_short">Qibla</string>
+    <string name="shortcut_qibla_long">Find the Qibla</string>
+    <string name="shortcut_tasbih_short">Tasbih</string>
+    <string name="shortcut_tasbih_long">Open the tasbih</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_welcome_title">Bilal</string>
+    <string name="onboarding_welcome_body">Prayer times, the mushaf, athkar and the Qibla. No account, no ads, and nothing about you leaves this phone unless you turn it on. Change the language any time in Settings.</string>
+    <string name="onboarding_location_title">Where you are</string>
+    <string name="onboarding_location_body">Prayer times and the Qibla are worked out for your position, on this phone. Location is used only while the app is open, never in the background. You can choose a city by hand instead.</string>
+    <string name="onboarding_alerts_title">Alerts that arrive</string>
+    <string name="onboarding_alerts_body">Android needs your permission to show prayer alerts, and a second one to deliver them on the minute rather than whenever it suits. If alerts still come late, Settings has a screen that shows exactly what on your phone is stopping them.</string>
+    <string name="onboarding_smart_title">Reacting to the day</string>
+    <string name="onboarding_smart_body">Bilal notices Jumu\'ah, Ramadan\'s nights, Arafah and the rest of the Islamic year, and offers the dua for the weather outside. Weather sends your location, rounded to about a kilometre, to Open-Meteo once an hour while the app is open. Turn it off in Settings whenever you like.</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_start">Start</string>
 </resources>

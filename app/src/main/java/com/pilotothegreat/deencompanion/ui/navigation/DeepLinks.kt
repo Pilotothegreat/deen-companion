@@ -10,11 +10,25 @@ object DeepLinks {
     private const val EXTRA_DESTINATION = "com.pilotothegreat.deencompanion.destination"
     private const val ATHKAR = "athkar/"
     private const val READER = "reader/"
+    private const val SCREEN = "screen/"
+
+    /** Screens a launcher shortcut or a tile can open directly. */
+    const val QIBLA = "qibla"
+    const val TASBIH = "tasbih"
+
+    /**
+     * The launcher shortcut cannot know which page was last read, so it opens the Quran, where
+     * "continue reading" sits at the top with the real page. A shortcut that always opened page 1
+     * would be a shortcut to the wrong place.
+     */
+    const val QURAN = "quran"
 
     fun athkar(context: Context, categoryId: String): Intent = open(context, ATHKAR + categoryId)
 
     fun reader(context: Context, page: Int, surah: Int = 0, ayah: Int = 0): Intent =
         open(context, "$READER$page/$surah/$ayah")
+
+    fun screen(context: Context, name: String): Intent = open(context, SCREEN + name)
 
     fun parse(intent: Intent?): NavKey? {
         val value = intent?.getStringExtra(EXTRA_DESTINATION) ?: return null
@@ -23,6 +37,12 @@ object DeepLinks {
             value.startsWith(READER) -> value.removePrefix(READER).split('/').mapNotNull(String::toIntOrNull)
                 .takeIf { it.size == 3 && it[0] in 1..604 }
                 ?.let { (page, surah, ayah) -> ReaderKey(page, surah, ayah) }
+            value.startsWith(SCREEN) -> when (value.removePrefix(SCREEN)) {
+                QIBLA -> QiblaKey
+                TASBIH -> AthkarKey
+                QURAN -> QuranKey
+                else -> null
+            }
             else -> null
         }
     }

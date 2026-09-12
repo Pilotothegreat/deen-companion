@@ -8,7 +8,7 @@ Everything Google Play asks for, in one place. The listing text itself lives in 
 | --- | --- |
 | Package (Google Play) | `com.pilotothegreat.bilal`, a new listing |
 | Package (GitHub APK) | `com.pilotothegreat.deencompanion` |
-| Version | 1.7.0 (`versionCode` 195) |
+| Version | 1.8.0 (`versionCode` 196) |
 | Category | Books & Reference |
 | Tags | Prayer times, Quran, Islam |
 | Price | Free, no ads, no in-app purchases |
@@ -22,7 +22,7 @@ Everything Google Play asks for, in one place. The listing text itself lives in 
 | App name | 30 | Bilal: Prayer Times & Athkar | بلال: مواقيت الصلاة والأذكار |
 | Short description | 80 | `en-US/short_description.txt` | `ar/short_description.txt` |
 | Full description | 4000 | `en-US/full_description.txt` | `ar/full_description.txt` |
-| Release notes | 500 | `en-US/changelogs/195.txt` | `ar/changelogs/195.txt` |
+| Release notes | 500 | `en-US/changelogs/196.txt` | `ar/changelogs/196.txt` |
 
 ## Graphics
 
@@ -55,13 +55,14 @@ Sources are in `branding/` (the icon and mark) and `branding/store/` (the featur
 - *Can users request deletion?* There's no account and nothing held off the device; uninstalling removes everything.
 
 **Permissions that need a declaration:**
+- *Do Not Disturb access (optional):* only if the reader turns on "silence during prayer"; the app asks for it at that moment and never otherwise.
 - *Foreground service (media playback):* keeps Quran recitation playing with media controls while the app is in the background. Play asks for a short video of starting a recitation and leaving the app.
 - *Exact alarms (`SCHEDULE_EXACT_ALARM`):* adhan and iqama notifications must arrive at the prayer time. The user grants it in system settings, and the app still works without it.
 - *Location:* used only in the foreground to calculate prayer times and the Qibla. It's never used in the background.
 
 ## App signing
 
-Upload `bilal-1.7.0-play.aab`, built with `./gradlew bundlePlay`. It's the release build without the donation sheet, packaged as `com.pilotothegreat.bilal` and signed with the key in `~/Documents/bilal-signing/`, which becomes the Play **upload key**. When Play asks about app signing, choose **Use Google-generated key**.
+Upload `bilal-1.8.0-play.aab`, built with `./gradlew bundlePlay`. It's the release build without the donation sheet, packaged as `com.pilotothegreat.bilal` and signed with the key in `~/Documents/bilal-signing/`, which becomes the Play **upload key**. When Play asks about app signing, choose **Use Google-generated key**.
 
 The old Deen Companion listing (`com.pilotothegreat.deencompanion`) can't take updates, because its upload key (SHA1 `4A:55:35:8F:16:20:FB:FB:E6:DA:27:41:C2:06:4B:D5:60:28:F1:EA`) is lost. Its text can still be edited, so point its users to Bilal once the new app is live, then unpublish it. If that listing is ever needed again, `upload_certificate.pem` on the v1.7.0 release can register the new key there through an upload key reset.
 

@@ -44,14 +44,14 @@ class ScreenshotTest {
     @Config(sdk = [30], qualifiers = "en-w400dp-h880dp-xxhdpi")
     fun englishLight() = walkThrough(
         "en",
-        Labels("Today", "Quran", "Athkar", "Hadith", "Qibla", "Settings", "Back", "Al-Fatihah", "Sahih al-Bukhari", "Morning"),
+        Labels("Today", "Quran", "Athkar", "Hadith", "Qibla", "Settings", "Back", "Al-Fatihah", "Sahih al-Bukhari", "Morning", "Skip"),
     )
 
     @Test
     @Config(sdk = [30], qualifiers = "ar-w400dp-h880dp-night-xxhdpi")
     fun arabicDark() = walkThrough(
         "ar",
-        Labels("اليوم", "القرآن", "الأذكار", "الحديث", "القبلة", "الإعدادات", "رجوع", "سورة الفاتحة", "صحيح البخاري", "أذكار الصباح"),
+        Labels("اليوم", "القرآن", "الأذكار", "الحديث", "القبلة", "الإعدادات", "رجوع", "سورة الفاتحة", "صحيح البخاري", "أذكار الصباح", "تخطّي"),
     )
 
     private data class Labels(
@@ -65,10 +65,15 @@ class ScreenshotTest {
         val firstSurah: String,
         val firstHadithBook: String,
         val morning: String,
+        val onboardingSkip: String,
     )
 
     private fun walkThrough(prefix: String, labels: Labels) {
         compose.mainClock.autoAdvance = false
+        // A fresh install starts at first run, which is also the only place this gets exercised.
+        waitForText(labels.onboardingSkip)
+        shoot("$prefix-00-onboarding")
+        compose.onAllNodesWithText(labels.onboardingSkip).onFirst().performClick()
         waitForText(labels.today)
         shoot("$prefix-01-today")
         scrollDown()
