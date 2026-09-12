@@ -6,10 +6,12 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Alarm
 import androidx.compose.material.icons.rounded.Explore
@@ -49,6 +51,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pilotothegreat.deencompanion.R
+import com.pilotothegreat.deencompanion.core.moment.MomentEngine
+import com.pilotothegreat.deencompanion.core.moment.Dismissal
 import com.pilotothegreat.deencompanion.alarms.Notifications
 import com.pilotothegreat.deencompanion.core.calendar.HijriCalendar
 import com.pilotothegreat.deencompanion.core.text.Numerals
@@ -92,6 +96,7 @@ fun HomeScreen(
     val content by viewModel.content.collectAsStateWithLifecycle()
     val countdown by viewModel.countdown.collectAsStateWithLifecycle()
     val athkarNow by viewModel.athkarNow.collectAsStateWithLifecycle()
+    val cards by viewModel.cards.collectAsStateWithLifecycle()
     val verseOfDay by viewModel.verseOfDay.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -194,59 +199,61 @@ fun HomeScreen(
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp + LocalBottomBarPadding.current),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                if (!permissions.location && current.settings.location.isDefault) {
-                    item(key = "permission-location") {
-                        PermissionCard(
-                            icon = Icons.Rounded.MyLocation,
-                            title = stringResource(R.string.permission_location_title),
-                            body = stringResource(R.string.permission_location_body),
-                            actionLabel = stringResource(R.string.allow),
-                            onAction = { locationPermission.launch(LOCATION_PERMISSIONS) },
-                            secondaryActionLabel = stringResource(R.string.choose_city),
-                            onSecondaryAction = onOpenLocation,
-                            modifier = Modifier.animateItem(),
-                        )
+                // At most one thing to go and fix. A column of permission cards above the prayer
+                // times is what teaches people to stop reading this screen.
+                val repairs = buildList<@Composable () -> Unit> {
+                    if (!permissions.location && current.settings.location.isDefault) {
+                        add {
+                            PermissionCard(
+                                icon = Icons.Rounded.MyLocation,
+                                title = stringResource(R.string.permission_location_title),
+                                body = stringResource(R.string.permission_location_body),
+                                actionLabel = stringResource(R.string.allow),
+                                onAction = { locationPermission.launch(LOCATION_PERMISSIONS) },
+                                secondaryActionLabel = stringResource(R.string.choose_city),
+                                onSecondaryAction = onOpenLocation,
+                            )
+                        }
+                    }
+                    if (current.settings.notificationsEnabled && !permissions.notifications) {
+                        add {
+                            PermissionCard(
+                                icon = Icons.Rounded.Notifications,
+                                title = stringResource(R.string.permission_notifications_title),
+                                body = stringResource(R.string.permission_notifications_body),
+                                actionLabel = stringResource(R.string.allow),
+                                onAction = {
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                        notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                    } else {
+                                        context.startSafely(SystemIntents.appNotifications(context))
+                                    }
+                                },
+                            )
+                        }
+                    } else if (current.settings.notificationsEnabled && !permissions.exactAlarms) {
+                        add {
+                            PermissionCard(
+                                icon = Icons.Rounded.Alarm,
+                                title = stringResource(R.string.permission_exact_title),
+                                body = stringResource(R.string.permission_exact_body),
+                                actionLabel = stringResource(R.string.open_settings),
+                                onAction = { context.startSafely(SystemIntents.exactAlarms(context)) },
+                            )
+                        }
                     }
                 }
-                if (current.settings.notificationsEnabled && !permissions.notifications) {
-                    item(key = "permission-notifications") {
-                        PermissionCard(
-                            icon = Icons.Rounded.Notifications,
-                            title = stringResource(R.string.permission_notifications_title),
-                            body = stringResource(R.string.permission_notifications_body),
-                            actionLabel = stringResource(R.string.allow),
-                            onAction = {
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                    notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
-                                } else {
-                                    context.startSafely(SystemIntents.appNotifications(context))
-                                }
-                            },
-                            modifier = Modifier.animateItem(),
-                        )
-                    }
-                } else if (current.settings.notificationsEnabled && !permissions.exactAlarms) {
-                    item(key = "permission-exact") {
-                        PermissionCard(
-                            icon = Icons.Rounded.Alarm,
-                            title = stringResource(R.string.permission_exact_title),
-                            body = stringResource(R.string.permission_exact_body),
-                            actionLabel = stringResource(R.string.open_settings),
-                            onAction = { context.startSafely(SystemIntents.exactAlarms(context)) },
-                            modifier = Modifier.animateItem(),
-                        )
-                    }
+                repairs.firstOrNull()?.let { repair ->
+                    item(key = "repair") { Box(Modifier.animateItem()) { repair() } }
                 }
-                val ramadanDays = current.daysUntilRamadan
-                if (current.showRamadanCard && ramadanDays != null && current.hijri != null) {
-                    item(key = "ramadan") {
-                        RamadanCard(
-                            daysLeft = ramadanDays,
-                            locale = locale,
-                            onDismiss = { viewModel.dismissRamadan(HijriCalendar.year(current.hijri)) },
-                            modifier = Modifier.animateItem(),
-                        )
-                    }
+                items(cards.take(MomentEngine.TODAY_CARDS - repairs.take(1).size), key = { it.id }) { moment ->
+                    MomentCard(
+                        moment = moment,
+                        locale = locale,
+                        onOpen = moment.athkarCategory?.let { category -> { onOpenAthkar(category) } },
+                        onDismiss = if (moment.dismissal == Dismissal.NONE) null else { { viewModel.dismiss(moment) } },
+                        modifier = Modifier.animateItem(),
+                    )
                 }
                 countdown?.let { cd -> item(key = "hero") { NextPrayerHero(cd, locale, Modifier.animateItem()) } }
                 item(key = "times") {

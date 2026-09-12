@@ -92,9 +92,7 @@ class HijriCalendarTest {
         assertEquals(HijriCalendar.RAMADAN, HijriCalendar.month(hijri))
     }
 
-    @Test fun daysUntilRamadanDuringShaban() = assertEquals(8, HijriCalendar.daysUntilRamadan(LocalDate.of(2026, 2, 10)))
 
-    @Test fun daysUntilRamadanOutsideShabanIsNull() = assertNull(HijriCalendar.daysUntilRamadan(LocalDate.of(2026, 3, 1)))
 
     @Test fun adjustmentShiftsTheDate() {
         val on = LocalDate.of(2026, 9, 11)

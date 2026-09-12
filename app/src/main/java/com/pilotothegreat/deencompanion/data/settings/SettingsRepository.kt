@@ -113,8 +113,6 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
     suspend fun setUseIpLocationFallback(enabled: Boolean) = edit { it[Keys.IP_FALLBACK] = enabled }
 
-    suspend fun setDismissedRamadanYear(hijriYear: Int) = edit { it[Keys.DISMISSED_RAMADAN_YEAR] = hijriYear }
-
     suspend fun setAthkarReminders(enabled: Boolean) = edit { it[Keys.ATHKAR_REMINDERS] = enabled }
 
     suspend fun setAthkarFontSize(size: Int) =
@@ -163,6 +161,17 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     suspend fun setAudioCacheMb(mb: Int) = edit { it[Keys.AUDIO_CACHE_MB] = mb.coerceIn(Defaults.AUDIO_CACHE_RANGE) }
 
     suspend fun setPlaybackSpeed(speed: Float) = edit { it[Keys.PLAYBACK_SPEED] = speed.coerceIn(0.5f, 2f) }
+
+    /**
+     * Records a dismissal as "id@epochDay", so a card sent away today comes back tomorrow while a
+     * permanent dismissal can be recognised by its own id. Entries older than a week are dropped
+     * here rather than needing a sweep of their own.
+     */
+    suspend fun dismissMoment(id: String, onEpochDay: Long) = edit { prefs ->
+        val kept = prefs[Keys.DISMISSED_MOMENTS].orEmpty()
+            .filter { (it.substringAfterLast('@').toLongOrNull() ?: 0L) > onEpochDay - 7 }
+        prefs[Keys.DISMISSED_MOMENTS] = (kept + "$id@$onEpochDay").toSet()
+    }
 
     suspend fun setContinuousPlayback(on: Boolean) = edit { it[Keys.CONTINUOUS_PLAYBACK] = on }
 
@@ -235,6 +244,7 @@ internal object Keys {
     val HIJRI_ADJUSTMENT = intPreferencesKey("hijri_adjustment")
     val NOTIFICATIONS = booleanPreferencesKey("notification_enabled")
     val MUTED_PRAYERS = stringSetPreferencesKey("muted_prayers")
+    val DISMISSED_MOMENTS = stringSetPreferencesKey("dismissed_moments")
     val THEME_MODE = stringPreferencesKey("theme_mode")
     val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
     val PURE_BLACK = booleanPreferencesKey("amoled_black_mode")
@@ -243,7 +253,6 @@ internal object Keys {
     val RECITER = stringPreferencesKey("reciter")
     val LAST_READ_PAGE = intPreferencesKey("quran_last_page")
     val IP_FALLBACK = booleanPreferencesKey("use_ip_location_fallback")
-    val DISMISSED_RAMADAN_YEAR = intPreferencesKey("dismissed_ramadan_hilal_year")
     val UPDATE_CHECKED_AT = longPreferencesKey("github_check_timestamp")
     val UPDATE_LATEST = stringPreferencesKey("github_check_latest_version")
     val LANGUAGE_MIGRATED = booleanPreferencesKey("language_migrated")
@@ -340,6 +349,7 @@ internal fun Preferences.toAppSettings(): AppSettings = AppSettings(
     hijriAdjustment = this[Keys.HIJRI_ADJUSTMENT] ?: 0,
     notificationsEnabled = this[Keys.NOTIFICATIONS] ?: true,
     mutedPrayers = this[Keys.MUTED_PRAYERS].orEmpty().mapNotNull(Prayer::fromKey).toSet(),
+    dismissedMoments = this[Keys.DISMISSED_MOMENTS].orEmpty(),
     themeMode = enumOrNull<ThemeMode>(this[Keys.THEME_MODE]) ?: ThemeMode.SYSTEM,
     dynamicColor = this[Keys.DYNAMIC_COLOR] ?: true,
     pureBlack = this[Keys.PURE_BLACK] ?: false,
@@ -348,7 +358,6 @@ internal fun Preferences.toAppSettings(): AppSettings = AppSettings(
     reciter = enumOrNull<Reciter>(this[Keys.RECITER]) ?: Reciter.MISHARY,
     lastReadPage = this[Keys.LAST_READ_PAGE] ?: 0,
     useIpLocationFallback = this[Keys.IP_FALLBACK] ?: false,
-    dismissedRamadanYear = this[Keys.DISMISSED_RAMADAN_YEAR] ?: 0,
     appLanguage = this[Keys.LANGUAGE] ?: AppLanguage.SYSTEM,
     athkarReminders = this[Keys.ATHKAR_REMINDERS] ?: false,
     athkarFontSize = (this[Keys.ATHKAR_FONT_SIZE] ?: Defaults.ATHKAR_FONT_SIZE).coerceIn(Defaults.ATHKAR_FONT_RANGE),

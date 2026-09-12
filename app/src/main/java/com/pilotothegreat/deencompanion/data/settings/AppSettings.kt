@@ -134,7 +134,8 @@ data class AppSettings(
     /** Last Quran page opened (1..604), or 0 if none. */
     val lastReadPage: Int,
     val useIpLocationFallback: Boolean,
-    val dismissedRamadanYear: Int,
+    /** Moment ids sent away, each stamped "id@epochDay". */
+    val dismissedMoments: Set<String>,
     /** BCP 47 tag of the UI language, or [AppLanguage.SYSTEM]. */
     val appLanguage: String,
     /** Morning and evening athkar reminders, after Fajr and Asr. */

@@ -14,6 +14,7 @@ import com.pilotothegreat.deencompanion.MainActivity
 import com.pilotothegreat.deencompanion.alarms.launchAsync
 import com.pilotothegreat.deencompanion.core.prayer.DaySchedule
 import com.pilotothegreat.deencompanion.data.athkar.AthkarRepository
+import com.pilotothegreat.deencompanion.data.moment.MomentRepository
 import com.pilotothegreat.deencompanion.data.quran.QuranRepository
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
 import com.pilotothegreat.deencompanion.data.tasbih.TasbihRepository
@@ -27,6 +28,7 @@ internal object WidgetDeps : KoinComponent {
     val tasbih: TasbihRepository by inject()
     val athkar: AthkarRepository by inject()
     val quran: QuranRepository by inject()
+    val moments: MomentRepository by inject()
 }
 
 // The first three receivers keep their original class names so widgets placed before the update stay put.

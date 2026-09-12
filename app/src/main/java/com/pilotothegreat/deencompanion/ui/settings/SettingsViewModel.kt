@@ -85,6 +85,8 @@ class SettingsViewModel(
     fun setAdjustment(prayer: Prayer, minutes: Int) = launch { repository.setAdjustment(prayer, minutes) }
     fun resetAdjustments() = launch { repository.resetAdjustments() }
     fun setIqama(prayer: Prayer, value: IqamaSetting) = launch { repository.setIqama(prayer, value) }
+fun setHijriDayStartsAtMaghrib(on: Boolean) = launch { repository.setHijriDayStartsAtMaghrib(on) }
+
     fun setHijriAdjustment(days: Int) = launch { repository.setHijriAdjustment(days) }
     fun setNotificationsEnabled(enabled: Boolean) = launch { repository.setNotificationsEnabled(enabled) }
     fun setThemeMode(mode: ThemeMode) = launch { repository.setThemeMode(mode) }

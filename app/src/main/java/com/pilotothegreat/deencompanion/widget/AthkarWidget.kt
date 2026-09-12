@@ -54,7 +54,7 @@ internal data class AthkarWidgetState(
             val today = now.toLocalDate()
             val library = WidgetDeps.athkar.library()
             val progress = WidgetDeps.athkar.progress.first().on(today)
-            val suggested = AthkarSchedule.suggest(now, DaySchedule.forDate(today, settings.prayerConfig))
+            val suggested = WidgetDeps.moments.suggestedAthkarNow()
             val category = library.category(suggested) ?: library.core.first()
             return AthkarWidgetState(
                 dynamic = settings.dynamicColor,

@@ -93,12 +93,6 @@
     <string name="permission_exact_body">Without this permission, Android may deliver prayer notifications a few minutes late.</string>
     <string name="update_available_short">A new version is available</string>
     <string name="update_action">Update</string>
-    <string name="ramadan_approaching">Ramadan is approaching</string>
-    <plurals name="days_until_ramadan">
-        <item quantity="one">%1$s day to go</item>
-        <item quantity="other">%1$s days to go</item>
-    </plurals>
-    <string name="ramadan_sighting_note">The start of the month is confirmed by the official moon sighting.</string>
     <string name="daily_inspiration">Daily inspiration</string>
     <string name="verse_of_the_day">Verse of the day</string>
     <string name="qibla_summary">%1$s° from north · %2$s km to Makkah</string>
@@ -380,4 +374,46 @@
     <string name="widget_prayer_times_desc">Today\'s prayer times with the next one highlighted</string>
     <string name="widget_verse_desc">A short ayah for each day</string>
     <string name="widget_athkar_desc">The athkar for this time of day and your progress</string>
+
+    <!-- Islamic occasions -->
+    <string name="occasion_kahf">Surah al-Kahf</string>
+    <string name="occasion_kahf_body">Read it between Thursday sunset and Friday sunset, and it lights the week between the two Fridays.</string>
+    <string name="occasion_jumuah">Jumu\'ah</string>
+    <string name="occasion_jumuah_body">Send salawat on the Prophet صلى الله عليه وسلم often today, and go early to the prayer.</string>
+    <string name="occasion_hour_of_response">The hour of response</string>
+    <string name="occasion_hour_of_response_body">The last hour before Maghrib on Friday is a time supplication is answered. Ask.</string>
+    <string name="occasion_ramadan_soon">Ramadan is near</string>
+    <string name="occasion_ramadan_soon_body">%1$s days to go, by the Umm al-Qura calendar. A local sighting may differ by a day.</string>
+    <string name="occasion_suhoor">Suhoor</string>
+    <string name="occasion_suhoor_body">Eat before Fajr, even a little. Stop when the adhan begins.</string>
+    <string name="occasion_iftar">Iftar</string>
+    <string name="occasion_iftar_body">Break your fast at Maghrib. The fasting person\'s supplication before it is not turned away.</string>
+    <string name="occasion_last_ten">The last ten nights</string>
+    <string name="occasion_last_ten_body">Night %1$s of Ramadan. Seek Laylat al-Qadr in these nights.</string>
+    <string name="occasion_odd_night">An odd night</string>
+    <string name="occasion_odd_night_body">Night %1$s. Stand in prayer, and say: O Allah, You are Pardoning and love to pardon, so pardon me.</string>
+    <string name="occasion_zakat_al_fitr">Zakat al-Fitr</string>
+    <string name="occasion_zakat_al_fitr_body">Give it before the Eid prayer, on behalf of everyone in the household.</string>
+    <string name="occasion_eid_al_fitr">Eid al-Fitr</string>
+    <string name="occasion_eid_body">Eid mubarak. May Allah accept from us and from you.</string>
+    <string name="occasion_eid_al_adha">Eid al-Adha</string>
+    <string name="occasion_six_of_shawwal">Six of Shawwal</string>
+    <string name="occasion_six_of_shawwal_body">Six days of fasting this month, after Ramadan, are as a year of fasting.</string>
+    <string name="occasion_ten_days">The ten of Dhul-Hijjah</string>
+    <string name="occasion_ten_days_body">Day %1$s. No days are more beloved to Allah for righteous deeds than these.</string>
+    <string name="occasion_arafah">The day of Arafah</string>
+    <string name="occasion_arafah_body">Fasting today expiates the year before and the year after, for those not on Hajj.</string>
+    <string name="occasion_takbir">Takbir</string>
+    <string name="occasion_takbir_body">Say the takbir aloud through these days: Allahu akbar, Allahu akbar, la ilaha illa Allah.</string>
+    <string name="occasion_tasua">Tasu\'a</string>
+    <string name="occasion_ashura">Ashura</string>
+    <string name="occasion_ashura_body">Fasting Ashura expiates the year before it. Fast the ninth with it.</string>
+    <string name="occasion_new_moon">A new month</string>
+    <string name="occasion_new_moon_body">The dua for the new crescent.</string>
+    <string name="occasion_white_days">The white days</string>
+    <string name="occasion_white_days_body">Day %1$s. Fasting the 13th, 14th and 15th of each month is as fasting the whole month.</string>
+    <string name="occasion_sunnah_fast">Monday and Thursday</string>
+    <string name="occasion_sunnah_fast_body">Deeds are presented to Allah on these days, and the Prophet صلى الله عليه وسلم liked his to be presented while fasting.</string>
+    <string name="hijri_maghrib">Islamic date changes at sunset</string>
+    <string name="hijri_maghrib_desc">As the Islamic day does. Night-anchored things — the odd nights, al-Kahf, the takbir — are a day out without it.</string>
 </resources>

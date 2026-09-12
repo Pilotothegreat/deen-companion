@@ -49,6 +49,7 @@ import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material.icons.rounded.TextFields
 import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material.icons.rounded.Tune
+import androidx.compose.material.icons.rounded.WbTwilight
 import androidx.compose.material.icons.rounded.VolumeUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilledTonalIconButton
@@ -247,6 +248,13 @@ fun SettingsScreen(
                             }
                         },
                         { shapes -> HijriAdjustmentRow(shapes, s, viewModel::setHijriAdjustment) },
+                        { shapes ->
+                            SwitchRow(
+                                shapes, Icons.Rounded.WbTwilight, stringResource(R.string.hijri_maghrib),
+                                stringResource(R.string.hijri_maghrib_desc), s.smart.hijriDayStartsAtMaghrib,
+                                viewModel::setHijriDayStartsAtMaghrib,
+                            )
+                        },
                     ),
                 )
             }

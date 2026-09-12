@@ -7,6 +7,7 @@ import com.pilotothegreat.deencompanion.core.athkar.AthkarCategory
 import com.pilotothegreat.deencompanion.core.athkar.AthkarSchedule
 import com.pilotothegreat.deencompanion.core.athkar.DayProgress
 import com.pilotothegreat.deencompanion.core.calendar.HijriCalendar
+import com.pilotothegreat.deencompanion.core.moment.Moment
 import com.pilotothegreat.deencompanion.core.prayer.DaySchedule
 import com.pilotothegreat.deencompanion.core.prayer.NextPrayer
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
@@ -17,6 +18,7 @@ import com.pilotothegreat.deencompanion.core.text.Inspirations
 import com.pilotothegreat.deencompanion.core.time.Ticker
 import com.pilotothegreat.deencompanion.data.athkar.AthkarRepository
 import com.pilotothegreat.deencompanion.data.location.LocationRepository
+import com.pilotothegreat.deencompanion.data.moment.MomentRepository
 import com.pilotothegreat.deencompanion.data.quran.QuranRepository
 import com.pilotothegreat.deencompanion.data.quran.Surah
 import com.pilotothegreat.deencompanion.data.quran.Verse
@@ -49,12 +51,8 @@ data class HomeContent(
     val settings: AppSettings,
     val today: PrayerSchedule,
     val hijri: HijrahDate?,
-    val daysUntilRamadan: Int?,
     val inspiration: Inspiration,
-) {
-    val showRamadanCard: Boolean
-        get() = daysUntilRamadan != null && hijri != null && HijriCalendar.year(hijri) != settings.dismissedRamadanYear
-}
+)
 
 data class Countdown(val next: NextPrayer, val remaining: Duration)
 
@@ -74,6 +72,7 @@ class HomeViewModel(
     private val settings: SettingsRepository,
     private val location: LocationRepository,
     private val athkar: AthkarRepository,
+    private val moments: MomentRepository,
     private val quran: QuranRepository,
     private val updates: UpdateChecker,
 ) : ViewModel() {
@@ -88,7 +87,6 @@ class HomeViewModel(
                 settings = s,
                 today = DaySchedule.forDate(date, s.prayerConfig),
                 hijri = HijriCalendar.date(date, s.hijriAdjustment),
-                daysUntilRamadan = HijriCalendar.daysUntilRamadan(date, s.hijriAdjustment),
                 inspiration = Inspirations.forDate(date),
             )
         }
@@ -115,13 +113,19 @@ class HomeViewModel(
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    val athkarNow: StateFlow<AthkarNow?> = combine(settings.settings, athkar.progress, minutes) { s, progress, _ ->
+    val athkarNow: StateFlow<AthkarNow?> = combine(settings.settings, athkar.progress, moments.suggestedAthkar) { s, progress, suggested ->
         val now = ZonedDateTime.now(s.zone)
-        val suggested = AthkarSchedule.suggest(now, DaySchedule.forDate(now.toLocalDate(), s.prayerConfig))
         athkar.library().category(suggested)?.let { AthkarNow(it, progress.on(now.toLocalDate())) }
     }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /**
+     * What Today shows above the prayer times: whatever the engine ranks highest right now, capped
+     * so the screen can never turn into a column of cards.
+     */
+    val cards: StateFlow<List<Moment>> = moments.todayCards
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
@@ -164,8 +168,8 @@ class HomeViewModel(
         viewModelScope.launch { settings.setPrayerMuted(prayer, muted) }
     }
 
-    fun dismissRamadan(hijriYear: Int) {
-        viewModelScope.launch { settings.setDismissedRamadanYear(hijriYear) }
+    fun dismiss(moment: Moment) {
+        viewModelScope.launch { moments.dismiss(moment) }
     }
 
     fun updateIntent(): Intent = updates.updateIntent()

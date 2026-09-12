@@ -110,16 +110,6 @@
     <string name="permission_exact_body">بدون هذا الإذن قد يؤخر أندرويد تنبيهات الصلاة بضع دقائق.</string>
     <string name="update_available_short">يتوفر إصدار جديد</string>
     <string name="update_action">تحديث</string>
-    <string name="ramadan_approaching">اقترب شهر رمضان</string>
-    <plurals name="days_until_ramadan">
-        <item quantity="zero">%1$s يوم متبقٍ</item>
-        <item quantity="one">يوم واحد متبقٍ</item>
-        <item quantity="two">يومان متبقيان</item>
-        <item quantity="few">%1$s أيام متبقية</item>
-        <item quantity="many">%1$s يومًا متبقيًا</item>
-        <item quantity="other">%1$s يوم متبقٍ</item>
-    </plurals>
-    <string name="ramadan_sighting_note">يُعلن بدء الشهر رسميًا بعد تحري رؤية الهلال.</string>
     <string name="daily_inspiration">إلهام اليوم</string>
     <string name="verse_of_the_day">آية اليوم</string>
     <string name="qibla_summary">%1$s° من الشمال · %2$s كم إلى مكة</string>
@@ -416,4 +406,46 @@
     <string name="widget_verse_desc">آية قصيرة لكل يوم</string>
     <string name="widget_athkar_desc">أذكار هذا الوقت وتقدمك فيها</string>
     <string name="translated_by">ترجمة %1$s · %2$s</string>
+
+    <!-- Islamic occasions -->
+    <string name="occasion_kahf">سورة الكهف</string>
+    <string name="occasion_kahf_body">اقرأها بين غروب الخميس وغروب الجمعة، أضاء له ما بين الجمعتين.</string>
+    <string name="occasion_jumuah">الجمعة</string>
+    <string name="occasion_jumuah_body">أكثر من الصلاة على النبي صلى الله عليه وسلم اليوم، وبكّر إلى الصلاة.</string>
+    <string name="occasion_hour_of_response">ساعة الإجابة</string>
+    <string name="occasion_hour_of_response_body">آخر ساعة من يوم الجمعة ساعة يُستجاب فيها الدعاء، فادعُ.</string>
+    <string name="occasion_ramadan_soon">رمضان يقترب</string>
+    <string name="occasion_ramadan_soon_body">بقي %1$s يومًا بحساب أم القرى، وقد يختلف الثبوت المحلي بيوم.</string>
+    <string name="occasion_suhoor">السحور</string>
+    <string name="occasion_suhoor_body">تسحّر ولو بشيء يسير، وأمسك عند الأذان.</string>
+    <string name="occasion_iftar">الإفطار</string>
+    <string name="occasion_iftar_body">أفطر عند المغرب، ودعوة الصائم قبلها لا تُرد.</string>
+    <string name="occasion_last_ten">العشر الأواخر</string>
+    <string name="occasion_last_ten_body">الليلة %1$s من رمضان، فالتمس ليلة القدر فيها.</string>
+    <string name="occasion_odd_night">ليلة وتر</string>
+    <string name="occasion_odd_night_body">الليلة %1$s، فقُم وقل: اللهم إنك عفوّ تحب العفو فاعفُ عني.</string>
+    <string name="occasion_zakat_al_fitr">زكاة الفطر</string>
+    <string name="occasion_zakat_al_fitr_body">أخرجها قبل صلاة العيد عن كل من تعول.</string>
+    <string name="occasion_eid_al_fitr">عيد الفطر</string>
+    <string name="occasion_eid_body">عيد مبارك، تقبل الله منا ومنكم.</string>
+    <string name="occasion_eid_al_adha">عيد الأضحى</string>
+    <string name="occasion_six_of_shawwal">ست من شوال</string>
+    <string name="occasion_six_of_shawwal_body">من صام ستًّا من شوال بعد رمضان كان كصيام الدهر.</string>
+    <string name="occasion_ten_days">عشر ذي الحجة</string>
+    <string name="occasion_ten_days_body">اليوم %1$s، وما من أيام العمل الصالح فيهن أحب إلى الله من هذه.</string>
+    <string name="occasion_arafah">يوم عرفة</string>
+    <string name="occasion_arafah_body">صيامه يكفّر سنة ماضية وسنة باقية لغير الحاج.</string>
+    <string name="occasion_takbir">التكبير</string>
+    <string name="occasion_takbir_body">أعلن التكبير في هذه الأيام: الله أكبر، الله أكبر، لا إله إلا الله.</string>
+    <string name="occasion_tasua">تاسوعاء</string>
+    <string name="occasion_ashura">عاشوراء</string>
+    <string name="occasion_ashura_body">صيام عاشوراء يكفّر السنة الماضية، وصُم التاسع معه.</string>
+    <string name="occasion_new_moon">شهر جديد</string>
+    <string name="occasion_new_moon_body">دعاء رؤية الهلال.</string>
+    <string name="occasion_white_days">الأيام البيض</string>
+    <string name="occasion_white_days_body">اليوم %1$s، وصيام الثالث عشر والرابع عشر والخامس عشر كصيام الشهر كله.</string>
+    <string name="occasion_sunnah_fast">الإثنين والخميس</string>
+    <string name="occasion_sunnah_fast_body">تُعرض الأعمال على الله فيهما، وكان النبي صلى الله عليه وسلم يحب أن يُعرض عمله وهو صائم.</string>
+    <string name="hijri_maghrib">بدء اليوم الهجري عند المغرب</string>
+    <string name="hijri_maghrib_desc">كما هو اليوم الشرعي، وبدونه تتأخر ليالي الوتر والكهف والتكبير يومًا.</string>
 </resources>

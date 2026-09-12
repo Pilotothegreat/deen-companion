@@ -13,6 +13,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,6 +25,9 @@ import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material.icons.rounded.Explore
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.NightsStay
+import androidx.compose.material.icons.rounded.Build
+import androidx.compose.material.icons.rounded.Flight
+import androidx.compose.material.icons.rounded.Cloud
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.NotificationsOff
 import androidx.compose.material3.Card
@@ -46,6 +50,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -63,6 +68,8 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pilotothegreat.deencompanion.R
+import com.pilotothegreat.deencompanion.core.moment.MomentKind
+import com.pilotothegreat.deencompanion.core.moment.Moment
 import com.pilotothegreat.deencompanion.core.athkar.AthkarCategory
 import com.pilotothegreat.deencompanion.core.athkar.DayProgress
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
@@ -420,27 +427,46 @@ fun InspirationCard(inspiration: Inspiration, locale: Locale) {
     }
 }
 
+
+/**
+ * One thing the engine decided is worth saying now. Every occasion, every dua for the weather and
+ * every travel note uses this one card, so adding a producer never means adding a screen.
+ */
 @Composable
-fun RamadanCard(daysLeft: Int, locale: Locale, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier,
-        shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-        ),
-    ) {
+fun MomentCard(moment: Moment, locale: Locale, onOpen: (() -> Unit)?, onDismiss: (() -> Unit)?, modifier: Modifier = Modifier) {
+    val colors = CardDefaults.cardColors(
+        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+    )
+    val content: @Composable ColumnScope.() -> Unit = {
         Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Icon(Icons.Rounded.NightsStay, contentDescription = null)
-                Text(stringResource(R.string.ramadan_approaching), style = MaterialTheme.typography.titleMedium)
+                Icon(moment.kind.icon, contentDescription = null)
+                Text(stringResource(moment.title), style = MaterialTheme.typography.titleMedium)
             }
-            Text(
-                pluralStringResource(R.plurals.days_until_ramadan, daysLeft, Formatters.number(daysLeft, locale)),
-                style = MaterialTheme.typography.headlineSmallEmphasized,
-            )
-            Text(stringResource(R.string.ramadan_sighting_note), style = MaterialTheme.typography.bodyMedium)
-            TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) { Text(stringResource(R.string.dismiss)) }
+            moment.body?.let { body ->
+                Text(
+                    if (moment.count != null) stringResource(body, Formatters.number(moment.count, locale)) else stringResource(body),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            if (onDismiss != null) {
+                TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) { Text(stringResource(R.string.dismiss)) }
+            }
         }
     }
+    if (onOpen != null) {
+        Card(onClick = onOpen, modifier = modifier, shape = MaterialTheme.shapes.extraLarge, colors = colors, content = content)
+    } else {
+        Card(modifier = modifier, shape = MaterialTheme.shapes.extraLarge, colors = colors, content = content)
+    }
 }
+
+private val MomentKind.icon: ImageVector
+    get() = when (this) {
+        MomentKind.OCCASION -> Icons.Rounded.NightsStay
+        MomentKind.NATURE -> Icons.Rounded.Cloud
+        MomentKind.TRAVEL -> Icons.Rounded.Flight
+        MomentKind.PLAN -> Icons.AutoMirrored.Rounded.MenuBook
+        MomentKind.MAINTENANCE -> Icons.Rounded.Build
+    }

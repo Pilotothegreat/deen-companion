@@ -11,6 +11,7 @@ import com.pilotothegreat.deencompanion.core.tasbih.Dhikr
 import com.pilotothegreat.deencompanion.core.tasbih.TasbihState
 import com.pilotothegreat.deencompanion.core.text.ArabicText
 import com.pilotothegreat.deencompanion.data.athkar.AthkarRepository
+import com.pilotothegreat.deencompanion.data.moment.MomentRepository
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
 import com.pilotothegreat.deencompanion.data.tasbih.TasbihRepository
 import kotlinx.coroutines.Dispatchers
@@ -51,6 +52,7 @@ sealed interface AthkarEvent {
 class AthkarViewModel(
     private val athkar: AthkarRepository,
     settings: SettingsRepository,
+    private val moments: MomentRepository,
     private val tasbih: TasbihRepository,
 ) : ViewModel() {
 
@@ -63,11 +65,10 @@ class AthkarViewModel(
     }
 
     val state: StateFlow<AthkarHome?> =
-        combine(settings.settings, athkar.progress, athkar.streak, minutes) { s, progress, streak, _ ->
+        combine(settings.settings, athkar.progress, athkar.streak, moments.suggestedAthkar) { s, progress, streak, suggested ->
             val now = ZonedDateTime.now(s.zone)
             val today = now.toLocalDate()
             val library = athkar.library()
-            val suggested = AthkarSchedule.suggest(now, DaySchedule.forDate(today, s.prayerConfig))
             AthkarHome(library, progress.on(today), streak.current(today), library.category(suggested) ?: library.core.first())
         }
             .flowOn(Dispatchers.Default)
