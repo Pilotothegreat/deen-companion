@@ -12,9 +12,11 @@ import com.pilotothegreat.deencompanion.alarms.KhatmaReminderWorker
 import com.pilotothegreat.deencompanion.alarms.Notifications
 import com.pilotothegreat.deencompanion.alarms.PrayerAlarmScheduler
 import com.pilotothegreat.deencompanion.alarms.RescheduleWorker
+import com.pilotothegreat.deencompanion.core.prayer.DaySchedule
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
 import com.pilotothegreat.deencompanion.core.prayer.PrayerConfig
 import com.pilotothegreat.deencompanion.data.athkar.AthkarRepository
+import com.pilotothegreat.deencompanion.data.backup.AutoBackupWorker
 import com.pilotothegreat.deencompanion.data.settings.AppLanguage
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
 import com.pilotothegreat.deencompanion.data.settings.SoundSettings
@@ -60,11 +62,22 @@ class DeenApplication : Application(), Configuration.Provider {
         }
         RescheduleWorker.enqueue(this)
         KhatmaReminderWorker.enqueue(this)
+        AutoBackupWorker.enqueue(this)
         syncLanguage()
         refreshWidgetsOnUnlock()
         keepAlarmsInSync()
         keepChannelsLocalized()
         keepWidgetsInSync()
+        warmTomorrow()
+    }
+
+    /**
+     * Works tomorrow's prayer times out now, while nobody is waiting for them, so the first draw
+     * after midnight — and the widget's first redraw of the new day — is already answered.
+     */
+    private fun warmTomorrow() = appScope.launch {
+        val current = settings.current()
+        DaySchedule.warm(java.time.LocalDate.now(current.zone), current.prayerConfig)
     }
 
     private fun syncLanguage() = appScope.launch {

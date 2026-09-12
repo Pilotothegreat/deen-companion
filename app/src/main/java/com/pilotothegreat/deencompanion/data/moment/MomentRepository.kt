@@ -43,6 +43,11 @@ class MomentRepository(
     private val location: LocationRepository,
     private val eclipses: EclipseRepository,
     private val earthquakes: EarthquakeRepository,
+    /**
+     * True while the phone is saving power. Injected rather than read here so this class stays free
+     * of Android and keeps its tests fast.
+     */
+    private val savingPower: () -> Boolean = { false },
 ) {
 
     /** Recomputed with the weather, not on the minute: the table is fixed and the feed is hourly. */
@@ -95,8 +100,13 @@ class MomentRepository(
     suspend fun onAppOpened() {
         val s = settings.current()
         val nowMillis = System.currentTimeMillis()
-        weather.refresh(s, nowMillis)
-        earthquakes.refresh(s, nowMillis)
+        // Battery saver is the reader saying the phone has to last the day. The weather and the
+        // earthquake feed are the two things here that cost a radio, and neither is worth a percent
+        // of someone's battery: the last reading is still shown, it is simply not refreshed.
+        if (!savingPower()) {
+            weather.refresh(s, nowMillis)
+            earthquakes.refresh(s, nowMillis)
+        }
         refreshEclipse(s, nowMillis)
         anchorHomeIfNeeded(s)
         updateTravelState(s)

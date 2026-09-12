@@ -57,6 +57,12 @@ class QuranPlaybackService : MediaSessionService() {
             .setHandleAudioBecomingNoisy(true)
             .setMediaSourceFactory(DefaultMediaSourceFactory(this).setDataSourceFactory(dataSource))
             .build()
+        // Ayahs are short, and the gap between two of them is where a recitation audibly stumbles:
+        // the player used to start fetching the next one only once the current had finished. This
+        // asks it to have the next ayah ready before it is needed, which on a good connection is
+        // invisible and on a poor one is the difference between reciting and buffering. The fetched
+        // bytes land in the same cache, so nothing is downloaded twice.
+        player.preloadConfiguration = ExoPlayer.PreloadConfiguration(PRELOAD_AHEAD_US)
         val openApp = PendingIntent.getActivity(
             this,
             0,
@@ -130,6 +136,9 @@ class QuranPlaybackService : MediaSessionService() {
     }
 
     companion object {
+        /** Twenty seconds is most of an ayah, and a few hundred kilobytes at recitation bitrates. */
+        private const val PRELOAD_AHEAD_US = 20_000_000L
+
         const val COMMAND_SLEEP_TIMER = "com.pilotothegreat.deencompanion.SLEEP_TIMER"
         const val EXTRA_SLEEP_MILLIS = "sleep_millis"
     }

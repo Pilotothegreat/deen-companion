@@ -213,6 +213,7 @@ fun SettingsScreen(
     var showSupport by rememberSaveable { mutableStateOf(false) }
     var showUpdate by rememberSaveable { mutableStateOf(false) }
     var showIqama by rememberSaveable { mutableStateOf(false) }
+    var showRestore by rememberSaveable { mutableStateOf(false) }
     val install by viewModel.install.collectAsStateWithLifecycle()
     var exactAllowed by remember { mutableStateOf(viewModel.canScheduleExactAlarms()) }
     LifecycleResumeEffect(Unit) {
@@ -458,7 +459,7 @@ fun SettingsScreen(
                             NavRow(
                                 shapes, Icons.Rounded.Restore, stringResource(R.string.backup_import),
                                 stringResource(R.string.backup_import_desc),
-                            ) { importFile.launch(arrayOf("application/json", "text/plain", "*/*")) }
+                            ) { showRestore = true }
                         },
                         { shapes ->
                             NavRow(
@@ -629,6 +630,22 @@ fun SettingsScreen(
             onDismiss = { showUpdate = false },
         )
     }
+    if (showRestore) {
+        val autoBackups by viewModel.autoBackups.collectAsStateWithLifecycle()
+        RestoreSheet(
+            backups = autoBackups,
+            onRestore = {
+                showRestore = false
+                viewModel.restoreAutoBackup(it.path)
+            },
+            onChooseFile = {
+                showRestore = false
+                importFile.launch(arrayOf("application/json", "text/plain", "*/*"))
+            },
+            onDismiss = { showRestore = false },
+        )
+    }
+
     if (showIqama) {
         IqamaSheet(
             iqama = s.iqama,
@@ -982,6 +999,61 @@ private val Float.labelRes: Int
         this <= 1.3f -> R.string.text_scale_larger
         else -> R.string.text_scale_largest
     }
+
+/**
+ * Where a restore comes from.
+ *
+ * A file the reader exported by hand is still offered, but it is no longer the only answer: the
+ * copies Bilal writes for itself each week come first, because the people who lose a khatma are
+ * exactly the people who never pressed the export button.
+ */
+@Composable
+private fun RestoreSheet(
+    backups: List<AutoBackup>,
+    onRestore: (AutoBackup) -> Unit,
+    onChooseFile: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val locale = currentLocale()
+    val context = LocalContext.current
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(
+            Modifier.padding(start = 16.dp, end = 16.dp, bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+        ) {
+            Text(
+                stringResource(R.string.backup_auto_desc),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(vertical = 12.dp),
+            )
+            if (backups.isEmpty()) {
+                Text(
+                    stringResource(R.string.backup_auto_none),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(bottom = 12.dp),
+                )
+            } else {
+                backups.forEachIndexed { index, entry ->
+                    NavRow(
+                        ListItemDefaults.segmentedShapes(index, backups.size),
+                        Icons.Rounded.Restore,
+                        DateFormat.getDateFormat(context).format(entry.savedAt) + " · " +
+                            DateFormat.getTimeFormat(context).format(entry.savedAt),
+                        Formatters.number((entry.bytes / 1024).toInt().coerceAtLeast(1), locale) + " kB",
+                    ) { onRestore(entry) }
+                }
+            }
+            NavRow(
+                ListItemDefaults.segmentedShapes(0, 1),
+                Icons.AutoMirrored.Rounded.OpenInNew,
+                stringResource(R.string.backup_choose_file),
+                null,
+                onClick = onChooseFile,
+            )
+        }
+    }
+}
 
 /** The five prayers' iqama times, one tap in from the prayer-times group. */
 @Composable

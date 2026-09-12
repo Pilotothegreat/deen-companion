@@ -54,7 +54,38 @@ data class NextPrayer(
 
 object DaySchedule {
 
+    /**
+     * The last few days computed, so the same day is not solved over and over.
+     *
+     * The astronomy is deterministic — the same date and the same configuration always give the same
+     * answer — so holding it costs nothing in correctness. It buys two things: the home screen and
+     * the widgets recompute today and tomorrow every minute between them, and the first draw after
+     * midnight is instant because tomorrow was already worked out yesterday.
+     */
+    private val memo = java.util.concurrent.ConcurrentHashMap<Pair<LocalDate, PrayerConfig>, PrayerSchedule>()
+
+    /** Four is today, tomorrow, yesterday and one spare; beyond that the cache is simply dropped. */
+    private const val MEMO_LIMIT = 8
+
     fun forDate(date: LocalDate, config: PrayerConfig): PrayerSchedule {
+        val key = date to config
+        memo[key]?.let { return it }
+        return compute(date, config).also {
+            if (memo.size >= MEMO_LIMIT) memo.clear()
+            memo[key] = it
+        }
+    }
+
+    /** Works tomorrow out now, while nobody is waiting for it. */
+    fun warm(date: LocalDate, config: PrayerConfig) {
+        forDate(date, config)
+        forDate(date.plusDays(1), config)
+    }
+
+    /** Only for tests, which must not inherit another test's configuration. */
+    internal fun forget() = memo.clear()
+
+    private fun compute(date: LocalDate, config: PrayerConfig): PrayerSchedule {
         val times = PrayerEngine.calculate(
             date, config.latitude, config.longitude, config.zone, config.method, config.asrSchool,
             config.highLatitude, config.adjustments,

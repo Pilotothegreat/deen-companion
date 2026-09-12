@@ -53,6 +53,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -110,11 +111,17 @@ fun AthkarSessionScreen(
     // is one tap away in the bar above.
     var showTranslation by rememberSaveable(locale) { mutableStateOf(!locale.isArabic) }
     var showTransliteration by rememberSaveable(locale) { mutableStateOf(!locale.isArabic) }
-    // Open at the first item not finished today; the extra last page is the finish screen.
+    // Open where the session was left if it was left part-way, and otherwise at the first item not
+    // finished today; the extra last page is the finish screen.
     val firstOpen = remember(category.id) {
-        items.indexOfFirst { !session.progress.isDone(category, it) }.takeIf { it >= 0 } ?: items.size
+        session.resumeAt?.takeIf { !session.progress.isDone(category, items[it]) }
+            ?: items.indexOfFirst { !session.progress.isDone(category, it) }.takeIf { it >= 0 }
+            ?: items.size
     }
     val pager = rememberPagerState(initialPage = firstOpen) { items.size + 1 }
+    LaunchedEffect(pager, category.id) {
+        snapshotFlow { pager.settledPage }.collect { if (it < items.size) viewModel.onPage(it) }
+    }
     var confirmReset by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(viewModel) {

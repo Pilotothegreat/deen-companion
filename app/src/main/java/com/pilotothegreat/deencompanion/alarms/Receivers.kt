@@ -14,7 +14,10 @@ import kotlinx.coroutines.flow.first
 import com.pilotothegreat.deencompanion.data.quran.KhatmaRepository
 import com.pilotothegreat.deencompanion.core.quran.KhatmaPlan
 import androidx.work.WorkerParameters
+import com.pilotothegreat.deencompanion.core.calendar.HijriCalendar
+import com.pilotothegreat.deencompanion.core.calendar.HijriClock
 import com.pilotothegreat.deencompanion.core.prayer.DaySchedule
+import com.pilotothegreat.deencompanion.core.quiet.QuietTimes
 import com.pilotothegreat.deencompanion.data.settings.AppSettings
 import java.time.ZonedDateTime
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
@@ -197,14 +200,26 @@ class KhatmaReminderWorker(context: Context, params: WorkerParameters) : Corouti
         val plan = khatma.plan.first() ?: return Result.success()
         val today = LocalDate.now()
         if (!KhatmaPlan.needsReminder(plan, today)) return Result.success()
+        val current = settings.current()
+        // On an odd night of the last ten, a nudge about a reading plan can wait until morning. The
+        // adhan still sounds and the athkar still arrive; this is the one notice that can afford to.
+        if (holdsTonight(current)) return Result.success()
         val progress = KhatmaPlan.progress(plan, today)
         Notifications.showKhatma(
             context = applicationContext,
-            languageTag = settings.current().appLanguage,
+            languageTag = current.appLanguage,
             pagesDue = progress.pagesDueToday,
             page = progress.currentPage + 1,
         )
         return Result.success()
+    }
+
+    private fun holdsTonight(current: AppSettings): Boolean {
+        val now = ZonedDateTime.now(current.zone)
+        val maghrib = DaySchedule.forDate(now.toLocalDate(), current.prayerConfig).adhan[Prayer.MAGHRIB]
+        val hijri = HijriClock.dateAt(now, maghrib, current.hijriAdjustment, current.smart.hijriDayStartsAtMaghrib)
+            ?: return false
+        return QuietTimes.holdsGentleNotices(HijriCalendar.month(hijri), HijriCalendar.day(hijri))
     }
 
     companion object {

@@ -97,11 +97,15 @@ object Notifications {
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .build()
         try {
-            NotificationManagerCompat.from(context).notify(kind.ordinal * 10, notification)
+            // One id for both, so the evening reminder replaces a morning one still sitting in the
+            // shade rather than joining it.
+            NotificationManagerCompat.from(context).notify(ATHKAR_NOTIFICATION, notification)
         } catch (_: SecurityException) {
             // Permission revoked between the check and the post.
         }
     }
+
+    private const val ATHKAR_NOTIFICATION = 910
 
     /**
      * The khatma nudge. It is low importance and only ever sent on a day the plan is actually
@@ -224,6 +228,9 @@ object Notifications {
         val manager = NotificationManagerCompat.from(context)
         val builder = if (canPost(context)) prayerWindow(context, languageTag, prayer, stage, iqamaAt) else null
         try {
+            // The "ten minutes to Dhuhr" notice has done its job the moment the adhan sounds, and
+            // two Bilal notifications for one prayer is exactly what this release set out to end.
+            manager.cancel(notificationId(AlarmKind.PRE_PRAYER, prayer))
             if (builder == null) manager.cancel(prayerWindowId(prayer)) else manager.notify(prayerWindowId(prayer), builder.build())
         } catch (_: SecurityException) {
             // Permission revoked between the check and the post.

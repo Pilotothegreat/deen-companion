@@ -496,7 +496,11 @@
     <string name="backup_export">Save a backup</string>
     <string name="backup_export_desc">Your settings, bookmarks and khatma, in a file you keep</string>
     <string name="backup_import">Restore a backup</string>
-    <string name="backup_import_desc">Replaces what is on this phone with what the file holds</string>
+    <string name="backup_auto_title">Bilal\'s own copies</string>
+    <string name="backup_auto_desc">Written quietly once a week and kept for three weeks, on this phone only</string>
+    <string name="backup_auto_none">There is no automatic copy yet. The first is written within a week of installing.</string>
+    <string name="backup_choose_file">Choose a file instead…</string>
+    <string name="backup_import_desc">Replaces what is on this phone with a copy you choose</string>
     <string name="backup_saved">Backup saved</string>
     <string name="backup_restored">Backup restored</string>
     <string name="backup_error_unreadable">That file could not be read.</string>

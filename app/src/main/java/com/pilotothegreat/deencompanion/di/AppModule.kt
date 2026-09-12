@@ -56,7 +56,11 @@ val appModule = module {
     single { BackupRepository(get(), get(), get()) }
     single { EclipseRepository(androidContext()) }
     single { EarthquakeRepository(get()) }
-    single { MomentRepository(get(), get(), get(), get(), get()) }
+    single {
+        MomentRepository(get(), get(), get(), get(), get()) {
+            androidContext().getSystemService(android.os.PowerManager::class.java)?.isPowerSaveMode == true
+        }
+    }
     single { UpdateChecker(androidContext(), get()) }
     single { ApkInstaller(androidContext()) }
     single { PrayerAlarmScheduler(androidContext(), get()) }

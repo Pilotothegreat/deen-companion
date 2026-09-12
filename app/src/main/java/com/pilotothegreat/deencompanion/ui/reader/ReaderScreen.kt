@@ -40,7 +40,9 @@ import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -49,6 +51,9 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.pluralStringResource
@@ -58,6 +63,7 @@ import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
@@ -78,6 +84,9 @@ import com.pilotothegreat.deencompanion.data.quran.Quran
 import com.pilotothegreat.deencompanion.data.quran.Revelation
 import com.pilotothegreat.deencompanion.data.quran.Surah
 import com.pilotothegreat.deencompanion.data.quran.Verse
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import com.pilotothegreat.deencompanion.ui.common.KeepScreenOn
 import com.pilotothegreat.deencompanion.ui.common.Formatters
 import com.pilotothegreat.deencompanion.ui.common.currentLocale
 import com.pilotothegreat.deencompanion.ui.components.LoadingBox
@@ -98,9 +107,11 @@ fun ReaderScreen(
     val prefs by viewModel.prefs.collectAsStateWithLifecycle()
     val bookmarks by viewModel.bookmarks.collectAsStateWithLifecycle()
     val playback by viewModel.playback.collectAsStateWithLifecycle()
+    val nightDim by viewModel.nightDim.collectAsStateWithLifecycle()
     val resources = LocalResources.current
     val locale = currentLocale()
     val snackbar = remember { SnackbarHostState() }
+    val haptics = LocalHapticFeedback.current
     var selected by remember { mutableStateOf<Verse?>(null) }
     var jumping by remember { mutableStateOf(false) }
 
@@ -114,6 +125,9 @@ fun ReaderScreen(
             if (result == SnackbarResult.ActionPerformed) viewModel.retry()
         }
     }
+
+    // Reading a page takes longer than most screen timeouts, and so does listening to a surah.
+    KeepScreenOn(enabled = true)
 
     val loaded = quran ?: return LoadingBox()
     val pagerState = rememberPagerState(initialPage = viewModel.initialPage - 1) { loaded.pages.size }
@@ -167,8 +181,16 @@ fun ReaderScreen(
         Box(Modifier.padding(padding).fillMaxSize()) {
             val layoutDirection = LocalLayoutDirection.current
             // Pages turn right-to-left like a printed mushaf.
+            // A few percent off the page after Isha, eased so it is never a visible step, and full
+            // brightness again from Fajr. The toolbar and the snackbar keep their contrast.
+            val dim by animateFloatAsState(if (nightDim) NIGHT_DIM else 1f, label = "nightDim")
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                HorizontalPager(state = pagerState, beyondViewportPageCount = 1, key = { it }) { index ->
+                HorizontalPager(
+                    state = pagerState,
+                    beyondViewportPageCount = 1,
+                    key = { it },
+                    modifier = Modifier.graphicsLayer { alpha = dim },
+                ) { index ->
                     CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
                         MushafPageView(
                             page = loaded.pages[index],
@@ -176,9 +198,13 @@ fun ReaderScreen(
                             fontSize = prefs.fontSize,
                             showTranslation = prefs.showTranslation,
                             highlight = highlight,
+                            follow = if (playback.isActive && playback.isPlaying) highlight else null,
                             bookmarks = bookmarks,
                             bottomSpace = playback.isActive,
-                            onAyahClick = { selected = it },
+                            onAyahClick = {
+                                haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
+                                selected = it
+                            },
                         )
                     }
                 }
@@ -238,15 +264,32 @@ private fun MushafPageView(
     fontSize: Int,
     showTranslation: Boolean,
     highlight: Pair<Int, Int>?,
+    /** The ayah being recited right now, which the page scrolls to keep in view. Null when idle. */
+    follow: Pair<Int, Int>?,
     bookmarks: Set<Pair<Int, Int>>,
     bottomSpace: Boolean,
     onAyahClick: (Verse) -> Unit,
 ) {
     val locale = currentLocale()
+    val scroll = rememberScrollState()
+    // Where the page begins on screen, and where the recited ayah sits, both in root coordinates:
+    // the ayah lives inside a single justified Text, so there is no list item to scroll to and its
+    // position has to come from the text layout itself.
+    var pageTop by remember { mutableFloatStateOf(0f) }
+    var ayahTop by remember { mutableStateOf<Float?>(null) }
+    LaunchedEffect(follow, ayahTop, pageTop) {
+        val top = ayahTop ?: return@LaunchedEffect
+        if (follow == null) return@LaunchedEffect
+        // A third of the way down rather than at the very top: an ayah pinned to the edge of the
+        // screen reads like the page is about to run out.
+        val target = (scroll.value + (top - pageTop) - FOLLOW_MARGIN_PX).toInt().coerceAtLeast(0)
+        if (kotlin.math.abs(target - scroll.value) > FOLLOW_SLACK_PX) scroll.animateScrollTo(target)
+    }
     Column(
         Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(scroll)
+            .onGloballyPositioned { pageTop = it.positionInRoot().y }
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
@@ -274,7 +317,7 @@ private fun MushafPageView(
                             )
                         }
                     }
-                    AyahText(verses, fontSize, highlight, bookmarks, onAyahClick)
+                    AyahText(verses, fontSize, highlight, follow, bookmarks, onAyahClick) { ayahTop = it }
                 }
                 Text(
                     Numerals.toArabicIndic(page.number.toString()),
@@ -316,16 +359,21 @@ private fun AyahText(
     verses: List<Verse>,
     fontSize: Int,
     highlight: Pair<Int, Int>?,
+    follow: Pair<Int, Int>?,
     bookmarks: Set<Pair<Int, Int>>,
     onAyahClick: (Verse) -> Unit,
+    onFollowedAyahPositioned: (Float) -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
     // Ayahs are tappable, but must not look like hyperlinks.
     val plainLink = TextLinkStyles(style = SpanStyle(textDecoration = TextDecoration.None))
     val markers = mutableMapOf<String, InlineTextContent>()
+    /** Where each ayah starts in the finished string, so the recited one can be found again. */
+    val starts = mutableMapOf<Pair<Int, Int>, Int>()
     val text = buildAnnotatedString {
         verses.forEach { verse ->
             val key = verse.surah to verse.number
+            starts[key] = length
             val emphasis = when (key) {
                 highlight -> SpanStyle(background = colors.tertiaryContainer, color = colors.onTertiaryContainer)
                 else -> SpanStyle()
@@ -350,9 +398,19 @@ private fun AyahText(
             }
         }
     }
+    var layout by remember { mutableStateOf<TextLayoutResult?>(null) }
+    var textTop by remember { mutableFloatStateOf(0f) }
+    val followedStart = follow?.let { starts[it] }
+    LaunchedEffect(followedStart, layout, textTop) {
+        val start = followedStart ?: return@LaunchedEffect
+        val measured = layout ?: return@LaunchedEffect
+        if (start >= measured.layoutInput.text.length) return@LaunchedEffect
+        onFollowedAyahPositioned(textTop + measured.getLineTop(measured.getLineForOffset(start)))
+    }
     Text(
         text = text,
         inlineContent = markers,
+        onTextLayout = { layout = it },
         style = TextStyle(
             fontFamily = UthmanicHafs,
             fontSize = fontSize.sp,
@@ -361,9 +419,20 @@ private fun AyahText(
             textDirection = TextDirection.Rtl,
             color = colors.onSurface,
         ),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .onGloballyPositioned { textTop = it.positionInRoot().y },
     )
 }
+
+/** How far below the top of the page the recited ayah is parked, in pixels. */
+private const val FOLLOW_MARGIN_PX = 180f
+
+/** Below this, the ayah is near enough already and scrolling would only be a twitch. */
+private const val FOLLOW_SLACK_PX = 48f
+
+/** After Isha the page comes down to this, and returns to full at Fajr. */
+private const val NIGHT_DIM = 0.88f
 
 private const val AYAH_MARKER = "ayah:"
 

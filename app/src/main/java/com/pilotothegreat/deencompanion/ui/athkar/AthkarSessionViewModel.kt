@@ -22,6 +22,8 @@ data class AthkarSession(
     val category: AthkarCategory,
     val progress: DayProgress,
     val fontSize: Int,
+    /** The dhikr this session was last left on, or null if it was never left part-way. */
+    val resumeAt: Int?,
 )
 
 sealed interface SessionEvent {
@@ -42,7 +44,15 @@ class AthkarSessionViewModel(
         settings.settings,
     ) { category, progress, s ->
         category?.let {
-            AthkarSession(it, progress.on(LocalDate.now(s.zone)), s.quranFontSize)
+            AthkarSession(
+                category = it,
+                progress = progress.on(LocalDate.now(s.zone)),
+                fontSize = s.quranFontSize,
+                resumeAt = s.athkarPlace.takeIf { place -> place.substringBefore(':') == key.categoryId }
+                    ?.substringAfter(':')
+                    ?.toIntOrNull()
+                    ?.takeIf { index -> index in it.items.indices },
+            )
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
@@ -61,6 +71,11 @@ class AthkarSessionViewModel(
 
     fun reset() {
         viewModelScope.launch { athkar.reset(key.categoryId, today()) }
+    }
+
+    /** Remembers the dhikr on screen, so closing the app mid-session does not lose the place. */
+    fun onPage(index: Int) {
+        viewModelScope.launch { settings.setAthkarPlace(key.categoryId, index) }
     }
 
 

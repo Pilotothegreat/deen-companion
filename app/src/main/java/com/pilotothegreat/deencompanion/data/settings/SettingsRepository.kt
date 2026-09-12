@@ -112,6 +112,16 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
     suspend fun setLastReadPage(page: Int) = edit { it[Keys.LAST_READ_PAGE] = page }
 
+    /**
+     * Where an athkar session was left, as "categoryId:index".
+     *
+     * The session already opened at the first dhikr not finished today, which is right until someone
+     * skips ahead — then closing the app sent them back to the one they had passed over. This
+     * remembers the page they were actually on, as the mushaf remembers its page.
+     */
+    suspend fun setAthkarPlace(categoryId: String, index: Int) =
+        edit { it[Keys.ATHKAR_PLACE] = "$categoryId:$index" }
+
     suspend fun setAthkarReminders(enabled: Boolean) = edit { it[Keys.ATHKAR_REMINDERS] = enabled }
 
 
@@ -249,6 +259,7 @@ internal object Keys {
     val SHOW_TRANSLATION = booleanPreferencesKey("show_translation")
     val RECITER = stringPreferencesKey("reciter")
     val LAST_READ_PAGE = intPreferencesKey("quran_last_page")
+    val ATHKAR_PLACE = stringPreferencesKey("athkar_last_place")
     val UPDATE_CHECKED_AT = longPreferencesKey("github_check_timestamp")
     val UPDATE_LATEST = stringPreferencesKey("github_check_latest_version")
     val LANGUAGE_MIGRATED = booleanPreferencesKey("language_migrated")
@@ -340,6 +351,7 @@ internal fun Preferences.toAppSettings(): AppSettings = AppSettings(
     showTranslation = this[Keys.SHOW_TRANSLATION] ?: false,
     reciter = enumOrNull<Reciter>(this[Keys.RECITER]) ?: Reciter.MISHARY,
     lastReadPage = this[Keys.LAST_READ_PAGE] ?: 0,
+    athkarPlace = this[Keys.ATHKAR_PLACE].orEmpty(),
     appLanguage = this[Keys.LANGUAGE] ?: AppLanguage.SYSTEM,
     athkarReminders = this[Keys.ATHKAR_REMINDERS] ?: false,
     smart = SmartSettings(

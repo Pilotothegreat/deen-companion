@@ -528,7 +528,11 @@
     <string name="backup_export">حفظ نسخة احتياطية</string>
     <string name="backup_export_desc">إعداداتك وعلاماتك وختمتك في ملف تحتفظ به</string>
     <string name="backup_import">استعادة نسخة</string>
-    <string name="backup_import_desc">يستبدل ما في الهاتف بما في الملف</string>
+    <string name="backup_auto_title">نسخ بلال الخاصة</string>
+    <string name="backup_auto_desc">تُكتب بهدوء مرة كل أسبوع وتُحفظ ثلاثة أسابيع، على هذا الهاتف وحده</string>
+    <string name="backup_auto_none">لا توجد نسخة تلقائية بعد، وتُكتب الأولى خلال أسبوع من التثبيت.</string>
+    <string name="backup_choose_file">اختيار ملف بدلاً من ذلك…</string>
+    <string name="backup_import_desc">يستبدل ما في الهاتف بالنسخة التي تختارها</string>
     <string name="backup_saved">تم حفظ النسخة</string>
     <string name="backup_restored">تمت الاستعادة</string>
     <string name="backup_error_unreadable">تعذّر قراءة الملف.</string>

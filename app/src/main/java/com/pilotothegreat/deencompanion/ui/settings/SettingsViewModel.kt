@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import com.pilotothegreat.deencompanion.R
+import com.pilotothegreat.deencompanion.data.backup.AutoBackups
 import com.pilotothegreat.deencompanion.data.backup.BackupRepository
 import com.pilotothegreat.deencompanion.data.backup.RestoreError
 import androidx.lifecycle.ViewModel
@@ -38,6 +39,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+/** One of the copies Bilal writes for itself each week. */
+data class AutoBackup(val path: String, val savedAt: Long, val bytes: Long)
 
 /** What the Quran text and its translation must be credited as, read from the assets themselves. */
 data class QuranCredits(val text: TextSource, val translation: TranslationInfo, val edition: String)
@@ -92,6 +96,34 @@ private val _backupMessage = MutableStateFlow<Int?>(null)
                     ?: error("no stream")
                 R.string.backup_saved
             }.getOrDefault(R.string.backup_error_unreadable)
+        }
+        _backupMessage.value = message
+    }
+
+    /**
+     * The copies Bilal wrote for itself, newest first, so a reinstall does not depend on someone
+     * having remembered to export by hand.
+     */
+    val autoBackups: StateFlow<List<AutoBackup>> = flow {
+        emit(
+            withContext(Dispatchers.IO) {
+                AutoBackups.list(context).map { AutoBackup(it.absolutePath, it.lastModified(), it.length()) }
+            },
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    fun restoreAutoBackup(path: String) = launch {
+        val message = withContext(Dispatchers.IO) {
+            val json = runCatching { java.io.File(path).readText() }.getOrNull()
+            when {
+                json == null -> R.string.backup_error_unreadable
+                else -> when (backup.restore(json)) {
+                    null -> R.string.backup_restored
+                    RestoreError.UNREADABLE -> R.string.backup_error_unreadable
+                    RestoreError.WRONG_FILE -> R.string.backup_error_wrong_file
+                    RestoreError.TOO_NEW -> R.string.backup_error_too_new
+                }
+            }
         }
         _backupMessage.value = message
     }

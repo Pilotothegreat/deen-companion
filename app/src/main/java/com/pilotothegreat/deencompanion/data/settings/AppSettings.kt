@@ -151,6 +151,8 @@ data class AppSettings(
     val reciter: Reciter,
     /** Last Quran page opened (1..604), or 0 if none. */
     val lastReadPage: Int,
+    /** Where the last athkar session was left, as "categoryId:index"; empty if none. */
+    val athkarPlace: String = "",
     /** Moment ids sent away, each stamped "id@epochDay". */
     val dismissedMoments: Set<String>,
     /** BCP 47 tag of the UI language, or [AppLanguage.SYSTEM]. */

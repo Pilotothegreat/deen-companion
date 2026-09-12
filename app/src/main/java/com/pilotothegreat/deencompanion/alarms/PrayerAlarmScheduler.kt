@@ -8,6 +8,7 @@ import android.os.Build
 import com.pilotothegreat.deencompanion.core.prayer.DaySchedule
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
 import com.pilotothegreat.deencompanion.core.prayer.PrayerSchedule
+import com.pilotothegreat.deencompanion.core.quiet.QuietTimes
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -64,11 +65,12 @@ class PrayerAlarmScheduler(private val context: Context, private val settings: S
                     }
 
                     // The restore is scheduled in the same breath as the mute, so a crash between
-                    // the two can never leave someone's phone silent for good.
-                    val silenceFrom = (iqama ?: adhan).takeIf { sounds.silenceMinutes > 0 }
-                    if (silenceFrom != null && silenceFrom.isAfter(now)) {
-                        set(manager, AlarmKind.SILENCE_START, day, prayer, silenceFrom)
-                        set(manager, AlarmKind.SILENCE_END, day, prayer, silenceFrom.plusMinutes(sounds.silenceMinutes.toLong()))
+                    // the two can never leave someone's phone silent for good. On Friday the window
+                    // covers the khutbah too, which begins at the adhan rather than the iqama.
+                    val quiet = QuietTimes.silenceWindow(prayer, adhan, iqama, sounds.silenceMinutes)
+                    if (quiet != null && quiet.start.isAfter(now)) {
+                        set(manager, AlarmKind.SILENCE_START, day, prayer, quiet.start)
+                        set(manager, AlarmKind.SILENCE_END, day, prayer, quiet.endInclusive)
                     }
                 }
             }

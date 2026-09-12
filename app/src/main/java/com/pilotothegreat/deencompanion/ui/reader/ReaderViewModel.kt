@@ -2,7 +2,10 @@ package com.pilotothegreat.deencompanion.ui.reader
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pilotothegreat.deencompanion.core.prayer.DaySchedule
+import com.pilotothegreat.deencompanion.core.prayer.Prayer
 import com.pilotothegreat.deencompanion.core.quran.RepeatMode
+import com.pilotothegreat.deencompanion.core.time.Ticker
 import com.pilotothegreat.deencompanion.data.net.NetError
 import com.pilotothegreat.deencompanion.data.quran.KhatmaRepository
 import com.pilotothegreat.deencompanion.data.quran.Quran
@@ -18,6 +21,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -54,6 +58,22 @@ class ReaderViewModel(
     val bookmarks: StateFlow<Set<Pair<Int, Int>>> = repository.bookmarks
         .map { list -> list.map { it.surah to it.ayah }.toSet() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
+
+    /**
+     * True between Isha and Fajr, which the reader uses to take the page down a shade.
+     *
+     * Reading at night on a screen set for daylight is the most common reason someone puts the
+     * mushaf down, and reaching for the system brightness slider mid-ayah is the other. This is
+     * deliberately small — a few percent, not a night filter — and it is not a setting, because
+     * asking someone whether they would like the screen to stop hurting is not a real question.
+     */
+    val nightDim: StateFlow<Boolean> = combine(settings.settings, Ticker.minutes) { s, _ ->
+        val now = java.time.ZonedDateTime.now(s.zone)
+        val today = DaySchedule.forDate(now.toLocalDate(), s.prayerConfig)
+        val isha = today.adhan[Prayer.ISHA]
+        val fajr = today.adhan[Prayer.FAJR]
+        (isha != null && !now.isBefore(isha)) || (fajr != null && now.isBefore(fajr))
+    }.distinctUntilChanged().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
     val playback: StateFlow<PlaybackState> = player.state
     val playbackErrors: SharedFlow<NetError> = player.errors
