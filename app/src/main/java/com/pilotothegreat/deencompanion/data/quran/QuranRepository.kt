@@ -42,7 +42,16 @@ data class Surah(
     val bismillah: String?,
 )
 
-data class MushafPage(val number: Int, val juz: Int, val verses: List<Verse>)
+data class MushafPage(
+    val number: Int,
+    val juz: Int,
+    val verses: List<Verse>,
+    /**
+     * The fifteen lines the printed page breaks into, or empty when the layout table could not be
+     * read. Empty means the reader flows the page instead, which is what it always did.
+     */
+    val lines: List<MushafLine> = emptyList(),
+)
 
 data class Bookmark(val surah: Int, val ayah: Int, val surahName: String, val createdAt: Long)
 
@@ -176,7 +185,7 @@ class QuranRepository(private val context: Context, private val bookmarkDao: Boo
             source = sourceJson.getString("source"),
             terms = sourceJson.getString("terms"),
         )
-        return Quran(surahs, buildPages(surahs), info, source)
+        return Quran(surahs, buildPages(surahs, readLines(surahs)), info, source)
     }
 
     /** Null when the translation file is missing, so the Arabic still opens. */
@@ -185,7 +194,13 @@ class QuranRepository(private val context: Context, private val bookmarkDao: Boo
         JSONObject(json).getJSONArray("verses")
     }.getOrNull()
 
-    private fun buildPages(surahs: List<Surah>): List<MushafPage> {
+    /** Null when the table is missing or does not fit the text; the reader then flows the page. */
+    private fun readLines(surahs: List<Surah>): List<List<MushafLine>>? = runCatching {
+        val json = context.assets.open(MushafLines.ASSET).bufferedReader().use { it.readText() }
+        MushafLines.parse(json, surahs)
+    }.getOrNull()
+
+    private fun buildPages(surahs: List<Surah>, lines: List<List<MushafLine>>?): List<MushafPage> {
         val starts = MushafLayout.pageStarts
         val pages = ArrayList<MushafPage>(MushafLayout.PAGE_COUNT)
         var current = ArrayList<Verse>()
@@ -201,14 +216,24 @@ class QuranRepository(private val context: Context, private val bookmarkDao: Boo
         for (surah in surahs) {
             for (verse in surah.verses) {
                 while (current.isNotEmpty() && isStartOf(pageIndex + 1, verse)) {
-                    pages += MushafPage(pageIndex + 1, MushafLayout.juzOf(current[0].surah, current[0].number), current)
+                    pages += MushafPage(
+                        pageIndex + 1,
+                        MushafLayout.juzOf(current[0].surah, current[0].number),
+                        current,
+                        lines?.getOrNull(pageIndex).orEmpty(),
+                    )
                     current = ArrayList()
                     pageIndex++
                 }
                 current += verse
             }
         }
-        pages += MushafPage(pageIndex + 1, MushafLayout.juzOf(current[0].surah, current[0].number), current)
+        pages += MushafPage(
+            pageIndex + 1,
+            MushafLayout.juzOf(current[0].surah, current[0].number),
+            current,
+            lines?.getOrNull(pageIndex).orEmpty(),
+        )
         return pages
     }
 }

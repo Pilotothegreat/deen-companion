@@ -22,6 +22,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.List
+import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -45,6 +46,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -71,6 +73,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
@@ -85,6 +88,7 @@ import com.pilotothegreat.deencompanion.data.quran.Revelation
 import com.pilotothegreat.deencompanion.data.quran.Surah
 import com.pilotothegreat.deencompanion.data.quran.Verse
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import com.pilotothegreat.deencompanion.ui.common.KeepScreenOn
 import com.pilotothegreat.deencompanion.ui.common.Formatters
@@ -108,6 +112,11 @@ fun ReaderScreen(
     val bookmarks by viewModel.bookmarks.collectAsStateWithLifecycle()
     val playback by viewModel.playback.collectAsStateWithLifecycle()
     val nightDim by viewModel.nightDim.collectAsStateWithLifecycle()
+    // A fifteen-line page cannot be read at twice the system text size, so the reader falls back to
+    // flowing it. The reader can also ask for that directly, from the top bar.
+    val density = LocalDensity.current
+    var flowingOverride by rememberSaveable { mutableStateOf<Boolean?>(null) }
+    val flowing = flowingOverride ?: (density.fontScale > FLOW_ABOVE_FONT_SCALE)
     val resources = LocalResources.current
     val locale = currentLocale()
     val snackbar = remember { SnackbarHostState() }
@@ -170,6 +179,12 @@ fun ReaderScreen(
                     IconButton(onClick = { jumping = true }) {
                         Icon(Icons.AutoMirrored.Rounded.List, contentDescription = stringResource(R.string.jump_to))
                     }
+                    IconToggleButton(checked = !flowing, onCheckedChange = { flowingOverride = !it }) {
+                        Icon(
+                            Icons.AutoMirrored.Rounded.MenuBook,
+                            contentDescription = stringResource(R.string.reader_mushaf_page),
+                        )
+                    }
                     IconToggleButton(checked = prefs.showTranslation, onCheckedChange = { viewModel.toggleTranslation() }) {
                         Icon(Icons.Rounded.Translate, contentDescription = stringResource(R.string.show_translation))
                     }
@@ -201,6 +216,7 @@ fun ReaderScreen(
                             follow = if (playback.isActive && playback.isPlaying) highlight else null,
                             bookmarks = bookmarks,
                             bottomSpace = playback.isActive,
+                            flowing = flowing,
                             onAyahClick = {
                                 haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
                                 selected = it
@@ -268,6 +284,8 @@ private fun MushafPageView(
     follow: Pair<Int, Int>?,
     bookmarks: Set<Pair<Int, Int>>,
     bottomSpace: Boolean,
+    /** True to flow the page as a paragraph instead of setting it line for line. */
+    flowing: Boolean,
     onAyahClick: (Verse) -> Unit,
 ) {
     val locale = currentLocale()
@@ -300,7 +318,17 @@ private fun MushafPageView(
             modifier = Modifier.fillMaxWidth(),
         ) {
             Column(Modifier.padding(horizontal = 16.dp, vertical = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                page.verses.groupBy { it.surah }.forEach { (surahNumber, verses) ->
+                if (page.lines.isNotEmpty() && !flowing) {
+                    MushafPageLines(
+                        lines = page.lines,
+                        quran = quran,
+                        fontSize = fontSize,
+                        highlight = highlight,
+                        bookmarks = bookmarks,
+                        onAyahClick = onAyahClick,
+                    )
+                } else {
+                    page.verses.groupBy { it.surah }.forEach { (surahNumber, verses) ->
                     val surah = quran.surah(surahNumber)
                     if (verses.first().number == 1) {
                         SurahBanner(surah)
@@ -318,6 +346,7 @@ private fun MushafPageView(
                         }
                     }
                     AyahText(verses, fontSize, highlight, follow, bookmarks, onAyahClick) { ayahTop = it }
+                    }
                 }
                 Text(
                     Numerals.toArabicIndic(page.number.toString()),
@@ -390,7 +419,7 @@ private fun AyahText(
                 val id = "$AYAH_MARKER${verse.surah}:${verse.number}"
                 val digits = Numerals.toArabicIndic(verse.number.toString())
                 markers[id] = ayahMarker(
-                    number = digits,
+                    number = verse.number,
                     fontSize = fontSize,
                     color = if (key in bookmarks) colors.primary else colors.secondary,
                 )
@@ -434,6 +463,14 @@ private const val FOLLOW_SLACK_PX = 48f
 /** After Isha the page comes down to this, and returns to full at Fajr. */
 private const val NIGHT_DIM = 0.88f
 
+/**
+ * Above this system text scale the page is flowed rather than set in fifteen lines.
+ *
+ * The printed page is a fixed shape; at twice the text size it would either run off the screen or
+ * shrink until it was no longer readable, which defeats the point of asking for larger text.
+ */
+private const val FLOW_ABOVE_FONT_SCALE = 1.3f
+
 private const val AYAH_MARKER = "ayah:"
 
 /**
@@ -444,35 +481,42 @@ private const val AYAH_MARKER = "ayah:"
  * liga and medi — there is no rule to compose it. Typing "۝٢" therefore produced an empty rosette
  * followed by loose digits: two marks where the mushaf has one.
  */
-private fun ayahMarker(number: String, fontSize: Int, color: Color): InlineTextContent =
+@Composable
+fun AyahRosette(number: Int, size: Float, color: Color) {
+    Box(contentAlignment = Alignment.Center) {
+        Text(AYAH_ROSETTE, fontFamily = UthmanicHafs, fontSize = (size * ROSETTE_SIZE).sp, color = color)
+        Text(
+            Numerals.toArabicIndic(number.toString()),
+            fontFamily = UthmanicHafs,
+            fontSize = (size * DIGIT_SIZE).sp,
+            color = color,
+            // The rosette's open centre sits well below the middle of its line box, under the
+            // ornamental crown; centred without this, the number lands on the crown and is lost in
+            // it. The nudge is expressed in sp rather than dp so that it grows with the glyph it
+            // corrects — as dp it stayed put while the rosette grew, and at a large accessibility
+            // text scale the digit climbed back onto the crown.
+            modifier = Modifier.offset { IntOffset(0, (size * DIGIT_DROP).sp.roundToPx()) },
+        )
+    }
+}
+
+private const val ROSETTE_SIZE = 1.15f
+private const val DIGIT_SIZE = 0.62f
+private const val DIGIT_DROP = 0f
+
+private fun ayahMarker(number: Int, fontSize: Int, color: Color): InlineTextContent =
     InlineTextContent(
         Placeholder(width = 1.95.em, height = 1.35.em, placeholderVerticalAlign = PlaceholderVerticalAlign.Center),
     ) {
-        Box(contentAlignment = Alignment.Center) {
-            Text(
-                AYAH_ROSETTE,
-                fontFamily = UthmanicHafs,
-                fontSize = (fontSize * 1.15f).sp,
-                color = color,
-            )
-            Text(
-                number,
-                fontFamily = UthmanicHafs,
-                fontSize = (fontSize * 0.62f).sp,
-                color = color,
-                // The rosette's open centre sits well below the middle of its line box, under the
-                // ornamental crown. Centred without this, the number lands on the crown and is lost
-                // in it.
-                modifier = Modifier.offset(y = (fontSize * 0.33f).dp),
-            )
-        }
+        AyahRosette(number = number, size = fontSize.toFloat(), color = color)
     }
 
 /** U+06DD on its own: the rosette, with no digits for the font to fail to compose. */
 private const val AYAH_ROSETTE = "۝"
 
+/** The ornamental band the print sets a surah's name in. */
 @Composable
-private fun SurahBanner(surah: Surah) {
+fun SurahBanner(surah: Surah) {
     val locale = currentLocale()
     Surface(
         shape = MaterialTheme.shapes.large,

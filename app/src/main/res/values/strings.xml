@@ -135,6 +135,7 @@
     <string name="sajdah_note">۩ A prostration of recitation at %1$s. The schools differ on whether it is obligatory or recommended.</string>
     <string name="page_juz">Page %1$s · Juz %2$s</string>
     <string name="show_translation">Translation</string>
+    <string name="reader_mushaf_page">Show the printed page</string>
     <string name="play_from_here">Play from this ayah</string>
     <string name="repeat">Repeat</string>
     <string name="repeat_off">Off</string>

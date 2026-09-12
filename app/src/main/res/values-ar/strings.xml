@@ -155,6 +155,7 @@
     <string name="sajdah_note">۩ سجدة تلاوة عند %1$s، وقد اختلف الفقهاء في وجوبها أو استحبابها.</string>
     <string name="page_juz">صفحة %1$s · الجزء %2$s</string>
     <string name="show_translation">الترجمة</string>
+    <string name="reader_mushaf_page">عرض الصفحة كما تُطبع</string>
     <string name="play_from_here">التلاوة من هذه الآية</string>
     <string name="repeat">التكرار</string>
     <string name="repeat_off">إيقاف</string>
