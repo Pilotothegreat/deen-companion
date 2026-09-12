@@ -39,3 +39,41 @@ class AutoBackupsTest {
         assertEquals(3, AutoBackups.KEEP)
     }
 }
+
+/**
+ * The same rules against a real files directory: what is written can be found again and read back,
+ * and the directory cannot grow past three copies however many weeks pass.
+ */
+@org.junit.runner.RunWith(androidx.test.ext.junit.runners.AndroidJUnit4::class)
+@org.robolectric.annotation.Config(sdk = [34], application = android.app.Application::class)
+class AutoBackupsOnDiskTest {
+
+    private val context = androidx.test.core.app.ApplicationProvider.getApplicationContext<android.content.Context>()
+
+    @org.junit.After fun clean() {
+        AutoBackups.directory(context).deleteRecursively()
+    }
+
+    @Test fun whatIsWrittenIsWhatComesBack() {
+        val json = """{"format":"bilal-backup","version":1}"""
+        val written = AutoBackups.write(context, json, atMillis = 1_757_000_000_000)
+        assertEquals(json, written.readText())
+        assertEquals(listOf(written.name), AutoBackups.list(context).map { it.name })
+    }
+
+    @Test fun aYearOfWeeklyBackupsStillLeavesThree() {
+        val week = 7L * 24 * 60 * 60 * 1000
+        var at = 1_700_000_000_000
+        repeat(52) {
+            AutoBackups.write(context, """{"n":$it}""", atMillis = at)
+            at += week
+        }
+        val kept = AutoBackups.list(context)
+        assertEquals(AutoBackups.KEEP, kept.size)
+        assertTrue("the newest must survive", kept.first().readText().contains("51"))
+    }
+
+    @Test fun anEmptyDirectoryIsNotAnError() {
+        assertEquals(emptyList<File>(), AutoBackups.list(context))
+    }
+}
