@@ -50,6 +50,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.data.hadith.Hadith
 import com.pilotothegreat.deencompanion.data.hadith.HadithBook
@@ -93,7 +94,7 @@ fun HadithScreen(onOpenBook: (String) -> Unit, viewModel: HadithViewModel = koin
                 query = query,
                 onQueryChange = viewModel::onQueryChange,
                 placeholder = stringResource(R.string.search_hadith_hint),
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                modifier = Modifier.padding(horizontal = Spacing.large, vertical = Spacing.small),
             )
             val loadedBooks = books ?: run {
                 LoadingBox()
@@ -126,7 +127,7 @@ private fun BookList(
 ) {
     val locale = currentLocale()
     LazyColumn(
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 24.dp + LocalBottomBarPadding.current),
+        contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = Spacing.medium, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
         verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
     ) {
         itemsIndexed(books, key = { _, book -> book.info.id }) { index, book ->
@@ -180,7 +181,7 @@ private fun BookList(
                 stringResource(R.string.downloads_note),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 4.dp, end = 4.dp, top = 16.dp),
+                modifier = Modifier.padding(start = Spacing.hair, end = Spacing.hair, top = Spacing.large),
             )
         }
     }
@@ -197,8 +198,8 @@ private fun FavoriteList(favorites: List<Hadith>, bookNames: Map<String, String>
         return
     }
     LazyColumn(
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 24.dp + LocalBottomBarPadding.current),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = Spacing.medium, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
+        verticalArrangement = Arrangement.spacedBy(Spacing.medium),
     ) {
         items(favorites, key = { it.id }) { hadith ->
             HadithCard(hadith, bookNames[hadith.bookId], isFavorite = true, onFavoriteChange = { onFavorite(hadith.id, it) }, Modifier.animateItem())
@@ -222,8 +223,8 @@ private fun SearchResults(
             body = if (someIncomplete) stringResource(R.string.search_incomplete) else null,
         )
         else -> LazyColumn(
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp + LocalBottomBarPadding.current),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = Spacing.small, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
+            verticalArrangement = Arrangement.spacedBy(Spacing.medium),
         ) {
             if (someIncomplete) {
                 item(key = "hint") {
@@ -231,7 +232,7 @@ private fun SearchResults(
                         stringResource(R.string.search_incomplete),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 4.dp),
+                        modifier = Modifier.padding(horizontal = Spacing.hair),
                     )
                 }
             }
@@ -280,8 +281,8 @@ fun HadithBookScreen(
     ) { padding ->
         LazyColumn(
             modifier = Modifier.padding(padding).fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp + LocalBottomBarPadding.current),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = Spacing.small, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
+            verticalArrangement = Arrangement.spacedBy(Spacing.medium),
         ) {
             val current = book
             if (current != null && !current.isComplete) {
@@ -298,7 +299,7 @@ fun HadithBookScreen(
             }
             if (!endReached) {
                 item(key = "loading") {
-                    Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) { LoadingIndicator() }
+                    Box(Modifier.fillMaxWidth().padding(Spacing.xxlarge), contentAlignment = Alignment.Center) { LoadingIndicator() }
                     LaunchedEffect(hadiths.size) { viewModel.loadMore() }
                 }
             }
@@ -315,14 +316,14 @@ private fun SampleBanner(downloading: Boolean, progress: Float?, onDownload: () 
             contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
         ),
     ) {
-        Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.fillMaxWidth().padding(Spacing.xlarge), verticalArrangement = Arrangement.spacedBy(Spacing.medium)) {
             Text(stringResource(R.string.sample_banner), style = MaterialTheme.typography.bodyMedium)
             when {
                 downloading && progress != null -> LinearWavyProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth())
                 downloading -> LinearWavyProgressIndicator(Modifier.fillMaxWidth())
                 else -> FilledTonalButton(onClick = onDownload, modifier = Modifier.align(Alignment.End)) {
                     Icon(Icons.Rounded.Download, contentDescription = null)
-                    Text(stringResource(R.string.download_collection), modifier = Modifier.padding(start = 8.dp))
+                    Text(stringResource(R.string.download_collection), modifier = Modifier.padding(start = Spacing.small))
                 }
             }
         }

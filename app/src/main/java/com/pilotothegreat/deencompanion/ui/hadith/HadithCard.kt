@@ -28,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.data.hadith.Hadith
 import com.pilotothegreat.deencompanion.ui.common.Formatters
@@ -56,8 +57,8 @@ fun HadithCard(
         shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
-        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.padding(Spacing.xlarge), verticalArrangement = Arrangement.spacedBy(Spacing.medium)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
                 Text(header, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f))
                 if (hadith.grade.isNotBlank()) GradeLabel(hadith.grade)
             }
@@ -110,6 +111,6 @@ private fun GradeLabel(grade: String) {
         else -> Triple<String, Color, Color>(grade, colors.surfaceVariant, colors.onSurfaceVariant)
     }
     Surface(shape = CircleShape, color = container, contentColor = content) {
-        Text(label, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp))
+        Text(label, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(horizontal = 10.dp, vertical = Spacing.hair))
     }
 }

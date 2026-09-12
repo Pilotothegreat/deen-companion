@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.data.quran.MushafLayout
 import com.pilotothegreat.deencompanion.data.quran.Quran
@@ -49,7 +50,7 @@ fun JumpSheet(quran: Quran, currentPage: Int, onJump: (Int) -> Unit, onDismiss: 
     val locale = currentLocale()
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(Modifier.padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.padding(bottom = Spacing.xxlarge), verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
             SecondaryTabRow(selectedTabIndex = tab) {
                 Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.surahs)) })
                 Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.juz_tab)) })
@@ -63,7 +64,7 @@ fun JumpSheet(quran: Quran, currentPage: Int, onJump: (Int) -> Unit, onDismiss: 
                         LazyColumn(
                             state = state,
                             modifier = Modifier.heightIn(max = 420.dp),
-                            contentPadding = PaddingValues(horizontal = 16.dp),
+                            contentPadding = PaddingValues(horizontal = Spacing.large),
                             verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
                         ) {
                             itemsIndexed(surahs, key = { _, s -> s.number }) { index, surah ->
@@ -97,7 +98,7 @@ fun JumpSheet(quran: Quran, currentPage: Int, onJump: (Int) -> Unit, onDismiss: 
                         LazyColumn(
                             state = state,
                             modifier = Modifier.heightIn(max = 420.dp),
-                            contentPadding = PaddingValues(horizontal = 16.dp),
+                            contentPadding = PaddingValues(horizontal = Spacing.large),
                             verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
                         ) {
                             itemsIndexed(juzs) { index, (surah, ayah) ->
@@ -119,9 +120,9 @@ fun JumpSheet(quran: Quran, currentPage: Int, onJump: (Int) -> Unit, onDismiss: 
                 else -> LazyVerticalGrid(
                     columns = GridCells.Adaptive(72.dp),
                     modifier = Modifier.heightIn(max = 420.dp),
-                    contentPadding = PaddingValues(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(Spacing.large),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.small),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.small),
                 ) {
                     items((1..quran.pages.size).toList()) { page ->
                         val selected = page == currentPage

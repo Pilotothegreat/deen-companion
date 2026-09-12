@@ -51,6 +51,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.ui.common.rememberHaptics
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.core.athkar.AthkarCategory
@@ -108,8 +109,8 @@ fun AthkarScreen(onOpenCategory: (String) -> Unit, viewModel: AthkarViewModel = 
         }
         LazyColumn(
             modifier = Modifier.padding(padding).fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp + LocalBottomBarPadding.current),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = Spacing.small, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
+            verticalArrangement = Arrangement.spacedBy(Spacing.medium),
         ) {
             item(key = "search") {
                 SearchField(query, viewModel::onQueryChange, stringResource(R.string.search_athkar_hint))
@@ -144,7 +145,7 @@ fun AthkarScreen(onOpenCategory: (String) -> Unit, viewModel: AthkarViewModel = 
             home.library.groups.forEach { group ->
                 item(key = "group-${group.id}") {
                     Column {
-                        SectionHeader(group.title(locale), Modifier.padding(start = 4.dp).semantics { heading() })
+                        SectionHeader(group.title(locale), Modifier.padding(start = Spacing.hair).semantics { heading() })
                         CategoryList(group.categories, home.library, home.progress, locale, onOpenCategory)
                     }
                 }
@@ -169,7 +170,7 @@ private fun NowCard(category: AthkarCategory, progress: DayProgress, streak: Int
         ),
         modifier = Modifier.fillMaxWidth().pressScale(interaction),
     ) {
-        Row(Modifier.padding(24.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.padding(Spacing.xxlarge), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(stringResource(R.string.athkar_now), style = MaterialTheme.typography.labelLarge)
                 Text(category.title(locale), style = MaterialTheme.typography.headlineMediumEmphasized)
@@ -215,9 +216,9 @@ private fun NowCard(category: AthkarCategory, progress: DayProgress, streak: Int
 fun StreakPill(days: Int, locale: Locale) {
     Surface(shape = MaterialTheme.shapes.large, color = MaterialTheme.colorScheme.tertiary, contentColor = MaterialTheme.colorScheme.onTertiary) {
         Row(
-            Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+            Modifier.padding(horizontal = 10.dp, vertical = Spacing.hair),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.hair),
         ) {
             Icon(Icons.Rounded.LocalFireDepartment, contentDescription = null, modifier = Modifier.size(16.dp))
             Text(pluralStringResource(R.plurals.athkar_streak, days, Formatters.number(days, locale)), style = MaterialTheme.typography.labelLarge)
@@ -228,9 +229,9 @@ fun StreakPill(days: Int, locale: Locale) {
 /** Two tiles per row; an odd last tile takes the full width. */
 @Composable
 private fun CoreGrid(categories: List<AthkarCategory>, progress: DayProgress, locale: Locale, onOpen: (String) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.medium)) {
         categories.chunked(2).forEach { row ->
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.medium)) {
                 row.forEach { category -> CoreTile(category, progress, locale, { onOpen(category.id) }, Modifier.weight(1f)) }
             }
         }
@@ -249,7 +250,7 @@ private fun CoreTile(category: AthkarCategory, progress: DayProgress, locale: Lo
         colors = CardDefaults.cardColors(containerColor = container, contentColor = content),
         modifier = modifier.pressScale(interaction),
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.padding(Spacing.large), verticalArrangement = Arrangement.spacedBy(Spacing.medium)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Surface(
                     shape = athkarShape(category.id).toShape(),

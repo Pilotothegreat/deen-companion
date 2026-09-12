@@ -30,6 +30,7 @@ import androidx.compose.material.icons.rounded.Contrast
 import androidx.compose.material.icons.rounded.FormatSize
 import androidx.compose.material.icons.rounded.TouchApp
 import androidx.compose.material.icons.rounded.Vibration
+import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.data.settings.ContrastMode
 import com.pilotothegreat.deencompanion.data.settings.ReduceMotion
 import androidx.compose.material.icons.rounded.DeleteSweep
@@ -327,7 +328,7 @@ fun SettingsScreen(
                                     if (it == 0) stringResource(R.string.pre_reminder_off)
                                     else pluralStringResource(R.plurals.minutes, it, Formatters.number(it, locale))
                                 },
-                                modifier = Modifier.padding(top = 8.dp),
+                                modifier = Modifier.padding(top = Spacing.small),
                             )
                         }
                     }
@@ -337,8 +338,8 @@ fun SettingsScreen(
                         add { shapes ->
                             ContentRow(shapes, Icons.Rounded.NotificationsActive, stringResource(R.string.pre_reminder_which)) {
                                 Row(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    modifier = Modifier.padding(top = 8.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(Spacing.small),
+                                    modifier = Modifier.padding(top = Spacing.small),
                                 ) {
                                     Prayer.obligatory.forEach { prayer ->
                                         val chosen = prayer in s.sounds.preReminderPrayers
@@ -360,7 +361,7 @@ fun SettingsScreen(
                     add { shapes ->
                         val allowed = QuietDuringPrayer.isAllowed(context)
                         ContentRow(shapes, Icons.Rounded.DoNotDisturbOn, stringResource(R.string.silence_during_prayer)) {
-                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Column(verticalArrangement = Arrangement.spacedBy(Spacing.hair)) {
                                 Text(
                                     if (allowed) stringResource(R.string.silence_during_prayer_desc)
                                     else stringResource(R.string.silence_needs_permission),
@@ -378,7 +379,7 @@ fun SettingsScreen(
                                         if (it == 0) stringResource(R.string.pre_reminder_off)
                                         else pluralStringResource(R.plurals.minutes, it, Formatters.number(it, locale))
                                     },
-                                    modifier = Modifier.padding(top = 8.dp),
+                                    modifier = Modifier.padding(top = Spacing.small),
                                 )
                             }
                         }
@@ -448,9 +449,26 @@ fun SettingsScreen(
                                     selected = s.themeMode,
                                     onSelect = viewModel::setThemeMode,
                                     label = { stringResource(it.labelRes) },
-                                    modifier = Modifier.padding(top = 8.dp),
+                                    modifier = Modifier.padding(top = Spacing.small),
                                 )
                             }
+                        },
+                        // 1.9.0 said these two were folded into the Theme row and folded them out
+                        // of existence instead: nothing could set either, so the app was stuck on
+                        // its defaults with no way back.
+                        { shapes ->
+                            SwitchRow(
+                                shapes, Icons.Rounded.ColorLens, stringResource(R.string.theme_wallpaper),
+                                stringResource(R.string.theme_wallpaper_desc), s.dynamicColor,
+                                viewModel::setDynamicColor,
+                            )
+                        },
+                        { shapes ->
+                            SwitchRow(
+                                shapes, Icons.Rounded.DarkMode, stringResource(R.string.theme_pure_black),
+                                stringResource(R.string.theme_pure_black_desc), s.pureBlack,
+                                viewModel::setPureBlack,
+                            )
                         },
                         { shapes ->
                             ContentRow(shapes, Icons.Rounded.Language, stringResource(R.string.language)) {
@@ -459,7 +477,7 @@ fun SettingsScreen(
                                     selected = s.appLanguage,
                                     onSelect = viewModel::setLanguage,
                                     label = { languageLabel(it) },
-                                    modifier = Modifier.padding(top = 8.dp),
+                                    modifier = Modifier.padding(top = Spacing.small),
                                 )
                             }
                         },
@@ -470,7 +488,7 @@ fun SettingsScreen(
                                     selected = TEXT_SCALES.minByOrNull { kotlin.math.abs(it - s.accessibility.textScale) } ?: 1f,
                                     onSelect = viewModel::setTextScale,
                                     label = { stringResource(it.labelRes) },
-                                    modifier = Modifier.padding(top = 8.dp),
+                                    modifier = Modifier.padding(top = Spacing.small),
                                 )
                             }
                         },
@@ -720,7 +738,7 @@ private fun supportRow(onOpen: () -> Unit): SettingsRow = { shapes ->
 @Composable
 private fun SettingsGroup(title: String, rows: List<SettingsRow>) {
     Column {
-        SectionHeader(title, Modifier.padding(start = 4.dp))
+        SectionHeader(title, Modifier.padding(start = Spacing.hair))
         Column(verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
             rows.forEachIndexed { index, row -> row(ListItemDefaults.segmentedShapes(index, rows.size)) }
         }
@@ -846,7 +864,7 @@ private fun IqamaDialog(prayer: Prayer, current: IqamaSetting, onSave: (IqamaSet
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.iqama_for, stringResource(prayer.nameRes))) },
         text = {
-            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(Spacing.xlarge)) {
                 ConnectedChoice(
                     options = listOf(false, true),
                     selected = fixed,
@@ -863,7 +881,7 @@ private fun IqamaDialog(prayer: Prayer, current: IqamaSetting, onSave: (IqamaSet
                         Text(
                             pluralStringResource(R.plurals.minutes, minutes, Formatters.number(minutes, locale)),
                             style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.padding(horizontal = 20.dp),
+                            modifier = Modifier.padding(horizontal = Spacing.xlarge),
                         )
                         FilledTonalIconButton(onClick = { minutes = (minutes + 5).coerceAtMost(range.last) }) {
                             Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.increase))
@@ -924,7 +942,7 @@ private fun FineTuneDialog(
                 Text(stringResource(R.string.fine_tune_desc), style = MaterialTheme.typography.bodyMedium)
                 Prayer.entries.forEach { prayer ->
                     val value = adjustments[prayer] ?: 0
-                    Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Row(Modifier.fillMaxWidth().padding(top = Spacing.small), verticalAlignment = Alignment.CenterVertically) {
                         Text(stringResource(prayer.nameRes), style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
                         IconButton(onClick = { onChange(prayer, value - 1) }, enabled = value > range.first) {
                             Icon(Icons.Rounded.Remove, contentDescription = stringResource(R.string.decrease))
@@ -989,9 +1007,9 @@ private fun AudioCacheDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.audio_cache)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.medium)) {
                 Text(stringResource(R.string.audio_cache_explainer))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
                     AUDIO_CACHE_CHOICES.forEach { mb ->
                         FilterChip(
                             selected = mb == currentMb,
@@ -1025,9 +1043,9 @@ private fun CalamityDialog(active: Boolean, onChoose: (Int) -> Unit, onDismiss: 
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.calamity_mode)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.medium)) {
                 Text(stringResource(R.string.calamity_body))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
                     FilterChip(selected = false, onClick = { onChoose(7) }, label = { Text(stringResource(R.string.calamity_for_week)) })
                     FilterChip(selected = false, onClick = { onChoose(30) }, label = { Text(stringResource(R.string.calamity_for_month)) })
                 }
@@ -1074,14 +1092,14 @@ private fun AdhanSoundSheet(
     var editing by remember { mutableStateOf<Prayer?>(null) }
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(
-            Modifier.padding(start = 16.dp, end = 16.dp, bottom = 32.dp),
+            Modifier.padding(start = Spacing.large, end = Spacing.large, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
         ) {
             Text(
                 stringResource(R.string.adhan_sound_desc),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(vertical = 12.dp),
+                modifier = Modifier.padding(vertical = Spacing.medium),
             )
             Prayer.obligatory.forEachIndexed { index, prayer ->
                 NavRow(
@@ -1146,20 +1164,20 @@ private fun RestoreSheet(
     val context = LocalContext.current
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(
-            Modifier.padding(start = 16.dp, end = 16.dp, bottom = 32.dp),
+            Modifier.padding(start = Spacing.large, end = Spacing.large, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
         ) {
             Text(
                 stringResource(R.string.backup_auto_desc),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(vertical = 12.dp),
+                modifier = Modifier.padding(vertical = Spacing.medium),
             )
             if (backups.isEmpty()) {
                 Text(
                     stringResource(R.string.backup_auto_none),
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(bottom = 12.dp),
+                    modifier = Modifier.padding(bottom = Spacing.medium),
                 )
             } else {
                 backups.forEachIndexed { index, entry ->
@@ -1187,12 +1205,12 @@ private fun RestoreSheet(
 @Composable
 private fun IqamaSheet(iqama: Map<Prayer, IqamaSetting>, onEdit: (Prayer) -> Unit, onDismiss: () -> Unit) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
+        Column(Modifier.padding(start = Spacing.large, end = Spacing.large, bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
             Text(
                 stringResource(R.string.iqama_sheet_intro),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(vertical = 12.dp),
+                modifier = Modifier.padding(vertical = Spacing.medium),
             )
             Prayer.obligatory.forEachIndexed { index, prayer ->
                 NavRow(

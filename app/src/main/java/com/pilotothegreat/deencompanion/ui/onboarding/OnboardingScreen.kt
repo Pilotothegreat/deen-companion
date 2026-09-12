@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.ui.common.SystemIntents
 import com.pilotothegreat.deencompanion.ui.common.startSafely
@@ -76,9 +77,9 @@ fun OnboardingScreen(onOpenLocation: () -> Unit, onFinish: () -> Unit) {
 
     Scaffold { padding ->
         Column(
-            Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
+            Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(Spacing.xxlarge),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+            verticalArrangement = Arrangement.spacedBy(Spacing.large, Alignment.CenterVertically),
         ) {
             Icon(step.icon, contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.primary)
             Text(stringResource(step.title), style = MaterialTheme.typography.headlineMediumEmphasized, textAlign = TextAlign.Center)

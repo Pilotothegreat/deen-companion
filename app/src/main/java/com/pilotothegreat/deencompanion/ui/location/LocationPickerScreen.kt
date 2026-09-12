@@ -45,6 +45,7 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.core.text.Numerals
 import com.pilotothegreat.deencompanion.data.settings.LocationSource
@@ -105,19 +106,19 @@ fun LocationPickerScreen(onBack: () -> Unit, viewModel: LocationViewModel = koin
                 query = query,
                 onQueryChange = viewModel::onQueryChange,
                 placeholder = stringResource(R.string.search_city_hint),
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                modifier = Modifier.padding(horizontal = Spacing.large, vertical = Spacing.small),
             )
             val cities = results ?: run {
                 LoadingBox()
                 return@Column
             }
             LazyColumn(
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp),
+                contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = Spacing.small, bottom = Spacing.xxlarge),
                 verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
             ) {
                 if (query.isBlank()) {
                     settings?.let { s ->
-                        item(key = "current") { CurrentLocationCard(s.location, Modifier.padding(bottom = 12.dp)) }
+                        item(key = "current") { CurrentLocationCard(s.location, Modifier.padding(bottom = Spacing.medium)) }
                     }
                     item(key = "device") {
                         SegmentedListItem(
@@ -134,7 +135,7 @@ fun LocationPickerScreen(onBack: () -> Unit, viewModel: LocationViewModel = koin
                 item(key = "header") {
                     SectionHeader(
                         stringResource(if (query.isBlank()) R.string.suggested_cities else R.string.search_results),
-                        Modifier.padding(start = 4.dp),
+                        Modifier.padding(start = Spacing.hair),
                     )
                 }
                 if (cities.isEmpty()) {
@@ -162,7 +163,7 @@ private fun CurrentLocationCard(location: SavedLocation, modifier: Modifier = Mo
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         modifier = modifier.fillMaxWidth(),
     ) {
-        Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        Row(Modifier.padding(Spacing.xlarge), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.large)) {
             Surface(
                 shape = MaterialShapes.Cookie7Sided.toShape(),
                 color = MaterialTheme.colorScheme.primary,

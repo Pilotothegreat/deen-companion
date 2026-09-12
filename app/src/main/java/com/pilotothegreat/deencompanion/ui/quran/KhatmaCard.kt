@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.core.quran.KhatmaProgress
 import com.pilotothegreat.deencompanion.ui.common.Formatters
@@ -50,7 +51,7 @@ fun KhatmaCard(progress: KhatmaProgress, onOpen: (Int) -> Unit, onCancel: () -> 
         shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
     ) {
-        Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        Row(Modifier.padding(Spacing.xlarge), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.large)) {
             if (progress.isComplete) {
                 Icon(Icons.Rounded.CheckCircle, contentDescription = null, modifier = Modifier.size(40.dp))
             } else {
@@ -98,7 +99,7 @@ fun StartKhatmaRow(onStart: () -> Unit, modifier: Modifier = Modifier) {
         shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
     ) {
-        Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        Row(Modifier.padding(Spacing.xlarge), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.large)) {
             Icon(Icons.Rounded.Add, contentDescription = null)
             Column(Modifier.weight(1f)) {
                 Text(stringResource(R.string.khatma_start), style = MaterialTheme.typography.titleMedium)
@@ -118,9 +119,9 @@ fun StartKhatmaDialog(currentPage: Int, onStart: (days: Int, fromPage: Int) -> U
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.khatma_start)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.medium)) {
                 Text(stringResource(R.string.khatma_length), style = MaterialTheme.typography.labelLarge)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
                     KHATMA_LENGTHS.forEach { length ->
                         FilterChip(
                             selected = length == days,
@@ -131,7 +132,7 @@ fun StartKhatmaDialog(currentPage: Int, onStart: (days: Int, fromPage: Int) -> U
                 }
                 if (currentPage > 1) {
                     Text(stringResource(R.string.khatma_from), style = MaterialTheme.typography.labelLarge)
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
                         FilterChip(
                             selected = fromStart == 1,
                             onClick = { fromStart = 1 },

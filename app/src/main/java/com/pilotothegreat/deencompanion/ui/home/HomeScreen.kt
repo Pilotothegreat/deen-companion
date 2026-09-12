@@ -17,6 +17,7 @@ import androidx.compose.material.icons.rounded.Alarm
 import androidx.compose.material.icons.rounded.Explore
 import androidx.compose.material.icons.rounded.MyLocation
 import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Icon
@@ -51,7 +52,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.R
+import com.pilotothegreat.deencompanion.ui.reliability.hasReliabilityProblem
 import com.pilotothegreat.deencompanion.ui.common.nameRes
 import com.pilotothegreat.deencompanion.ui.common.Formatters
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
@@ -95,11 +98,14 @@ fun HomeScreen(
     onOpenLocation: () -> Unit,
     onOpenAthkar: (String) -> Unit,
     onOpenReader: (ReaderKey) -> Unit,
+    onOpenReliability: () -> Unit,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val content by viewModel.content.collectAsStateWithLifecycle()
     val countdown by viewModel.countdown.collectAsStateWithLifecycle()
     val athkarNow by viewModel.athkarNow.collectAsStateWithLifecycle()
+    val prayed by viewModel.prayedToday.collectAsStateWithLifecycle()
+    val daysObserved by viewModel.daysObserved.collectAsStateWithLifecycle()
     val cards by viewModel.cards.collectAsStateWithLifecycle()
     val verseOfDay by viewModel.verseOfDay.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
@@ -209,8 +215,8 @@ fun HomeScreen(
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp + LocalBottomBarPadding.current),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = Spacing.small, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
+                verticalArrangement = Arrangement.spacedBy(Spacing.medium),
             ) {
                 // At most one thing to go and fix. A column of permission cards above the prayer
                 // times is what teaches people to stop reading this screen.
@@ -255,6 +261,23 @@ fun HomeScreen(
                             )
                         }
                     }
+                    // Everything else that can silence an alert — battery optimisation, a blocked
+                    // channel, a manufacturer's own killer — has no single action to offer, so it
+                    // points at the screen that explains each one. Checked here rather than
+                    // re-derived, since ReliabilityScreen already knows the whole list.
+                    if (isEmpty() && current.settings.notificationsEnabled &&
+                        hasReliabilityProblem(context, permissions.exactAlarms)
+                    ) {
+                        add {
+                            PermissionCard(
+                                icon = Icons.Rounded.NotificationsActive,
+                                title = stringResource(R.string.reliability_card_title),
+                                body = stringResource(R.string.reliability_card_body),
+                                actionLabel = stringResource(R.string.reliability),
+                                onAction = onOpenReliability,
+                            )
+                        }
+                    }
                 }
                 repairs.firstOrNull()?.let { repair ->
                     item(key = "repair") { Box(Modifier.animateItem()) { repair() } }
@@ -286,8 +309,11 @@ fun HomeScreen(
                         nextPrayer = countdown?.next?.takeIf { it.adhan.toLocalDate() == current.today.date }?.prayer,
                         muted = current.settings.mutedPrayers,
                         notificationsEnabled = current.settings.notificationsEnabled,
+                        prayed = prayed,
+                        daysObserved = daysObserved,
                         locale = locale,
                         onToggleMute = viewModel::setMuted,
+                        onTogglePrayed = viewModel::setPrayed,
                     )
                 }
                 athkarNow?.let { now ->
@@ -319,10 +345,8 @@ fun HomeScreen(
     }
 }
 
-private fun gregorianDate(locale: Locale, date: LocalDate): String {
-    val pattern = if (locale.language == "ar") "EEEE، d MMMM" else "EEEE, d MMMM"
-    return DateTimeFormatter.ofPattern(pattern, locale).withDecimalStyle(DecimalStyle.of(locale)).format(date)
-}
+private fun gregorianDate(locale: Locale, date: LocalDate): String =
+    Formatters.pattern(if (locale.language == "ar") "EEEE، d MMMM" else "EEEE, d MMMM", locale).format(date)
 
 /** Today's times as a message: the date, the place, and one prayer per line. */
 private fun shareTimes(

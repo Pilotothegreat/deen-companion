@@ -80,6 +80,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.ui.common.rememberHaptics
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.core.text.Numerals
@@ -243,7 +244,7 @@ fun ReaderScreen(
                     onRepeat = viewModel::setRepeat,
                     onSpeed = viewModel::setSpeed,
                     onClearRange = viewModel::clearRange,
-                    modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp),
+                    modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = Spacing.large),
                 )
             }
         }
@@ -335,8 +336,8 @@ private fun MushafPageView(
                     }
                 }
             }
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+            .padding(horizontal = Spacing.large, vertical = Spacing.small),
+        verticalArrangement = Arrangement.spacedBy(Spacing.large),
     ) {
         Surface(
             shape = MaterialTheme.shapes.extraLarge,
@@ -344,7 +345,7 @@ private fun MushafPageView(
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Column(Modifier.padding(horizontal = 16.dp, vertical = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(Modifier.padding(horizontal = Spacing.large, vertical = Spacing.xlarge), verticalArrangement = Arrangement.spacedBy(Spacing.medium)) {
                 if (page.lines.isNotEmpty() && !flowing) {
                     MushafPageLines(
                         lines = page.lines,
@@ -400,7 +401,7 @@ private fun MushafPageView(
             // Each ayah with its meaning directly under it, rather than the page's Arabic followed
             // by a list of numbered sentences the reader has to match up by eye.
             page.verses.forEach { verse ->
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
+                Column(verticalArrangement = Arrangement.spacedBy(Spacing.hair), modifier = Modifier.fillMaxWidth()) {
                     Text(
                         verse.text,
                         fontFamily = UthmanicHafs,
@@ -410,7 +411,7 @@ private fun MushafPageView(
                         style = TextStyle(textDirection = TextDirection.Rtl),
                         modifier = Modifier.fillMaxWidth(),
                     )
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.medium), modifier = Modifier.fillMaxWidth()) {
                         Text(
                             verseReference(verse, locale),
                             style = MaterialTheme.typography.labelLarge,
@@ -582,7 +583,7 @@ fun SurahBanner(surah: Surah) {
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.padding(Spacing.medium), verticalAlignment = Alignment.CenterVertically) {
             Surface(
                 shape = MaterialShapes.Flower.toShape(),
                 color = MaterialTheme.colorScheme.primary,

@@ -100,6 +100,8 @@
     <string name="not_downloaded">غير منزّل</string>
     <string name="cd_countdown">%1$s بعد %2$s</string>
     <string name="mute_prayer">كتم تنبيهات %1$s</string>
+    <string name="mark_prayed">تعليم %1$s كمُصلّاة</string>
+    <string name="unmark_prayed">إلغاء تعليم %1$s</string>
     <string name="unmute_prayer">تفعيل تنبيهات %1$s</string>
     <string name="calculated_with">مواقيت الصلاة: %1$s</string>
     <string name="permission_location_title">استخدم موقعك</string>
@@ -347,6 +349,10 @@
     <string name="arabic_text_size">حجم النص العربي</string>
     <string name="appearance">المظهر</string>
     <string name="theme">السمة</string>
+    <string name="theme_wallpaper">استخدام ألوان الخلفية</string>
+    <string name="theme_wallpaper_desc">يأخذ التطبيق ألوانه من الصورة خلفه</string>
+    <string name="theme_pure_black">أسود خالص ليلاً</string>
+    <string name="theme_pure_black_desc">أسود بدل الرمادي الداكن، وشاشة OLED تُبقيه مطفأً</string>
     <string name="theme_system">النظام</string>
     <string name="theme_light">فاتح</string>
     <string name="theme_dark">داكن</string>
@@ -484,6 +490,8 @@
     <string name="action_snooze">بعد ١٠ دقائق</string>
     <string name="reliability">ضمان وصول التنبيهات</string>
     <string name="reliability_intro">ما يظهر بالأحمر أدناه يؤخّر تنبيهات الصلاة أو يمنعها.</string>
+    <string name="reliability_card_title">قد لا تصل التنبيهات</string>
+    <string name="reliability_card_body">هناك ما يؤخّر الأذان أو يكتمه في هذا الهاتف، وإصلاحه لا يستغرق دقيقة.</string>
     <string name="reliability_notifications">إذن الإشعارات</string>
     <string name="reliability_notifications_body">بدونه يحجب أندرويد كل تنبيه قبل عرضه.</string>
     <string name="reliability_exact">المنبهات الدقيقة</string>
@@ -609,4 +617,12 @@
     <string name="text_scale_largest">الأكبر</string>
     <string name="iqama_sheet_intro">كم يفصل بين الأذان والإقامة في مسجدك.</string>
     <string name="iqama_varies">يختلف من صلاة لأخرى</string>
+    <plurals name="days_observed">
+        <item quantity="zero">لا أيام في آخر ثلاثين</item>
+        <item quantity="one">يوم واحد في آخر ثلاثين</item>
+        <item quantity="two">يومان في آخر ثلاثين</item>
+        <item quantity="few">%1$s أيام في آخر ثلاثين</item>
+        <item quantity="many">%1$s يومًا في آخر ثلاثين</item>
+        <item quantity="other">%1$s يوم في آخر ثلاثين</item>
+    </plurals>
 </resources>

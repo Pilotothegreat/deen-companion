@@ -35,10 +35,10 @@ import com.pilotothegreat.deencompanion.core.calendar.HijriCalendar
 import com.pilotothegreat.deencompanion.core.prayer.DaySchedule
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
 import com.pilotothegreat.deencompanion.core.text.Numerals
+import com.pilotothegreat.deencompanion.ui.common.Formatters
 import com.pilotothegreat.deencompanion.data.settings.AppLanguage
 import com.pilotothegreat.deencompanion.ui.common.nameRes
 import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
 
 internal data class TimesRow(val name: String, val time: String, val iqama: String?, val isNext: Boolean)
 
@@ -56,7 +56,9 @@ internal data class PrayerTimesState(val dynamic: Boolean, val title: String, va
             return PrayerTimesState(
                 dynamic = settings.dynamicColor,
                 title = hijri?.let { res.getString(R.string.hijri_date, Numerals.localize(HijriCalendar.format(it, locale), locale)) }
-                    ?: DateTimeFormatter.ofPattern("EEEE d MMMM", locale).format(date),
+                    // Through Formatters so the widget's fallback date carries the locale's own
+                    // digits, which ofPattern alone does not do.
+                    ?: Formatters.pattern("EEEE d MMMM", locale).format(date),
                 place = settings.location.cityName ?: res.getString(R.string.default_location),
                 rows = Prayer.obligatory.map { prayer ->
                     val adhan = schedule.adhan.getValue(prayer)

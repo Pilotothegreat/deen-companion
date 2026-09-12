@@ -53,6 +53,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.core.quran.RepeatMode
 import com.pilotothegreat.deencompanion.data.quran.Reciter
@@ -90,7 +91,7 @@ fun PlayerToolbar(
 ) {
     val locale = currentLocale()
     var menuOpen by remember { mutableStateOf(false) }
-    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
         // A chosen range is the one piece of playback state that is invisible otherwise, and the
         // one a reader most needs a way out of.
         state.range?.let { range ->
@@ -140,7 +141,7 @@ fun PlayerToolbar(
                         Text(
                             stringResource(R.string.reciter),
                             style = MaterialTheme.typography.labelLarge,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            modifier = Modifier.padding(horizontal = Spacing.large, vertical = Spacing.small),
                         )
                         Reciter.entries.forEach { reciter ->
                             DropdownMenuItem(
@@ -156,7 +157,7 @@ fun PlayerToolbar(
                         Text(
                             stringResource(R.string.repeat),
                             style = MaterialTheme.typography.labelLarge,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            modifier = Modifier.padding(horizontal = Spacing.large, vertical = Spacing.small),
                         )
                         RepeatMode.entries.forEach { mode ->
                             DropdownMenuItem(
@@ -170,7 +171,7 @@ fun PlayerToolbar(
                             )
                         }
                         if (state.repeatMode != RepeatMode.OFF) {
-                            Row(Modifier.padding(horizontal = 16.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(Modifier.padding(horizontal = Spacing.large, vertical = Spacing.hair), horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
                                 REPEAT_COUNTS.forEach { count ->
                                     FilterChip(
                                         selected = count == state.repeatCount,
@@ -184,9 +185,9 @@ fun PlayerToolbar(
                         Text(
                             stringResource(R.string.playback_speed),
                             style = MaterialTheme.typography.labelLarge,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            modifier = Modifier.padding(horizontal = Spacing.large, vertical = Spacing.small),
                         )
-                        Row(Modifier.padding(horizontal = 16.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(Modifier.padding(horizontal = Spacing.large, vertical = Spacing.hair), horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
                             SPEED_OPTIONS.forEach { speed ->
                                 FilterChip(
                                     selected = speed == state.speed,
@@ -199,7 +200,7 @@ fun PlayerToolbar(
                         Text(
                             stringResource(R.string.sleep_timer),
                             style = MaterialTheme.typography.labelLarge,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            modifier = Modifier.padding(horizontal = Spacing.large, vertical = Spacing.small),
                         )
                         SLEEP_OPTIONS.forEach { minutes ->
                             DropdownMenuItem(
@@ -260,7 +261,7 @@ fun AyahSheet(
         .let { if (verse.translation.isBlank()) it else "$it\n${translation.attribution}" }
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(Modifier.padding(start = 24.dp, end = 24.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Column(Modifier.padding(start = Spacing.xxlarge, end = Spacing.xxlarge, bottom = Spacing.xxlarge), verticalArrangement = Arrangement.spacedBy(Spacing.large)) {
             Text(reference, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
             Text(
                 verse.text,

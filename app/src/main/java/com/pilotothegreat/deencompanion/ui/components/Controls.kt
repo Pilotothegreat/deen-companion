@@ -25,6 +25,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.R
 
 /** Connected button group for a single choice, e.g. theme or language. */
@@ -84,9 +85,9 @@ fun <T> ChoiceDialog(
                                     onDismiss()
                                 },
                             )
-                            .padding(vertical = 12.dp),
+                            .padding(vertical = Spacing.medium),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.large),
                     ) {
                         RadioButton(selected = option == selected, onClick = null)
                         Text(label(option), style = MaterialTheme.typography.bodyLarge)

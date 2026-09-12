@@ -36,6 +36,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.R
 
 @Composable
@@ -44,7 +45,7 @@ fun SectionHeader(text: String, modifier: Modifier = Modifier) {
         text = text,
         style = MaterialTheme.typography.titleSmallEmphasized,
         color = MaterialTheme.colorScheme.primary,
-        modifier = modifier.semantics { heading() }.padding(start = 20.dp, end = 20.dp, top = 24.dp, bottom = 8.dp),
+        modifier = modifier.semantics { heading() }.padding(start = Spacing.xlarge, end = Spacing.xlarge, top = Spacing.xxlarge, bottom = Spacing.small),
     )
 }
 
@@ -68,15 +69,15 @@ fun PermissionCard(
             contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
         ),
     ) {
-        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.padding(Spacing.xlarge), verticalArrangement = Arrangement.spacedBy(Spacing.medium)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.large), verticalAlignment = Alignment.CenterVertically) {
                 Icon(icon, contentDescription = null)
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(Spacing.hair)) {
                     Text(title, style = MaterialTheme.typography.titleMedium)
                     Text(body, style = MaterialTheme.typography.bodyMedium)
                 }
             }
-            Row(Modifier.align(Alignment.End), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(Modifier.align(Alignment.End), horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
                 if (secondaryActionLabel != null) TextButton(onClick = onSecondaryAction) { Text(secondaryActionLabel) }
                 FilledTonalButton(onClick = onAction) { Text(actionLabel) }
             }
@@ -89,7 +90,7 @@ fun EmptyState(icon: ImageVector, title: String, modifier: Modifier = Modifier, 
     Column(
         modifier = modifier.fillMaxWidth().padding(horizontal = 32.dp, vertical = 48.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(Spacing.medium),
     ) {
         Surface(
             shape = MaterialShapes.Cookie9Sided.toShape(),

@@ -83,6 +83,8 @@
     <string name="iqama_at">Iqama %1$s</string>
     <string name="cd_countdown">%1$s in %2$s</string>
     <string name="mute_prayer">Mute %1$s notifications</string>
+    <string name="mark_prayed">Mark %1$s as prayed</string>
+    <string name="unmark_prayed">Unmark %1$s</string>
     <string name="unmute_prayer">Turn on %1$s notifications</string>
     <string name="calculated_with">Prayer times: %1$s</string>
     <string name="permission_location_title">Use your location</string>
@@ -312,6 +314,10 @@
     <string name="arabic_text_size">Arabic text size</string>
     <string name="appearance">Appearance</string>
     <string name="theme">Theme</string>
+    <string name="theme_wallpaper">Use your wallpaper\'s colours</string>
+    <string name="theme_wallpaper_desc">The app takes its palette from the picture behind it</string>
+    <string name="theme_pure_black">Pure black at night</string>
+    <string name="theme_pure_black_desc">Black rather than dark grey, which an OLED screen leaves switched off</string>
     <string name="theme_system">System</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
@@ -452,6 +458,8 @@
     <string name="action_snooze">In 10 minutes</string>
     <string name="reliability">Make alerts arrive</string>
     <string name="reliability_intro">Anything marked in red below will delay or silence your prayer alerts.</string>
+    <string name="reliability_card_title">Alerts may not arrive</string>
+    <string name="reliability_card_body">Something on this phone will delay or silence the adhan. It takes a minute to put right.</string>
     <string name="reliability_notifications">Notification permission</string>
     <string name="reliability_notifications_body">Without it Android drops every alert before it is shown.</string>
     <string name="reliability_exact">Exact alarms</string>
@@ -577,4 +585,8 @@ And the small things. The screen stays awake while you read. The page follows th
     <string name="text_scale_largest">Largest</string>
     <string name="iqama_sheet_intro">How long after each adhan your mosque calls the iqama.</string>
     <string name="iqama_varies">Different for each prayer</string>
+    <plurals name="days_observed">
+        <item quantity="one">%1$s day in the last thirty</item>
+        <item quantity="other">%1$s days in the last thirty</item>
+    </plurals>
 </resources>

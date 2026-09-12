@@ -60,6 +60,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.ui.common.rememberHaptics
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.core.qibla.QiblaMath
@@ -112,7 +113,7 @@ fun QiblaScreen(onBack: () -> Unit, viewModel: QiblaViewModel = koinViewModel())
                 },
                 actions = {
                     if (refreshing) {
-                        LoadingIndicator(Modifier.padding(12.dp).size(24.dp))
+                        LoadingIndicator(Modifier.padding(Spacing.medium).size(24.dp))
                     } else {
                         IconButton(onClick = {
                             if (hasLocationPermission(context)) viewModel.refresh() else locationPermission.launch(LOCATION_PERMISSIONS)
@@ -136,9 +137,9 @@ fun QiblaScreen(onBack: () -> Unit, viewModel: QiblaViewModel = koinViewModel())
         val bearingText = Formatters.number(qibla.bearing.roundToInt(), locale)
 
         Column(
-            modifier = Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+            modifier = Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(Spacing.large),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(20.dp),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xlarge),
         ) {
             when {
                 !compass.available -> InfoCard(
@@ -179,7 +180,7 @@ fun QiblaScreen(onBack: () -> Unit, viewModel: QiblaViewModel = koinViewModel())
                 modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
             )
 
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Spacing.medium)) {
                 StatCard(stringResource(R.string.qibla_bearing_label), stringResource(R.string.degrees, bearingText), Modifier.weight(1f))
                 StatCard(
                     stringResource(R.string.qibla_distance_label),
@@ -284,9 +285,9 @@ private fun InfoCard(icon: ImageVector, title: String, body: String) {
         ),
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Row(Modifier.padding(20.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        Row(Modifier.padding(Spacing.xlarge), horizontalArrangement = Arrangement.spacedBy(Spacing.large)) {
             Icon(icon, contentDescription = null)
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.hair)) {
                 Text(title, style = MaterialTheme.typography.titleMedium)
                 Text(body, style = MaterialTheme.typography.bodyMedium)
             }
@@ -301,7 +302,7 @@ private fun StatCard(label: String, value: String, modifier: Modifier = Modifier
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(Modifier.padding(Spacing.large), verticalArrangement = Arrangement.spacedBy(Spacing.hair)) {
             Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(value, style = MaterialTheme.typography.titleLargeEmphasized)
         }

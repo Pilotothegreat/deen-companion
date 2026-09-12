@@ -73,6 +73,7 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.ui.common.rememberHaptics
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.core.athkar.AthkarItem
@@ -172,11 +173,11 @@ fun AthkarSessionScreen(
     ) { padding ->
         Column(Modifier.padding(padding).fillMaxSize()) {
             val fraction by animateFloatAsState(session.progress.fraction(category), MaterialTheme.motionScheme.slowSpatialSpec(), label = "session")
-            LinearWavyProgressIndicator(progress = { fraction }, modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp))
+            LinearWavyProgressIndicator(progress = { fraction }, modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.large, vertical = Spacing.small))
             HorizontalPager(
                 state = pager,
                 modifier = Modifier.weight(1f),
-                contentPadding = PaddingValues(horizontal = 16.dp),
+                contentPadding = PaddingValues(horizontal = Spacing.large),
                 pageSpacing = 12.dp,
             ) { page ->
                 if (page == items.size) {
@@ -207,7 +208,7 @@ fun AthkarSessionScreen(
                         haptics.tick()
                         viewModel.count(page)
                     },
-                    modifier = Modifier.align(Alignment.CenterHorizontally).navigationBarsPadding().padding(vertical = 16.dp),
+                    modifier = Modifier.align(Alignment.CenterHorizontally).navigationBarsPadding().padding(vertical = Spacing.large),
                 )
             }
         }
@@ -255,8 +256,8 @@ private fun DhikrPage(
         // Short athkar sit in the middle of the card; long ones scroll.
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Column(
-                Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(Spacing.xlarge),
+                verticalArrangement = Arrangement.spacedBy(Spacing.large),
             ) {
                 item.note(locale)?.let { note ->
                     Text(note, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.tertiary)
@@ -292,7 +293,7 @@ private fun DhikrPage(
                 if (virtue != null || source != null) {
                     TextButton(onClick = { showDetails = !showDetails }) { Text(stringResource(R.string.athkar_virtue_source)) }
                     AnimatedVisibility(visible = showDetails) {
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
                             virtue?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
                             source?.let {
                                 Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -322,7 +323,7 @@ private fun CounterButton(count: Int, target: Int, locale: Locale, onCount: () -
     val progress by animateFloatAsState(count / target.toFloat(), MaterialTheme.motionScheme.defaultSpatialSpec(), label = "counter")
     val countLabel = stringResource(R.string.athkar_count_action)
     val countState = stringResource(R.string.athkar_progress, Formatters.number(count, locale), Formatters.number(target, locale))
-    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
         Box(Modifier.size(120.dp), contentAlignment = Alignment.Center) {
             CircularWavyProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxSize())
             Box(
@@ -371,9 +372,9 @@ private fun FinishPage(reducedMotion: Boolean, onBack: () -> Unit) {
         }
     }
     Column(
-        Modifier.fillMaxSize().padding(24.dp),
+        Modifier.fillMaxSize().padding(Spacing.xxlarge),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(20.dp, Alignment.CenterVertically),
+        verticalArrangement = Arrangement.spacedBy(Spacing.xlarge, Alignment.CenterVertically),
     ) {
         Box(
             Modifier.size(160.dp).graphicsLayer {

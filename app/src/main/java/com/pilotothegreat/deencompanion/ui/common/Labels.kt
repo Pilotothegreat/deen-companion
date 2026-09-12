@@ -75,11 +75,18 @@ val AsrSchool.labelRes: Int
 /** Locale-aware formatting shared by screens, widgets and notifications. */
 object Formatters {
 
+    /**
+     * A formatter that writes its numbers in the locale's own digits.
+     *
+     * `ofPattern` alone gives Western digits even in an Arabic locale, so every caller had to
+     * remember `withDecimalStyle` — and the four that did were four copies of the same line.
+     */
+    fun pattern(pattern: String, locale: Locale): DateTimeFormatter =
+        DateTimeFormatter.ofPattern(pattern, locale).withDecimalStyle(DecimalStyle.of(locale))
+
     /** Clock time honoring the device's 12/24-hour preference and the locale's digits. */
-    fun time(context: Context, time: LocalTime, locale: Locale): String {
-        val pattern = if (DateFormat.is24HourFormat(context)) "HH:mm" else "h:mm a"
-        return DateTimeFormatter.ofPattern(pattern, locale).withDecimalStyle(DecimalStyle.of(locale)).format(time)
-    }
+    fun time(context: Context, time: LocalTime, locale: Locale): String =
+        pattern(if (DateFormat.is24HourFormat(context)) "HH:mm" else "h:mm a", locale).format(time)
 
     /** Countdown such as "2:05:09" or "5:09". */
     fun countdown(duration: Duration, locale: Locale): String {
@@ -99,9 +106,7 @@ object Formatters {
 
     /** A date such as "14 Mar", for an expiry the reader needs to recognise at a glance. */
     fun date(epochMillis: Long, zone: java.time.ZoneId, locale: Locale): String =
-        DateTimeFormatter.ofPattern("d MMM", locale)
-            .withDecimalStyle(DecimalStyle.of(locale))
-            .format(java.time.Instant.ofEpochMilli(epochMillis).atZone(zone))
+        pattern("d MMM", locale).format(java.time.Instant.ofEpochMilli(epochMillis).atZone(zone))
 
     /** The Hijri date in the reader's own digits, for the widget's quiet state. */
     fun hijri(date: java.time.chrono.HijrahDate, locale: Locale): String =

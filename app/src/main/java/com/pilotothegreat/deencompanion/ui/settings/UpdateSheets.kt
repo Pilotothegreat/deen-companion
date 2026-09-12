@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.data.update.InstallState
 
@@ -43,7 +44,7 @@ fun UpdateDialog(
         text = {
             Column(
                 Modifier.heightIn(max = 360.dp).verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(Spacing.medium),
             ) {
                 Text(notes?.takeIf { it.isNotBlank() } ?: stringResource(R.string.update_no_notes), style = MaterialTheme.typography.bodyMedium)
                 when (install) {
@@ -86,8 +87,8 @@ fun WhatsNewSheet(version: String, notes: String, onDismiss: () -> Unit) {
         Column(
             Modifier
                 .verticalScroll(rememberScrollState())
-                .padding(start = 24.dp, end = 24.dp, bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(start = Spacing.xxlarge, end = Spacing.xxlarge, bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(Spacing.medium),
         ) {
             Text(stringResource(R.string.whats_new_in, version), style = MaterialTheme.typography.headlineSmallEmphasized)
             Text(notes, style = MaterialTheme.typography.bodyLarge)

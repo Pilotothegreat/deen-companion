@@ -24,6 +24,7 @@ import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material.icons.rounded.Explore
 import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.NightsStay
 import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.Flight
@@ -34,6 +35,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialShapes
@@ -69,6 +71,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.core.moment.MomentKind
 import com.pilotothegreat.deencompanion.core.moment.Moment
@@ -113,8 +116,8 @@ fun NextPrayerHero(countdown: Countdown, locale: Locale, modifier: Modifier = Mo
         // One focus stop for screen readers: label, prayer, time left and times together.
         modifier = modifier.fillMaxWidth().semantics(mergeDescendants = true) {},
     ) {
-        Row(Modifier.padding(24.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(Modifier.padding(Spacing.xxlarge), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Spacing.hair)) {
                 Text(stringResource(R.string.next_prayer_label), style = MaterialTheme.typography.labelLarge)
                 Text(name, style = MaterialTheme.typography.headlineMediumEmphasized)
                 Odometer(
@@ -177,8 +180,13 @@ fun PrayerTimesCard(
     nextPrayer: Prayer?,
     muted: Set<Prayer>,
     notificationsEnabled: Boolean,
+    /** Prayers the reader has marked prayed today. */
+    prayed: Set<Prayer>,
+    /** Days in the last thirty on which anything was marked; 0 hides the line entirely. */
+    daysObserved: Int,
     locale: Locale,
     onToggleMute: (Prayer, Boolean) -> Unit,
+    onTogglePrayed: (Prayer, Boolean) -> Unit,
 ) {
     val context = LocalContext.current
     val rowCount = Prayer.entries.size + 1
@@ -202,7 +210,23 @@ fun PrayerTimesCard(
                 } else {
                     ListItemDefaults.segmentedColors(containerColor = container)
                 },
-                leadingContent = { Icon(prayer.icon, contentDescription = null) },
+                leadingContent = {
+                    // Tapping the icon marks the prayer prayed. Every tap on the notification's
+                    // "Prayed" has been recorded since 1.8.0 and shown nowhere; this is where it
+                    // shows, and the only place it can be corrected.
+                    if (prayer.isObligatory) {
+                        val done = prayer in prayed
+                        IconToggleButton(checked = done, onCheckedChange = { onTogglePrayed(prayer, it) }) {
+                            Icon(
+                                imageVector = if (done) Icons.Rounded.CheckCircle else prayer.icon,
+                                contentDescription = stringResource(if (done) R.string.unmark_prayed else R.string.mark_prayed, name),
+                                tint = if (done) MaterialTheme.colorScheme.primary else LocalContentColor.current,
+                            )
+                        }
+                    } else {
+                        Icon(prayer.icon, contentDescription = null)
+                    }
+                },
                 supportingContent = iqama?.let {
                     { Text(stringResource(R.string.iqama_at, Formatters.time(context, it.toLocalTime(), locale))) }
                 },
@@ -240,6 +264,16 @@ fun PrayerTimesCard(
         ) {
             Text(stringResource(R.string.last_third_of_night), style = MaterialTheme.typography.titleMedium)
         }
+        // Days on which anything was marked, not a score out of five. It appears only once there is
+        // something to say, and it says it once, quietly.
+        if (daysObserved > 0) {
+            Text(
+                pluralStringResource(R.plurals.days_observed, daysObserved, Formatters.number(daysObserved, locale)),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = Spacing.large, top = Spacing.small),
+            )
+        }
     }
 }
 
@@ -255,7 +289,7 @@ fun AthkarNowCard(category: AthkarCategory, progress: DayProgress, locale: Local
             contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
         ),
     ) {
-        Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        Row(Modifier.padding(Spacing.xlarge), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.large)) {
             Box(Modifier.size(56.dp), contentAlignment = Alignment.Center) {
                 CircularWavyProgressIndicator(
                     progress = { fraction },
@@ -295,8 +329,8 @@ fun VerseOfDayCard(verse: VerseOfDay, locale: Locale, onOpen: () -> Unit, modifi
         shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
     ) {
-        Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.fillMaxWidth().padding(Spacing.xlarge), verticalArrangement = Arrangement.spacedBy(Spacing.medium)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
                 Icon(
                     Icons.AutoMirrored.Rounded.MenuBook,
                     contentDescription = null,
@@ -345,7 +379,7 @@ fun QiblaShortcut(location: SavedLocation, locale: Locale, onOpen: () -> Unit) {
             contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         ),
     ) {
-        Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        Row(Modifier.padding(Spacing.xlarge), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.large)) {
             Surface(
                 shape = MaterialShapes.Cookie7Sided.toShape(),
                 color = MaterialTheme.colorScheme.secondary,
@@ -379,7 +413,7 @@ fun LocationCard(location: SavedLocation, methodLabel: String, onOpen: () -> Uni
         shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
-        Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        Row(Modifier.padding(Spacing.xlarge), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.large)) {
             Surface(
                 shape = MaterialShapes.Clover4Leaf.toShape(),
                 color = MaterialTheme.colorScheme.primaryContainer,
@@ -408,7 +442,7 @@ fun InspirationCard(inspiration: Inspiration, locale: Locale) {
         shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
-        Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.fillMaxWidth().padding(Spacing.xlarge), verticalArrangement = Arrangement.spacedBy(Spacing.medium)) {
             Text(stringResource(R.string.daily_inspiration), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
             Text(
                 text = inspiration.arabic,
@@ -453,8 +487,8 @@ fun MomentCard(
         contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
     )
     val content: @Composable ColumnScope.() -> Unit = {
-        Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.fillMaxWidth().padding(Spacing.xlarge), verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.medium)) {
                 Icon(moment.kind.icon, contentDescription = null)
                 Text(stringResource(moment.title), style = MaterialTheme.typography.titleMedium)
             }
@@ -465,7 +499,7 @@ fun MomentCard(
                 )
             }
             if (answer != null || decline != null || onDismiss != null) {
-                Row(Modifier.align(Alignment.End), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(Modifier.align(Alignment.End), horizontalArrangement = Arrangement.spacedBy(Spacing.hair)) {
                     decline?.let { (label, action) -> TextButton(onClick = action) { Text(label) } }
                     if (answer == null && onDismiss != null) {
                         TextButton(onClick = onDismiss) { Text(stringResource(R.string.dismiss)) }

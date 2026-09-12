@@ -19,6 +19,7 @@ import com.pilotothegreat.deencompanion.core.time.Ticker
 import com.pilotothegreat.deencompanion.data.athkar.AthkarRepository
 import com.pilotothegreat.deencompanion.data.location.LocationRepository
 import com.pilotothegreat.deencompanion.data.moment.MomentRepository
+import com.pilotothegreat.deencompanion.data.prayer.PrayerLogRepository
 import com.pilotothegreat.deencompanion.data.quran.QuranRepository
 import com.pilotothegreat.deencompanion.data.quran.Surah
 import com.pilotothegreat.deencompanion.data.quran.Verse
@@ -36,6 +37,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -68,6 +70,7 @@ sealed interface HomeEvent {
     data object UpdateAvailable : HomeEvent
 }
 
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class HomeViewModel(
     private val settings: SettingsRepository,
     private val location: LocationRepository,
@@ -75,10 +78,38 @@ class HomeViewModel(
     private val moments: MomentRepository,
     private val quran: QuranRepository,
     private val updates: UpdateChecker,
+    private val prayerLog: PrayerLogRepository,
 ) : ViewModel() {
 
     private val seconds = Ticker.seconds
     private val minutes = Ticker.minutes
+
+    /**
+     * Which prayers have been marked prayed today, and how many of the last thirty days had any
+     * mark at all.
+     *
+     * Every "Prayed" tap has been written to the database since 1.8.0 and read by nothing, so the
+     * record existed and the reader could never see it. The count is deliberately gentle: days on
+     * which anything was marked, not a tally of five-out-of-five, because an app that grades
+     * someone's prayers has stopped being useful and started being a nag.
+     */
+    val prayedToday: StateFlow<Set<Prayer>> = settings.settings
+        .map { LocalDate.now(it.zone) }
+        .distinctUntilChanged()
+        .flatMapLatest { prayerLog.today(it) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
+
+    val daysObserved: StateFlow<Int> = combine(settings.settings, Ticker.days) { s, _ -> LocalDate.now(s.zone) }
+        .distinctUntilChanged()
+        .map { prayerLog.daysObserved(it) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
+
+    fun setPrayed(prayer: Prayer, prayed: Boolean) {
+        viewModelScope.launch {
+            val date = LocalDate.now(settings.current().zone)
+            if (prayed) prayerLog.record(prayer, date, System.currentTimeMillis()) else prayerLog.undo(prayer, date)
+        }
+    }
 
     val content: StateFlow<HomeContent?> = combine(settings.settings, seconds) { s, _ -> s to LocalDate.now(s.zone) }
         .distinctUntilChanged()

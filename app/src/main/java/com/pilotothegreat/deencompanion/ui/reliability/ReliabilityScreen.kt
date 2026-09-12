@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.alarms.Notifications as AppNotifications
 import com.pilotothegreat.deencompanion.core.device.OemGuidance
@@ -70,7 +71,7 @@ fun ReliabilityScreen(canScheduleExact: Boolean, onBack: () -> Unit) {
     ) { padding ->
         LazyColumn(
             modifier = Modifier.padding(padding).fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp + LocalBottomBarPadding.current),
+            contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
             verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
         ) {
             item { SectionHeader(stringResource(R.string.reliability_intro), Modifier.padding(start = 0.dp)) }

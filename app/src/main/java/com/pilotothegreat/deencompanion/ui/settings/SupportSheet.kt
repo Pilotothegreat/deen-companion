@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.ui.common.copyToClipboard
 import com.pilotothegreat.deencompanion.ui.common.showsOwnCopyConfirmation
@@ -59,10 +60,10 @@ fun SupportSheet(onDismiss: () -> Unit) {
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(
-            modifier = Modifier.verticalScroll(rememberScrollState()).padding(start = 24.dp, end = 24.dp, bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.verticalScroll(rememberScrollState()).padding(start = Spacing.xxlarge, end = Spacing.xxlarge, bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(Spacing.large),
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.medium)) {
                 Icon(Icons.Rounded.Favorite, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                 Text(stringResource(R.string.support_title), style = MaterialTheme.typography.headlineSmallEmphasized)
             }
@@ -71,7 +72,7 @@ fun SupportSheet(onDismiss: () -> Unit) {
                 Text(
                     stringResource(R.string.palestine_note),
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(Spacing.large),
                 )
             }
             Card(
@@ -85,8 +86,8 @@ fun SupportSheet(onDismiss: () -> Unit) {
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 ),
             ) {
-                Row(Modifier.fillMaxWidth().padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(Modifier.fillMaxWidth().padding(Spacing.xlarge), verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Spacing.hair)) {
                         Text(stringResource(R.string.bank_transfer_phone_pay), style = MaterialTheme.typography.labelLarge)
                         Text(DONATION_PHONE, style = MaterialTheme.typography.headlineSmallEmphasized)
                         Text(stringResource(R.string.payment_tap_hint), style = MaterialTheme.typography.bodySmall)
@@ -96,7 +97,7 @@ fun SupportSheet(onDismiss: () -> Unit) {
             }
             if (installed.isNotEmpty()) {
                 Text(stringResource(R.string.open_bank_app_label), style = MaterialTheme.typography.labelLarge)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
                     installed.forEach { (app, intent) ->
                         AssistChip(
                             onClick = { context.startSafely(intent) },

@@ -45,6 +45,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.BuildConfig
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.ui.settings.WhatsNewSheet
@@ -190,6 +191,7 @@ fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpe
                                 onOpenQibla = { navigator.navigate(QiblaKey) },
                                 onOpenLocation = { navigator.navigate(LocationKey) },
                                 onOpenAthkar = { navigator.navigate(AthkarSessionKey(it)) },
+                                onOpenReliability = { navigator.navigate(ReliabilityKey) },
                                 onOpenReader = navigator::navigate,
                             )
                         }
@@ -229,7 +231,7 @@ fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpe
                         current = navigator.currentTab,
                         onSelect = navigator::selectTab,
                         scrollBehavior = barScroll,
-                        modifier = Modifier.navigationBarsPadding().padding(bottom = 16.dp),
+                        modifier = Modifier.navigationBarsPadding().padding(bottom = Spacing.large),
                     )
                 }
             }

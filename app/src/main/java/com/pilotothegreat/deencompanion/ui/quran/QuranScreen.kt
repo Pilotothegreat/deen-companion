@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.core.quran.KhatmaProgress
 import com.pilotothegreat.deencompanion.data.quran.Bookmark
@@ -83,7 +84,7 @@ fun QuranScreen(onOpenReader: (ReaderKey) -> Unit, viewModel: QuranViewModel = k
                 query = query,
                 onQueryChange = viewModel::onQueryChange,
                 placeholder = stringResource(R.string.search_quran_hint),
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                modifier = Modifier.padding(horizontal = Spacing.large, vertical = Spacing.small),
             )
             val loaded = quran ?: run {
                 LoadingBox()
@@ -127,7 +128,7 @@ private fun SurahList(
 ) {
     val locale = currentLocale()
     LazyColumn(
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 24.dp + LocalBottomBarPadding.current),
+        contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = Spacing.medium, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
         verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
     ) {
         if (lastReadPage > 0) {
@@ -138,7 +139,7 @@ private fun SurahList(
                     surahName = surahName(quran.surah(firstVerse.surah), locale),
                     locale = locale,
                     onClick = { onOpenReader(ReaderKey(lastReadPage)) },
-                    modifier = Modifier.animateItem().padding(bottom = 12.dp),
+                    modifier = Modifier.animateItem().padding(bottom = Spacing.medium),
                 )
             }
         }
@@ -149,10 +150,10 @@ private fun SurahList(
                     progress = khatma,
                     onOpen = { onOpenReader(ReaderKey(it)) },
                     onCancel = onCancelKhatma,
-                    modifier = Modifier.animateItem().padding(bottom = 12.dp),
+                    modifier = Modifier.animateItem().padding(bottom = Spacing.medium),
                 )
             } else {
-                StartKhatmaRow(onStart = onStartKhatma, modifier = Modifier.animateItem().padding(bottom = 12.dp))
+                StartKhatmaRow(onStart = onStartKhatma, modifier = Modifier.animateItem().padding(bottom = Spacing.medium))
             }
         }
         itemsIndexed(quran.surahs, key = { _, surah -> surah.number }) { index, surah ->
@@ -192,7 +193,7 @@ private fun ContinueReadingCard(page: Int, surahName: String, locale: Locale, on
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         ),
     ) {
-        Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        Row(Modifier.padding(Spacing.xlarge), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.large)) {
             Icon(Icons.AutoMirrored.Rounded.MenuBook, contentDescription = null)
             Column(Modifier.weight(1f)) {
                 Text(stringResource(R.string.continue_reading), style = MaterialTheme.typography.titleMedium)
@@ -220,7 +221,7 @@ private fun BookmarkList(
     }
     val locale = currentLocale()
     LazyColumn(
-        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 24.dp + LocalBottomBarPadding.current),
+        contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = Spacing.medium, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
         verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
     ) {
         itemsIndexed(bookmarks, key = { _, b -> "${b.surah}:${b.ayah}" }) { index, bookmark ->
@@ -262,8 +263,8 @@ private fun SearchResults(results: QuranSearchResults?, quran: Quran, onOpenRead
                 color = MaterialTheme.colorScheme.onTertiaryContainer,
             )
             LazyColumn(
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp + LocalBottomBarPadding.current),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
+                verticalArrangement = Arrangement.spacedBy(Spacing.small),
             ) {
                 if (results.surahs.isNotEmpty()) {
                     item { SectionHeader(stringResource(R.string.surahs), Modifier.padding(start = 0.dp)) }
@@ -287,7 +288,7 @@ private fun SearchResults(results: QuranSearchResults?, quran: Quran, onOpenRead
                             shape = MaterialTheme.shapes.large,
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
                         ) {
-                            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Column(Modifier.padding(Spacing.large), verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
                                 Text(
                                     verseReference(quran.surah(verse.surah), verse.number, locale),
                                     style = MaterialTheme.typography.labelLarge,

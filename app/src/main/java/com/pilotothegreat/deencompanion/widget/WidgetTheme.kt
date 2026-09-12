@@ -36,6 +36,7 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
+import com.pilotothegreat.deencompanion.ui.common.Formatters
 import com.pilotothegreat.deencompanion.ui.common.icon
 import com.pilotothegreat.deencompanion.ui.theme.DeenDarkColors
 import com.pilotothegreat.deencompanion.ui.theme.DeenLightColors
@@ -98,10 +99,8 @@ internal fun textStyle(
 ) = TextStyle(color = color, fontSize = size, fontWeight = weight, textAlign = align)
 
 /** "4:36" or "16:36" without the AM/PM marker, for the narrow columns of the times strip and table. */
-internal fun shortTime(context: Context, time: LocalTime, locale: Locale): String {
-    val pattern = if (DateFormat.is24HourFormat(context)) "HH:mm" else "h:mm"
-    return DateTimeFormatter.ofPattern(pattern, locale).withDecimalStyle(DecimalStyle.of(locale)).format(time)
-}
+internal fun shortTime(context: Context, time: LocalTime, locale: Locale): String =
+    Formatters.pattern(if (DateFormat.is24HourFormat(context)) "HH:mm" else "h:mm", locale).format(time)
 
 /**
  * A live countdown that reaches zero at [target] (an elapsedRealtime). RemoteViews' Chronometer ticks
