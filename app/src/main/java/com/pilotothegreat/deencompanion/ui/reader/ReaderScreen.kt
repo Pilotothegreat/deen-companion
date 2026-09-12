@@ -16,6 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,6 +36,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -71,6 +73,7 @@ import com.pilotothegreat.deencompanion.ui.components.LoadingBox
 import com.pilotothegreat.deencompanion.ui.navigation.ReaderKey
 import com.pilotothegreat.deencompanion.ui.quran.surahName
 import com.pilotothegreat.deencompanion.ui.theme.UthmanicHafs
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -89,6 +92,7 @@ fun ReaderScreen(
     val locale = currentLocale()
     val snackbar = remember { SnackbarHostState() }
     var selected by remember { mutableStateOf<Verse?>(null) }
+    var jumping by remember { mutableStateOf(false) }
 
     LaunchedEffect(viewModel) {
         viewModel.playbackErrors.collect { snackbar.showSnackbar(resources.getString(R.string.playback_error)) }
@@ -116,7 +120,15 @@ fun ReaderScreen(
             TopAppBar(
                 title = { Text(surahName(loaded.surah(firstVerse.surah), locale)) },
                 subtitle = {
-                    Text(stringResource(R.string.page_juz, Formatters.number(current.number, locale), Formatters.number(current.juz, locale)))
+                    Text(
+                        stringResource(
+                            R.string.page_juz_hizb,
+                            Formatters.number(current.number, locale),
+                            Formatters.number(current.juz, locale),
+                            Formatters.number(loaded.hizbOf(firstVerse.surah, firstVerse.number), locale),
+                            Formatters.number(loaded.rubOf(firstVerse.surah, firstVerse.number), locale),
+                        ),
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
@@ -124,6 +136,9 @@ fun ReaderScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { jumping = true }) {
+                        Icon(Icons.AutoMirrored.Rounded.List, contentDescription = stringResource(R.string.jump_to))
+                    }
                     IconToggleButton(checked = prefs.showTranslation, onCheckedChange = { viewModel.toggleTranslation() }) {
                         Icon(Icons.Rounded.Translate, contentDescription = stringResource(R.string.show_translation))
                     }
@@ -165,6 +180,19 @@ fun ReaderScreen(
                 )
             }
         }
+    }
+
+    if (jumping) {
+        val scope = rememberCoroutineScope()
+        JumpSheet(
+            quran = loaded,
+            currentPage = current.number,
+            onJump = { page ->
+                jumping = false
+                scope.launch { pagerState.scrollToPage(page - 1) }
+            },
+            onDismiss = { jumping = false },
+        )
     }
 
     selected?.let { verse ->
@@ -238,6 +266,16 @@ private fun MushafPageView(
                 )
             }
         }
+        // Says what the ۩ on the page means, and leaves the ruling to the reader's school.
+        page.verses.filter { it.isSajdah }.takeIf { it.isNotEmpty() }?.let { prostrations ->
+            val references = prostrations
+                .joinToString(", ") { "${Formatters.number(it.surah, locale)}:${Formatters.number(it.number, locale)}" }
+            Text(
+                stringResource(R.string.sajdah_note, references),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         if (showTranslation) {
             page.verses.forEach { verse ->
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -272,6 +310,10 @@ private fun AyahText(
                 highlight -> SpanStyle(background = colors.tertiaryContainer, color = colors.onTertiaryContainer)
                 else -> SpanStyle()
             }
+            // ۞ opens a rub' al-hizb; the mushaf prints it before the ayah that begins one.
+            if (verse.quarterStart != null) {
+                withStyle(SpanStyle(color = colors.tertiary)) { append("۞ ") }
+            }
             withLink(LinkAnnotation.Clickable(tag = "${verse.surah}:${verse.number}", styles = plainLink) { onAyahClick(verse) }) {
                 withStyle(emphasis) {
                     append(verse.text)
@@ -283,7 +325,8 @@ private fun AyahText(
                         fontWeight = FontWeight.Bold,
                     ),
                 ) {
-                    append(" ${Numerals.toArabicIndic(verse.number.toString())} ")
+                    // U+06DD draws the ayah rosette around the digits that follow it.
+                    append(" ۝${Numerals.toArabicIndic(verse.number.toString())} ")
                 }
             }
         }

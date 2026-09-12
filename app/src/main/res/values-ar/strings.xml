@@ -110,6 +110,12 @@
     <string name="no_bookmarks_body">المس أي آية أثناء القراءة واختر «علامة».</string>
     <string name="bookmark">علامة</string>
     <string name="remove_bookmark">إزالة العلامة</string>
+    <string name="jump_to">الانتقال إلى</string>
+    <string name="juz_tab">الأجزاء</string>
+    <string name="page_tab">الصفحات</string>
+    <string name="juz_number">الجزء %1$s</string>
+    <string name="page_juz_hizb">صفحة %1$s · الجزء %2$s · الحزب %3$s/%4$s</string>
+    <string name="sajdah_note">۩ سجدة تلاوة عند %1$s، وقد اختلف الفقهاء في وجوبها أو استحبابها.</string>
     <string name="page_juz">صفحة %1$s · الجزء %2$s</string>
     <string name="show_translation">الترجمة</string>
     <string name="play_from_here">التلاوة من هذه الآية</string>

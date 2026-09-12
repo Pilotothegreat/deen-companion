@@ -413,7 +413,7 @@ fun SettingsScreen(
                         // Both licences ask to be named with a link back to the source.
                         credits?.let { c ->
                             @Composable { shapes: ListItemShapes ->
-                                NavRow(shapes, Icons.AutoMirrored.Rounded.MenuBook, c.text.name, c.text.terms, trailing = { OpenIcon() }) {
+                                NavRow(shapes, Icons.AutoMirrored.Rounded.MenuBook, c.text.name, c.edition, trailing = { OpenIcon() }) {
                                     context.startSafely(SystemIntents.url(c.text.source))
                                 }
                             }

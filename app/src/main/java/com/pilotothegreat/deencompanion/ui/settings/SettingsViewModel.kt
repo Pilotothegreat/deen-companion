@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /** What the Quran text and its translation must be credited as, read from the assets themselves. */
-data class QuranCredits(val text: TextSource, val translation: TranslationInfo)
+data class QuranCredits(val text: TextSource, val translation: TranslationInfo, val edition: String)
 
 class SettingsViewModel(
     private val repository: SettingsRepository,
@@ -36,7 +36,7 @@ class SettingsViewModel(
     quran: QuranRepository,
 ) : ViewModel() {
 
-    val quranCredits: StateFlow<QuranCredits?> = flow { quran.quran().let { emit(QuranCredits(it.textSource, it.translation)) } }
+    val quranCredits: StateFlow<QuranCredits?> = flow { quran.quran().let { emit(QuranCredits(it.textSource, it.translation, it.edition)) } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     val settings: StateFlow<AppSettings?> =

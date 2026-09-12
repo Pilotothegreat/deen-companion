@@ -16,7 +16,13 @@ import org.json.JSONObject
 enum class Revelation { MECCAN, MEDINAN }
 
 data class Verse(val surah: Int, val number: Int, val text: String, val translation: String) {
-    val isSajdah: Boolean get() = (surah to number) in MushafLayout.sajdahs
+    /** Set when this ayah carries a prostration of recitation. */
+    val sajdah: Sajdah? get() = MushafLayout.sajdahs[surah to number]
+
+    val isSajdah: Boolean get() = sajdah != null
+
+    /** The rub' al-hizb (1..240) that opens at this ayah, or null: where the reader draws a ۞. */
+    val quarterStart: Int? get() = MushafLayout.quarterStartingAt(surah, number)
 
     /** The translation as a standalone excerpt: a quote that runs on into the next ayah is closed. */
     val standaloneTranslation: String
@@ -61,6 +67,18 @@ class Quran internal constructor(
     fun pageOf(surah: Int, ayah: Int): Int = MushafLayout.pageOf(surah, ayah)
 
     fun juzOf(surah: Int, ayah: Int): Int = MushafLayout.juzOf(surah, ayah)
+
+    fun hizbOf(surah: Int, ayah: Int): Int = MushafLayout.hizbOf(surah, ayah)
+
+    /** Which quarter of its hizb the ayah falls in, 1 through 4. */
+    fun rubOf(surah: Int, ayah: Int): Int = MushafLayout.rubOf(surah, ayah)
+
+    fun manzilOf(surah: Int, ayah: Int): Int = MushafLayout.manzilOf(surah, ayah)
+
+    fun rukuOf(surah: Int, ayah: Int): Int = MushafLayout.rukuOf(surah, ayah)
+
+    /** The printed mushaf these divisions follow, shown in About. */
+    val edition: String get() = MushafLayout.EDITION
 }
 
 class QuranRepository(private val context: Context, private val bookmarkDao: BookmarkDao) {

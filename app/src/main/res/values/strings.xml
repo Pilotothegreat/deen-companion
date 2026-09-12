@@ -98,6 +98,12 @@
     <string name="no_bookmarks_body">Tap an ayah while reading and choose Bookmark.</string>
     <string name="bookmark">Bookmark</string>
     <string name="remove_bookmark">Remove bookmark</string>
+    <string name="jump_to">Jump to</string>
+    <string name="juz_tab">Juz</string>
+    <string name="page_tab">Page</string>
+    <string name="juz_number">Juz %1$s</string>
+    <string name="page_juz_hizb">Page %1$s · Juz %2$s · Hizb %3$s/%4$s</string>
+    <string name="sajdah_note">۩ A prostration of recitation at %1$s. The schools differ on whether it is obligatory or recommended.</string>
     <string name="page_juz">Page %1$s · Juz %2$s</string>
     <string name="show_translation">Translation</string>
     <string name="play_from_here">Play from this ayah</string>
