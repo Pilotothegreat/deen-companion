@@ -40,7 +40,9 @@ class PrayerAlarmScheduler(private val context: Context, private val settings: S
                     if (prayer in current.mutedPrayers) continue
                     val adhan = schedule.adhan.getValue(prayer)
                     if (adhan.isAfter(now)) set(manager, AlarmKind.ADHAN, day, prayer, adhan)
-                    val iqama = schedule.iqama[prayer]
+                    // The iqama is a local mosque's, so it means nothing in another city. The adhan
+                    // still sounds: the prayer time is the prayer time wherever you are.
+                    val iqama = schedule.iqama[prayer].takeUnless { current.smart.isTravelling }
                     if (iqama != null && iqama.isAfter(now) && iqama != adhan) set(manager, AlarmKind.IQAMA, day, prayer, iqama)
                 }
             }

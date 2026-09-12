@@ -20,6 +20,7 @@ import com.pilotothegreat.deencompanion.core.prayer.CalculationMethod
 import com.pilotothegreat.deencompanion.core.prayer.HighLatitudeMode
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
 import com.pilotothegreat.deencompanion.core.quran.RepeatMode
+import com.pilotothegreat.deencompanion.core.travel.TravelState
 import com.pilotothegreat.deencompanion.data.quran.Reciter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -134,6 +135,20 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     /** Pass 0 to turn "times of calamity" off. */
     suspend fun setCalamityUntil(epochMillis: Long) = edit { it[Keys.CALAMITY_UNTIL] = epochMillis }
 
+    /** Anchors home where you are now; travel is measured from here. */
+    suspend fun setHome(latitude: Double, longitude: Double) = edit {
+        it[Keys.HOME_LATITUDE] = latitude
+        it[Keys.HOME_LONGITUDE] = longitude
+    }
+
+    suspend fun clearHome() = edit {
+        it.remove(Keys.HOME_LATITUDE)
+        it.remove(Keys.HOME_LONGITUDE)
+        it[Keys.TRAVEL_STATE] = TravelState.HOME.name
+    }
+
+    suspend fun setTravelState(state: TravelState) = edit { it[Keys.TRAVEL_STATE] = state.name }
+
     suspend fun setHijriDayStartsAtMaghrib(on: Boolean) = edit { it[Keys.HIJRI_MAGHRIB] = on }
 
     suspend fun setSafarKm(km: Int) = edit { it[Keys.SAFAR_KM] = km.coerceIn(Defaults.SAFAR_RANGE) }
@@ -245,6 +260,9 @@ internal object Keys {
     val NOTIFICATIONS = booleanPreferencesKey("notification_enabled")
     val MUTED_PRAYERS = stringSetPreferencesKey("muted_prayers")
     val DISMISSED_MOMENTS = stringSetPreferencesKey("dismissed_moments")
+    val HOME_LATITUDE = doublePreferencesKey("home_latitude")
+    val HOME_LONGITUDE = doublePreferencesKey("home_longitude")
+    val TRAVEL_STATE = stringPreferencesKey("travel_state")
     val THEME_MODE = stringPreferencesKey("theme_mode")
     val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
     val PURE_BLACK = booleanPreferencesKey("amoled_black_mode")
@@ -371,6 +389,9 @@ internal fun Preferences.toAppSettings(): AppSettings = AppSettings(
         calamityUntil = this[Keys.CALAMITY_UNTIL] ?: 0L,
         hijriDayStartsAtMaghrib = this[Keys.HIJRI_MAGHRIB] ?: true,
         safarKm = (this[Keys.SAFAR_KM] ?: Defaults.SAFAR_KM).coerceIn(Defaults.SAFAR_RANGE),
+        homeLatitude = this[Keys.HOME_LATITUDE],
+        homeLongitude = this[Keys.HOME_LONGITUDE],
+        travelState = enumOrNull<TravelState>(this[Keys.TRAVEL_STATE]) ?: TravelState.HOME,
     ),
     sounds = SoundSettings(
         adhan = Prayer.obligatory.mapNotNull { prayer -> this[adhanSoundKey(prayer)]?.let { prayer to it } }.toMap(),

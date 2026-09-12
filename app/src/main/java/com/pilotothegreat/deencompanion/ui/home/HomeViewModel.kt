@@ -134,16 +134,26 @@ class HomeViewModel(
     val events: SharedFlow<HomeEvent> = _events.asSharedFlow()
 
     init {
-        viewModelScope.launch { location.onAppOpened() }
+        viewModelScope.launch {
+            location.onAppOpened()
+            moments.onAppOpened()
+        }
         viewModelScope.launch {
             updates.check()
             if (updates.state.value is UpdateChecker.State.Available) _events.emit(HomeEvent.UpdateAvailable)
         }
     }
 
-    /** Picks up travel since the app was last in front (throttled in the repository). */
+    /** Picks up travel and weather since the app was last in front (both throttled). */
     fun onResume() {
-        viewModelScope.launch { location.onAppOpened() }
+        viewModelScope.launch {
+            location.onAppOpened()
+            moments.onAppOpened()
+        }
+    }
+
+    fun setTravelling(travelling: Boolean) {
+        viewModelScope.launch { moments.setTravelling(travelling) }
     }
 
     fun refreshLocation() {

@@ -448,4 +448,37 @@
     <string name="occasion_sunnah_fast_body">تُعرض الأعمال على الله فيهما، وكان النبي صلى الله عليه وسلم يحب أن يُعرض عمله وهو صائم.</string>
     <string name="hijri_maghrib">بدء اليوم الهجري عند المغرب</string>
     <string name="hijri_maghrib_desc">كما هو اليوم الشرعي، وبدونه تتأخر ليالي الوتر والكهف والتكبير يومًا.</string>
+
+    <!-- Weather and travel -->
+    <string name="weather_rain">المطر</string>
+    <string name="weather_rain_body">المطر موطن إجابة، فقل: اللهم صيّبًا نافعًا.</string>
+    <string name="weather_thunder">الرعد</string>
+    <string name="weather_thunder_body">سبحان الذي يسبّح الرعد بحمده والملائكة من خيفته.</string>
+    <string name="weather_wind">رياح شديدة</string>
+    <string name="weather_wind_body">اسأل خيرها واستعذ من شرها، ولا تسبّ الريح.</string>
+    <string name="weather_snow">الثلج</string>
+    <string name="weather_snow_body">ماء من السماء، ووقت سؤال.</string>
+    <string name="weather_heat">حرّ شديد</string>
+    <string name="weather_heat_body">استعذ من حرّ جهنم، وارفق بنفسك وبمن يعمل في الخارج.</string>
+    <string name="weather_cold">برد شديد</string>
+    <string name="weather_cold_body">استعذ من زمهرير جهنم، وترفّق في الوضوء إن شقّ البرد.</string>
+    <string name="travel_ask">هل أنت مسافر؟</string>
+    <string name="travel_ask_body">تبعد عن منزلك نحو %1$s كم. إن أكّدت ظهرت أذكار السفر وتنبيه القصر، وتوقفت تنبيهات الإقامة.</string>
+    <string name="travel_yes">نعم، مسافر</string>
+    <string name="travel_no">لا، أنا في بلدي</string>
+    <string name="travel_duas">أذكار السفر</string>
+    <string name="travel_duas_body">دعاء الخروج ودعوة المسافر المستجابة.</string>
+    <string name="travel_qasr">القصر والجمع</string>
+    <string name="travel_qasr_body">للمسافر أن يقصر الظهر والعصر والعشاء ركعتين، ويجيز كثير من أهل العلم الجمع بين الظهرين والعشاءين. والأوقات المعروضة هي أوقات مكانك دون تغيير.</string>
+    <string name="travel_driving">هل أنت على الطريق؟</string>
+    <string name="travel_driving_body">فعّل هذا ويبقى العرض مختصرًا حتى تتوقف.</string>
+    <string name="travel_end">عدت إلى بلدي</string>
+    <string name="smart_features">الاقتراحات الذكية</string>
+    <string name="smart_weather">الطقس</string>
+    <string name="smart_weather_desc">يعرض دعاء المطر والرعد والريح والحرّ والبرد. يُرسل موقعك مقرّبًا إلى نحو كيلومتر إلى Open-Meteo، مرة كل ساعة على الأكثر، والتطبيق مفتوح فقط.</string>
+    <string name="smart_travel">السفر</string>
+    <string name="smart_travel_desc">يسألك إن كنت مسافرًا إذا تجاوزت %1$s كم من منزلك، ثم يعرض أذكار السفر ويوقف تنبيهات الإقامة.</string>
+    <string name="smart_home">المنزل</string>
+    <string name="smart_home_set">محدّد. اضغط لنقله إلى موقعك الحالي.</string>
+    <string name="smart_home_unset">غير محدّد. اضغط لاستخدام موقعك الحالي.</string>
 </resources>

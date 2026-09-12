@@ -45,8 +45,11 @@ Sources are in `branding/` (the icon and mark) and `branding/store/` (the featur
 **Target audience:** 13 and over. Choosing a younger age group enrols the app in the Families programme, which has extra requirements.
 
 **Data safety:**
-- *Does your app collect or share any of the required user data types?* **No.**
-  - Location, settings, bookmarks and athkar progress are stored and processed only on the device. Nothing is sent to the developer.
+- *Does your app collect or share any of the required user data types?* **Yes, one: approximate location.**
+  - *Approximate location* is **shared** with Open-Meteo to fetch the weather, rounded to about a kilometre, at most once an hour and only while the app is open. It is **not collected** (nothing is stored off the device), the purpose is **App functionality**, and it is **optional** — the "Weather" setting turns it off.
+  - Nothing else leaves the device.
+  - Settings, bookmarks, the khatma plan and athkar progress are stored and processed only on the device. Nothing is sent to the developer.
+  - Travel detection compares your position with a home point entirely on the device.
   - The optional internet location fallback is off by default. When the user turns it on, ipapi.co or freeipapi.com see the device's IP address, the same as any web request, and send back an approximate city.
 - *Is data encrypted in transit?* Yes, every request uses HTTPS.
 - *Can users request deletion?* There's no account and nothing held off the device; uninstalling removes everything.

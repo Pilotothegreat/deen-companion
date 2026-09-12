@@ -11,8 +11,12 @@ import com.pilotothegreat.deencompanion.core.moment.MomentKind
 import com.pilotothegreat.deencompanion.core.prayer.DaySchedule
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
 import com.pilotothegreat.deencompanion.core.time.Ticker
+import com.pilotothegreat.deencompanion.core.travel.Travel
+import com.pilotothegreat.deencompanion.core.travel.TravelState
+import com.pilotothegreat.deencompanion.data.location.LocationRepository
 import com.pilotothegreat.deencompanion.data.settings.AppSettings
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
+import com.pilotothegreat.deencompanion.data.weather.WeatherRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -28,13 +32,21 @@ import java.time.ZonedDateTime
  * one becomes visible on every surface at once, because every surface reads this list rather than
  * deciding for itself what to show.
  */
-class MomentRepository(private val settings: SettingsRepository) {
+class MomentRepository(
+    private val settings: SettingsRepository,
+    private val weather: WeatherRepository,
+    private val location: LocationRepository,
+) {
 
     /** Everything live, best first. Recomputed on the minute, since windows open and close on time. */
     val moments: Flow<List<Moment>> = combine(settings.settings, Ticker.minutes) { s, _ -> s }
         .map { s ->
             val now = ZonedDateTime.now(s.zone)
-            MomentEngine.rank(occasions(s, now), now, dismissedToday(s, now))
+            val live = occasions(s, now) +
+                listOfNotNull(Producers.weather(weather.current(), now)) +
+                Producers.travel(s, distanceFromHome(s), now) +
+                listOfNotNull(Producers.driving(location.lastFixSpeed, now))
+            MomentEngine.rank(live, now, dismissedToday(s, now))
         }
         .flowOn(Dispatchers.Default)
 
@@ -52,6 +64,47 @@ class MomentRepository(private val settings: SettingsRepository) {
 
     /** The same choice, for callers outside composition such as the widgets. */
     suspend fun suggestedAthkarNow(): String = suggestedAthkar.first()
+
+    /**
+     * Fetches the weather, at most once an hour and only while the app is in front of the reader.
+     * There is no background poll: knowing it rained while the phone was in a pocket is worth
+     * nothing, and a wake-up for it would cost battery for nobody.
+     */
+    suspend fun onAppOpened() {
+        val s = settings.current()
+        weather.refresh(s, System.currentTimeMillis())
+        anchorHomeIfNeeded(s)
+        updateTravelState(s)
+    }
+
+    suspend fun setTravelling(travelling: Boolean) {
+        settings.setTravelState(if (travelling) TravelState.CONFIRMED else TravelState.HOME)
+        if (!travelling) {
+            // Coming home while far away would ask again immediately, so home moves to here.
+            val s = settings.current()
+            if (!s.location.isDefault) settings.setHome(s.location.latitude, s.location.longitude)
+        }
+    }
+
+    /** The first real location becomes home; there is nothing to measure travel against before that. */
+    private suspend fun anchorHomeIfNeeded(s: AppSettings) {
+        if (s.smart.hasHome || s.location.isDefault) return
+        settings.setHome(s.location.latitude, s.location.longitude)
+    }
+
+    private suspend fun updateTravelState(s: AppSettings) {
+        if (!s.smart.travel) return
+        val distance = distanceFromHome(s) ?: return
+        val next = Travel.state(distance, s.smart.safarKm, s.smart.travelState)
+        if (next != s.smart.travelState) settings.setTravelState(next)
+    }
+
+    private fun distanceFromHome(s: AppSettings): Double? {
+        val latitude = s.smart.homeLatitude ?: return null
+        val longitude = s.smart.homeLongitude ?: return null
+        if (s.location.isDefault) return null
+        return Travel.distanceKm(latitude, longitude, s.location.latitude, s.location.longitude)
+    }
 
     suspend fun dismiss(moment: Moment) {
         if (moment.dismissal == Dismissal.NONE) return

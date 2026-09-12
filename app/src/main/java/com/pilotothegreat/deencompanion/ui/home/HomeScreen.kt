@@ -253,6 +253,17 @@ fun HomeScreen(
                         onOpen = moment.athkarCategory?.let { category -> { onOpenAthkar(category) } },
                         onDismiss = if (moment.dismissal == Dismissal.NONE) null else { { viewModel.dismiss(moment) } },
                         modifier = Modifier.animateItem(),
+                        // Travel is the one thing the app suspects but never decides: it asks.
+                        answer = when (moment.id) {
+                            "travel-ask" -> stringResource(R.string.travel_yes) to { viewModel.setTravelling(true) }
+                            "travel-duas" -> null
+                            else -> null
+                        },
+                        decline = when (moment.id) {
+                            "travel-ask" -> stringResource(R.string.travel_no) to { viewModel.setTravelling(false) }
+                            "travel-qasr" -> stringResource(R.string.travel_end) to { viewModel.setTravelling(false) }
+                            else -> null
+                        },
                     )
                 }
                 countdown?.let { cd -> item(key = "hero") { NextPrayerHero(cd, locale, Modifier.animateItem()) } }

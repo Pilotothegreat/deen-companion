@@ -7,6 +7,7 @@ import com.pilotothegreat.deencompanion.data.hadith.HadithRepository
 import com.pilotothegreat.deencompanion.data.location.CityIndex
 import com.pilotothegreat.deencompanion.data.location.LocationRepository
 import com.pilotothegreat.deencompanion.data.moment.MomentRepository
+import com.pilotothegreat.deencompanion.data.weather.WeatherRepository
 import com.pilotothegreat.deencompanion.data.quran.KhatmaRepository
 import com.pilotothegreat.deencompanion.data.quran.QuranRepository
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
@@ -43,7 +44,8 @@ val appModule = module {
     single { HadithRepository(androidContext(), get()) }
     single { CityIndex { androidContext().assets.open("cities.json").bufferedReader().use { it.readText() } } }
     single { LocationRepository(androidContext(), get(), get()) }
-    single { MomentRepository(get()) }
+    single { WeatherRepository() }
+    single { MomentRepository(get(), get(), get()) }
     single { UpdateChecker(androidContext(), get()) }
     single { PrayerAlarmScheduler(androidContext(), get()) }
     single { QuranPlayer(androidContext(), get(), get()) }

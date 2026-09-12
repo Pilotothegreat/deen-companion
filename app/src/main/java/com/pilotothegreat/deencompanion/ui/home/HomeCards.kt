@@ -433,7 +433,16 @@ fun InspirationCard(inspiration: Inspiration, locale: Locale) {
  * every travel note uses this one card, so adding a producer never means adding a screen.
  */
 @Composable
-fun MomentCard(moment: Moment, locale: Locale, onOpen: (() -> Unit)?, onDismiss: (() -> Unit)?, modifier: Modifier = Modifier) {
+fun MomentCard(
+    moment: Moment,
+    locale: Locale,
+    onOpen: (() -> Unit)?,
+    onDismiss: (() -> Unit)?,
+    modifier: Modifier = Modifier,
+    /** A named answer, for the few moments that ask a question instead of stating something. */
+    answer: Pair<String, () -> Unit>? = null,
+    decline: Pair<String, () -> Unit>? = null,
+) {
     val colors = CardDefaults.cardColors(
         containerColor = MaterialTheme.colorScheme.tertiaryContainer,
         contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
@@ -450,8 +459,14 @@ fun MomentCard(moment: Moment, locale: Locale, onOpen: (() -> Unit)?, onDismiss:
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
-            if (onDismiss != null) {
-                TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) { Text(stringResource(R.string.dismiss)) }
+            if (answer != null || decline != null || onDismiss != null) {
+                Row(Modifier.align(Alignment.End), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    decline?.let { (label, action) -> TextButton(onClick = action) { Text(label) } }
+                    if (answer == null && onDismiss != null) {
+                        TextButton(onClick = onDismiss) { Text(stringResource(R.string.dismiss)) }
+                    }
+                    answer?.let { (label, action) -> TextButton(onClick = action) { Text(label) } }
+                }
             }
         }
     }

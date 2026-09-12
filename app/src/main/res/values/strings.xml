@@ -416,4 +416,37 @@
     <string name="occasion_sunnah_fast_body">Deeds are presented to Allah on these days, and the Prophet صلى الله عليه وسلم liked his to be presented while fasting.</string>
     <string name="hijri_maghrib">Islamic date changes at sunset</string>
     <string name="hijri_maghrib_desc">As the Islamic day does. Night-anchored things — the odd nights, al-Kahf, the takbir — are a day out without it.</string>
+
+    <!-- Weather and travel -->
+    <string name="weather_rain">It is raining</string>
+    <string name="weather_rain_body">Rain is a time supplication is answered. Say: O Allah, a beneficial rain.</string>
+    <string name="weather_thunder">Thunder</string>
+    <string name="weather_thunder_body">Glory to the One whom the thunder glorifies with His praise, and the angels out of awe of Him.</string>
+    <string name="weather_wind">Strong wind</string>
+    <string name="weather_wind_body">Ask for its good and seek refuge from its harm. Do not curse the wind.</string>
+    <string name="weather_snow">Snow</string>
+    <string name="weather_snow_body">Water from the sky, and a time to ask.</string>
+    <string name="weather_heat">Severe heat</string>
+    <string name="weather_heat_body">Seek refuge from the heat of Hellfire, and be gentle with yourself and with those working outside.</string>
+    <string name="weather_cold">Severe cold</string>
+    <string name="weather_cold_body">Seek refuge from the cold of Hellfire, and keep wudu warm if the cold makes it hard.</string>
+    <string name="travel_ask">Are you travelling?</string>
+    <string name="travel_ask_body">You are about %1$s km from home. Say yes and the travel duas and a note on shortening prayers appear, and iqama alerts stop.</string>
+    <string name="travel_yes">Yes, travelling</string>
+    <string name="travel_no">No, I am home</string>
+    <string name="travel_duas">The duas of travel</string>
+    <string name="travel_duas_body">The dua on setting out, and the traveller\'s supplication, which is answered.</string>
+    <string name="travel_qasr">Shortening and combining</string>
+    <string name="travel_qasr_body">A traveller may pray Dhuhr, Asr and Isha as two rak\'ahs, and many scholars allow combining Dhuhr with Asr and Maghrib with Isha. The times shown are the real times here; nothing has been changed.</string>
+    <string name="travel_driving">On the road?</string>
+    <string name="travel_driving_body">Turn this on and the app keeps things brief until you stop.</string>
+    <string name="travel_end">I am home again</string>
+    <string name="smart_features">Smart suggestions</string>
+    <string name="smart_weather">Weather</string>
+    <string name="smart_weather_desc">Shows the dua for rain, thunder, wind and extreme temperatures. Sends your location rounded to about a kilometre to Open-Meteo, at most once an hour, only while the app is open.</string>
+    <string name="smart_travel">Travel</string>
+    <string name="smart_travel_desc">Asks whether you are travelling once you are more than %1$s km from home, then offers the travel duas and pauses iqama alerts.</string>
+    <string name="smart_home">Home</string>
+    <string name="smart_home_set">Set. Tap to move it to where you are now.</string>
+    <string name="smart_home_unset">Not set yet. Tap to use your current location.</string>
 </resources>

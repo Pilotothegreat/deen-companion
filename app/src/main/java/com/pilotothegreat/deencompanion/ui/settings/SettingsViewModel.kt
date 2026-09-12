@@ -66,7 +66,17 @@ class SettingsViewModel(
         AudioCache.setBudgetMb(mb)
     }
 
-    fun setContinuousPlayback(on: Boolean) = launch { repository.setContinuousPlayback(on) }
+fun setSmartWeather(on: Boolean) = launch { repository.setWeatherEnabled(on) }
+
+    fun setSmartTravel(on: Boolean) = launch { repository.setTravelEnabled(on) }
+
+    /** Home is wherever you are when you say so; travel is measured from it. */
+    fun anchorHomeHere() = launch {
+        val current = repository.current()
+        if (!current.location.isDefault) repository.setHome(current.location.latitude, current.location.longitude)
+    }
+
+        fun setContinuousPlayback(on: Boolean) = launch { repository.setContinuousPlayback(on) }
 
     fun clearAudioCache() = launch {
         withContext(Dispatchers.IO) { AudioCache.clear() }

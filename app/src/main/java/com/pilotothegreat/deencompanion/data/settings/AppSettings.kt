@@ -7,6 +7,7 @@ import com.pilotothegreat.deencompanion.core.prayer.IqamaRule
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
 import com.pilotothegreat.deencompanion.core.prayer.PrayerConfig
 import com.pilotothegreat.deencompanion.core.quran.RepeatMode
+import com.pilotothegreat.deencompanion.core.travel.TravelState
 import com.pilotothegreat.deencompanion.data.quran.Reciter
 import java.time.LocalTime
 import java.time.ZoneId
@@ -61,8 +62,17 @@ data class SmartSettings(
     val hijriDayStartsAtMaghrib: Boolean = true,
     /** Distance from home past which travel is suspected. */
     val safarKm: Int = Defaults.SAFAR_KM,
+    /** Where home is, for measuring travel against; null until one is anchored. */
+    val homeLatitude: Double? = null,
+    val homeLongitude: Double? = null,
+    /** What the reader last told the app about travelling, which outranks any guess. */
+    val travelState: TravelState = TravelState.HOME,
 ) {
     fun calamityActive(nowMillis: Long): Boolean = calamityUntil > nowMillis
+
+    val hasHome: Boolean get() = homeLatitude != null && homeLongitude != null
+
+    val isTravelling: Boolean get() = travel && travelState == TravelState.CONFIRMED
 }
 
 /** What each prayer sounds like, and what arrives before it. */

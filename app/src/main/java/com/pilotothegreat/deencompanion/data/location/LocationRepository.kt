@@ -54,9 +54,17 @@ class LocationRepository(
      * Resolves the device location, falling back to IP geolocation only when the user allows it,
      * and saves it in one write. This also switches a manually chosen city back to automatic.
      */
+    /**
+     * Speed reported by the last fix, when the provider gave one. The app never asks for location in
+     * order to learn this; it only reads what a fix it took anyway happens to carry.
+     */
+    @Volatile var lastFixSpeed: Float? = null
+        private set
+
     suspend fun refresh(): Result {
         val allowIp = settings.current().useIpLocationFallback
         val fix = if (hasPermission()) deviceLocation() else null
+        lastFixSpeed = fix?.takeIf { it.hasSpeed() }?.speed
         val resolved = when {
             fix != null -> {
                 val place = describe(fix.latitude, fix.longitude)

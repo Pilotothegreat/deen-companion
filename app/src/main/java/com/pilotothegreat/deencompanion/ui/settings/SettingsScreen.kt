@@ -28,11 +28,14 @@ import androidx.compose.material.icons.rounded.AppSettingsAlt
 import androidx.compose.material.icons.rounded.Brightness5
 import androidx.compose.material.icons.rounded.Calculate
 import androidx.compose.material.icons.rounded.CalendarMonth
+import androidx.compose.material.icons.rounded.Cloud
 import androidx.compose.material.icons.rounded.CloudDownload
 import androidx.compose.material.icons.rounded.Code
 import androidx.compose.material.icons.rounded.ColorLens
 import androidx.compose.material.icons.rounded.DarkMode
+import androidx.compose.material.icons.rounded.Flight
 import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.LocationOn
@@ -344,6 +347,33 @@ fun SettingsScreen(
                                 stringResource(R.string.athkar_transliteration_desc), s.athkarShowTransliteration,
                                 viewModel::setAthkarShowTransliteration,
                             )
+                        },
+                    ),
+                )
+            }
+
+            item(key = "smart") {
+                SettingsGroup(
+                    stringResource(R.string.smart_features),
+                    listOf(
+                        { shapes ->
+                            SwitchRow(
+                                shapes, Icons.Rounded.Cloud, stringResource(R.string.smart_weather),
+                                stringResource(R.string.smart_weather_desc), s.smart.weather, viewModel::setSmartWeather,
+                            )
+                        },
+                        { shapes ->
+                            SwitchRow(
+                                shapes, Icons.Rounded.Flight, stringResource(R.string.smart_travel),
+                                stringResource(R.string.smart_travel_desc, Formatters.number(s.smart.safarKm, locale)),
+                                s.smart.travel, viewModel::setSmartTravel,
+                            )
+                        },
+                        { shapes ->
+                            NavRow(
+                                shapes, Icons.Rounded.Home, stringResource(R.string.smart_home),
+                                stringResource(if (s.smart.hasHome) R.string.smart_home_set else R.string.smart_home_unset),
+                            ) { viewModel.anchorHomeHere() }
                         },
                     ),
                 )
