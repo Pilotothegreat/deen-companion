@@ -26,6 +26,7 @@ class WidgetContentTest {
         label = "Next prayer",
         name = "Asr",
         countdownTarget = 0L,
+        elapsed = 0.4f,
         adhan = "Adhan 3:35 PM",
         iqama = "Iqama 3:55 PM",
         day = listOf(

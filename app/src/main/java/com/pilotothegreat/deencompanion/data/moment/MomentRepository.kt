@@ -24,6 +24,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import java.time.ZonedDateTime
@@ -35,6 +36,7 @@ import java.time.ZonedDateTime
  * one becomes visible on every surface at once, because every surface reads this list rather than
  * deciding for itself what to show.
  */
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class MomentRepository(
     private val settings: SettingsRepository,
     private val weather: WeatherRepository,
@@ -51,7 +53,9 @@ class MomentRepository(
     val moments: Flow<List<Moment>> = combine(
         settings.settings,
         Ticker.minutes,
-        earthquakes.recent(System.currentTimeMillis()),
+        // The window is asked for per emission, not once when this object was built: taken at
+        // construction it stayed anchored to app start and drifted further out of date every hour.
+        Ticker.minutes.flatMapLatest { earthquakes.recent(System.currentTimeMillis()) },
     ) { s, _, quakes -> s to quakes }
         .map { (s, quakes) ->
             val now = ZonedDateTime.now(s.zone)

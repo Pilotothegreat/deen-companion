@@ -83,7 +83,7 @@ internal data class AthkarWidgetState(
 
 /** The athkar for this time of day with today's progress; tapping starts the session. */
 class AthkarWidget : GlanceAppWidget() {
-    override val sizeMode: SizeMode = SizeMode.Responsive(setOf(SMALL, TALL))
+    override val sizeMode: SizeMode = SizeMode.Responsive(setOf(TINY, SMALL, TALL, LARGE))
     override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(TALL))
 
     override suspend fun provideGlance(context: Context, id: GlanceId) = show(context, configOf(context, id))
@@ -96,8 +96,10 @@ class AthkarWidget : GlanceAppWidget() {
     }
 
     internal companion object {
+        val TINY = DpSize(110.dp, 70.dp)
         val SMALL = DpSize(150.dp, 100.dp)
         val TALL = DpSize(180.dp, 180.dp)
+        val LARGE = DpSize(280.dp, 260.dp)
     }
 }
 

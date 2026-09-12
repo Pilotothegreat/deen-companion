@@ -77,7 +77,7 @@ internal data class MomentWidgetState(
  * widget as the day and the world move, instead of six more that each need placing.
  */
 class MomentWidget : GlanceAppWidget() {
-    override val sizeMode: SizeMode = SizeMode.Responsive(setOf(SMALL, WIDE))
+    override val sizeMode: SizeMode = SizeMode.Responsive(setOf(TINY, SMALL, WIDE, LARGE))
     override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(WIDE))
 
     override suspend fun provideGlance(context: Context, id: GlanceId) = show(context, configOf(context, id))
@@ -90,8 +90,10 @@ class MomentWidget : GlanceAppWidget() {
     }
 
     internal companion object {
+        val TINY = DpSize(110.dp, 60.dp)
         val SMALL = DpSize(150.dp, 100.dp)
         val WIDE = DpSize(250.dp, 100.dp)
+        val LARGE = DpSize(320.dp, 180.dp)
     }
 }
 

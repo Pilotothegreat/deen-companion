@@ -1,6 +1,11 @@
 package com.pilotothegreat.deencompanion
 
 import android.app.Application
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.os.Build
 import android.util.Log
 import androidx.work.Configuration
 import com.pilotothegreat.deencompanion.alarms.KhatmaReminderWorker
@@ -56,6 +61,7 @@ class DeenApplication : Application(), Configuration.Provider {
         RescheduleWorker.enqueue(this)
         KhatmaReminderWorker.enqueue(this)
         syncLanguage()
+        refreshWidgetsOnUnlock()
         keepAlarmsInSync()
         keepChannelsLocalized()
         keepWidgetsInSync()
@@ -93,6 +99,33 @@ class DeenApplication : Application(), Configuration.Provider {
             .distinctUntilChanged()
             .debounce(300)
             .collectLatest { scheduler.reschedule() }
+    }
+
+    /**
+     * Redraws the widgets when the phone is unlocked, so a countdown is never stale at the moment
+     * someone actually looks at it.
+     *
+     * Registered here rather than in the manifest because ACTION_USER_PRESENT is an implicit
+     * broadcast, and Android has not delivered those to manifest receivers since Oreo. That means it
+     * only fires while this process happens to be alive — which is exactly when someone has been
+     * using the app and is most likely to glance at its widgets. The half-hourly update and the
+     * alarm at each prayer cover the rest.
+     */
+    private fun refreshWidgetsOnUnlock() {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                appScope.launch { WidgetUpdater.updateAll(context) }
+            }
+        }
+        val filter = IntentFilter(Intent.ACTION_USER_PRESENT)
+        // Registered against the platform rather than ContextCompat: only the system can send this
+        // broadcast, and the compat helper asks for a permission of its own to say so.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            @Suppress("UnspecifiedRegisterReceiverFlag")
+            registerReceiver(receiver, filter)
+        }
     }
 
     private fun keepChannelsLocalized() = appScope.launch {

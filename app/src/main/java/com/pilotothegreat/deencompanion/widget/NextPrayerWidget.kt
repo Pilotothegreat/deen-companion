@@ -15,6 +15,7 @@ import androidx.glance.LocalContext
 import androidx.glance.LocalSize
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.LinearProgressIndicator
 import androidx.glance.appwidget.PreviewSizeMode
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionStartActivity
@@ -52,6 +53,8 @@ internal data class NextPrayerState(
     val name: String,
     /** elapsedRealtime at which the countdown reaches zero. */
     val countdownTarget: Long,
+    /** How far the day has come between the last prayer and the next, 0f..1f. */
+    val elapsed: Float,
     val adhan: String,
     val iqama: String?,
     val day: List<TimeCell>,
@@ -65,12 +68,23 @@ internal data class NextPrayerState(
             val next = DaySchedule.next(now, settings.prayerConfig)
             val schedule = DaySchedule.forDate(next.adhan.toLocalDate(), settings.prayerConfig)
             val iqama = next.iqama?.takeIf { it != next.adhan }
+            // The arc fills from one prayer to the next. It advances on every redraw, and the
+            // widget is redrawn at each prayer and on unlock, so it is never far behind.
+            val today = DaySchedule.forDate(now.toLocalDate(), settings.prayerConfig)
+            val yesterday = DaySchedule.forDate(now.toLocalDate().minusDays(1), settings.prayerConfig)
+            val previous = (Prayer.obligatory.mapNotNull { today.adhan[it] } + listOfNotNull(yesterday.adhan[Prayer.ISHA]))
+                .filter { !it.isAfter(now) }
+                .maxOrNull()
             return NextPrayerState(
                 dynamic = settings.dynamicColor,
                 prayer = next.prayer,
                 label = res.getString(R.string.widget_next_prayer_title),
                 name = res.getString(next.prayer.nameRes),
                 countdownTarget = SystemClock.elapsedRealtime() + Duration.between(now, next.adhan).toMillis(),
+                elapsed = previous?.let {
+                    val whole = Duration.between(it, next.adhan).toMillis().toFloat()
+                    if (whole <= 0f) 0f else (Duration.between(it, now).toMillis() / whole).coerceIn(0f, 1f)
+                } ?: 0f,
                 adhan = res.getString(R.string.adhan_at, Formatters.time(context, next.adhan.toLocalTime(), locale)),
                 iqama = iqama?.let { res.getString(R.string.iqama_at, Formatters.time(context, it.toLocalTime(), locale)) },
                 day = Prayer.obligatory.map { prayer ->
@@ -133,6 +147,13 @@ internal fun NextPrayerContent(state: NextPrayerState, config: WidgetConfig = Wi
                 Text(state.name, style = textStyle(content, 18.sp, FontWeight.Bold), maxLines = 1)
                 Countdown(state.countdownTarget, 24f, state.dynamic)
                 Text(state.adhan, style = textStyle(content, 12.sp), maxLines = 1)
+                Spacer(GlanceModifier.height(6.dp))
+                LinearProgressIndicator(
+                    progress = state.elapsed,
+                    modifier = GlanceModifier.fillMaxWidth(),
+                    color = colors.primary,
+                    backgroundColor = colors.surfaceVariant,
+                )
             }
             else -> Column(GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
                 Row(GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -141,11 +162,21 @@ internal fun NextPrayerContent(state: NextPrayerState, config: WidgetConfig = Wi
                         Text(state.name, style = textStyle(content, 20.sp, FontWeight.Bold), maxLines = 1)
                         Countdown(state.countdownTarget, if (size.width >= NextPrayerWidget.WIDE.width) 30f else 26f, state.dynamic)
                         Text(state.adhan, style = textStyle(content, 12.sp), maxLines = 1)
-                        state.iqama?.let { Text(it, style = textStyle(content, 12.sp), maxLines = 1) }
+                        if (config.showIqama) state.iqama?.let { Text(it, style = textStyle(content, 12.sp), maxLines = 1) }
+                        Spacer(GlanceModifier.height(6.dp))
+                        LinearProgressIndicator(
+                            progress = state.elapsed,
+                            modifier = GlanceModifier.fillMaxWidth(),
+                            color = colors.primary,
+                            backgroundColor = colors.surfaceVariant,
+                        )
                     }
-                    if (size.width >= NextPrayerWidget.WIDE.width) {
+                    // Each prayer has its own shape, and it changes as the day moves — the same
+                    // language as the Today card, drawn as a bitmap so it looks identical on One UI,
+                    // Pixel and everything else.
+                    if (size.width >= NextPrayerWidget.CARD.width) {
                         Spacer(GlanceModifier.width(8.dp))
-                        PrayerBadge(state.prayer, 64.dp)
+                        PrayerBadge(state.prayer, if (size.width >= NextPrayerWidget.WIDE.width) 64.dp else 44.dp)
                     }
                 }
                 if (size.height >= NextPrayerWidget.FULL.height && size.width >= NextPrayerWidget.FULL.width) {

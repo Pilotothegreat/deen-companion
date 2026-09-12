@@ -70,7 +70,7 @@ internal data class TasbihWidgetState(
 
 /** Counts dhikr from the home screen with the same rules and storage as the app. */
 class TasbihWidget : GlanceAppWidget() {
-    override val sizeMode: SizeMode = SizeMode.Responsive(setOf(NARROW, WIDE))
+    override val sizeMode: SizeMode = SizeMode.Responsive(setOf(NARROW, WIDE, BIG))
     override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(WIDE))
 
     override suspend fun provideGlance(context: Context, id: GlanceId) = show(context)
@@ -85,6 +85,7 @@ class TasbihWidget : GlanceAppWidget() {
     internal companion object {
         val NARROW = DpSize(110.dp, 100.dp)
         val WIDE = DpSize(170.dp, 100.dp)
+        val BIG = DpSize(250.dp, 180.dp)
     }
 }
 

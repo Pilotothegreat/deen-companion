@@ -74,7 +74,7 @@ internal data class PrayerTimesState(val dynamic: Boolean, val title: String, va
 
 /** The day's prayer times as a table, the next prayer on a pill; wide sizes lay them out as columns. */
 class PrayerTimesWidget : GlanceAppWidget() {
-    override val sizeMode: SizeMode = SizeMode.Responsive(setOf(COLUMNS, LIST, LIST_WIDE))
+    override val sizeMode: SizeMode = SizeMode.Responsive(setOf(STRIP, COLUMNS, LIST, LIST_WIDE, TABLE))
     override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(LIST_WIDE))
 
     override suspend fun provideGlance(context: Context, id: GlanceId) = show(context, configOf(context, id))
@@ -87,9 +87,11 @@ class PrayerTimesWidget : GlanceAppWidget() {
     }
 
     internal companion object {
+        val STRIP = DpSize(140.dp, 70.dp)
         val COLUMNS = DpSize(250.dp, 100.dp)
         val LIST = DpSize(150.dp, 190.dp)
         val LIST_WIDE = DpSize(250.dp, 200.dp)
+        val TABLE = DpSize(320.dp, 260.dp)
     }
 }
 

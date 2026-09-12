@@ -45,10 +45,11 @@ internal data class QuoteState(
 
 internal val QUOTE_SHORT = DpSize(180.dp, 100.dp)
 internal val QUOTE_TALL = DpSize(200.dp, 170.dp)
+internal val QUOTE_LARGE = DpSize(320.dp, 260.dp)
 
 /** Today's ayah; tapping it opens the mushaf at the ayah. */
 class VerseWidget : GlanceAppWidget() {
-    override val sizeMode: SizeMode = SizeMode.Responsive(setOf(QUOTE_SHORT, QUOTE_TALL))
+    override val sizeMode: SizeMode = SizeMode.Responsive(setOf(QUOTE_SHORT, QUOTE_TALL, QUOTE_LARGE))
     override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(QUOTE_TALL))
 
     override suspend fun provideGlance(context: Context, id: GlanceId) = show(context)
@@ -83,7 +84,7 @@ class VerseWidget : GlanceAppWidget() {
 
 /** Today's hadith or dua, the same one as on the Today screen. */
 class InspirationWidget : GlanceAppWidget() {
-    override val sizeMode: SizeMode = SizeMode.Responsive(setOf(QUOTE_SHORT, QUOTE_TALL))
+    override val sizeMode: SizeMode = SizeMode.Responsive(setOf(QUOTE_SHORT, QUOTE_TALL, QUOTE_LARGE))
     override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(QUOTE_TALL))
 
     override suspend fun provideGlance(context: Context, id: GlanceId) = show(context)
