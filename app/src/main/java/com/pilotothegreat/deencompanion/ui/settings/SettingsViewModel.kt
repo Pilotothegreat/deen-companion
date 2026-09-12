@@ -66,7 +66,14 @@ class SettingsViewModel(
         AudioCache.setBudgetMb(mb)
     }
 
-fun setSmartWeather(on: Boolean) = launch { repository.setWeatherEnabled(on) }
+    fun setNaturalEvents(on: Boolean) = launch { repository.setNaturalEventsEnabled(on) }
+
+    /** Zero turns it off; otherwise it runs for this many days and then lapses on its own. */
+    fun setCalamityDays(days: Int) = launch {
+        repository.setCalamityUntil(if (days <= 0) 0L else System.currentTimeMillis() + days * 86_400_000L)
+    }
+
+    fun setSmartWeather(on: Boolean) = launch { repository.setWeatherEnabled(on) }
 
     fun setSmartTravel(on: Boolean) = launch { repository.setTravelEnabled(on) }
 

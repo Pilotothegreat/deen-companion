@@ -14,6 +14,9 @@ import com.pilotothegreat.deencompanion.core.time.Ticker
 import com.pilotothegreat.deencompanion.core.travel.Travel
 import com.pilotothegreat.deencompanion.core.travel.TravelState
 import com.pilotothegreat.deencompanion.data.location.LocationRepository
+import com.pilotothegreat.deencompanion.data.nature.EarthquakeRepository
+import com.pilotothegreat.deencompanion.data.nature.Eclipse
+import com.pilotothegreat.deencompanion.data.nature.EclipseRepository
 import com.pilotothegreat.deencompanion.data.settings.AppSettings
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
 import com.pilotothegreat.deencompanion.data.weather.WeatherRepository
@@ -36,16 +39,31 @@ class MomentRepository(
     private val settings: SettingsRepository,
     private val weather: WeatherRepository,
     private val location: LocationRepository,
+    private val eclipses: EclipseRepository,
+    private val earthquakes: EarthquakeRepository,
 ) {
 
+    /** Recomputed with the weather, not on the minute: the table is fixed and the feed is hourly. */
+    @Volatile private var nextEclipse: Eclipse? = null
+    @Volatile private var eclipseVisibleHere = false
+
     /** Everything live, best first. Recomputed on the minute, since windows open and close on time. */
-    val moments: Flow<List<Moment>> = combine(settings.settings, Ticker.minutes) { s, _ -> s }
-        .map { s ->
+    val moments: Flow<List<Moment>> = combine(
+        settings.settings,
+        Ticker.minutes,
+        earthquakes.recent(System.currentTimeMillis()),
+    ) { s, _, quakes -> s to quakes }
+        .map { (s, quakes) ->
             val now = ZonedDateTime.now(s.zone)
             val live = occasions(s, now) +
-                listOfNotNull(Producers.weather(weather.current(), now)) +
-                Producers.travel(s, distanceFromHome(s), now) +
-                listOfNotNull(Producers.driving(location.lastFixSpeed, now))
+                listOfNotNull(
+                    Producers.calamity(s, now),
+                    Producers.weather(weather.current(), now),
+                    Producers.eclipse(nextEclipse.takeIf { s.smart.naturalEvents }, eclipseVisibleHere, now),
+                    Producers.earthquake(quakes.firstOrNull().takeIf { s.smart.naturalEvents }, now),
+                    Producers.driving(location.lastFixSpeed, now),
+                ) +
+                Producers.travel(s, distanceFromHome(s), now)
             MomentEngine.rank(live, now, dismissedToday(s, now))
         }
         .flowOn(Dispatchers.Default)
@@ -72,10 +90,27 @@ class MomentRepository(
      */
     suspend fun onAppOpened() {
         val s = settings.current()
-        weather.refresh(s, System.currentTimeMillis())
+        val nowMillis = System.currentTimeMillis()
+        weather.refresh(s, nowMillis)
+        earthquakes.refresh(s, nowMillis)
+        refreshEclipse(s, nowMillis)
         anchorHomeIfNeeded(s)
         updateTravelState(s)
     }
+
+    private suspend fun refreshEclipse(s: AppSettings, nowMillis: Long) {
+        if (!s.smart.naturalEvents) {
+            nextEclipse = null
+            return
+        }
+        val next = eclipses.upcoming(java.time.Instant.ofEpochMilli(nowMillis)).firstOrNull()
+        nextEclipse = next
+        eclipseVisibleHere = next != null && !s.location.isDefault &&
+            eclipses.isLunarEclipseVisible(next, s.location.latitude, s.location.longitude)
+    }
+
+    /** Turns "times of calamity" on for a while, or off when given zero. */
+    suspend fun setCalamity(untilMillis: Long) = settings.setCalamityUntil(untilMillis)
 
     suspend fun setTravelling(travelling: Boolean) {
         settings.setTravelState(if (travelling) TravelState.CONFIRMED else TravelState.HOME)

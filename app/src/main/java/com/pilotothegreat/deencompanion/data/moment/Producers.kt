@@ -8,6 +8,9 @@ import com.pilotothegreat.deencompanion.core.travel.Travel
 import com.pilotothegreat.deencompanion.core.travel.TravelState
 import com.pilotothegreat.deencompanion.core.weather.WeatherCondition
 import com.pilotothegreat.deencompanion.core.weather.WeatherReading
+import com.pilotothegreat.deencompanion.data.nature.Earthquake
+import com.pilotothegreat.deencompanion.data.nature.Eclipse
+import com.pilotothegreat.deencompanion.data.nature.EclipseKind
 import com.pilotothegreat.deencompanion.data.settings.AppSettings
 import java.time.ZonedDateTime
 
@@ -89,6 +92,76 @@ object Producers {
             )
             TravelState.HOME -> emptyList()
         }
+    }
+
+    /**
+     * An eclipse, and what the app is honest about.
+     *
+     * A lunar eclipse gets a real answer, because whether the moon is above your horizon can be
+     * computed. A solar eclipse gets the date and NASA's own list of regions and nothing more: the
+     * path of totality is a narrow track this app has no table for, and the prayer follows seeing
+     * the eclipse rather than reading about it. Neither card treats an eclipse as an omen; it is a
+     * sign, and the sunnah is prayer, remembrance and charity.
+     */
+    fun eclipse(eclipse: Eclipse?, visibleHere: Boolean, now: ZonedDateTime): Moment? {
+        if (eclipse == null) return null
+        val at = eclipse.at.atZone(now.zone)
+        val solar = eclipse.kind == EclipseKind.SOLAR
+        return Moment(
+            id = "eclipse-${eclipse.at.epochSecond}",
+            kind = MomentKind.NATURE,
+            priority = if (visibleHere) 72 else 44,
+            title = if (solar) R.string.eclipse_solar else R.string.eclipse_lunar,
+            body = when {
+                solar -> R.string.eclipse_solar_body
+                visibleHere -> R.string.eclipse_lunar_visible_body
+                else -> R.string.eclipse_lunar_elsewhere_body
+            },
+            startsAt = at.minusDays(1),
+            endsAt = at.plusHours(4),
+            peak = at,
+            dismissal = Dismissal.TODAY,
+        )
+    }
+
+    /**
+     * A nearby earthquake, as a card and never as a notification. Android's own earthquake alerts
+     * are faster and better placed; a second alarm for the same tremor frightens without helping.
+     */
+    fun earthquake(quake: Earthquake?, now: ZonedDateTime): Moment? {
+        if (quake == null) return null
+        return Moment(
+            id = "quake-${quake.id}",
+            kind = MomentKind.NATURE,
+            priority = 62,
+            title = R.string.quake_title,
+            body = R.string.quake_body,
+            count = quake.distanceKm.toInt(),
+            startsAt = now.minusMinutes(1),
+            endsAt = java.time.Instant.ofEpochMilli(quake.atMillis).atZone(now.zone).plusHours(24),
+            athkarCategory = "fear",
+            dismissal = Dismissal.PERMANENT,
+        )
+    }
+
+    /**
+     * Times of calamity: a mode you switch on with an expiry, not a feed the app decides for you.
+     * There is no neutral source of "what is happening", one maintainer cannot moderate one, and an
+     * app that exists to pull people out of the feed should not become one.
+     */
+    fun calamity(settings: AppSettings, now: ZonedDateTime): Moment? {
+        if (!settings.smart.calamityActive(now.toInstant().toEpochMilli())) return null
+        return Moment(
+            id = "calamity",
+            kind = MomentKind.OCCASION,
+            priority = 88,
+            title = R.string.calamity_title,
+            body = R.string.calamity_body,
+            startsAt = now.minusMinutes(1),
+            endsAt = java.time.Instant.ofEpochMilli(settings.smart.calamityUntil).atZone(now.zone),
+            athkarCategory = "calamity",
+            dismissal = Dismissal.NONE,
+        )
     }
 
     /** Offered from a fix taken for another reason; never from watching where you go. */

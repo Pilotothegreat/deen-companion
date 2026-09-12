@@ -449,4 +449,23 @@
     <string name="smart_home">Home</string>
     <string name="smart_home_set">Set. Tap to move it to where you are now.</string>
     <string name="smart_home_unset">Not set yet. Tap to use your current location.</string>
+
+    <!-- Natural events -->
+    <string name="eclipse_solar">A solar eclipse</string>
+    <string name="eclipse_solar_body">Whether it is visible where you are depends on a narrow path. If the sun darkens, pray salat al-kusuf: two rak\'ahs, each with two standings and two bowings, and give in charity. An eclipse is a sign, not an omen, and it darkens for no one\'s birth or death.</string>
+    <string name="eclipse_lunar">A lunar eclipse</string>
+    <string name="eclipse_lunar_visible_body">The moon will be above your horizon. Pray salat al-khusuf while it lasts: two rak\'ahs, each with two standings and two bowings, then remembrance and charity.</string>
+    <string name="eclipse_lunar_elsewhere_body">The moon will be below your horizon here, so it cannot be seen from where you are. The prayer follows seeing the eclipse.</string>
+    <string name="quake_title">An earthquake nearby</string>
+    <string name="quake_body">About %1$s km away. Say the dua for fear and distress, and give what you can to those affected.</string>
+    <string name="calamity_title">Times of calamity</string>
+    <string name="calamity_body">Qunut an-nazilah in your prayers, dua for the oppressed and the afflicted, and sadaqah. Turn this off in Settings when you wish.</string>
+    <string name="calamity_mode">Times of calamity</string>
+    <string name="calamity_mode_on">On until %1$s</string>
+    <string name="calamity_mode_off">Qunut an-nazilah, duas for the afflicted and a sadaqah reminder, for as long as you choose</string>
+    <string name="calamity_for_week">For a week</string>
+    <string name="calamity_for_month">For a month</string>
+    <string name="calamity_turn_off">Turn off</string>
+    <string name="smart_events">Eclipses and earthquakes</string>
+    <string name="smart_events_desc">Eclipses come from a table bundled with the app and work offline. Nearby earthquakes come from the USGS public feed and never raise a notification — Android already does that.</string>
 </resources>

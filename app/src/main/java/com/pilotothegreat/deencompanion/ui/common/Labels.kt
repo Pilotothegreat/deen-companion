@@ -96,6 +96,12 @@ object Formatters {
     fun decimal(value: Float, locale: Locale): String =
         Numerals.localize(java.math.BigDecimal(value.toDouble()).setScale(2, java.math.RoundingMode.HALF_UP).stripTrailingZeros().toPlainString(), locale)
 
+    /** A date such as "14 Mar", for an expiry the reader needs to recognise at a glance. */
+    fun date(epochMillis: Long, zone: java.time.ZoneId, locale: Locale): String =
+        DateTimeFormatter.ofPattern("d MMM", locale)
+            .withDecimalStyle(DecimalStyle.of(locale))
+            .format(java.time.Instant.ofEpochMilli(epochMillis).atZone(zone))
+
     /** A byte count as whole megabytes, for cache sizes. */
     fun megabytes(bytes: Long): String = "${bytes / (1024 * 1024)} MB"
 

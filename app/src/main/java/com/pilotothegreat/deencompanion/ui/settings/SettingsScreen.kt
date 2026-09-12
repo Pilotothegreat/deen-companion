@@ -51,6 +51,7 @@ import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material.icons.rounded.TextFields
 import androidx.compose.material.icons.rounded.Translate
+import androidx.compose.material.icons.rounded.VolunteerActivism
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material.icons.rounded.WbTwilight
 import androidx.compose.material.icons.rounded.VolumeUp
@@ -146,6 +147,7 @@ private sealed interface SettingsDialog {
     data object FineTune : SettingsDialog
     data object ReciterChoice : SettingsDialog
     data object AudioCache : SettingsDialog
+    data object Calamity : SettingsDialog
     data class Iqama(val prayer: Prayer) : SettingsDialog
 }
 
@@ -375,6 +377,24 @@ fun SettingsScreen(
                                 stringResource(if (s.smart.hasHome) R.string.smart_home_set else R.string.smart_home_unset),
                             ) { viewModel.anchorHomeHere() }
                         },
+                        { shapes ->
+                            SwitchRow(
+                                shapes, Icons.Rounded.Public, stringResource(R.string.smart_events),
+                                stringResource(R.string.smart_events_desc), s.smart.naturalEvents,
+                                viewModel::setNaturalEvents,
+                            )
+                        },
+                        { shapes ->
+                            // The app suggests; you decide what counts as a calamity.
+                            NavRow(
+                                shapes, Icons.Rounded.VolunteerActivism, stringResource(R.string.calamity_mode),
+                                if (s.smart.calamityActive(System.currentTimeMillis())) {
+                                    stringResource(R.string.calamity_mode_on, Formatters.date(s.smart.calamityUntil, s.zone, locale))
+                                } else {
+                                    stringResource(R.string.calamity_mode_off)
+                                },
+                            ) { dialog = SettingsDialog.Calamity }
+                        },
                     ),
                 )
             }
@@ -548,6 +568,14 @@ fun SettingsScreen(
             selected = s.reciter,
             label = { stringResource(it.label) },
             onSelect = viewModel::setReciter,
+            onDismiss = { dialog = null },
+        )
+        SettingsDialog.Calamity -> CalamityDialog(
+            active = s.smart.calamityActive(System.currentTimeMillis()),
+            onChoose = { days ->
+                viewModel.setCalamityDays(days)
+                dialog = null
+            },
             onDismiss = { dialog = null },
         )
         SettingsDialog.AudioCache -> AudioCacheDialog(
@@ -871,3 +899,31 @@ private fun AudioCacheDialog(
 }
 
 private val AUDIO_CACHE_CHOICES = listOf(128, 256, 512, 1024)
+
+/**
+ * "Times of calamity" is a mode you turn on, with an end date, rather than a feed the app decides
+ * for you. No neutral source of "what is happening" exists, one maintainer could not moderate one,
+ * and an app meant to pull people out of the feed should not become one.
+ */
+@Composable
+private fun CalamityDialog(active: Boolean, onChoose: (Int) -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.calamity_mode)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(stringResource(R.string.calamity_body))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(selected = false, onClick = { onChoose(7) }, label = { Text(stringResource(R.string.calamity_for_week)) })
+                    FilterChip(selected = false, onClick = { onChoose(30) }, label = { Text(stringResource(R.string.calamity_for_month)) })
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
+        dismissButton = if (active) {
+            { TextButton(onClick = { onChoose(0) }) { Text(stringResource(R.string.calamity_turn_off)) } }
+        } else {
+            null
+        },
+    )
+}

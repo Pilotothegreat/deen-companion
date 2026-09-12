@@ -12,6 +12,8 @@ Traffic Light is licensed under the GPLv3, so Bilal is distributed under the sam
 - **Mushaf divisions:** the page, juz, hizb, rub' al-hizb, manzil, ruku' and sajdah tables come from Tanzil's `quran-data.xml` (CC BY 3.0), generated into `MushafLayout.kt` by `scripts/quran/build_layout.py`.
 - **Quran translation:** *The Clear Quran* by Talal Itani, from [clearquran.com](https://clearquran.com), licensed under [CC BY-ND 4.0](https://creativecommons.org/licenses/by-nd/4.0/). It is named wherever it is read, in the reader and in Settings > About.
 - **Weather:** [Open-Meteo](https://open-meteo.com), free for non-commercial use and requiring no account or key.
+- **Eclipse predictions:** NASA/GSFC eclipse predictions by Fred Espenak, [eclipse.gsfc.nasa.gov](https://eclipse.gsfc.nasa.gov), a US government work in the public domain. Bundled as a table to 2045 by `scripts/eclipses/build_eclipses.py`.
+- **Earthquakes:** the [USGS](https://earthquake.usgs.gov) real-time feeds, a US government work in the public domain.
 - **Recitation audio:** streamed from [everyayah.com](https://everyayah.com).
 - **Hadith collections:** [fawazahmed0/hadith-api](https://github.com/fawazahmed0/hadith-api), served by jsDelivr.
 - **Fonts:** KFGQPC Uthmanic Hafs (King Fahd Glorious Quran Printing Complex), [Amiri](https://github.com/aliftype/amiri) (OFL) and Google Sans Flex (OFL).
