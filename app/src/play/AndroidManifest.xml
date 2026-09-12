@@ -5,4 +5,15 @@
 
     <queries tools:node="removeAll" />
 
+    <!-- Play updates through Play. An app on Play has no business installing packages, and CI
+         asserts this permission is absent from the bundle. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" tools:node="remove" />
+
+    <application>
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.updates"
+            tools:node="remove" />
+    </application>
+
 </manifest>

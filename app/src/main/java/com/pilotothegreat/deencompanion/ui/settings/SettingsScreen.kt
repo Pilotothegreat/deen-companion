@@ -207,6 +207,8 @@ fun SettingsScreen(
     }
     var dialog by remember { mutableStateOf<SettingsDialog?>(null) }
     var showSupport by rememberSaveable { mutableStateOf(false) }
+    var showUpdate by rememberSaveable { mutableStateOf(false) }
+    val install by viewModel.install.collectAsStateWithLifecycle()
     var exactAllowed by remember { mutableStateOf(viewModel.canScheduleExactAlarms()) }
     LifecycleResumeEffect(Unit) {
         exactAllowed = viewModel.canScheduleExactAlarms()
@@ -655,7 +657,9 @@ fun SettingsScreen(
                                     }
                                 },
                             ) {
-                                if (updateState is UpdateChecker.State.Available) context.startSafely(viewModel.updateIntent())
+                                // The notes come first now. Going to a web page to find out what a
+                                // download changes, after agreeing to it, is backwards.
+                                if (updateState is UpdateChecker.State.Available) showUpdate = true
                                 else viewModel.checkForUpdates()
                             }
                         },
@@ -789,6 +793,20 @@ fun SettingsScreen(
             onDismiss = { dialog = null },
         )
         null -> Unit
+    }
+    (updateState as? UpdateChecker.State.Available)?.takeIf { showUpdate }?.let { available ->
+        UpdateDialog(
+            version = available.version,
+            notes = available.notes,
+            install = install,
+            canInstall = viewModel.canInstallUpdates() && available.apkUrl != null,
+            onUpdate = { viewModel.downloadAndInstall(available) },
+            onOpenPage = {
+                context.startSafely(viewModel.updateIntent())
+                showUpdate = false
+            },
+            onDismiss = { showUpdate = false },
+        )
     }
     if (showSupport) SupportSheet(onDismiss = { showSupport = false })
 }

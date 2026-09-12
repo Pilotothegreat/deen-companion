@@ -39,6 +39,25 @@ jobs:
       - name: Lint, test and build
         run: ./gradlew lintDebug testDebugUnitTest assembleDebug assembleRelease bundlePlay
 
+      # Two things must never reach Google Play: the banking-app queries the donation sheet needs,
+      # and the permission to install packages. Both are removed by the play manifest overlay, and
+      # an overlay is exactly the kind of thing that stops working without anyone noticing.
+      - name: Check what the Play build does not contain
+        run: |
+          manifest="app/build/intermediates/merged_manifest/play/processPlayMainManifest/AndroidManifest.xml"
+          [ -f "$manifest" ] || { echo "::error::$manifest is missing; the build layout changed."; exit 1; }
+          for forbidden in REQUEST_INSTALL_PACKAGES "<queries"; do
+            if grep -q "$forbidden" "$manifest"; then
+              echo "::error::The Play manifest still contains $forbidden."
+              exit 1
+            fi
+          done
+          release="app/build/intermediates/merged_manifest/release/processReleaseMainManifest/AndroidManifest.xml"
+          grep -q REQUEST_INSTALL_PACKAGES "$release" || {
+            echo "::error::The sideloaded build lost REQUEST_INSTALL_PACKAGES and can no longer update itself."
+            exit 1
+          }
+
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:

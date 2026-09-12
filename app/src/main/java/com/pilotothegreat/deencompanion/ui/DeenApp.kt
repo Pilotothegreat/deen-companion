@@ -45,6 +45,13 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.pilotothegreat.deencompanion.BuildConfig
+import com.pilotothegreat.deencompanion.R
+import com.pilotothegreat.deencompanion.ui.settings.WhatsNewSheet
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import com.pilotothegreat.deencompanion.data.settings.AppSettings
 import com.pilotothegreat.deencompanion.ui.athkar.AthkarScreen
 import com.pilotothegreat.deencompanion.ui.athkar.AthkarSessionScreen
@@ -60,28 +67,41 @@ import com.pilotothegreat.deencompanion.ui.navigation.HadithBookKey
 import com.pilotothegreat.deencompanion.ui.navigation.HadithKey
 import com.pilotothegreat.deencompanion.ui.navigation.HomeKey
 import com.pilotothegreat.deencompanion.ui.navigation.LocalBottomBarPadding
-import com.pilotothegreat.deencompanion.ui.navigation.ReliabilityKey
 import com.pilotothegreat.deencompanion.ui.navigation.LocationKey
 import com.pilotothegreat.deencompanion.ui.navigation.Navigator
 import com.pilotothegreat.deencompanion.ui.navigation.QiblaKey
 import com.pilotothegreat.deencompanion.ui.navigation.QuranKey
 import com.pilotothegreat.deencompanion.ui.navigation.ReaderKey
+import com.pilotothegreat.deencompanion.ui.navigation.ReliabilityKey
 import com.pilotothegreat.deencompanion.ui.navigation.SettingsKey
 import com.pilotothegreat.deencompanion.ui.navigation.TopLevel
 import com.pilotothegreat.deencompanion.ui.qibla.QiblaScreen
 import com.pilotothegreat.deencompanion.ui.quran.QuranScreen
 import com.pilotothegreat.deencompanion.ui.reader.ReaderScreen
 import com.pilotothegreat.deencompanion.ui.reliability.ReliabilityScreen
+import com.pilotothegreat.deencompanion.ui.settings.SettingsScreen
 import com.pilotothegreat.deencompanion.ui.settings.SettingsViewModel
 import org.koin.androidx.compose.koinViewModel
-import com.pilotothegreat.deencompanion.ui.settings.SettingsScreen
-
 /**
  * App shell over the Nav3 back stack. Phones get a floating pill bar that hides while scrolling;
  * wider windows keep a navigation rail. [destination] is a screen requested by a notification or widget.
  */
 @Composable
 fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpened: () -> Unit = {}) {
+    // Once, on the first launch of a new version. A changelog that keeps reappearing is an advert.
+    val versionCode = BuildConfig.VERSION_CODE
+    var showWhatsNew by rememberSaveable(versionCode) {
+        mutableStateOf(settings.lastSeenVersionCode in 1 until versionCode)
+    }
+    val settingsViewModel: SettingsViewModel = koinViewModel()
+    LaunchedEffect(versionCode) { settingsViewModel.markVersionSeen(versionCode) }
+    if (showWhatsNew) {
+        WhatsNewSheet(
+            version = BuildConfig.VERSION_NAME,
+            notes = stringResource(R.string.whats_new_body),
+            onDismiss = { showWhatsNew = false },
+        )
+    }
     val backStack = rememberNavBackStack(HomeKey)
     val navigator = remember(backStack) { Navigator(backStack) }
     LaunchedEffect(destination) {

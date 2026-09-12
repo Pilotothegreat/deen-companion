@@ -17,6 +17,7 @@ import com.pilotothegreat.deencompanion.data.quran.QuranRepository
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
 import com.pilotothegreat.deencompanion.data.settings.createAppDataStore
 import com.pilotothegreat.deencompanion.data.tasbih.TasbihRepository
+import com.pilotothegreat.deencompanion.data.update.ApkInstaller
 import com.pilotothegreat.deencompanion.data.update.UpdateChecker
 import com.pilotothegreat.deencompanion.playback.QuranPlayer
 import com.pilotothegreat.deencompanion.ui.athkar.AthkarSessionViewModel
@@ -57,6 +58,7 @@ val appModule = module {
     single { EarthquakeRepository(get()) }
     single { MomentRepository(get(), get(), get(), get(), get()) }
     single { UpdateChecker(androidContext(), get()) }
+    single { ApkInstaller(androidContext()) }
     single { PrayerAlarmScheduler(androidContext(), get()) }
     single { QuranPlayer(androidContext(), get(), get()) }
 
@@ -66,7 +68,7 @@ val appModule = module {
     viewModelOf(::HadithViewModel)
     viewModel { params -> HadithBookViewModel(params.get(), get()) }
     viewModelOf(::QiblaViewModel)
-    viewModel { SettingsViewModel(androidContext(), get(), get(), get(), get(), get(), get()) }
+    viewModel { SettingsViewModel(androidContext(), get(), get(), get(), get(), get(), get(), get()) }
     viewModelOf(::LocationViewModel)
     viewModelOf(::AthkarViewModel)
     viewModel { params -> AthkarSessionViewModel(params.get(), get(), get()) }

@@ -543,4 +543,23 @@
     <string name="reset_app_desc">Back to a fresh install. The Quran text and downloaded recitation stay.</string>
     <string name="reset_confirm">Reset Bilal?</string>
     <string name="reset_confirm_body">Every setting, bookmark and plan on this phone is cleared. This cannot be undone, so save a backup first if you want one.</string>
-    </resources>
+    
+    <!-- Updates -->
+    <string name="update_no_notes">No release notes were published for this version.</string>
+    <string name="update_downloading">Downloading and checking the file…</string>
+    <string name="update_ready">Downloaded and verified. Android will ask you to confirm.</string>
+    <string name="update_checksum_failed">The download did not match its published checksum and was deleted. Nothing was installed.</string>
+    <string name="update_not_allowed">Android needs your permission for Bilal to install updates.</string>
+    <string name="update_download_failed">The download failed. Check your connection and try again.</string>
+    <string name="update_now">Update</string>
+    <string name="update_open_page">Open the release page</string>
+    <string name="later">Later</string>
+    <string name="whats_new_in">What\'s new in %1$s</string>
+    <string name="whats_new_body">The Quran text is now Tanzil\'s Uthmani, shipped exactly as published, with The Clear Quran alongside it and the full mushaf divisions — hizb, rub\', manzil and ruku\'.
+
+Bilal now notices the day it is in: Jumu\'ah, Ramadan\'s odd nights, Arafah, Ashura and the white days, with the Islamic date turning over at sunset as it should. It notices the weather, asks whether you are travelling, and knows when an eclipse can be seen from where you are.
+
+Alerts got serious: the adhan plays as real audio through Do Not Disturb, notifications carry "Prayed" and a snooze, and a new screen shows exactly what on your phone is stopping alerts arriving.
+
+Also: offline recitation with repeat and speed, a khatma plan, widget configuration, a Right Now widget, simple mode and larger text for anyone who needs it, and backup to a file you keep.</string>
+</resources>

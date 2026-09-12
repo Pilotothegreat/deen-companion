@@ -25,6 +25,8 @@ import com.pilotothegreat.deencompanion.data.settings.ReduceMotion
 import com.pilotothegreat.deencompanion.data.settings.IqamaSetting
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
 import com.pilotothegreat.deencompanion.data.settings.ThemeMode
+import com.pilotothegreat.deencompanion.data.update.ApkInstaller
+import com.pilotothegreat.deencompanion.data.update.InstallState
 import com.pilotothegreat.deencompanion.data.update.UpdateChecker
 import com.pilotothegreat.deencompanion.playback.AudioCache
 import kotlinx.coroutines.Dispatchers
@@ -48,6 +50,7 @@ class SettingsViewModel(
     private val scheduler: PrayerAlarmScheduler,
     quran: QuranRepository,
     private val backup: BackupRepository,
+    private val installer: ApkInstaller,
 ) : ViewModel() {
 
     val quranCredits: StateFlow<QuranCredits?> = flow { quran.quran().let { emit(QuranCredits(it.textSource, it.translation, it.edition)) } }
@@ -112,6 +115,40 @@ private val _backupMessage = MutableStateFlow<Int?>(null)
     }
 
     fun resetEverything() = launch { backup.reset() }
+
+    private val _install = MutableStateFlow<InstallState>(InstallState.Idle)
+
+    /** Progress of a sideloaded update, which the reader watches rather than guesses at. */
+    val install: StateFlow<InstallState> = _install.asStateFlow()
+
+    /** True when the system will let this build install an update at all. */
+    fun canInstallUpdates(): Boolean = !updates.isPlayInstall && installer.canInstall()
+
+    /**
+     * Downloads the release APK, verifies it against the checksum GitHub publishes, and only then
+     * opens the system installer. A download that does not match is deleted without being offered.
+     */
+    fun downloadAndInstall(available: UpdateChecker.State.Available) = launch {
+        val url = available.apkUrl
+        val sha = available.apkSha256
+        if (url == null || sha == null) {
+            _install.value = InstallState.Failed(InstallState.Reason.DOWNLOAD)
+            return@launch
+        }
+        if (!installer.canInstall()) {
+            _install.value = InstallState.Failed(InstallState.Reason.NOT_ALLOWED)
+            return@launch
+        }
+        _install.value = InstallState.Downloading(0f)
+        val file = installer.download(url, sha) { _install.value = InstallState.Downloading(it) }
+        _install.value = when {
+            file == null -> InstallState.Failed(InstallState.Reason.CHECKSUM)
+            installer.install(file) -> InstallState.Ready
+            else -> InstallState.Failed(InstallState.Reason.NOT_ALLOWED)
+        }
+    }
+
+    fun markVersionSeen(versionCode: Int) = launch { repository.setLastSeenVersionCode(versionCode) }
 
         fun setSimpleMode(on: Boolean) = launch { repository.setSimpleMode(on) }
 
