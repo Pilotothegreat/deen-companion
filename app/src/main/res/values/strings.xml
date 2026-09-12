@@ -522,13 +522,15 @@
     <string name="update_open_page">Open the release page</string>
     <string name="later">Later</string>
     <string name="whats_new_in">What\'s new in %1$s</string>
-    <string name="whats_new_body">The Quran text is now Tanzil\'s Uthmani, shipped exactly as published, with The Clear Quran alongside it and the full mushaf divisions — hizb, rub\', manzil and ruku\'.
+    <string name="whats_new_body">One mark per ayah. The mushaf printed two: an empty rosette and the number beside it, because the number is meant to sit inside the rosette and no font on Android composes it. It is drawn now, as the mushaf prints it. The sajdah sign was printed twice as well, and is not any more.
 
-Bilal now notices the day it is in: Jumu\'ah, Ramadan\'s odd nights, Arafah, Ashura and the white days, with the Islamic date turning over at sunset as it should. It notices the weather, asks whether you are travelling, and knows when an eclipse can be seen from where you are.
+One notification per prayer. The adhan used to raise two at once and the iqama added a third. Now a single notification arrives with the adhan, becomes a live countdown and a filling bar to the iqama, and announces the iqama in place. The countdown is drawn by Android itself, so it ticks with nothing running and costs no battery.
 
-Alerts got serious: the adhan plays as real audio through Do Not Disturb, notifications carry "Prayed" and a snooze, and a new screen shows exactly what on your phone is stopping alerts arriving.
+Settings that say what they do. Eleven groups became six, about fifty rows became thirty, and every description now says what a feature does for you rather than which service its data comes from. Settings that did nothing at all are gone. Five switches for the weather, travel and the Islamic year became one. The internet location fallback was removed outright — it was the only feature that sent your IP address to a third party, and your device and the offline city list already answered the question.
 
-Also: offline recitation with repeat and speed, a khatma plan, widget configuration, a Right Now widget, simple mode and larger text for anyone who needs it, and backup to a file you keep.</string>
+Widgets that fit your phone. Every widget now has four or five sizes and tells you more as you make it bigger, from a 2x1 countdown to the full day with iqama times. They resize properly on Samsung\'s grid, sit flush with the launcher\'s own corners, and carry a shape that changes with each prayer and a bar that fills as the prayer approaches.
+
+And the small things. The screen stays awake while you read. The page follows the recitation. After Isha it comes down a shade and returns at Fajr. Your settings, bookmarks and khatma are copied quietly once a week, so a reinstall no longer costs you anything. On Friday the silence window covers the khutbah. On the odd nights of the last ten, Bilal holds its own nudges until morning.</string>
 
     <!-- Shortcuts and the tile -->
     <string name="tile_next_prayer">Next prayer</string>

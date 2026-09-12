@@ -18,15 +18,18 @@ The app works offline for prayer times, city search, the Quran text, athkar, the
 
 | Feature | Service | When | What the service receives |
 | --- | --- | --- | --- |
-| Internet location fallback | ipapi.co, then freeipapi.com | Only when the device can't provide a location and you've turned on "Internet location fallback" in Settings (it's off by default) | Your IP address |
 | City name | Android's system geocoder | After a location is found. Without it, the name comes from the city list bundled with the app | Your coordinates, handled by your device's geocoding provider |
-| Weather | api.open-meteo.com | While the app is open, at most once an hour, when "Weather" is on in Settings (it is on by default) | **Your approximate location**, rounded to two decimal places — about a kilometre — and your IP address. No account, no key, and nothing identifying you |
-| Nearby earthquakes | earthquake.usgs.gov | While the app is open, at most once an hour, when "Eclipses and earthquakes" is on | Your IP address. The feed is the same worldwide list for everyone; the filtering by distance happens on your device, so the service is never told where you are |
+| Weather | api.open-meteo.com | While the app is open, at most once an hour, when "React to the day and the weather" is on in Settings (it is on by default), and never while battery saver is on | **Your approximate location**, rounded to two decimal places — about a kilometre — and your IP address. No account, no key, and nothing identifying you |
+| Nearby earthquakes | earthquake.usgs.gov | While the app is open, at most once an hour, under the same setting, and never while battery saver is on | Your IP address. The feed is the same worldwide list for everyone; the filtering by distance happens on your device, so the service is never told where you are |
 | Quran recitation | everyayah.com | When you play a recitation | Your IP address and the ayah requested |
 | Full hadith collections | cdn.jsdelivr.net | Only when you tap Download | Your IP address |
 | Update check | api.github.com (sideloaded installs) or Google Play (Play Store installs) | At most once a day, or when you tap the version in Settings | Your IP address |
 
-Weather is the only feature that sends anything about where you are, and it is the reason this section changed in 1.8.0. The coordinates are blunted to about a kilometre before they leave the device, which is enough to know whether it is raining over you and not enough to place a house. Turning "Weather" off in Settings stops the request entirely, and the rest of the app carries on working.
+Weather is the only feature that sends anything about where you are. The coordinates are blunted to about a kilometre before they leave the device, which is enough to know whether it is raining over you and not enough to place a house. Turning "React to the day and the weather" off in Settings stops the request entirely, and the rest of the app carries on working.
+
+**1.9.0 removed the internet location fallback.** It was the one feature that sent your IP address to a third party — ipapi.co and freeipapi.com — for an approximate city that the device's own location and the offline city list bundled with the app already provide. It is gone, along with those two hosts, rather than hidden behind a switch that nobody reads.
+
+**1.9.0 also added a weekly automatic backup.** It is written to the app's own private files directory, keeps the last three copies, and never leaves the device. Nothing about it is uploaded anywhere; it exists so a reinstall does not lose a khatma.
 
 Eclipses need no request at all: the table is bundled with the app and works offline. Travel is worked out entirely on the device: your home point and your current position never leave it, and the app asks before it treats you as travelling.
 

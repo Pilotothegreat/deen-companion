@@ -8,7 +8,7 @@ Everything Google Play asks for, in one place. The listing text itself lives in 
 | --- | --- |
 | Package (Google Play) | `com.pilotothegreat.bilal`, a new listing |
 | Package (GitHub APK) | `com.pilotothegreat.deencompanion` |
-| Version | 1.8.0 (`versionCode` 196) |
+| Version | 1.9.0 (`versionCode` 197) |
 | Category | Books & Reference |
 | Tags | Prayer times, Quran, Islam |
 | Price | Free, no ads, no in-app purchases |
@@ -46,11 +46,10 @@ Sources are in `branding/` (the icon and mark) and `branding/store/` (the featur
 
 **Data safety:**
 - *Does your app collect or share any of the required user data types?* **Yes, one: approximate location.**
-  - *Approximate location* is **shared** with Open-Meteo to fetch the weather, rounded to about a kilometre, at most once an hour and only while the app is open. It is **not collected** (nothing is stored off the device), the purpose is **App functionality**, and it is **optional** — the "Weather" setting turns it off.
+  - *Approximate location* is **shared** with Open-Meteo to fetch the weather, rounded to about a kilometre, at most once an hour and only while the app is open. It is **not collected** (nothing is stored off the device), the purpose is **App functionality**, and it is **optional** — the "React to the day and the weather" setting turns it off, and battery saver suspends it.
   - Nothing else leaves the device.
-  - Settings, bookmarks, the khatma plan and athkar progress are stored and processed only on the device. Nothing is sent to the developer.
+  - Settings, bookmarks, the khatma plan and athkar progress are stored and processed only on the device. Nothing is sent to the developer. The weekly automatic backup is written to the app's own private storage and never uploaded.
   - Travel detection compares your position with a home point entirely on the device.
-  - The optional internet location fallback is off by default. When the user turns it on, ipapi.co or freeipapi.com see the device's IP address, the same as any web request, and send back an approximate city.
 - *Is data encrypted in transit?* Yes, every request uses HTTPS.
 - *Can users request deletion?* There's no account and nothing held off the device; uninstalling removes everything.
 
@@ -62,7 +61,7 @@ Sources are in `branding/` (the icon and mark) and `branding/store/` (the featur
 
 ## App signing
 
-Upload `bilal-1.8.0-play.aab`, built with `./gradlew bundlePlay`. It's the release build without the donation sheet, packaged as `com.pilotothegreat.bilal` and signed with the key in `~/Documents/bilal-signing/`, which becomes the Play **upload key**. When Play asks about app signing, choose **Use Google-generated key**.
+Upload `bilal-1.9.0-play.aab`, built with `./gradlew bundlePlay`. It's the release build without the donation sheet, packaged as `com.pilotothegreat.bilal` and signed with the key in `~/Documents/bilal-signing/`, which becomes the Play **upload key**. When Play asks about app signing, choose **Use Google-generated key**.
 
 The old Deen Companion listing (`com.pilotothegreat.deencompanion`) can't take updates, because its upload key (SHA1 `4A:55:35:8F:16:20:FB:FB:E6:DA:27:41:C2:06:4B:D5:60:28:F1:EA`) is lost. Its text can still be edited, so point its users to Bilal once the new app is live, then unpublish it. If that listing is ever needed again, `upload_certificate.pem` on the v1.7.0 release can register the new key there through an upload key reset.
 
