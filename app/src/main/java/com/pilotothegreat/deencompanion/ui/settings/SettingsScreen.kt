@@ -31,6 +31,10 @@ import androidx.compose.material.icons.rounded.TouchApp
 import androidx.compose.material.icons.rounded.Vibration
 import com.pilotothegreat.deencompanion.data.settings.ContrastMode
 import com.pilotothegreat.deencompanion.data.settings.ReduceMotion
+import androidx.compose.material.icons.rounded.DeleteSweep
+import androidx.compose.material.icons.rounded.Restore
+import androidx.compose.material.icons.rounded.Save
+import com.pilotothegreat.deencompanion.data.backup.BackupRepository
 import androidx.compose.material.icons.rounded.Alarm
 import androidx.compose.material.icons.rounded.AppSettingsAlt
 import androidx.compose.material.icons.rounded.BatteryAlert
@@ -101,6 +105,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -148,6 +153,7 @@ import java.util.Locale
 import kotlin.math.roundToInt
 
 private const val REPOSITORY_URL = "https://github.com/Pilotothegreat/deen-companion"
+private const val SPONSORS_URL = "https://github.com/sponsors/Pilotothegreat"
 private const val PRIVACY_URL = "https://github.com/Pilotothegreat/deen-companion/blob/main/PRIVACY.md"
 
 private typealias SettingsRow = @Composable (ListItemShapes) -> Unit
@@ -160,6 +166,7 @@ private sealed interface SettingsDialog {
     data object ReciterChoice : SettingsDialog
     data object AudioCache : SettingsDialog
     data object Calamity : SettingsDialog
+    data object Reset : SettingsDialog
     data class Iqama(val prayer: Prayer) : SettingsDialog
 }
 
@@ -178,9 +185,26 @@ fun SettingsScreen(
     val cacheBytes by viewModel.audioCacheBytes.collectAsStateWithLifecycle()
     val cacheSummary = remember(cacheBytes) { Formatters.megabytes(cacheBytes) }
     LaunchedEffect(Unit) { viewModel.refreshAudioCacheSize() }
+
+    // Storage Access Framework, so the file lands wherever the reader keeps things and the app never
+    // asks for a storage permission it would otherwise have no use for.
+    val exportFile = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
+        uri?.let { viewModel.exportBackup(it) }
+    }
+    val importFile = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri?.let { viewModel.importBackup(it) }
+    }
     val context = LocalContext.current
     val locale = currentLocale()
     val snackbar = remember { SnackbarHostState() }
+    val backupMessage by viewModel.backupMessage.collectAsStateWithLifecycle()
+    val resources = LocalResources.current
+    LaunchedEffect(backupMessage) {
+        backupMessage?.let {
+            snackbar.showSnackbar(resources.getString(it))
+            viewModel.clearBackupMessage()
+        }
+    }
     var dialog by remember { mutableStateOf<SettingsDialog?>(null) }
     var showSupport by rememberSaveable { mutableStateOf(false) }
     var exactAllowed by remember { mutableStateOf(viewModel.canScheduleExactAlarms()) }
@@ -487,6 +511,32 @@ fun SettingsScreen(
                 )
             }
 
+            item(key = "general") {
+                SettingsGroup(
+                    stringResource(R.string.general),
+                    listOf(
+                        { shapes ->
+                            NavRow(
+                                shapes, Icons.Rounded.Save, stringResource(R.string.backup_export),
+                                stringResource(R.string.backup_export_desc),
+                            ) { exportFile.launch(BackupRepository.FILENAME) }
+                        },
+                        { shapes ->
+                            NavRow(
+                                shapes, Icons.Rounded.Restore, stringResource(R.string.backup_import),
+                                stringResource(R.string.backup_import_desc),
+                            ) { importFile.launch(arrayOf("application/json", "text/plain", "*/*")) }
+                        },
+                        { shapes ->
+                            NavRow(
+                                shapes, Icons.Rounded.DeleteSweep, stringResource(R.string.reset_app),
+                                stringResource(R.string.reset_app_desc),
+                            ) { dialog = SettingsDialog.Reset }
+                        },
+                    ),
+                )
+            }
+
             item(key = "accessibility") {
                 SettingsGroup(
                     stringResource(R.string.accessibility),
@@ -609,7 +659,20 @@ fun SettingsScreen(
                                 else viewModel.checkForUpdates()
                             }
                         },
-                        if (BuildConfig.SUPPORT_SHEET) supportRow { showSupport = true } else null,
+                        // The GitHub build keeps its bank sheet. The Play build links out instead:
+                        // Play's payments policy generally requires Play Billing for payments to the
+                        // developer, and the carve-out for donations is a link that receives nothing
+                        // in return, which is exactly what this is.
+                        if (BuildConfig.SUPPORT_SHEET) {
+                            supportRow { showSupport = true }
+                        } else {
+                            { shapes: ListItemShapes ->
+                                NavRow(
+                                    shapes, Icons.Rounded.Favorite, stringResource(R.string.support_development),
+                                    stringResource(R.string.support_link_desc), trailing = { OpenIcon() },
+                                ) { context.startSafely(SystemIntents.url(SPONSORS_URL)) }
+                            }
+                        },
                         // Both licences ask to be named with a link back to the source.
                         credits?.let { c ->
                             @Composable { shapes: ListItemShapes ->
@@ -691,6 +754,18 @@ fun SettingsScreen(
             label = { stringResource(it.label) },
             onSelect = viewModel::setReciter,
             onDismiss = { dialog = null },
+        )
+        SettingsDialog.Reset -> AlertDialog(
+            onDismissRequest = { dialog = null },
+            title = { Text(stringResource(R.string.reset_confirm)) },
+            text = { Text(stringResource(R.string.reset_confirm_body)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.resetEverything()
+                    dialog = null
+                }) { Text(stringResource(R.string.reset)) }
+            },
+            dismissButton = { TextButton(onClick = { dialog = null }) { Text(stringResource(R.string.cancel)) } },
         )
         SettingsDialog.Calamity -> CalamityDialog(
             active = s.smart.calamityActive(System.currentTimeMillis()),

@@ -528,4 +528,19 @@
     <string name="large_targets_desc">Raises the smallest tappable area, for anyone whose aim is not steady.</string>
     <string name="haptics">Vibration</string>
     <string name="haptics_desc">A short buzz on the tasbih and the athkar counter.</string>
-</resources>
+    <string name="support_link_desc">A gift, with nothing received in return. Opens GitHub Sponsors.</string>
+    <string name="general">General</string>
+    <string name="backup_export">Save a backup</string>
+    <string name="backup_export_desc">Settings, bookmarks and your khatma, as a file you keep. Nothing is uploaded.</string>
+    <string name="backup_import">Restore a backup</string>
+    <string name="backup_import_desc">Replaces what is on this phone with what the file holds.</string>
+    <string name="backup_saved">Backup saved</string>
+    <string name="backup_restored">Backup restored</string>
+    <string name="backup_error_unreadable">That file could not be read.</string>
+    <string name="backup_error_wrong_file">That is not a Bilal backup.</string>
+    <string name="backup_error_too_new">That backup was made by a newer version of Bilal. Update first.</string>
+    <string name="reset_app">Reset everything</string>
+    <string name="reset_app_desc">Back to a fresh install. The Quran text and downloaded recitation stay.</string>
+    <string name="reset_confirm">Reset Bilal?</string>
+    <string name="reset_confirm_body">Every setting, bookmark and plan on this phone is cleared. This cannot be undone, so save a backup first if you want one.</string>
+    </resources>

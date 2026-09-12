@@ -2,6 +2,10 @@ package com.pilotothegreat.deencompanion.ui.settings
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
+import com.pilotothegreat.deencompanion.R
+import com.pilotothegreat.deencompanion.data.backup.BackupRepository
+import com.pilotothegreat.deencompanion.data.backup.RestoreError
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pilotothegreat.deencompanion.alarms.PrayerAlarmScheduler
@@ -43,6 +47,7 @@ class SettingsViewModel(
     private val updates: UpdateChecker,
     private val scheduler: PrayerAlarmScheduler,
     quran: QuranRepository,
+    private val backup: BackupRepository,
 ) : ViewModel() {
 
     val quranCredits: StateFlow<QuranCredits?> = flow { quran.quran().let { emit(QuranCredits(it.textSource, it.translation, it.edition)) } }
@@ -68,7 +73,47 @@ class SettingsViewModel(
         AudioCache.setBudgetMb(mb)
     }
 
-    fun setSimpleMode(on: Boolean) = launch { repository.setSimpleMode(on) }
+private val _backupMessage = MutableStateFlow<Int?>(null)
+
+    /** A string resource to show once, then forget. */
+    val backupMessage: StateFlow<Int?> = _backupMessage.asStateFlow()
+
+    fun clearBackupMessage() {
+        _backupMessage.value = null
+    }
+
+    fun exportBackup(destination: Uri) = launch {
+        val message = withContext(Dispatchers.IO) {
+            runCatching {
+                context.contentResolver.openOutputStream(destination)?.use { it.write(backup.export().toByteArray()) }
+                    ?: error("no stream")
+                R.string.backup_saved
+            }.getOrDefault(R.string.backup_error_unreadable)
+        }
+        _backupMessage.value = message
+    }
+
+    fun importBackup(source: Uri) = launch {
+        val message = withContext(Dispatchers.IO) {
+            val json = runCatching {
+                context.contentResolver.openInputStream(source)?.bufferedReader()?.use { it.readText() }
+            }.getOrNull()
+            when {
+                json == null -> R.string.backup_error_unreadable
+                else -> when (backup.restore(json)) {
+                    null -> R.string.backup_restored
+                    RestoreError.UNREADABLE -> R.string.backup_error_unreadable
+                    RestoreError.WRONG_FILE -> R.string.backup_error_wrong_file
+                    RestoreError.TOO_NEW -> R.string.backup_error_too_new
+                }
+            }
+        }
+        _backupMessage.value = message
+    }
+
+    fun resetEverything() = launch { backup.reset() }
+
+        fun setSimpleMode(on: Boolean) = launch { repository.setSimpleMode(on) }
 
     fun setTextScale(scale: Float) = launch { repository.setTextScale(scale) }
 

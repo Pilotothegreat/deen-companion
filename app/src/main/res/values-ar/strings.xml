@@ -560,4 +560,19 @@
     <string name="large_targets_desc">يوسّع أصغر مساحة قابلة للضغط، لمن لا تثبت يده.</string>
     <string name="haptics">الاهتزاز</string>
     <string name="haptics_desc">اهتزاز خفيف عند التسبيح وعدّ الأذكار.</string>
-</resources>
+    <string name="support_link_desc">هدية بلا مقابل، تفتح GitHub Sponsors.</string>
+    <string name="general">عام</string>
+    <string name="backup_export">حفظ نسخة احتياطية</string>
+    <string name="backup_export_desc">الإعدادات والعلامات والختمة في ملف تحتفظ به، ولا يُرفع شيء.</string>
+    <string name="backup_import">استعادة نسخة</string>
+    <string name="backup_import_desc">يستبدل ما في الهاتف بما في الملف.</string>
+    <string name="backup_saved">تم حفظ النسخة</string>
+    <string name="backup_restored">تمت الاستعادة</string>
+    <string name="backup_error_unreadable">تعذّر قراءة الملف.</string>
+    <string name="backup_error_wrong_file">هذا ليس ملف نسخة من بلال.</string>
+    <string name="backup_error_too_new">أُنشئت النسخة بإصدار أحدث، حدّث التطبيق أولاً.</string>
+    <string name="reset_app">إعادة ضبط كل شيء</string>
+    <string name="reset_app_desc">العودة إلى الحالة الأولى، مع بقاء المصحف والتلاوة المحفوظة.</string>
+    <string name="reset_confirm">إعادة ضبط بلال؟</string>
+    <string name="reset_confirm_body">ستُمسح كل الإعدادات والعلامات والخطط في هذا الهاتف، ولا يمكن التراجع، فاحفظ نسخة أولاً إن أردت.</string>
+    </resources>

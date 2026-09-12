@@ -6,6 +6,7 @@ import com.pilotothegreat.deencompanion.data.db.AppDatabase
 import com.pilotothegreat.deencompanion.data.hadith.HadithRepository
 import com.pilotothegreat.deencompanion.data.location.CityIndex
 import com.pilotothegreat.deencompanion.data.location.LocationRepository
+import com.pilotothegreat.deencompanion.data.backup.BackupRepository
 import com.pilotothegreat.deencompanion.data.moment.MomentRepository
 import com.pilotothegreat.deencompanion.data.nature.EarthquakeRepository
 import com.pilotothegreat.deencompanion.data.prayer.PrayerLogRepository
@@ -51,6 +52,7 @@ val appModule = module {
     single { get<AppDatabase>().naturalEventDao() }
     single { get<AppDatabase>().prayerLogDao() }
     single { PrayerLogRepository(get()) }
+    single { BackupRepository(get(), get(), get()) }
     single { EclipseRepository(androidContext()) }
     single { EarthquakeRepository(get()) }
     single { MomentRepository(get(), get(), get(), get(), get()) }
@@ -64,7 +66,7 @@ val appModule = module {
     viewModelOf(::HadithViewModel)
     viewModel { params -> HadithBookViewModel(params.get(), get()) }
     viewModelOf(::QiblaViewModel)
-    viewModel { SettingsViewModel(androidContext(), get(), get(), get(), get(), get()) }
+    viewModel { SettingsViewModel(androidContext(), get(), get(), get(), get(), get(), get()) }
     viewModelOf(::LocationViewModel)
     viewModelOf(::AthkarViewModel)
     viewModel { params -> AthkarSessionViewModel(params.get(), get(), get()) }
