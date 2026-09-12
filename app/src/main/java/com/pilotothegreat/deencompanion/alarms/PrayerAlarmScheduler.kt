@@ -48,7 +48,20 @@ class PrayerAlarmScheduler(private val context: Context, private val settings: S
                     // The iqama is a local mosque's, so it means nothing in another city. The adhan
                     // still sounds: the prayer time is the prayer time wherever you are.
                     val iqama = schedule.iqama[prayer].takeUnless { current.smart.isTravelling }
-                    if (iqama != null && iqama.isAfter(now) && iqama != adhan) set(manager, AlarmKind.IQAMA, day, prayer, iqama)
+                    if (iqama != null && iqama.isAfter(now) && iqama != adhan) {
+                        set(manager, AlarmKind.IQAMA, day, prayer, iqama)
+                        // A handful of nudges to advance the progress bar between the two. The
+                        // countdown beside it is a Chronometer and wakes nothing.
+                        val checkpoints = PrayerWindow.checkpoints(
+                            adhanAt = adhan.toInstant().toEpochMilli(),
+                            iqamaAt = iqama.toInstant().toEpochMilli(),
+                        )
+                        checkpoints.forEachIndexed { index, at ->
+                            val kind = AlarmKind.progressCheckpoints[index]
+                            val time = java.time.Instant.ofEpochMilli(at).atZone(current.zone)
+                            if (time.isAfter(now)) set(manager, kind, day, prayer, time)
+                        }
+                    }
 
                     // The restore is scheduled in the same breath as the mute, so a crash between
                     // the two can never leave someone's phone silent for good.

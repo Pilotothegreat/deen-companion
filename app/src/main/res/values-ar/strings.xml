@@ -618,4 +618,5 @@
     <string name="onboarding_skip">تخطّي</string>
     <string name="onboarding_next">التالي</string>
     <string name="onboarding_start">ابدأ</string>
+    <string name="iqama_waiting_body">حتى إقامة %1$s</string>
 </resources>

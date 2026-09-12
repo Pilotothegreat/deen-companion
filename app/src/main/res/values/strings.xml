@@ -586,4 +586,5 @@ Also: offline recitation with repeat and speed, a khatma plan, widget configurat
     <string name="onboarding_skip">Skip</string>
     <string name="onboarding_next">Next</string>
     <string name="onboarding_start">Start</string>
+    <string name="iqama_waiting_body">Until the iqama for %1$s</string>
 </resources>

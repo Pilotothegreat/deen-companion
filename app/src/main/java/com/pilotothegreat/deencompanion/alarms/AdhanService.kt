@@ -38,6 +38,11 @@ import timber.log.Timber
 class AdhanService : Service() {
 
     private var player: MediaPlayer? = null
+    private var prayer: Prayer? = null
+    private var languageTag: String = ""
+    private var iqamaAt: Long? = null
+    /** True once the countdown has been handed over, so tearing down must not cancel it. */
+    private var handedOver = false
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -50,7 +55,9 @@ class AdhanService : Service() {
             stopSelf()
             return START_NOT_STICKY
         }
-        val languageTag = intent?.getStringExtra(EXTRA_LANGUAGE).orEmpty()
+        this.prayer = prayer
+        languageTag = intent?.getStringExtra(EXTRA_LANGUAGE).orEmpty()
+        iqamaAt = intent?.getLongExtra(EXTRA_IQAMA_AT, 0L)?.takeIf { it > 0L }
         val sound = intent?.getStringExtra(EXTRA_SOUND)
 
         startForeground(prayer, languageTag)
@@ -59,39 +66,38 @@ class AdhanService : Service() {
     }
 
     private fun startForeground(prayer: Prayer, languageTag: String) {
-        val res = AppLanguage.localizedContext(this, languageTag)
-        val name = res.getString(prayer.nameRes)
-        val stop = PendingIntent.getService(
-            this,
-            0,
-            Intent(this, AdhanService::class.java).setAction(ACTION_STOP),
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-        )
-        val open = PendingIntent.getActivity(
-            this,
-            0,
-            Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP),
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-        )
-        val notification: Notification = NotificationCompat.Builder(this, Notifications.CHANNEL_ADHAN)
-            .setSmallIcon(R.drawable.notification)
-            .setContentTitle(res.getString(R.string.adhan_notification_title, name))
-            .setContentText(res.getString(R.string.adhan_notification_body, name))
-            .setContentIntent(open)
-            .addAction(0, res.getString(R.string.stop_playback), stop)
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setOngoing(true)
-            .build()
+        val notification: Notification = Notifications
+            .prayerWindow(this, languageTag, prayer, PrayerStage.Adhan, iqamaAt)
+            ?.build()
+            ?: return stopSelf()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ServiceCompat.startForeground(this, NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
+            ServiceCompat.startForeground(this, notificationId(prayer), notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
         } else {
-            ServiceCompat.startForeground(this, NOTIFICATION_ID, notification, 0)
+            ServiceCompat.startForeground(this, notificationId(prayer), notification, 0)
         }
     }
 
+    /**
+     * The audio is over but the prayer is not. The same notification becomes the countdown to the
+     * iqama and is detached from the service, so it survives this process going away — a chronometer
+     * keeps ticking in the shade with nothing running behind it.
+     */
+    private fun handOverToCountdown() {
+        val prayer = prayer ?: return
+        handedOver = true
+        val stage = PrayerWindow.stageAt(
+            now = System.currentTimeMillis(),
+            adhanAt = System.currentTimeMillis(),
+            iqamaAt = iqamaAt,
+            adhanPlaying = false,
+        )
+        Notifications.showPrayerWindow(this, languageTag, prayer, stage, iqamaAt)
+        ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_DETACH)
+        stopSelf()
+    }
+
     private fun play(sound: String?) {
-        val uri = sound?.takeIf { it.isNotBlank() }?.let(Uri::parse) ?: return stopSelf()
+        val uri = sound?.takeIf { it.isNotBlank() }?.let(Uri::parse) ?: return handOverToCountdown()
         player = runCatching {
             MediaPlayer().apply {
                 setAudioAttributes(
@@ -102,9 +108,9 @@ class AdhanService : Service() {
                         .build(),
                 )
                 setDataSource(this@AdhanService, uri)
-                setOnCompletionListener { this@AdhanService.stopSelf() }
+                setOnCompletionListener { this@AdhanService.handOverToCountdown() }
                 setOnErrorListener { _, _, _ ->
-                    this@AdhanService.stopSelf()
+                    this@AdhanService.handOverToCountdown()
                     true
                 }
                 prepare()
@@ -112,7 +118,7 @@ class AdhanService : Service() {
             }
         }.onFailure {
             Timber.w(it, "Could not play the adhan")
-            stopSelf()
+            handOverToCountdown()
         }.getOrNull()
     }
 
@@ -122,24 +128,28 @@ class AdhanService : Service() {
             release()
         }
         player = null
-        NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID)
+        // Only tear the notification down if it was not handed on as the iqama countdown.
+        if (!handedOver) prayer?.let { NotificationManagerCompat.from(this).cancel(notificationId(it)) }
         super.onDestroy()
     }
 
+    private fun notificationId(prayer: Prayer) = Notifications.prayerWindowId(prayer)
+
     companion object {
-        private const val NOTIFICATION_ID = 777
         private const val ACTION_STOP = "com.pilotothegreat.deencompanion.action.STOP_ADHAN"
         private const val EXTRA_PRAYER = "prayer"
         private const val EXTRA_LANGUAGE = "language"
         private const val EXTRA_SOUND = "sound"
+        private const val EXTRA_IQAMA_AT = "iqama_at"
 
         /** Starts the adhan for [prayer]; [sound] is a URI, or null for the phone's own alarm sound. */
-        fun start(context: Context, prayer: Prayer, languageTag: String, sound: String?) {
+        fun start(context: Context, prayer: Prayer, languageTag: String, sound: String?, iqamaAt: Long = 0L) {
             val resolved = sound ?: defaultAlarmUri(context)
             val intent = Intent(context, AdhanService::class.java)
                 .putExtra(EXTRA_PRAYER, prayer.key)
                 .putExtra(EXTRA_LANGUAGE, languageTag)
                 .putExtra(EXTRA_SOUND, resolved)
+                .putExtra(EXTRA_IQAMA_AT, iqamaAt)
             runCatching { context.startForegroundService(intent) }
                 .onFailure { Timber.w(it, "Could not start the adhan service") }
         }

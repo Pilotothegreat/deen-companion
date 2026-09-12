@@ -14,6 +14,9 @@ import kotlinx.coroutines.flow.first
 import com.pilotothegreat.deencompanion.data.quran.KhatmaRepository
 import com.pilotothegreat.deencompanion.core.quran.KhatmaPlan
 import androidx.work.WorkerParameters
+import com.pilotothegreat.deencompanion.core.prayer.DaySchedule
+import com.pilotothegreat.deencompanion.data.settings.AppSettings
+import java.time.ZonedDateTime
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
 import com.pilotothegreat.deencompanion.data.location.LocationRepository
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
@@ -54,29 +57,60 @@ class PrayerAlarmReceiver : BroadcastReceiver(), KoinComponent {
         launchAsync {
             val current = settings.current()
             // Alarms delivered long after their time (e.g. held while the device was off) are skipped.
-            val onTime = System.currentTimeMillis() - scheduledAt < STALE_AFTER_MILLIS
+            // A progress nudge can be a few minutes late without harm; an adhan cannot.
+            val window = if (kind != null && kind in AlarmKind.progressCheckpoints) PROGRESS_STALE_MILLIS else STALE_AFTER_MILLIS
+            val onTime = System.currentTimeMillis() - scheduledAt < window
             if (prayer != null && kind != null && onTime) {
                 when {
                     kind.isAthkar -> if (current.athkarReminders) Notifications.showAthkar(context, current.appLanguage, kind)
                     kind == AlarmKind.SILENCE_START -> QuietDuringPrayer.silence(context)
                     kind == AlarmKind.SILENCE_END -> QuietDuringPrayer.restore(context)
-                    current.notificationsEnabled && prayer !in current.mutedPrayers -> {
-                        Notifications.showPrayer(context, current.appLanguage, kind, prayer)
-                        val sound = current.sounds.adhanFor(prayer)
-                        if (kind == AlarmKind.ADHAN && sound != SoundSettings.SILENT) {
-                            AdhanService.start(
-                                context = context,
-                                prayer = prayer,
-                                languageTag = current.appLanguage,
-                                sound = sound.takeUnless { it == SoundSettings.SYSTEM_SOUND },
-                            )
-                        }
-                    }
+                    current.notificationsEnabled && prayer !in current.mutedPrayers ->
+                        onPrayerAlarm(context, current, kind, prayer)
                 }
             }
             scheduler.reschedule()
             WidgetUpdater.updateAll(context)
         }
+    }
+
+    /**
+     * The adhan, its countdown and the iqama, as one notification that changes rather than three
+     * that pile up.
+     */
+    private fun onPrayerAlarm(context: Context, current: AppSettings, kind: AlarmKind, prayer: Prayer) {
+        if (kind == AlarmKind.PRE_PRAYER) {
+            Notifications.showPreReminder(context, current.appLanguage, prayer)
+            return
+        }
+        val now = ZonedDateTime.now(current.zone)
+        val schedule = DaySchedule.forDate(now.toLocalDate(), current.prayerConfig)
+        val adhanAt = schedule.adhan[prayer]?.toInstant()?.toEpochMilli() ?: return
+        val iqamaAt = schedule.iqama[prayer]
+            ?.takeUnless { current.smart.isTravelling }
+            ?.toInstant()?.toEpochMilli()
+            ?.takeIf { it > adhanAt }
+
+        val sound = current.sounds.adhanFor(prayer)
+        val playing = kind == AlarmKind.ADHAN && sound != SoundSettings.SILENT
+        if (playing) {
+            // The service owns the notification while it owns the audio, so the two cannot diverge.
+            AdhanService.start(
+                context = context,
+                prayer = prayer,
+                languageTag = current.appLanguage,
+                sound = sound.takeUnless { it == SoundSettings.SYSTEM_SOUND },
+                iqamaAt = iqamaAt ?: 0L,
+            )
+            return
+        }
+        val stage = PrayerWindow.stageAt(
+            now = System.currentTimeMillis(),
+            adhanAt = adhanAt,
+            iqamaAt = iqamaAt,
+            adhanPlaying = false,
+        )
+        Notifications.showPrayerWindow(context, current.appLanguage, prayer, stage, iqamaAt)
     }
 
     companion object {
@@ -85,6 +119,7 @@ class PrayerAlarmReceiver : BroadcastReceiver(), KoinComponent {
         private const val EXTRA_PRAYER = "prayer"
         private const val EXTRA_AT = "at"
         private const val STALE_AFTER_MILLIS = 30 * 60 * 1000L
+        private const val PROGRESS_STALE_MILLIS = 5 * 60 * 1000L
 
         /** Extras don't affect PendingIntent identity, so the bare intent also matches for cancelling. */
         internal fun intent(context: Context, kind: AlarmKind? = null, prayer: Prayer? = null, at: Long = 0L): Intent =

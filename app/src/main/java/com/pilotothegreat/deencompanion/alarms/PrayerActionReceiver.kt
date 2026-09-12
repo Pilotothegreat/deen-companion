@@ -37,37 +37,44 @@ class PrayerActionReceiver : BroadcastReceiver(), KoinComponent {
             when (action) {
                 ACTION_PRAYED -> {
                     AdhanService.stop(context)
-                    manager.cancel(Notifications.notificationId(AlarmKind.ADHAN, prayer))
-                    manager.cancel(Notifications.notificationId(AlarmKind.IQAMA, prayer))
-                    cancelIqama(context, prayer)
+                    manager.cancel(Notifications.prayerWindowId(prayer))
+                    manager.cancel(Notifications.notificationId(AlarmKind.PRE_PRAYER, prayer))
+                    cancelIqamaAndProgress(context, prayer)
                     log.record(prayer, LocalDate.now(current.zone), System.currentTimeMillis())
                 }
                 ACTION_SNOOZE -> {
                     AdhanService.stop(context)
-                    manager.cancel(Notifications.notificationId(AlarmKind.ADHAN, prayer))
+                    manager.cancel(Notifications.prayerWindowId(prayer))
                     snooze(context, prayer)
                 }
                 ACTION_STOP -> {
                     AdhanService.stop(context)
-                    manager.cancel(Notifications.notificationId(AlarmKind.ADHAN, prayer))
+                    manager.cancel(Notifications.prayerWindowId(prayer))
+                    cancelIqamaAndProgress(context, prayer)
                 }
             }
             scheduler.reschedule()
         }
     }
 
-    /** The iqama alert is for a prayer not yet prayed; once it is, the reminder is noise. */
-    private fun cancelIqama(context: Context, prayer: Prayer) {
+    /**
+     * The iqama alert is for a prayer not yet prayed; once it is, the reminder is noise — and so are
+     * the nudges that would keep redrawing a progress bar towards it.
+     */
+    private fun cancelIqamaAndProgress(context: Context, prayer: Prayer) {
         val manager = context.getSystemService(AlarmManager::class.java) ?: return
-        for (day in 0..1) {
-            val pending = PendingIntent.getBroadcast(
-                context,
-                AlarmRequestCodes.of(AlarmKind.IQAMA, day, prayer),
-                PrayerAlarmReceiver.intent(context),
-                PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE,
-            ) ?: continue
-            manager.cancel(pending)
-            pending.cancel()
+        val kinds = listOf(AlarmKind.IQAMA) + AlarmKind.progressCheckpoints
+        for (kind in kinds) {
+            for (day in 0..1) {
+                val pending = PendingIntent.getBroadcast(
+                    context,
+                    AlarmRequestCodes.of(kind, day, prayer),
+                    PrayerAlarmReceiver.intent(context),
+                    PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE,
+                ) ?: continue
+                manager.cancel(pending)
+                pending.cancel()
+            }
         }
     }
 

@@ -29,7 +29,21 @@ enum class AlarmKind {
 
     /** Optional: quieten the phone from iqama, and give it back afterwards. */
     SILENCE_START,
-    SILENCE_END;
+    SILENCE_END,
+
+    /**
+     * A nudge to redraw the progress bar between the adhan and the iqama. The countdown beside it
+     * is a Chronometer and needs nothing; only the bar has to be re-posted.
+     */
+    IQAMA_PROGRESS_1,
+    IQAMA_PROGRESS_2,
+    IQAMA_PROGRESS_3;
+
+    /** The checkpoint kinds, in order, so the scheduler can zip them with their times. */
+    companion object {
+        val progressCheckpoints: List<AlarmKind>
+            get() = listOf(IQAMA_PROGRESS_1, IQAMA_PROGRESS_2, IQAMA_PROGRESS_3)
+    }
 
     val isAthkar: Boolean get() = this == ATHKAR_MORNING || this == ATHKAR_EVENING
 
@@ -132,64 +146,122 @@ object Notifications {
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
 
     /**
-     * A prayer alert, with the two answers people actually have: "prayed" and "in a moment".
+     * The one notification a prayer gets, from the adhan through to the iqama.
      *
-     * The adhan itself is not a channel sound. A channel's sound is fixed when the channel is
-     * created, several manufacturers cut long ones short, and Do Not Disturb silences them; the
-     * adhan is played by AdhanService with alarm attributes instead, and this notification is what
-     * stops it.
+     * It is built rather than posted three times: the adhan used to raise one notification from the
+     * receiver and a second from the foreground service playing the audio, and the iqama added a
+     * third, all saying the same thing. This returns a builder so the service can hand the same
+     * notification to startForeground and later update it in place.
+     *
+     * The waiting state counts down with a Chronometer rather than a re-posted string. A chronometer
+     * ticks in the shade with no process alive and is exact to the second; re-posting for it would
+     * mean waking the app every minute for a clock Android can draw itself.
      */
-    fun showPrayer(context: Context, languageTag: String, kind: AlarmKind, prayer: Prayer) {
-        if (!canPost(context)) return
+    fun prayerWindow(
+        context: Context,
+        languageTag: String,
+        prayer: Prayer,
+        stage: PrayerStage,
+        iqamaAt: Long?,
+    ): NotificationCompat.Builder? {
         val res = AppLanguage.localizedContext(context, languageTag)
         val name = res.getString(prayer.nameRes)
-        val (channel, title, body) = when (kind) {
-            AlarmKind.PRE_PRAYER -> Triple(
-                CHANNEL_IQAMA,
-                res.getString(R.string.pre_prayer_title, name),
-                res.getString(R.string.pre_prayer_body, name),
-            )
-            AlarmKind.ADHAN -> Triple(
-                CHANNEL_ADHAN,
-                res.getString(R.string.adhan_notification_title, name),
-                res.getString(R.string.adhan_notification_body, name),
-            )
-            AlarmKind.IQAMA -> Triple(
-                CHANNEL_IQAMA,
-                res.getString(R.string.iqama_notification_title, name),
-                res.getString(R.string.iqama_notification_body, name),
-            )
-            AlarmKind.ATHKAR_MORNING, AlarmKind.ATHKAR_EVENING,
-            AlarmKind.SILENCE_START, AlarmKind.SILENCE_END,
-            -> return
-        }
         val open = PendingIntent.getActivity(
             context,
             0,
             Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
-        val builder = NotificationCompat.Builder(context, channel)
+        val builder = NotificationCompat.Builder(context, CHANNEL_ADHAN)
             .setSmallIcon(R.drawable.notification)
-            .setContentTitle(title)
-            .setContentText(body)
+            .setContentTitle(res.getString(R.string.adhan_notification_title, name))
             .setContentIntent(open)
-            .setAutoCancel(true)
-            .setCategory(if (kind == AlarmKind.ADHAN) NotificationCompat.CATEGORY_ALARM else NotificationCompat.CATEGORY_REMINDER)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-        if (kind != AlarmKind.PRE_PRAYER) {
-            builder.addAction(0, res.getString(R.string.action_prayed), action(context, PrayerActionReceiver.ACTION_PRAYED, prayer))
+            .setDeleteIntent(action(context, PrayerActionReceiver.ACTION_STOP, prayer))
+            .addAction(0, res.getString(R.string.action_prayed), action(context, PrayerActionReceiver.ACTION_PRAYED, prayer))
+
+        when (stage) {
+            PrayerStage.Adhan -> builder
+                .setContentText(res.getString(R.string.adhan_notification_body, name))
+                .setOngoing(true)
+                .addAction(0, res.getString(R.string.stop_playback), action(context, PrayerActionReceiver.ACTION_STOP, prayer))
+
+            is PrayerStage.Waiting -> {
+                builder
+                    .setContentText(res.getString(R.string.iqama_waiting_body, name))
+                    .setOngoing(false)
+                    .setOnlyAlertOnce(true)
+                    .setProgress(PROGRESS_MAX, (stage.fraction * PROGRESS_MAX).toInt(), false)
+                    .addAction(0, res.getString(R.string.action_snooze), action(context, PrayerActionReceiver.ACTION_SNOOZE, prayer))
+                if (iqamaAt != null) {
+                    // Android draws the remaining time itself, and keeps drawing it after the app is gone.
+                    builder.setUsesChronometer(true).setChronometerCountDown(true).setWhen(iqamaAt)
+                    builder.setShowWhen(true)
+                }
+            }
+
+            PrayerStage.Iqama -> builder
+                .setContentTitle(res.getString(R.string.iqama_notification_title, name))
+                .setContentText(res.getString(R.string.iqama_notification_body, name))
+                .setOngoing(false)
+                .setAutoCancel(true)
+                .setOnlyAlertOnce(false)
+
+            PrayerStage.Done -> return null
         }
-        if (kind == AlarmKind.ADHAN) {
-            builder.addAction(0, res.getString(R.string.action_snooze), action(context, PrayerActionReceiver.ACTION_SNOOZE, prayer))
-            builder.setDeleteIntent(action(context, PrayerActionReceiver.ACTION_STOP, prayer))
-        }
+        return builder
+    }
+
+    /** Posts or updates the prayer's one notification; a null stage removes it. */
+    fun showPrayerWindow(
+        context: Context,
+        languageTag: String,
+        prayer: Prayer,
+        stage: PrayerStage,
+        iqamaAt: Long?,
+    ) {
+        val manager = NotificationManagerCompat.from(context)
+        val builder = if (canPost(context)) prayerWindow(context, languageTag, prayer, stage, iqamaAt) else null
         try {
-            NotificationManagerCompat.from(context).notify(notificationId(kind, prayer), builder.build())
+            if (builder == null) manager.cancel(prayerWindowId(prayer)) else manager.notify(prayerWindowId(prayer), builder.build())
         } catch (_: SecurityException) {
             // Permission revoked between the check and the post.
         }
     }
+
+    /** The quieter notice before the adhan, which stays its own thing. */
+    fun showPreReminder(context: Context, languageTag: String, prayer: Prayer) {
+        if (!canPost(context)) return
+        val res = AppLanguage.localizedContext(context, languageTag)
+        val name = res.getString(prayer.nameRes)
+        val open = PendingIntent.getActivity(
+            context,
+            0,
+            Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        val notification = NotificationCompat.Builder(context, CHANNEL_IQAMA)
+            .setSmallIcon(R.drawable.notification)
+            .setContentTitle(res.getString(R.string.pre_prayer_title, name))
+            .setContentText(res.getString(R.string.pre_prayer_body, name))
+            .setContentIntent(open)
+            .setAutoCancel(true)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .build()
+        try {
+            NotificationManagerCompat.from(context).notify(notificationId(AlarmKind.PRE_PRAYER, prayer), notification)
+        } catch (_: SecurityException) {
+            // Permission revoked between the check and the post.
+        }
+    }
+
+    const val PROGRESS_MAX = 1000
+
+    /** One id per prayer for the whole adhan-to-iqama window, so nothing can stack. */
+    fun prayerWindowId(prayer: Prayer): Int = PRAYER_WINDOW_BASE + prayer.ordinal
+
+    private const val PRAYER_WINDOW_BASE = 700
 
     /** Stable per kind and prayer, so an action can cancel exactly the notification it belongs to. */
     fun notificationId(kind: AlarmKind, prayer: Prayer): Int = kind.ordinal * 100 + prayer.ordinal
