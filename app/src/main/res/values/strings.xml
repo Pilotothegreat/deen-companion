@@ -468,4 +468,33 @@
     <string name="calamity_turn_off">Turn off</string>
     <string name="smart_events">Eclipses and earthquakes</string>
     <string name="smart_events_desc">Eclipses come from a table bundled with the app and work offline. Nearby earthquakes come from the USGS public feed and never raise a notification — Android already does that.</string>
+
+    <!-- Alarms -->
+    <string name="pre_prayer_title">%1$s soon</string>
+    <string name="pre_prayer_body">Time to make wudu before %1$s.</string>
+    <string name="action_prayed">Prayed</string>
+    <string name="action_snooze">In 10 minutes</string>
+    <string name="reliability">Make alerts arrive</string>
+    <string name="reliability_intro">Android and some phone makers stop background apps in ways no app can see. Anything marked in red below will delay or silence your prayer alerts.</string>
+    <string name="reliability_notifications">Notification permission</string>
+    <string name="reliability_notifications_body">Without it Android drops every alert before it is shown.</string>
+    <string name="reliability_exact">Exact alarms</string>
+    <string name="reliability_exact_body">Without it an alert can drift by many minutes, and a prayer time that drifts is a wrong time.</string>
+    <string name="reliability_battery">Battery optimisation</string>
+    <string name="reliability_battery_body">Exempt Bilal so Android does not hold an alarm until the phone is next unlocked.</string>
+    <string name="reliability_channel">Adhan notifications</string>
+    <string name="reliability_channel_body">The adhan category is switched off in system settings. Only you can switch it back on.</string>
+    <string name="reliability_manufacturer">Your phone\'s battery manager</string>
+    <string name="reliability_oem_xiaomi">On Xiaomi, Redmi and POCO: Settings > Apps > Bilal > Autostart on, and Battery saver set to No restrictions. Then lock Bilal in Recents so it is not swept away.</string>
+    <string name="reliability_oem_huawei">On Huawei and Honor: Settings > Battery > App launch > Bilal > Manage manually, with all three switches on.</string>
+    <string name="reliability_oem_oppo">On Oppo and Realme: Settings > Battery > Bilal > Allow background activity and Allow auto-launch.</string>
+    <string name="reliability_oem_vivo">On vivo and iQOO: Settings > Battery > Background power consumption management > Bilal > Allow high background power use.</string>
+    <string name="reliability_oem_samsung">On Samsung: Settings > Battery > Background usage limits, and make sure Bilal is not in Sleeping or Deep sleeping apps.</string>
+    <string name="reliability_oem_other">If alerts still arrive late, look for a battery or autostart setting for Bilal in your phone\'s own settings and allow it to run in the background.</string>
+    <string name="silence_during_prayer">Silence during prayer</string>
+    <string name="silence_during_prayer_desc">Turns on Do Not Disturb from the iqama and turns it off again afterwards. Alarms still sound, and the restore is scheduled at the same moment as the silence so it can never be left on.</string>
+    <string name="silence_needs_permission">Needs Do Not Disturb access</string>
+    <string name="pre_reminder">Reminder before the adhan</string>
+    <string name="pre_reminder_off">Off</string>
+    <string name="adhan_sound_choice">Adhan sound</string>
 </resources>

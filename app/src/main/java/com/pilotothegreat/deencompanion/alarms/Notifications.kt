@@ -20,12 +20,21 @@ import com.pilotothegreat.deencompanion.ui.common.nameRes
 import com.pilotothegreat.deencompanion.ui.navigation.DeepLinks
 
 enum class AlarmKind {
+    /** A few minutes before the adhan, so wudu and the walk to the mosque are not a scramble. */
+    PRE_PRAYER,
     ADHAN,
     IQAMA,
     ATHKAR_MORNING,
-    ATHKAR_EVENING;
+    ATHKAR_EVENING,
+
+    /** Optional: quieten the phone from iqama, and give it back afterwards. */
+    SILENCE_START,
+    SILENCE_END;
 
     val isAthkar: Boolean get() = this == ATHKAR_MORNING || this == ATHKAR_EVENING
+
+    /** Kinds that must land on the minute; the rest use inexact alarms and spare the battery. */
+    val needsExactTime: Boolean get() = this == ADHAN || this == IQAMA || this == PRE_PRAYER || this == SILENCE_START
 }
 
 object Notifications {
@@ -111,15 +120,35 @@ object Notifications {
     private const val KHATMA_REQUEST = 900
     private const val KHATMA_NOTIFICATION = 901
 
+    /** The reader can switch a channel off in system settings, and the app cannot switch it back. */
+    fun isAdhanChannelBlocked(context: Context): Boolean {
+        val manager = context.getSystemService(NotificationManager::class.java) ?: return false
+        val channel = manager.getNotificationChannel(CHANNEL_ADHAN) ?: return false
+        return channel.importance == NotificationManager.IMPORTANCE_NONE
+    }
+
     fun canPost(context: Context): Boolean =
         Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
 
+    /**
+     * A prayer alert, with the two answers people actually have: "prayed" and "in a moment".
+     *
+     * The adhan itself is not a channel sound. A channel's sound is fixed when the channel is
+     * created, several manufacturers cut long ones short, and Do Not Disturb silences them; the
+     * adhan is played by AdhanService with alarm attributes instead, and this notification is what
+     * stops it.
+     */
     fun showPrayer(context: Context, languageTag: String, kind: AlarmKind, prayer: Prayer) {
         if (!canPost(context)) return
         val res = AppLanguage.localizedContext(context, languageTag)
         val name = res.getString(prayer.nameRes)
         val (channel, title, body) = when (kind) {
+            AlarmKind.PRE_PRAYER -> Triple(
+                CHANNEL_IQAMA,
+                res.getString(R.string.pre_prayer_title, name),
+                res.getString(R.string.pre_prayer_body, name),
+            )
             AlarmKind.ADHAN -> Triple(
                 CHANNEL_ADHAN,
                 res.getString(R.string.adhan_notification_title, name),
@@ -130,7 +159,9 @@ object Notifications {
                 res.getString(R.string.iqama_notification_title, name),
                 res.getString(R.string.iqama_notification_body, name),
             )
-            AlarmKind.ATHKAR_MORNING, AlarmKind.ATHKAR_EVENING -> return
+            AlarmKind.ATHKAR_MORNING, AlarmKind.ATHKAR_EVENING,
+            AlarmKind.SILENCE_START, AlarmKind.SILENCE_END,
+            -> return
         }
         val open = PendingIntent.getActivity(
             context,
@@ -138,19 +169,36 @@ object Notifications {
             Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
-        val notification = NotificationCompat.Builder(context, channel)
+        val builder = NotificationCompat.Builder(context, channel)
             .setSmallIcon(R.drawable.notification)
             .setContentTitle(title)
             .setContentText(body)
             .setContentIntent(open)
             .setAutoCancel(true)
-            .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .setCategory(if (kind == AlarmKind.ADHAN) NotificationCompat.CATEGORY_ALARM else NotificationCompat.CATEGORY_REMINDER)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .build()
+        if (kind != AlarmKind.PRE_PRAYER) {
+            builder.addAction(0, res.getString(R.string.action_prayed), action(context, PrayerActionReceiver.ACTION_PRAYED, prayer))
+        }
+        if (kind == AlarmKind.ADHAN) {
+            builder.addAction(0, res.getString(R.string.action_snooze), action(context, PrayerActionReceiver.ACTION_SNOOZE, prayer))
+            builder.setDeleteIntent(action(context, PrayerActionReceiver.ACTION_STOP, prayer))
+        }
         try {
-            NotificationManagerCompat.from(context).notify(kind.ordinal * 10 + prayer.ordinal, notification)
+            NotificationManagerCompat.from(context).notify(notificationId(kind, prayer), builder.build())
         } catch (_: SecurityException) {
             // Permission revoked between the check and the post.
         }
     }
+
+    /** Stable per kind and prayer, so an action can cancel exactly the notification it belongs to. */
+    fun notificationId(kind: AlarmKind, prayer: Prayer): Int = kind.ordinal * 100 + prayer.ordinal
+
+    private fun action(context: Context, action: String, prayer: Prayer): PendingIntent =
+        PendingIntent.getBroadcast(
+            context,
+            action.hashCode() + prayer.ordinal,
+            PrayerActionReceiver.intent(context, action, prayer),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
 }

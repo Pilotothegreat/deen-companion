@@ -66,7 +66,11 @@ class SettingsViewModel(
         AudioCache.setBudgetMb(mb)
     }
 
-    fun setNaturalEvents(on: Boolean) = launch { repository.setNaturalEventsEnabled(on) }
+fun setPreReminder(minutes: Int) = launch { repository.setPreReminderMinutes(minutes) }
+
+    fun setSilenceMinutes(minutes: Int) = launch { repository.setSilenceMinutes(minutes) }
+
+        fun setNaturalEvents(on: Boolean) = launch { repository.setNaturalEventsEnabled(on) }
 
     /** Zero turns it off; otherwise it runs for this many days and then lapses on its own. */
     fun setCalamityDays(days: Int) = launch {

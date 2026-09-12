@@ -500,4 +500,33 @@
     <string name="calamity_turn_off">إيقاف</string>
     <string name="smart_events">الكسوف والزلازل</string>
     <string name="smart_events_desc">الكسوف من جدول مرفق مع التطبيق ويعمل دون اتصال، والزلازل القريبة من بيانات USGS ولا ترفع إشعارًا، فنظام أندرويد يقوم بذلك.</string>
+
+    <!-- Alarms -->
+    <string name="pre_prayer_title">اقترب وقت %1$s</string>
+    <string name="pre_prayer_body">تهيّأ وتوضّأ قبل %1$s.</string>
+    <string name="action_prayed">صليت</string>
+    <string name="action_snooze">بعد ١٠ دقائق</string>
+    <string name="reliability">ضمان وصول التنبيهات</string>
+    <string name="reliability_intro">يوقف أندرويد وبعض الشركات التطبيقات في الخلفية بطرق لا يراها التطبيق. ما يظهر بالأحمر أدناه يؤخّر تنبيهات الصلاة أو يمنعها.</string>
+    <string name="reliability_notifications">إذن الإشعارات</string>
+    <string name="reliability_notifications_body">بدونه يحجب أندرويد كل تنبيه قبل عرضه.</string>
+    <string name="reliability_exact">المنبهات الدقيقة</string>
+    <string name="reliability_exact_body">بدونها قد يتأخر التنبيه دقائق، ووقت الصلاة لا يحتمل ذلك.</string>
+    <string name="reliability_battery">توفير البطارية</string>
+    <string name="reliability_battery_body">استثنِ بلال حتى لا يؤجّل أندرويد المنبه حتى فتح الهاتف.</string>
+    <string name="reliability_channel">إشعارات الأذان</string>
+    <string name="reliability_channel_body">فئة الأذان معطّلة في إعدادات النظام، ولا يمكن للتطبيق إعادتها.</string>
+    <string name="reliability_manufacturer">مدير البطارية في هاتفك</string>
+    <string name="reliability_oem_xiaomi">في Xiaomi وRedmi وPOCO: الإعدادات > التطبيقات > بلال > تفعيل التشغيل التلقائي، وتوفير البطارية إلى دون قيود.</string>
+    <string name="reliability_oem_huawei">في Huawei وHonor: الإعدادات > البطارية > تشغيل التطبيقات > بلال > إدارة يدوية مع تفعيل الخيارات الثلاثة.</string>
+    <string name="reliability_oem_oppo">في Oppo وRealme: الإعدادات > البطارية > بلال > السماح بالنشاط في الخلفية والتشغيل التلقائي.</string>
+    <string name="reliability_oem_vivo">في vivo وiQOO: الإعدادات > البطارية > إدارة استهلاك الخلفية > بلال > السماح بالاستهلاك المرتفع.</string>
+    <string name="reliability_oem_samsung">في Samsung: الإعدادات > البطارية > حدود الاستخدام في الخلفية، وتأكد أن بلال ليس ضمن التطبيقات النائمة.</string>
+    <string name="reliability_oem_other">إن تأخرت التنبيهات، ابحث في إعدادات هاتفك عن خيار البطارية أو التشغيل التلقائي لبلال واسمح له بالعمل في الخلفية.</string>
+    <string name="silence_during_prayer">كتم الصوت أثناء الصلاة</string>
+    <string name="silence_during_prayer_desc">يفعّل وضع عدم الإزعاج من الإقامة ثم يعيده، والمنبهات تبقى تعمل، ويُجدول الإرجاع في نفس لحظة الكتم فلا يُنسى.</string>
+    <string name="silence_needs_permission">يحتاج إذن وضع عدم الإزعاج</string>
+    <string name="pre_reminder">تذكير قبل الأذان</string>
+    <string name="pre_reminder_off">معطّل</string>
+    <string name="adhan_sound_choice">صوت الأذان</string>
 </resources>

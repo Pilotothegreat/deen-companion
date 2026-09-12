@@ -8,6 +8,7 @@ import com.pilotothegreat.deencompanion.data.location.CityIndex
 import com.pilotothegreat.deencompanion.data.location.LocationRepository
 import com.pilotothegreat.deencompanion.data.moment.MomentRepository
 import com.pilotothegreat.deencompanion.data.nature.EarthquakeRepository
+import com.pilotothegreat.deencompanion.data.prayer.PrayerLogRepository
 import com.pilotothegreat.deencompanion.data.nature.EclipseRepository
 import com.pilotothegreat.deencompanion.data.weather.WeatherRepository
 import com.pilotothegreat.deencompanion.data.quran.KhatmaRepository
@@ -48,6 +49,8 @@ val appModule = module {
     single { LocationRepository(androidContext(), get(), get()) }
     single { WeatherRepository() }
     single { get<AppDatabase>().naturalEventDao() }
+    single { get<AppDatabase>().prayerLogDao() }
+    single { PrayerLogRepository(get()) }
     single { EclipseRepository(androidContext()) }
     single { EarthquakeRepository(get()) }
     single { MomentRepository(get(), get(), get(), get(), get()) }

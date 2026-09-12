@@ -71,6 +71,12 @@ object SystemIntents {
     fun appDetails(context: Context) =
         Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, "package:${context.packageName}".toUri())
 
+    /** The system list where the app can be exempted from battery optimisation. */
+    fun batteryOptimisation(): Intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+
+    /** Where Do Not Disturb access is granted, which silence-during-prayer needs. */
+    fun doNotDisturbAccess(): Intent = Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
+
     fun url(url: String) = Intent(Intent.ACTION_VIEW, url.toUri())
 
     fun shareText(text: String): Intent =

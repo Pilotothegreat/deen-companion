@@ -140,6 +140,16 @@
             android:name=".widget.WidgetRefreshReceiver"
             android:exported="false" />
 
+        <!-- Plays the adhan with alarm audio attributes, which a channel sound cannot do. -->
+        <service
+            android:name=".alarms.AdhanService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
+
+        <receiver
+            android:name=".alarms.PrayerActionReceiver"
+            android:exported="false" />
+
         <service
             android:name=".playback.QuranPlaybackService"
             android:exported="false"

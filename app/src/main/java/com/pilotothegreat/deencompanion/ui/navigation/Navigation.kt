@@ -21,6 +21,7 @@ import kotlinx.serialization.Serializable
 @Serializable data object QiblaKey : NavKey
 @Serializable data object SettingsKey : NavKey
 @Serializable data object LocationKey : NavKey
+@Serializable data object ReliabilityKey : NavKey
 @Serializable data object AthkarKey : NavKey
 
 /** One athkar category, counted item by item. */

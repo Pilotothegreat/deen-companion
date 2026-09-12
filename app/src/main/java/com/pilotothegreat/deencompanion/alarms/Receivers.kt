@@ -17,6 +17,7 @@ import androidx.work.WorkerParameters
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
 import com.pilotothegreat.deencompanion.data.location.LocationRepository
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
+import com.pilotothegreat.deencompanion.data.settings.SoundSettings
 import com.pilotothegreat.deencompanion.widget.WidgetUpdater
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -57,8 +58,20 @@ class PrayerAlarmReceiver : BroadcastReceiver(), KoinComponent {
             if (prayer != null && kind != null && onTime) {
                 when {
                     kind.isAthkar -> if (current.athkarReminders) Notifications.showAthkar(context, current.appLanguage, kind)
-                    current.notificationsEnabled && prayer !in current.mutedPrayers ->
+                    kind == AlarmKind.SILENCE_START -> QuietDuringPrayer.silence(context)
+                    kind == AlarmKind.SILENCE_END -> QuietDuringPrayer.restore(context)
+                    current.notificationsEnabled && prayer !in current.mutedPrayers -> {
                         Notifications.showPrayer(context, current.appLanguage, kind, prayer)
+                        val sound = current.sounds.adhanFor(prayer)
+                        if (kind == AlarmKind.ADHAN && sound != SoundSettings.SILENT) {
+                            AdhanService.start(
+                                context = context,
+                                prayer = prayer,
+                                languageTag = current.appLanguage,
+                                sound = sound.takeUnless { it == SoundSettings.SYSTEM_SOUND },
+                            )
+                        }
+                    }
                 }
             }
             scheduler.reschedule()

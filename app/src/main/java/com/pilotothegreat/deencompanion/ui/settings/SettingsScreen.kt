@@ -25,6 +25,7 @@ import androidx.compose.material.icons.rounded.Abc
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Alarm
 import androidx.compose.material.icons.rounded.AppSettingsAlt
+import androidx.compose.material.icons.rounded.BatteryAlert
 import androidx.compose.material.icons.rounded.Brightness5
 import androidx.compose.material.icons.rounded.Calculate
 import androidx.compose.material.icons.rounded.CalendarMonth
@@ -34,6 +35,7 @@ import androidx.compose.material.icons.rounded.Code
 import androidx.compose.material.icons.rounded.ColorLens
 import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.Flight
+import androidx.compose.material.icons.rounded.DoNotDisturbOn
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Info
@@ -46,6 +48,7 @@ import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Policy
 import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material.icons.rounded.Repeat
+import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.RecordVoiceOver
 import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material.icons.rounded.SystemUpdate
@@ -101,6 +104,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pilotothegreat.deencompanion.BuildConfig
 import com.pilotothegreat.deencompanion.R
+import com.pilotothegreat.deencompanion.alarms.QuietDuringPrayer
 import com.pilotothegreat.deencompanion.alarms.Notifications
 import com.pilotothegreat.deencompanion.core.calendar.HijriCalendar
 import com.pilotothegreat.deencompanion.core.prayer.AsrSchool
@@ -156,6 +160,7 @@ fun SettingsScreen(
     settings: AppSettings,
     onBack: () -> Unit,
     onOpenLocation: () -> Unit,
+    onOpenReliability: () -> Unit,
     viewModel: SettingsViewModel = koinViewModel(),
 ) {
     val live by viewModel.settings.collectAsStateWithLifecycle()
@@ -299,6 +304,12 @@ fun SettingsScreen(
                         }
                     }
                     add { shapes ->
+                        NavRow(
+                            shapes, Icons.Rounded.BatteryAlert, stringResource(R.string.reliability),
+                            stringResource(R.string.reliability_intro),
+                        ) { onOpenReliability() }
+                    }
+                    add { shapes ->
                         NavRow(shapes, Icons.Rounded.VolumeUp, stringResource(R.string.adhan_sound), stringResource(R.string.sound_desc), trailing = { OpenIcon() }) {
                             context.startSafely(SystemIntents.channel(context, Notifications.CHANNEL_ADHAN))
                         }
@@ -306,6 +317,48 @@ fun SettingsScreen(
                     add { shapes ->
                         NavRow(shapes, Icons.Rounded.NotificationsActive, stringResource(R.string.iqama_sound), stringResource(R.string.sound_desc), trailing = { OpenIcon() }) {
                             context.startSafely(SystemIntents.channel(context, Notifications.CHANNEL_IQAMA))
+                        }
+                    }
+                    add { shapes ->
+                        ContentRow(shapes, Icons.Rounded.Schedule, stringResource(R.string.pre_reminder)) {
+                            ConnectedChoice(
+                                options = Defaults.PRE_REMINDER_CHOICES,
+                                selected = s.sounds.preReminderMinutes,
+                                onSelect = viewModel::setPreReminder,
+                                label = {
+                                    if (it == 0) stringResource(R.string.pre_reminder_off)
+                                    else pluralStringResource(R.plurals.minutes, it, Formatters.number(it, locale))
+                                },
+                                modifier = Modifier.padding(top = 8.dp),
+                            )
+                        }
+                    }
+                    add { shapes ->
+                        // Do Not Disturb can only be changed with an explicit grant, so the row says so
+                        // rather than silently doing nothing.
+                        val allowed = QuietDuringPrayer.isAllowed(context)
+                        ContentRow(shapes, Icons.Rounded.DoNotDisturbOn, stringResource(R.string.silence_during_prayer)) {
+                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text(
+                                    if (allowed) stringResource(R.string.silence_during_prayer_desc)
+                                    else stringResource(R.string.silence_needs_permission),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                                ConnectedChoice(
+                                    options = Defaults.SILENCE_CHOICES,
+                                    selected = s.sounds.silenceMinutes,
+                                    onSelect = { minutes ->
+                                        if (minutes > 0 && !allowed) context.startSafely(SystemIntents.doNotDisturbAccess())
+                                        else viewModel.setSilenceMinutes(minutes)
+                                    },
+                                    label = {
+                                        if (it == 0) stringResource(R.string.pre_reminder_off)
+                                        else pluralStringResource(R.plurals.minutes, it, Formatters.number(it, locale))
+                                    },
+                                    modifier = Modifier.padding(top = 8.dp),
+                                )
+                            }
                         }
                     }
                 }

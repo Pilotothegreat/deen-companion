@@ -36,14 +36,27 @@ class PrayerAlarmScheduler(private val context: Context, private val settings: S
         for (day in 0..1) {
             val schedule = DaySchedule.forDate(now.toLocalDate().plusDays(day.toLong()), current.prayerConfig)
             if (current.notificationsEnabled) {
+                val sounds = current.sounds
                 for (prayer in Prayer.obligatory) {
                     if (prayer in current.mutedPrayers) continue
                     val adhan = schedule.adhan.getValue(prayer)
+                    if (sounds.preReminderMinutes > 0 && prayer in sounds.preReminderPrayers) {
+                        val early = adhan.minusMinutes(sounds.preReminderMinutes.toLong())
+                        if (early.isAfter(now)) set(manager, AlarmKind.PRE_PRAYER, day, prayer, early)
+                    }
                     if (adhan.isAfter(now)) set(manager, AlarmKind.ADHAN, day, prayer, adhan)
                     // The iqama is a local mosque's, so it means nothing in another city. The adhan
                     // still sounds: the prayer time is the prayer time wherever you are.
                     val iqama = schedule.iqama[prayer].takeUnless { current.smart.isTravelling }
                     if (iqama != null && iqama.isAfter(now) && iqama != adhan) set(manager, AlarmKind.IQAMA, day, prayer, iqama)
+
+                    // The restore is scheduled in the same breath as the mute, so a crash between
+                    // the two can never leave someone's phone silent for good.
+                    val silenceFrom = (iqama ?: adhan).takeIf { sounds.silenceMinutes > 0 }
+                    if (silenceFrom != null && silenceFrom.isAfter(now)) {
+                        set(manager, AlarmKind.SILENCE_START, day, prayer, silenceFrom)
+                        set(manager, AlarmKind.SILENCE_END, day, prayer, silenceFrom.plusMinutes(sounds.silenceMinutes.toLong()))
+                    }
                 }
             }
             if (current.athkarReminders) {
@@ -68,7 +81,7 @@ class PrayerAlarmScheduler(private val context: Context, private val settings: S
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         try {
-            if (canScheduleExact() && !kind.isAthkar) {
+            if (canScheduleExact() && kind.needsExactTime) {
                 manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, millis, pending)
             } else {
                 manager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, millis, pending)
@@ -90,5 +103,25 @@ class PrayerAlarmScheduler(private val context: Context, private val settings: S
         }
     }
 
-    private fun requestCode(kind: AlarmKind, day: Int, prayer: Prayer) = 1000 + kind.ordinal * 100 + day * 10 + prayer.ordinal
+    /**
+     * A distinct PendingIntent id per (kind, day, prayer). Two alarms sharing an id silently
+     * overwrite each other, and the symptom — one prayer alert quietly missing — is nearly
+     * impossible to spot by hand, so AlarmRequestCodes is exhaustively tested instead.
+     */
+    private fun requestCode(kind: AlarmKind, day: Int, prayer: Prayer) =
+        AlarmRequestCodes.of(kind, day, prayer)
+}
+
+/**
+ * Ids for the alarms. Kept apart from the scheduler so every combination can be enumerated in a
+ * test: this release takes the alarm kinds from four to seven, and a clash would show up only as an
+ * alert that never arrived.
+ */
+object AlarmRequestCodes {
+    const val BASE = 1000
+    const val DAYS = 10
+    val PRAYERS = Prayer.entries.size
+
+    fun of(kind: AlarmKind, day: Int, prayer: Prayer): Int =
+        BASE + ((kind.ordinal * DAYS) + day) * PRAYERS + prayer.ordinal
 }

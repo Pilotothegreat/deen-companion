@@ -60,6 +60,7 @@ import com.pilotothegreat.deencompanion.ui.navigation.HadithBookKey
 import com.pilotothegreat.deencompanion.ui.navigation.HadithKey
 import com.pilotothegreat.deencompanion.ui.navigation.HomeKey
 import com.pilotothegreat.deencompanion.ui.navigation.LocalBottomBarPadding
+import com.pilotothegreat.deencompanion.ui.navigation.ReliabilityKey
 import com.pilotothegreat.deencompanion.ui.navigation.LocationKey
 import com.pilotothegreat.deencompanion.ui.navigation.Navigator
 import com.pilotothegreat.deencompanion.ui.navigation.QiblaKey
@@ -70,6 +71,9 @@ import com.pilotothegreat.deencompanion.ui.navigation.TopLevel
 import com.pilotothegreat.deencompanion.ui.qibla.QiblaScreen
 import com.pilotothegreat.deencompanion.ui.quran.QuranScreen
 import com.pilotothegreat.deencompanion.ui.reader.ReaderScreen
+import com.pilotothegreat.deencompanion.ui.reliability.ReliabilityScreen
+import com.pilotothegreat.deencompanion.ui.settings.SettingsViewModel
+import org.koin.androidx.compose.koinViewModel
 import com.pilotothegreat.deencompanion.ui.settings.SettingsScreen
 
 /**
@@ -148,9 +152,18 @@ fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpe
                         entry<HadithBookKey> { key -> HadithBookScreen(key, onBack = navigator::back) }
                         entry<QiblaKey> { QiblaScreen(onBack = navigator::back) }
                         entry<SettingsKey> {
-                            SettingsScreen(settings = settings, onBack = navigator::back, onOpenLocation = { navigator.navigate(LocationKey) })
+                            SettingsScreen(
+                                settings = settings,
+                                onBack = navigator::back,
+                                onOpenLocation = { navigator.navigate(LocationKey) },
+                                onOpenReliability = { navigator.navigate(ReliabilityKey) },
+                            )
                         }
                         entry<LocationKey> { LocationPickerScreen(onBack = navigator::back) }
+                        entry<ReliabilityKey> {
+                            val viewModel: SettingsViewModel = koinViewModel()
+                            ReliabilityScreen(canScheduleExact = viewModel.canScheduleExactAlarms(), onBack = navigator::back)
+                        }
                     },
                 )
                 AnimatedVisibility(

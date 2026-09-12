@@ -12,6 +12,7 @@ import com.pilotothegreat.deencompanion.core.prayer.PrayerConfig
 import com.pilotothegreat.deencompanion.data.athkar.AthkarRepository
 import com.pilotothegreat.deencompanion.data.settings.AppLanguage
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
+import com.pilotothegreat.deencompanion.data.settings.SoundSettings
 import com.pilotothegreat.deencompanion.data.tasbih.TasbihRepository
 import com.pilotothegreat.deencompanion.di.appModule
 import com.pilotothegreat.deencompanion.widget.WidgetUpdater
@@ -71,12 +72,24 @@ class DeenApplication : Application(), Configuration.Provider {
         }
     }
 
-    private data class AlarmInputs(val config: PrayerConfig, val enabled: Boolean, val muted: Set<Prayer>, val athkar: Boolean)
+    /**
+     * Everything an alarm's time or existence depends on. The pre-reminder, the silence window and
+     * travel all move alarms, so a change to any of them has to rebuild the set — otherwise the
+     * setting appears to take effect and quietly does not until the next prayer.
+     */
+    private data class AlarmInputs(
+        val config: PrayerConfig,
+        val enabled: Boolean,
+        val muted: Set<Prayer>,
+        val athkar: Boolean,
+        val sounds: SoundSettings,
+        val travelling: Boolean,
+    )
 
     @OptIn(FlowPreview::class)
     private fun keepAlarmsInSync() = appScope.launch {
         settings.settings
-            .map { AlarmInputs(it.prayerConfig, it.notificationsEnabled, it.mutedPrayers, it.athkarReminders) }
+            .map { AlarmInputs(it.prayerConfig, it.notificationsEnabled, it.mutedPrayers, it.athkarReminders, it.sounds, it.smart.isTravelling) }
             .distinctUntilChanged()
             .debounce(300)
             .collectLatest { scheduler.reschedule() }
