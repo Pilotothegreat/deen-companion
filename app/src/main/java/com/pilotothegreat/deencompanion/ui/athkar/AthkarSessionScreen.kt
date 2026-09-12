@@ -105,7 +105,11 @@ fun AthkarSessionScreen(
     val reducedMotion = rememberReducedMotion()
     val category = session.category
     val items = category.items
-    val showTranslation = session.showTranslation ?: !locale.isArabic
+    // The meaning and the transliteration belong to the session, not to a settings screen: someone
+    // reading in Arabic wants neither, everyone else usually wants both, and either way the answer
+    // is one tap away in the bar above.
+    var showTranslation by rememberSaveable(locale) { mutableStateOf(!locale.isArabic) }
+    var showTransliteration by rememberSaveable(locale) { mutableStateOf(!locale.isArabic) }
     // Open at the first item not finished today; the extra last page is the finish screen.
     val firstOpen = remember(category.id) {
         items.indexOfFirst { !session.progress.isDone(category, it) }.takeIf { it >= 0 } ?: items.size
@@ -147,10 +151,10 @@ fun AthkarSessionScreen(
                     }
                 },
                 actions = {
-                    IconToggleButton(checked = showTranslation, onCheckedChange = viewModel::setShowTranslation) {
+                    IconToggleButton(checked = showTranslation, onCheckedChange = { showTranslation = it }) {
                         Icon(Icons.Rounded.Translate, contentDescription = stringResource(R.string.athkar_show_translation))
                     }
-                    IconToggleButton(checked = session.showTransliteration, onCheckedChange = viewModel::setShowTransliteration) {
+                    IconToggleButton(checked = showTransliteration, onCheckedChange = { showTransliteration = it }) {
                         Icon(Icons.Rounded.Abc, contentDescription = stringResource(R.string.athkar_show_transliteration))
                     }
                     IconButton(onClick = { confirmReset = true }) {
@@ -177,6 +181,7 @@ fun AthkarSessionScreen(
                         count = session.progress.count(category.id, items[page].id),
                         session = session,
                         showTranslation = showTranslation,
+                        showTransliteration = showTransliteration,
                         locale = locale,
                         onCount = {
                             haptics.performHapticFeedback(HapticFeedbackType.SegmentTick)
@@ -224,6 +229,7 @@ private fun DhikrPage(
     count: Int,
     session: AthkarSession,
     showTranslation: Boolean,
+    showTransliteration: Boolean,
     locale: Locale,
     onCount: () -> Unit,
 ) {
@@ -259,7 +265,7 @@ private fun DhikrPage(
                     modifier = Modifier.fillMaxWidth(),
                 )
                 // English stays left-to-right even inside the Arabic UI.
-                if (session.showTransliteration && item.transliteration.isNotBlank()) {
+                if (showTransliteration && item.transliteration.isNotBlank()) {
                     Text(
                         item.transliteration,
                         style = MaterialTheme.typography.bodyMedium.copy(textDirection = TextDirection.Ltr),

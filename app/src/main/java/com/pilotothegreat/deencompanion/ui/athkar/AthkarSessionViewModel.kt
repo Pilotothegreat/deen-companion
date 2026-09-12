@@ -22,9 +22,6 @@ data class AthkarSession(
     val category: AthkarCategory,
     val progress: DayProgress,
     val fontSize: Int,
-    /** Null until chosen; see [com.pilotothegreat.deencompanion.data.settings.AppSettings.athkarShowTranslation]. */
-    val showTranslation: Boolean?,
-    val showTransliteration: Boolean,
 )
 
 sealed interface SessionEvent {
@@ -45,7 +42,7 @@ class AthkarSessionViewModel(
         settings.settings,
     ) { category, progress, s ->
         category?.let {
-            AthkarSession(it, progress.on(LocalDate.now(s.zone)), s.athkarFontSize, s.athkarShowTranslation, s.athkarShowTransliteration)
+            AthkarSession(it, progress.on(LocalDate.now(s.zone)), s.quranFontSize)
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
@@ -66,13 +63,7 @@ class AthkarSessionViewModel(
         viewModelScope.launch { athkar.reset(key.categoryId, today()) }
     }
 
-    fun setShowTranslation(show: Boolean) {
-        viewModelScope.launch { settings.setAthkarShowTranslation(show) }
-    }
 
-    fun setShowTransliteration(show: Boolean) {
-        viewModelScope.launch { settings.setAthkarShowTransliteration(show) }
-    }
 
     private suspend fun today(): LocalDate = LocalDate.now(settings.current().zone)
 }

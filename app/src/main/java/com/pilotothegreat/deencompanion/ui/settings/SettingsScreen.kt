@@ -3,6 +3,7 @@ package com.pilotothegreat.deencompanion.ui.settings
 import android.Manifest
 import android.os.Build
 import android.text.format.DateFormat
+import androidx.annotation.StringRes
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -35,6 +36,9 @@ import androidx.compose.material.icons.rounded.DeleteSweep
 import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material.icons.rounded.Save
 import com.pilotothegreat.deencompanion.data.backup.BackupRepository
+import androidx.compose.material.icons.rounded.AutoAwesome
+import androidx.compose.material.icons.rounded.Groups
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material.icons.rounded.Alarm
 import androidx.compose.material.icons.rounded.AppSettingsAlt
 import androidx.compose.material.icons.rounded.BatteryAlert
@@ -208,6 +212,7 @@ fun SettingsScreen(
     var dialog by remember { mutableStateOf<SettingsDialog?>(null) }
     var showSupport by rememberSaveable { mutableStateOf(false) }
     var showUpdate by rememberSaveable { mutableStateOf(false) }
+    var showIqama by rememberSaveable { mutableStateOf(false) }
     val install by viewModel.install.collectAsStateWithLifecycle()
     var exactAllowed by remember { mutableStateOf(viewModel.canScheduleExactAlarms()) }
     LifecycleResumeEffect(Unit) {
@@ -241,34 +246,14 @@ fun SettingsScreen(
                 bottom = padding.calculateBottomPadding() + 32.dp,
             ),
         ) {
-            item(key = "location") {
-                SettingsGroup(
-                    stringResource(R.string.settings_location),
-                    listOf(
-                        { shapes ->
-                            val city = s.location.cityName ?: stringResource(R.string.default_location)
-                            val status = locationStatus(s.location)
-                            NavRow(
-                                shapes, Icons.Rounded.LocationOn, stringResource(R.string.current_location),
-                                // The default location's name already says it's the default.
-                                if (s.location.isDefault) city else "$city · $status",
-                                onClick = onOpenLocation,
-                            )
-                        },
-                        { shapes ->
-                            SwitchRow(
-                                shapes, Icons.Rounded.Public, stringResource(R.string.ip_location_fallback_title),
-                                stringResource(R.string.ip_location_fallback_desc), s.useIpLocationFallback, viewModel::setUseIpLocationFallback,
-                            )
-                        },
-                    ),
-                )
-            }
-
             item(key = "prayer") {
                 SettingsGroup(
                     stringResource(R.string.prayer_times),
                     listOf(
+                        { shapes ->
+                            val city = s.location.cityName ?: stringResource(R.string.default_location)
+                            NavRow(shapes, Icons.Rounded.LocationOn, stringResource(R.string.current_location), city) { onOpenLocation() }
+                        },
                         { shapes ->
                             val methodName = stringResource(s.effectiveMethod.labelRes)
                             NavRow(
@@ -291,66 +276,30 @@ fun SettingsScreen(
                                 dialog = SettingsDialog.HighLatitude
                             }
                         },
-                        { shapes -> HijriAdjustmentRow(shapes, s, viewModel::setHijriAdjustment) },
                         { shapes ->
-                            SwitchRow(
-                                shapes, Icons.Rounded.WbTwilight, stringResource(R.string.hijri_maghrib),
-                                stringResource(R.string.hijri_maghrib_desc), s.smart.hijriDayStartsAtMaghrib,
-                                viewModel::setHijriDayStartsAtMaghrib,
-                            )
+                            // Five prayers behind one row: the iqama matters, but not enough to be a
+                            // third of everything Settings shows.
+                            NavRow(shapes, Icons.Rounded.Groups, stringResource(R.string.iqama), iqamaOverview(s.iqama)) {
+                                showIqama = true
+                            }
                         },
+                        { shapes -> HijriAdjustmentRow(shapes, s, viewModel::setHijriAdjustment) },
                     ),
                 )
             }
 
-            item(key = "iqama") {
-                SettingsGroup(
-                    stringResource(R.string.iqama),
-                    Prayer.obligatory.map { prayer ->
-                        { shapes: ListItemShapes ->
-                            NavRow(shapes, prayer.icon, stringResource(prayer.nameRes), iqamaSummary(s.iqama.getValue(prayer))) {
-                                dialog = SettingsDialog.Iqama(prayer)
-                            }
-                        }
-                    },
-                )
-            }
-
-            item(key = "notifications") {
+            item(key = "alerts") {
                 val rows = buildList<SettingsRow> {
                     add { shapes ->
                         SwitchRow(
                             shapes, Icons.Rounded.Notifications, stringResource(R.string.prayer_notifications),
                             stringResource(R.string.prayer_notifications_desc), s.notificationsEnabled,
-                        ) { enabled ->
-                            if (enabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !Notifications.canPost(context)) {
-                                notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
-                            }
-                            viewModel.setNotificationsEnabled(enabled)
-                        }
-                    }
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        add { shapes ->
-                            NavRow(
-                                shapes, Icons.Rounded.Alarm, stringResource(R.string.exact_alarms),
-                                stringResource(if (exactAllowed) R.string.exact_alarms_granted else R.string.exact_alarms_denied),
-                            ) { context.startSafely(SystemIntents.exactAlarms(context)) }
-                        }
+                            viewModel::setNotificationsEnabled,
+                        )
                     }
                     add { shapes ->
-                        NavRow(
-                            shapes, Icons.Rounded.BatteryAlert, stringResource(R.string.reliability),
-                            stringResource(R.string.reliability_intro),
-                        ) { onOpenReliability() }
-                    }
-                    add { shapes ->
-                        NavRow(shapes, Icons.Rounded.VolumeUp, stringResource(R.string.adhan_sound), stringResource(R.string.sound_desc), trailing = { OpenIcon() }) {
+                        NavRow(shapes, Icons.Rounded.VolumeUp, stringResource(R.string.adhan_sound), stringResource(R.string.adhan_sound_desc), trailing = { OpenIcon() }) {
                             context.startSafely(SystemIntents.channel(context, Notifications.CHANNEL_ADHAN))
-                        }
-                    }
-                    add { shapes ->
-                        NavRow(shapes, Icons.Rounded.NotificationsActive, stringResource(R.string.iqama_sound), stringResource(R.string.sound_desc), trailing = { OpenIcon() }) {
-                            context.startSafely(SystemIntents.channel(context, Notifications.CHANNEL_IQAMA))
                         }
                     }
                     add { shapes ->
@@ -368,8 +317,6 @@ fun SettingsScreen(
                         }
                     }
                     add { shapes ->
-                        // Do Not Disturb can only be changed with an explicit grant, so the row says so
-                        // rather than silently doing nothing.
                         val allowed = QuietDuringPrayer.isAllowed(context)
                         ContentRow(shapes, Icons.Rounded.DoNotDisturbOn, stringResource(R.string.silence_during_prayer)) {
                             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -395,84 +342,47 @@ fun SettingsScreen(
                             }
                         }
                     }
+                    add { shapes ->
+                        SwitchRow(
+                            shapes, Icons.Rounded.Alarm, stringResource(R.string.athkar_reminders),
+                            stringResource(R.string.athkar_reminders_desc), s.athkarReminders,
+                            viewModel::setAthkarReminders,
+                        )
+                    }
+                    add { shapes ->
+                        NavRow(
+                            shapes, Icons.Rounded.BatteryAlert, stringResource(R.string.reliability),
+                            stringResource(if (exactAllowed) R.string.reliability_summary_ok else R.string.reliability_summary_problem),
+                        ) { onOpenReliability() }
+                    }
                 }
                 SettingsGroup(stringResource(R.string.notifications), rows)
             }
 
-            item(key = "athkar") {
+            item(key = "reading") {
                 SettingsGroup(
-                    stringResource(R.string.athkar),
+                    stringResource(R.string.reading),
                     listOf(
+                        { shapes -> FontSizeRow(shapes, s.quranFontSize, viewModel::setQuranFontSize) },
                         { shapes ->
-                            SwitchRow(
-                                shapes, Icons.Rounded.Alarm, stringResource(R.string.athkar_reminders),
-                                stringResource(R.string.athkar_reminders_desc), s.athkarReminders,
-                            ) { enabled ->
-                                if (enabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !Notifications.canPost(context)) {
-                                    notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
-                                }
-                                viewModel.setAthkarReminders(enabled)
+                            NavRow(shapes, Icons.Rounded.RecordVoiceOver, stringResource(R.string.reciter), stringResource(s.reciter.label)) {
+                                dialog = SettingsDialog.ReciterChoice
                             }
                         },
                         { shapes ->
-                            FontSizeRow(
-                                shapes, s.athkarFontSize, viewModel::setAthkarFontSize,
-                                range = Defaults.ATHKAR_FONT_RANGE,
-                                title = stringResource(R.string.athkar_text_size),
-                                fontFamily = Amiri,
-                                sample = "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
-                            )
-                        },
-                        { shapes ->
-                            SwitchRow(
-                                shapes, Icons.Rounded.Translate, stringResource(R.string.athkar_show_translation),
-                                stringResource(R.string.athkar_translation_desc), s.athkarShowTranslation ?: !locale.isArabic,
-                                viewModel::setAthkarShowTranslation,
-                            )
-                        },
-                        { shapes ->
-                            SwitchRow(
-                                shapes, Icons.Rounded.Abc, stringResource(R.string.athkar_show_transliteration),
-                                stringResource(R.string.athkar_transliteration_desc), s.athkarShowTransliteration,
-                                viewModel::setAthkarShowTransliteration,
-                            )
-                        },
-                    ),
-                )
-            }
-
-            item(key = "smart") {
-                SettingsGroup(
-                    stringResource(R.string.smart_features),
-                    listOf(
-                        { shapes ->
-                            SwitchRow(
-                                shapes, Icons.Rounded.Cloud, stringResource(R.string.smart_weather),
-                                stringResource(R.string.smart_weather_desc), s.smart.weather, viewModel::setSmartWeather,
-                            )
-                        },
-                        { shapes ->
-                            SwitchRow(
-                                shapes, Icons.Rounded.Flight, stringResource(R.string.smart_travel),
-                                stringResource(R.string.smart_travel_desc, Formatters.number(s.smart.safarKm, locale)),
-                                s.smart.travel, viewModel::setSmartTravel,
-                            )
-                        },
-                        { shapes ->
                             NavRow(
-                                shapes, Icons.Rounded.Home, stringResource(R.string.smart_home),
-                                stringResource(if (s.smart.hasHome) R.string.smart_home_set else R.string.smart_home_unset),
-                            ) { viewModel.anchorHomeHere() }
+                                shapes, Icons.Rounded.CloudDownload, stringResource(R.string.audio_cache),
+                                stringResource(R.string.audio_cache_desc, Formatters.number(s.quran.audioCacheMb, locale), cacheSummary),
+                            ) { dialog = SettingsDialog.AudioCache }
                         },
                         { shapes ->
                             SwitchRow(
-                                shapes, Icons.Rounded.Public, stringResource(R.string.smart_events),
-                                stringResource(R.string.smart_events_desc), s.smart.naturalEvents,
-                                viewModel::setNaturalEvents,
+                                shapes, Icons.Rounded.AutoAwesome, stringResource(R.string.smart_features),
+                                stringResource(R.string.smart_features_desc), s.smart.reactToTheWorld,
+                                viewModel::setReactToTheWorld,
                             )
                         },
                         { shapes ->
-                            // The app suggests; you decide what counts as a calamity.
                             NavRow(
                                 shapes, Icons.Rounded.VolunteerActivism, stringResource(R.string.calamity_mode),
                                 if (s.smart.calamityActive(System.currentTimeMillis())) {
@@ -486,34 +396,55 @@ fun SettingsScreen(
                 )
             }
 
-            item(key = "quran") {
+            item(key = "appearance") {
                 SettingsGroup(
-                    stringResource(R.string.quran_settings),
+                    stringResource(R.string.appearance),
                     listOf(
-                        { shapes -> FontSizeRow(shapes, s.quranFontSize, viewModel::setQuranFontSize) },
                         { shapes ->
-                            NavRow(shapes, Icons.Rounded.RecordVoiceOver, stringResource(R.string.reciter), stringResource(s.reciter.label)) {
-                                dialog = SettingsDialog.ReciterChoice
+                            ContentRow(shapes, Icons.Rounded.Palette, stringResource(R.string.theme)) {
+                                ConnectedChoice(
+                                    options = ThemeMode.entries,
+                                    selected = s.themeMode,
+                                    onSelect = viewModel::setThemeMode,
+                                    label = { stringResource(it.labelRes) },
+                                    modifier = Modifier.padding(top = 8.dp),
+                                )
+                            }
+                        },
+                        { shapes ->
+                            ContentRow(shapes, Icons.Rounded.Language, stringResource(R.string.language)) {
+                                ConnectedChoice(
+                                    options = listOf(AppLanguage.SYSTEM) + AppLanguage.supported,
+                                    selected = s.appLanguage,
+                                    onSelect = viewModel::setLanguage,
+                                    label = { languageLabel(it) },
+                                    modifier = Modifier.padding(top = 8.dp),
+                                )
+                            }
+                        },
+                        { shapes ->
+                            ContentRow(shapes, Icons.Rounded.FormatSize, stringResource(R.string.text_scale)) {
+                                ConnectedChoice(
+                                    options = TEXT_SCALES,
+                                    selected = TEXT_SCALES.minByOrNull { kotlin.math.abs(it - s.accessibility.textScale) } ?: 1f,
+                                    onSelect = viewModel::setTextScale,
+                                    label = { stringResource(it.labelRes) },
+                                    modifier = Modifier.padding(top = 8.dp),
+                                )
                             }
                         },
                         { shapes ->
                             SwitchRow(
-                                shapes, Icons.Rounded.Repeat, stringResource(R.string.continuous_playback),
-                                stringResource(R.string.continuous_playback_desc), s.quran.continuousPlayback,
-                                viewModel::setContinuousPlayback,
+                                shapes, Icons.Rounded.Accessibility, stringResource(R.string.simple_mode),
+                                stringResource(R.string.simple_mode_desc), s.accessibility.simpleMode,
+                                viewModel::setSimpleMode,
                             )
-                        },
-                        { shapes ->
-                            NavRow(
-                                shapes, Icons.Rounded.CloudDownload, stringResource(R.string.audio_cache),
-                                stringResource(R.string.audio_cache_desc, Formatters.number(s.quran.audioCacheMb, locale), cacheSummary),
-                            ) { dialog = SettingsDialog.AudioCache }
                         },
                     ),
                 )
             }
 
-            item(key = "general") {
+            item(key = "data") {
                 SettingsGroup(
                     stringResource(R.string.general),
                     listOf(
@@ -539,109 +470,6 @@ fun SettingsScreen(
                 )
             }
 
-            item(key = "accessibility") {
-                SettingsGroup(
-                    stringResource(R.string.accessibility),
-                    listOf(
-                        { shapes ->
-                            SwitchRow(
-                                shapes, Icons.Rounded.Accessibility, stringResource(R.string.simple_mode),
-                                stringResource(R.string.simple_mode_desc), s.accessibility.simpleMode,
-                                viewModel::setSimpleMode,
-                            )
-                        },
-                        { shapes ->
-                            ContentRow(shapes, Icons.Rounded.FormatSize, stringResource(R.string.text_scale)) {
-                                ConnectedChoice(
-                                    options = TEXT_SCALES,
-                                    selected = TEXT_SCALES.minByOrNull { kotlin.math.abs(it - s.accessibility.textScale) } ?: 1f,
-                                    onSelect = viewModel::setTextScale,
-                                    label = { stringResource(R.string.text_scale_value, Formatters.decimal(it, locale)) },
-                                    modifier = Modifier.padding(top = 8.dp),
-                                )
-                            }
-                        },
-                        { shapes ->
-                            ContentRow(shapes, Icons.Rounded.Contrast, stringResource(R.string.contrast)) {
-                                ConnectedChoice(
-                                    options = ContrastMode.entries,
-                                    selected = s.accessibility.contrast,
-                                    onSelect = viewModel::setContrast,
-                                    label = { stringResource(it.labelRes) },
-                                    modifier = Modifier.padding(top = 8.dp),
-                                )
-                            }
-                        },
-                        { shapes ->
-                            ContentRow(shapes, Icons.Rounded.Animation, stringResource(R.string.reduce_motion)) {
-                                ConnectedChoice(
-                                    options = ReduceMotion.entries,
-                                    selected = s.accessibility.reduceMotion,
-                                    onSelect = viewModel::setReduceMotion,
-                                    label = { stringResource(it.labelRes) },
-                                    modifier = Modifier.padding(top = 8.dp),
-                                )
-                            }
-                        },
-                        { shapes ->
-                            SwitchRow(
-                                shapes, Icons.Rounded.TouchApp, stringResource(R.string.large_targets),
-                                stringResource(R.string.large_targets_desc), s.accessibility.largeTouchTargets,
-                                viewModel::setLargeTouchTargets,
-                            )
-                        },
-                        { shapes ->
-                            SwitchRow(
-                                shapes, Icons.Rounded.Vibration, stringResource(R.string.haptics),
-                                stringResource(R.string.haptics_desc), s.accessibility.haptics, viewModel::setHaptics,
-                            )
-                        },
-                    ),
-                )
-            }
-
-            item(key = "appearance") {
-                val rows = buildList<SettingsRow> {
-                    add { shapes ->
-                        ContentRow(shapes, Icons.Rounded.Palette, stringResource(R.string.theme)) {
-                            ConnectedChoice(
-                                options = ThemeMode.entries,
-                                selected = s.themeMode,
-                                onSelect = viewModel::setThemeMode,
-                                label = { stringResource(it.labelRes) },
-                                modifier = Modifier.padding(top = 8.dp),
-                            )
-                        }
-                    }
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        add { shapes ->
-                            SwitchRow(
-                                shapes, Icons.Rounded.ColorLens, stringResource(R.string.dynamic_color),
-                                stringResource(R.string.dynamic_color_desc), s.dynamicColor, viewModel::setDynamicColor,
-                            )
-                        }
-                    }
-                    add { shapes ->
-                        SwitchRow(
-                            shapes, Icons.Rounded.DarkMode, stringResource(R.string.pure_black),
-                            stringResource(R.string.pure_black_desc), s.pureBlack, viewModel::setPureBlack,
-                        )
-                    }
-                    add { shapes ->
-                        ContentRow(shapes, Icons.Rounded.Language, stringResource(R.string.language)) {
-                            ConnectedChoice(
-                                options = listOf(AppLanguage.SYSTEM) + AppLanguage.supported,
-                                selected = s.appLanguage,
-                                onSelect = viewModel::setLanguage,
-                                label = { languageLabel(it) },
-                                modifier = Modifier.padding(top = 8.dp),
-                            )
-                        }
-                    }
-                }
-                SettingsGroup(stringResource(R.string.appearance), rows)
-            }
-
             item(key = "about") {
                 SettingsGroup(
                     stringResource(R.string.about),
@@ -657,7 +485,7 @@ fun SettingsScreen(
                                     }
                                 },
                             ) {
-                                // The notes come first now. Going to a web page to find out what a
+                                // The notes come first. Going to a web page to find out what a
                                 // download changes, after agreeing to it, is backwards.
                                 if (updateState is UpdateChecker.State.Available) showUpdate = true
                                 else viewModel.checkForUpdates()
@@ -677,21 +505,14 @@ fun SettingsScreen(
                                 ) { context.startSafely(SystemIntents.url(SPONSORS_URL)) }
                             }
                         },
-                        // Both licences ask to be named with a link back to the source.
-                        credits?.let { c ->
-                            @Composable { shapes: ListItemShapes ->
-                                NavRow(shapes, Icons.AutoMirrored.Rounded.MenuBook, c.text.name, c.edition, trailing = { OpenIcon() }) {
-                                    context.startSafely(SystemIntents.url(c.text.source))
-                                }
-                            }
-                        },
+                        // One row for everything the licences ask to be named, rather than three.
                         credits?.let { c ->
                             @Composable { shapes: ListItemShapes ->
                                 NavRow(
-                                    shapes, Icons.Rounded.Translate, c.translation.name,
-                                    stringResource(R.string.translated_by, c.translation.translator, c.translation.license),
+                                    shapes, Icons.AutoMirrored.Rounded.MenuBook, stringResource(R.string.credits),
+                                    stringResource(R.string.credits_desc, c.text.name, c.translation.name, c.translation.translator),
                                     trailing = { OpenIcon() },
-                                ) { context.startSafely(SystemIntents.url(c.translation.source)) }
+                                ) { context.startSafely(SystemIntents.url(c.text.source)) }
                             }
                         },
                         { shapes ->
@@ -806,6 +627,13 @@ fun SettingsScreen(
                 showUpdate = false
             },
             onDismiss = { showUpdate = false },
+        )
+    }
+    if (showIqama) {
+        IqamaSheet(
+            iqama = s.iqama,
+            onEdit = { dialog = SettingsDialog.Iqama(it) },
+            onDismiss = { showIqama = false },
         )
     }
     if (showSupport) SupportSheet(onDismiss = { showSupport = false })
@@ -1143,5 +971,44 @@ private fun CalamityDialog(active: Boolean, onChoose: (Int) -> Unit, onDismiss: 
     )
 }
 
-/** A short ladder rather than a slider: three named steps are easier to choose between than sixty. */
+/** A short ladder rather than a slider: four named steps are easier to choose between than sixty. */
 private val TEXT_SCALES = listOf(1f, 1.15f, 1.3f, 1.5f)
+
+@get:StringRes
+private val Float.labelRes: Int
+    get() = when {
+        this <= 1f -> R.string.text_scale_default
+        this <= 1.15f -> R.string.text_scale_large
+        this <= 1.3f -> R.string.text_scale_larger
+        else -> R.string.text_scale_largest
+    }
+
+/** The five prayers' iqama times, one tap in from the prayer-times group. */
+@Composable
+private fun IqamaSheet(iqama: Map<Prayer, IqamaSetting>, onEdit: (Prayer) -> Unit, onDismiss: () -> Unit) {
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
+            Text(
+                stringResource(R.string.iqama_sheet_intro),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(vertical = 12.dp),
+            )
+            Prayer.obligatory.forEachIndexed { index, prayer ->
+                NavRow(
+                    ListItemDefaults.segmentedShapes(index, Prayer.obligatory.size),
+                    prayer.icon,
+                    stringResource(prayer.nameRes),
+                    iqamaSummary(iqama.getValue(prayer)),
+                ) { onEdit(prayer) }
+            }
+        }
+    }
+}
+
+/** "25 minutes after the adhan", or how many prayers differ from the rest. */
+@Composable
+private fun iqamaOverview(iqama: Map<Prayer, IqamaSetting>): String {
+    val distinct = iqama.values.distinct()
+    return if (distinct.size == 1) iqamaSummary(distinct.first()) else stringResource(R.string.iqama_varies)
+}

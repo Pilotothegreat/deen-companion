@@ -112,25 +112,12 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
     suspend fun setLastReadPage(page: Int) = edit { it[Keys.LAST_READ_PAGE] = page }
 
-    suspend fun setUseIpLocationFallback(enabled: Boolean) = edit { it[Keys.IP_FALLBACK] = enabled }
-
     suspend fun setAthkarReminders(enabled: Boolean) = edit { it[Keys.ATHKAR_REMINDERS] = enabled }
 
-    suspend fun setAthkarFontSize(size: Int) =
-        edit { it[Keys.ATHKAR_FONT_SIZE] = size.coerceIn(Defaults.ATHKAR_FONT_RANGE) }
-
-    suspend fun setAthkarShowTranslation(show: Boolean) = edit { it[Keys.ATHKAR_TRANSLATION] = show }
-
-    suspend fun setAthkarShowTransliteration(show: Boolean) = edit { it[Keys.ATHKAR_TRANSLITERATION] = show }
 
     // Smart features
-    suspend fun setWeatherEnabled(on: Boolean) = edit { it[Keys.SMART_WEATHER] = on }
-
-    suspend fun setOccasionsEnabled(on: Boolean) = edit { it[Keys.SMART_OCCASIONS] = on }
-
-    suspend fun setTravelEnabled(on: Boolean) = edit { it[Keys.SMART_TRAVEL] = on }
-
-    suspend fun setNaturalEventsEnabled(on: Boolean) = edit { it[Keys.SMART_EVENTS] = on }
+    /** The one switch for the Islamic year, the weather, travel and natural events. */
+    suspend fun setReactToTheWorld(on: Boolean) = edit { it[Keys.REACT_TO_WORLD] = on }
 
     /** Pass 0 to turn "times of calamity" off. */
     suspend fun setCalamityUntil(epochMillis: Long) = edit { it[Keys.CALAMITY_UNTIL] = epochMillis }
@@ -149,8 +136,6 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
     suspend fun setTravelState(state: TravelState) = edit { it[Keys.TRAVEL_STATE] = state.name }
 
-    suspend fun setHijriDayStartsAtMaghrib(on: Boolean) = edit { it[Keys.HIJRI_MAGHRIB] = on }
-
     suspend fun setSafarKm(km: Int) = edit { it[Keys.SAFAR_KM] = km.coerceIn(Defaults.SAFAR_RANGE) }
 
     // Sounds and early reminders
@@ -165,13 +150,6 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     suspend fun setSilenceMinutes(minutes: Int) = edit { it[Keys.SILENCE_MINUTES] = minutes.coerceAtLeast(0) }
 
     // Quran
-    suspend fun setTranslation(id: String) = edit { it[Keys.QURAN_TRANSLATION] = id }
-
-    suspend fun setSecondTranslation(id: String?) = edit {
-        if (id.isNullOrBlank()) it.remove(Keys.QURAN_TRANSLATION_SECOND) else it[Keys.QURAN_TRANSLATION_SECOND] = id
-    }
-
-    suspend fun setTajweed(on: Boolean) = edit { it[Keys.QURAN_TAJWEED] = on }
 
     suspend fun setAudioCacheMb(mb: Int) = edit { it[Keys.AUDIO_CACHE_MB] = mb.coerceIn(Defaults.AUDIO_CACHE_RANGE) }
 
@@ -187,8 +165,6 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
             .filter { (it.substringAfterLast('@').toLongOrNull() ?: 0L) > onEpochDay - 7 }
         prefs[Keys.DISMISSED_MOMENTS] = (kept + "$id@$onEpochDay").toSet()
     }
-
-    suspend fun setContinuousPlayback(on: Boolean) = edit { it[Keys.CONTINUOUS_PLAYBACK] = on }
 
     suspend fun setRepeat(mode: RepeatMode, count: Int) = edit {
         it[Keys.REPEAT_MODE] = mode.name
@@ -260,6 +236,9 @@ internal object Keys {
     val NOTIFICATIONS = booleanPreferencesKey("notification_enabled")
     val MUTED_PRAYERS = stringSetPreferencesKey("muted_prayers")
     val DISMISSED_MOMENTS = stringSetPreferencesKey("dismissed_moments")
+
+    /** One switch where five used to be: the Islamic year, weather, travel and natural events. */
+    val REACT_TO_WORLD = booleanPreferencesKey("react_to_the_world")
     val HOME_LATITUDE = doublePreferencesKey("home_latitude")
     val HOME_LONGITUDE = doublePreferencesKey("home_longitude")
     val TRAVEL_STATE = stringPreferencesKey("travel_state")
@@ -270,7 +249,6 @@ internal object Keys {
     val SHOW_TRANSLATION = booleanPreferencesKey("show_translation")
     val RECITER = stringPreferencesKey("reciter")
     val LAST_READ_PAGE = intPreferencesKey("quran_last_page")
-    val IP_FALLBACK = booleanPreferencesKey("use_ip_location_fallback")
     val UPDATE_CHECKED_AT = longPreferencesKey("github_check_timestamp")
     val UPDATE_LATEST = stringPreferencesKey("github_check_latest_version")
     val LANGUAGE_MIGRATED = booleanPreferencesKey("language_migrated")
@@ -278,19 +256,10 @@ internal object Keys {
     val COUNTRY_CODE = stringPreferencesKey("country_code")
     val LOCATION_SOURCE = stringPreferencesKey("location_source")
     val ATHKAR_REMINDERS = booleanPreferencesKey("athkar_reminders")
-    val ATHKAR_FONT_SIZE = intPreferencesKey("athkar_font_size")
-    val ATHKAR_TRANSLATION = booleanPreferencesKey("athkar_show_translation")
-    val ATHKAR_TRANSLITERATION = booleanPreferencesKey("athkar_show_transliteration")
     val METHOD_AUTO = booleanPreferencesKey("calc_method_auto")
     val HIGH_LATITUDE = stringPreferencesKey("high_latitude_rule")
 
-    // Smart features
-    val SMART_WEATHER = booleanPreferencesKey("smart_weather")
-    val SMART_OCCASIONS = booleanPreferencesKey("smart_occasions")
-    val SMART_TRAVEL = booleanPreferencesKey("smart_travel")
-    val SMART_EVENTS = booleanPreferencesKey("smart_natural_events")
     val CALAMITY_UNTIL = longPreferencesKey("calamity_until")
-    val HIJRI_MAGHRIB = booleanPreferencesKey("hijri_day_starts_at_maghrib")
     val SAFAR_KM = intPreferencesKey("safar_km")
 
     // Sounds and early reminders
@@ -299,14 +268,10 @@ internal object Keys {
     val SILENCE_MINUTES = intPreferencesKey("silence_during_prayer_minutes")
 
     // Quran
-    val QURAN_TRANSLATION = stringPreferencesKey("quran_translation")
-    val QURAN_TRANSLATION_SECOND = stringPreferencesKey("quran_translation_secondary")
-    val QURAN_TAJWEED = booleanPreferencesKey("quran_tajweed")
     val AUDIO_CACHE_MB = intPreferencesKey("quran_audio_cache_mb")
     val PLAYBACK_SPEED = floatPreferencesKey("quran_playback_speed")
     val REPEAT_MODE = stringPreferencesKey("quran_repeat_mode")
     val REPEAT_COUNT = intPreferencesKey("quran_repeat_count")
-    val CONTINUOUS_PLAYBACK = booleanPreferencesKey("quran_continuous_playback")
 
     // Accessibility
     val SIMPLE_MODE = booleanPreferencesKey("simple_mode")
@@ -375,19 +340,11 @@ internal fun Preferences.toAppSettings(): AppSettings = AppSettings(
     showTranslation = this[Keys.SHOW_TRANSLATION] ?: false,
     reciter = enumOrNull<Reciter>(this[Keys.RECITER]) ?: Reciter.MISHARY,
     lastReadPage = this[Keys.LAST_READ_PAGE] ?: 0,
-    useIpLocationFallback = this[Keys.IP_FALLBACK] ?: false,
     appLanguage = this[Keys.LANGUAGE] ?: AppLanguage.SYSTEM,
     athkarReminders = this[Keys.ATHKAR_REMINDERS] ?: false,
-    athkarFontSize = (this[Keys.ATHKAR_FONT_SIZE] ?: Defaults.ATHKAR_FONT_SIZE).coerceIn(Defaults.ATHKAR_FONT_RANGE),
-    athkarShowTranslation = this[Keys.ATHKAR_TRANSLATION],
-    athkarShowTransliteration = this[Keys.ATHKAR_TRANSLITERATION] ?: false,
     smart = SmartSettings(
-        weather = this[Keys.SMART_WEATHER] ?: true,
-        occasions = this[Keys.SMART_OCCASIONS] ?: true,
-        travel = this[Keys.SMART_TRAVEL] ?: true,
-        naturalEvents = this[Keys.SMART_EVENTS] ?: true,
+        reactToTheWorld = this[Keys.REACT_TO_WORLD] ?: true,
         calamityUntil = this[Keys.CALAMITY_UNTIL] ?: 0L,
-        hijriDayStartsAtMaghrib = this[Keys.HIJRI_MAGHRIB] ?: true,
         safarKm = (this[Keys.SAFAR_KM] ?: Defaults.SAFAR_KM).coerceIn(Defaults.SAFAR_RANGE),
         homeLatitude = this[Keys.HOME_LATITUDE],
         homeLongitude = this[Keys.HOME_LONGITUDE],
@@ -401,14 +358,10 @@ internal fun Preferences.toAppSettings(): AppSettings = AppSettings(
         silenceMinutes = this[Keys.SILENCE_MINUTES] ?: 0,
     ),
     quran = QuranSettings(
-        translationId = this[Keys.QURAN_TRANSLATION] ?: Defaults.TRANSLATION,
-        secondTranslationId = this[Keys.QURAN_TRANSLATION_SECOND]?.takeIf { it.isNotBlank() },
-        tajweed = this[Keys.QURAN_TAJWEED] ?: false,
         audioCacheMb = (this[Keys.AUDIO_CACHE_MB] ?: Defaults.AUDIO_CACHE_MB).coerceIn(Defaults.AUDIO_CACHE_RANGE),
         playbackSpeed = (this[Keys.PLAYBACK_SPEED] ?: 1f).coerceIn(0.5f, 2f),
         repeatMode = enumOrNull<RepeatMode>(this[Keys.REPEAT_MODE]) ?: RepeatMode.OFF,
         repeatCount = (this[Keys.REPEAT_COUNT] ?: 3).coerceIn(1, 20),
-        continuousPlayback = this[Keys.CONTINUOUS_PLAYBACK] ?: true,
     ),
     accessibility = AccessibilitySettings(
         simpleMode = this[Keys.SIMPLE_MODE] ?: false,

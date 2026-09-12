@@ -90,7 +90,7 @@ class EarthquakeRepositoryTest {
         var calls = 0
         val counting: suspend (String) -> String = { calls++; feed(now) }
 
-        EarthquakeRepository(FakeDao(), counting).refresh(settings(SmartSettings(naturalEvents = false)), now)
+        EarthquakeRepository(FakeDao(), counting).refresh(settings(SmartSettings(reactToTheWorld = false)), now)
         assertEquals("off means off", 0, calls)
 
         EarthquakeRepository(FakeDao(), counting).refresh(

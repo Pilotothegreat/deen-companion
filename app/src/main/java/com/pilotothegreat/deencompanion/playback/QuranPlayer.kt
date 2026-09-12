@@ -93,7 +93,7 @@ class QuranPlayer(
     init {
         scope.launch {
             settings.settings
-                .map { PlaybackPrefs(it.quran.repeatMode, it.quran.repeatCount, it.quran.playbackSpeed, it.quran.continuousPlayback, it.quran.audioCacheMb) }
+                .map { PlaybackPrefs(it.quran.repeatMode, it.quran.repeatCount, it.quran.playbackSpeed, true, it.quran.audioCacheMb) }
                 .distinctUntilChanged()
                 .collect { new ->
                     val speedChanged = new.speed != prefs.speed

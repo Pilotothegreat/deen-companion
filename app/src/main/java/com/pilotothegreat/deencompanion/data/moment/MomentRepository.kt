@@ -59,8 +59,8 @@ class MomentRepository(
                 listOfNotNull(
                     Producers.calamity(s, now),
                     Producers.weather(weather.current(), now),
-                    Producers.eclipse(nextEclipse.takeIf { s.smart.naturalEvents }, eclipseVisibleHere, now),
-                    Producers.earthquake(quakes.firstOrNull().takeIf { s.smart.naturalEvents }, now),
+                    Producers.eclipse(nextEclipse.takeIf { s.smart.reactToTheWorld }, eclipseVisibleHere, now),
+                    Producers.earthquake(quakes.firstOrNull().takeIf { s.smart.reactToTheWorld }, now),
                     Producers.driving(location.lastFixSpeed, now),
                 ) +
                 Producers.travel(s, distanceFromHome(s), now)
@@ -99,7 +99,7 @@ class MomentRepository(
     }
 
     private suspend fun refreshEclipse(s: AppSettings, nowMillis: Long) {
-        if (!s.smart.naturalEvents) {
+        if (!s.smart.reactToTheWorld) {
             nextEclipse = null
             return
         }
@@ -128,7 +128,7 @@ class MomentRepository(
     }
 
     private suspend fun updateTravelState(s: AppSettings) {
-        if (!s.smart.travel) return
+        if (!s.smart.reactToTheWorld) return
         val distance = distanceFromHome(s) ?: return
         val next = Travel.state(distance, s.smart.safarKm, s.smart.travelState)
         if (next != s.smart.travelState) settings.setTravelState(next)

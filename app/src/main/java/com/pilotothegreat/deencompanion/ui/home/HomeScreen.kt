@@ -194,7 +194,7 @@ fun HomeScreen(
         PullToRefreshBox(
             isRefreshing = isRefreshing,
             onRefresh = {
-                if (permissions.location || current.settings.useIpLocationFallback) viewModel.refreshLocation()
+                if (permissions.location) viewModel.refreshLocation()
                 else locationPermission.launch(LOCATION_PERMISSIONS)
             },
             state = pullState,

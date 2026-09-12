@@ -17,21 +17,17 @@ import com.pilotothegreat.deencompanion.data.settings.SoundSettings
 import com.pilotothegreat.deencompanion.data.settings.toAppSettings
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** The settings added in 1.8.0: an install that has never seen them must behave exactly as before. */
+/** An install that has never opened settings must behave exactly as the app is meant to out of the box. */
 class SmartSettingsMappingTest {
 
     @Test fun defaultsMatchTheShippedBehaviour() {
         val settings = emptyPreferences().toAppSettings()
 
-        assertTrue("weather is on by default", settings.smart.weather)
-        assertTrue(settings.smart.occasions)
-        assertTrue(settings.smart.travel)
-        assertTrue(settings.smart.naturalEvents)
-        assertTrue("the Islamic day turns over at Maghrib", settings.smart.hijriDayStartsAtMaghrib)
+        assertTrue("the app reacts to the day and the weather by default", settings.smart.reactToTheWorld)
+        assertTrue("the Islamic day turns over at Maghrib, which is not a preference", settings.smart.hijriDayStartsAtMaghrib)
         assertFalse("calamity mode stays off until asked for", settings.smart.calamityActive(nowMillis = 1_000))
         assertEquals(Defaults.SAFAR_KM, settings.smart.safarKm)
 
@@ -39,9 +35,6 @@ class SmartSettingsMappingTest {
         assertEquals("no early reminder until one is chosen", 0, settings.sounds.preReminderMinutes)
         assertEquals(0, settings.sounds.silenceMinutes)
 
-        assertEquals(Defaults.TRANSLATION, settings.quran.translationId)
-        assertNull(settings.quran.secondTranslationId)
-        assertFalse(settings.quran.tajweed)
         assertEquals(RepeatMode.OFF, settings.quran.repeatMode)
         assertEquals(1f, settings.quran.playbackSpeed, 0.001f)
 
@@ -55,19 +48,14 @@ class SmartSettingsMappingTest {
 
     @Test fun storedValuesRoundTrip() {
         val settings = preferencesOf(
-            booleanPreferencesKey("smart_weather") to false,
-            booleanPreferencesKey("smart_natural_events") to false,
+            booleanPreferencesKey("react_to_the_world") to false,
             longPreferencesKey("calamity_until") to 5_000L,
-            booleanPreferencesKey("hijri_day_starts_at_maghrib") to false,
             intPreferencesKey("safar_km") to 100,
             stringPreferencesKey("fajr_adhan_sound") to "makkah",
             stringPreferencesKey("asr_adhan_sound") to SoundSettings.SILENT,
             intPreferencesKey("pre_reminder_minutes") to 15,
             stringSetPreferencesKey("pre_reminder_prayers") to setOf("Fajr", "Maghrib"),
             intPreferencesKey("silence_during_prayer_minutes") to 20,
-            stringPreferencesKey("quran_translation") to "pickthall",
-            stringPreferencesKey("quran_translation_secondary") to "muyassar",
-            booleanPreferencesKey("quran_tajweed") to true,
             floatPreferencesKey("quran_playback_speed") to 1.5f,
             stringPreferencesKey("quran_repeat_mode") to "AYAH",
             intPreferencesKey("quran_repeat_count") to 7,
@@ -80,11 +68,9 @@ class SmartSettingsMappingTest {
             intPreferencesKey("last_seen_version_code") to 195,
         ).toAppSettings()
 
-        assertFalse(settings.smart.weather)
-        assertFalse(settings.smart.naturalEvents)
+        assertFalse(settings.smart.reactToTheWorld)
         assertTrue(settings.smart.calamityActive(nowMillis = 4_000))
         assertFalse(settings.smart.calamityActive(nowMillis = 6_000))
-        assertFalse(settings.smart.hijriDayStartsAtMaghrib)
         assertEquals(100, settings.smart.safarKm)
 
         assertEquals("makkah", settings.sounds.adhanFor(Prayer.FAJR))
@@ -94,9 +80,6 @@ class SmartSettingsMappingTest {
         assertEquals(setOf(Prayer.FAJR, Prayer.MAGHRIB), settings.sounds.preReminderPrayers)
         assertEquals(20, settings.sounds.silenceMinutes)
 
-        assertEquals("pickthall", settings.quran.translationId)
-        assertEquals("muyassar", settings.quran.secondTranslationId)
-        assertTrue(settings.quran.tajweed)
         assertEquals(1.5f, settings.quran.playbackSpeed, 0.001f)
         assertEquals(RepeatMode.AYAH, settings.quran.repeatMode)
         assertEquals(7, settings.quran.repeatCount)

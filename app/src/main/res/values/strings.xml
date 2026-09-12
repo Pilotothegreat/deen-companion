@@ -39,7 +39,7 @@
     <string name="megabytes">%1$s MB</string>
     <string name="audio_cache">Downloaded recitation</string>
     <string name="audio_cache_desc">Up to %1$s MB · %2$s used</string>
-    <string name="audio_cache_explainer">Ayahs you have listened to stay on the phone and play without a connection. The oldest are removed first once the limit is reached.</string>
+    <string name="audio_cache_explainer">Ayahs you have listened to stay on the phone and play again without a connection.</string>
     <string name="audio_cache_used">Currently using %1$s</string>
     <string name="audio_cache_clear">Clear</string>
     <!-- Khatma -->
@@ -144,8 +144,6 @@
     <string name="repeat_progress">Repeat %1$s</string>
     <string name="playback_speed">Speed</string>
     <string name="speed_multiplier">%1$s×</string>
-    <string name="continuous_playback">Continue into the next surah</string>
-    <string name="continuous_playback_desc">Keep reciting instead of stopping at the end</string>
     <string name="retry">Retry</string>
     <string name="playback_error_offline">No connection. Ayahs already downloaded still play.</string>
     <string name="playback_error_missing">This reciter doesn\'t have that ayah. Try another reciter.</string>
@@ -210,10 +208,7 @@
     <string name="compass_w">W</string>
 
     <!-- Settings -->
-    <string name="settings_location">Location</string>
     <string name="current_location">Current location</string>
-    <string name="ip_location_fallback_title">Internet location fallback</string>
-    <string name="ip_location_fallback_desc">When GPS isn\'t available, estimate your city from your IP address. Sends your IP to ipapi.co or freeipapi.com.</string>
     <string name="prayer_times">Prayer times</string>
     <string name="calculation_method">Calculation method</string>
     <string name="asr_juristic_method">Asr time</string>
@@ -234,7 +229,7 @@
     <string name="calc_turkey">Presidency of Religious Affairs, Turkey</string>
     <string name="calc_moonsighting">Moonsighting Committee Worldwide</string>
     <string name="method_automatic">Automatic</string>
-    <string name="method_automatic_desc">Follows your location · %1$s</string>
+    <string name="method_automatic_desc">Following your country · %1$s</string>
     <string name="high_latitude_rule">High-latitude rule</string>
     <string name="high_latitude_auto">Automatic</string>
     <string name="high_latitude_middle">Middle of the night</string>
@@ -281,16 +276,13 @@
     <string name="athkar_left">left</string>
     <string name="athkar_show_translation">Translation</string>
     <string name="athkar_show_transliteration">Transliteration</string>
-    <string name="athkar_translation_desc">Show the English meaning</string>
-    <string name="athkar_transliteration_desc">Show the Arabic in Latin letters</string>
     <string name="athkar_virtue_source">Virtue and source</string>
     <string name="athkar_reset">Start again</string>
     <string name="athkar_reset_confirm">Clear today\'s count for this list?</string>
     <string name="athkar_finished">All done. May Allah accept it from you.</string>
     <string name="athkar_back">Back to athkar</string>
     <string name="athkar_reminders">Morning and evening reminders</string>
-    <string name="athkar_reminders_desc">Shortly after Fajr and Asr</string>
-    <string name="athkar_text_size">Athkar text size</string>
+    <string name="athkar_reminders_desc">A reminder for the morning and evening athkar, after Fajr and after Asr</string>
     <string name="channel_athkar">Athkar reminders</string>
     <string name="channel_athkar_desc">Morning and evening athkar</string>
     <string name="athkar_morning_reminder">Morning athkar</string>
@@ -309,24 +301,15 @@
     <string name="iqama_offset_hint">A fixed time earlier than the adhan uses the adhan time.</string>
     <string name="notifications">Notifications</string>
     <string name="prayer_notifications">Prayer notifications</string>
-    <string name="prayer_notifications_desc">Adhan and iqama alerts</string>
+    <string name="prayer_notifications_desc">A notification at each prayer that becomes a countdown to the iqama</string>
     <string name="exact_alarms">On-time alarms</string>
-    <string name="exact_alarms_granted">Allowed</string>
-    <string name="exact_alarms_denied">Not allowed, so notifications may be a few minutes late</string>
     <string name="adhan_sound">Adhan sound</string>
-    <string name="iqama_sound">Iqama sound</string>
-    <string name="sound_desc">Sound and vibration in system settings</string>
-    <string name="quran_settings">Quran</string>
     <string name="arabic_text_size">Arabic text size</string>
     <string name="appearance">Appearance</string>
     <string name="theme">Theme</string>
     <string name="theme_system">System</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
-    <string name="dynamic_color">Dynamic color</string>
-    <string name="dynamic_color_desc">Use colors from your wallpaper</string>
-    <string name="pure_black">Pure black</string>
-    <string name="pure_black_desc">Black background in dark theme</string>
     <string name="language">Language</string>
     <string name="language_system">System</string>
     <string name="language_english" translatable="false">English</string>
@@ -341,11 +324,10 @@
     <string name="support_development">Support development</string>
     <string name="support_development_desc">Bilal is free and ad-free</string>
     <string name="source_code">Source code</string>
-    <string name="translated_by">Translated by %1$s · %2$s</string>
     <string name="source_code_desc" translatable="false">github.com/Pilotothegreat/deen-companion</string>
     <string name="privacy_policy">Privacy policy</string>
     <string name="app_info">App info</string>
-    <string name="app_info_desc">Permissions and storage</string>
+    <string name="app_info_desc">Permissions, storage and notifications, in your phone\'s own settings</string>
 
     <!-- Support sheet -->
     <string name="support_title">Support Bilal</string>
@@ -414,8 +396,6 @@
     <string name="occasion_white_days_body">Day %1$s. Fasting the 13th, 14th and 15th of each month is as fasting the whole month.</string>
     <string name="occasion_sunnah_fast">Monday and Thursday</string>
     <string name="occasion_sunnah_fast_body">Deeds are presented to Allah on these days, and the Prophet صلى الله عليه وسلم liked his to be presented while fasting.</string>
-    <string name="hijri_maghrib">Islamic date changes at sunset</string>
-    <string name="hijri_maghrib_desc">As the Islamic day does. Night-anchored things — the odd nights, al-Kahf, the takbir — are a day out without it.</string>
 
     <!-- Weather and travel -->
     <string name="weather_rain">It is raining</string>
@@ -442,13 +422,6 @@
     <string name="travel_driving_body">Turn this on and the app keeps things brief until you stop.</string>
     <string name="travel_end">I am home again</string>
     <string name="smart_features">Smart suggestions</string>
-    <string name="smart_weather">Weather</string>
-    <string name="smart_weather_desc">Shows the dua for rain, thunder, wind and extreme temperatures. Sends your location rounded to about a kilometre to Open-Meteo, at most once an hour, only while the app is open.</string>
-    <string name="smart_travel">Travel</string>
-    <string name="smart_travel_desc">Asks whether you are travelling once you are more than %1$s km from home, then offers the travel duas and pauses iqama alerts.</string>
-    <string name="smart_home">Home</string>
-    <string name="smart_home_set">Set. Tap to move it to where you are now.</string>
-    <string name="smart_home_unset">Not set yet. Tap to use your current location.</string>
 
     <!-- Natural events -->
     <string name="eclipse_solar">A solar eclipse</string>
@@ -462,12 +435,10 @@
     <string name="calamity_body">Qunut an-nazilah in your prayers, dua for the oppressed and the afflicted, and sadaqah. Turn this off in Settings when you wish.</string>
     <string name="calamity_mode">Times of calamity</string>
     <string name="calamity_mode_on">On until %1$s</string>
-    <string name="calamity_mode_off">Qunut an-nazilah, duas for the afflicted and a sadaqah reminder, for as long as you choose</string>
+    <string name="calamity_mode_off">Qunut an-nazilah, duas for the afflicted, and a reminder to give</string>
     <string name="calamity_for_week">For a week</string>
     <string name="calamity_for_month">For a month</string>
     <string name="calamity_turn_off">Turn off</string>
-    <string name="smart_events">Eclipses and earthquakes</string>
-    <string name="smart_events_desc">Eclipses come from a table bundled with the app and work offline. Nearby earthquakes come from the USGS public feed and never raise a notification — Android already does that.</string>
 
     <!-- Alarms -->
     <string name="pre_prayer_title">%1$s soon</string>
@@ -475,7 +446,7 @@
     <string name="action_prayed">Prayed</string>
     <string name="action_snooze">In 10 minutes</string>
     <string name="reliability">Make alerts arrive</string>
-    <string name="reliability_intro">Android and some phone makers stop background apps in ways no app can see. Anything marked in red below will delay or silence your prayer alerts.</string>
+    <string name="reliability_intro">Anything marked in red below will delay or silence your prayer alerts.</string>
     <string name="reliability_notifications">Notification permission</string>
     <string name="reliability_notifications_body">Without it Android drops every alert before it is shown.</string>
     <string name="reliability_exact">Exact alarms</string>
@@ -492,11 +463,10 @@
     <string name="reliability_oem_samsung">On Samsung: Settings > Battery > Background usage limits, and make sure Bilal is not in Sleeping or Deep sleeping apps.</string>
     <string name="reliability_oem_other">If alerts still arrive late, look for a battery or autostart setting for Bilal in your phone\'s own settings and allow it to run in the background.</string>
     <string name="silence_during_prayer">Silence during prayer</string>
-    <string name="silence_during_prayer_desc">Turns on Do Not Disturb from the iqama and turns it off again afterwards. Alarms still sound, and the restore is scheduled at the same moment as the silence so it can never be left on.</string>
+    <string name="silence_during_prayer_desc">Holds your phone quiet from the iqama and gives it back afterwards. Alarms still sound.</string>
     <string name="silence_needs_permission">Needs Do Not Disturb access</string>
     <string name="pre_reminder">Reminder before the adhan</string>
     <string name="pre_reminder_off">Off</string>
-    <string name="adhan_sound_choice">Adhan sound</string>
     <string name="widget_moment">Right now</string>
     <string name="widget_moment_desc">Whatever matters most at this moment: the night of Ramadan, iftar approaching, the dua for the rain outside. It falls back to today\'s date when there is nothing to say.</string>
     <string name="widget_config">Widget</string>
@@ -511,36 +481,29 @@
     <string name="widget_config_suggested">Whatever fits now</string>
 
     <!-- Accessibility -->
-    <string name="accessibility">Accessibility</string>
     <string name="simple_mode">Simple mode</string>
-    <string name="simple_mode_desc">Bigger text, stronger contrast, larger targets and no decorative motion, in one switch.</string>
+    <string name="simple_mode_desc">Bigger text, stronger contrast, wider buttons and no movement, in one switch</string>
     <string name="text_scale">Text size</string>
-    <string name="text_scale_value">%1$s×</string>
     <string name="contrast">Contrast</string>
     <string name="contrast_system">System</string>
     <string name="contrast_medium">Medium</string>
     <string name="contrast_high">High</string>
-    <string name="reduce_motion">Motion</string>
     <string name="motion_system">System</string>
     <string name="motion_on">Reduced</string>
     <string name="motion_off">Full</string>
-    <string name="large_targets">Larger touch targets</string>
-    <string name="large_targets_desc">Raises the smallest tappable area, for anyone whose aim is not steady.</string>
-    <string name="haptics">Vibration</string>
-    <string name="haptics_desc">A short buzz on the tasbih and the athkar counter.</string>
-    <string name="support_link_desc">A gift, with nothing received in return. Opens GitHub Sponsors.</string>
+    <string name="support_link_desc">A gift, with nothing received in return</string>
     <string name="general">General</string>
     <string name="backup_export">Save a backup</string>
-    <string name="backup_export_desc">Settings, bookmarks and your khatma, as a file you keep. Nothing is uploaded.</string>
+    <string name="backup_export_desc">Your settings, bookmarks and khatma, in a file you keep</string>
     <string name="backup_import">Restore a backup</string>
-    <string name="backup_import_desc">Replaces what is on this phone with what the file holds.</string>
+    <string name="backup_import_desc">Replaces what is on this phone with what the file holds</string>
     <string name="backup_saved">Backup saved</string>
     <string name="backup_restored">Backup restored</string>
     <string name="backup_error_unreadable">That file could not be read.</string>
     <string name="backup_error_wrong_file">That is not a Bilal backup.</string>
     <string name="backup_error_too_new">That backup was made by a newer version of Bilal. Update first.</string>
     <string name="reset_app">Reset everything</string>
-    <string name="reset_app_desc">Back to a fresh install. The Quran text and downloaded recitation stay.</string>
+    <string name="reset_app_desc">Back to a fresh start. The Quran and your downloaded recitation stay.</string>
     <string name="reset_confirm">Reset Bilal?</string>
     <string name="reset_confirm_body">Every setting, bookmark and plan on this phone is cleared. This cannot be undone, so save a backup first if you want one.</string>
     
@@ -587,4 +550,17 @@ Also: offline recitation with repeat and speed, a khatma plan, widget configurat
     <string name="onboarding_next">Next</string>
     <string name="onboarding_start">Start</string>
     <string name="iqama_waiting_body">Until the iqama for %1$s</string>
+    <string name="adhan_sound_desc">Choose the sound and vibration for the call to prayer</string>
+    <string name="reliability_summary_ok">Everything your phone needs to deliver them is in place</string>
+    <string name="reliability_summary_problem">Something on this phone is delaying or silencing your alerts</string>
+    <string name="reading">Reading</string>
+    <string name="smart_features_desc">Shows the dua for the rain or wind outside, the night of Ramadan you are in, Surah al-Kahf on Friday, and the duas for travel when you are away from home</string>
+    <string name="credits">Credits</string>
+    <string name="credits_desc">%1$s · %2$s, translated by %3$s</string>
+    <string name="text_scale_default">Default</string>
+    <string name="text_scale_large">Large</string>
+    <string name="text_scale_larger">Larger</string>
+    <string name="text_scale_largest">Largest</string>
+    <string name="iqama_sheet_intro">How long after each adhan your mosque calls the iqama.</string>
+    <string name="iqama_varies">Different for each prayer</string>
 </resources>

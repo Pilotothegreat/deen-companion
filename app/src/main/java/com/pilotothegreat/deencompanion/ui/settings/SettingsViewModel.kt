@@ -156,36 +156,22 @@ private val _backupMessage = MutableStateFlow<Int?>(null)
 
     fun setTextScale(scale: Float) = launch { repository.setTextScale(scale) }
 
-    fun setContrast(mode: ContrastMode) = launch { repository.setContrast(mode) }
-
-    fun setReduceMotion(mode: ReduceMotion) = launch { repository.setReduceMotion(mode) }
-
-    fun setLargeTouchTargets(on: Boolean) = launch { repository.setLargeTouchTargets(on) }
-
-    fun setHaptics(on: Boolean) = launch { repository.setHaptics(on) }
+    fun setReactToTheWorld(on: Boolean) = launch { repository.setReactToTheWorld(on) }
 
     fun setPreReminder(minutes: Int) = launch { repository.setPreReminderMinutes(minutes) }
 
     fun setSilenceMinutes(minutes: Int) = launch { repository.setSilenceMinutes(minutes) }
-
-        fun setNaturalEvents(on: Boolean) = launch { repository.setNaturalEventsEnabled(on) }
 
     /** Zero turns it off; otherwise it runs for this many days and then lapses on its own. */
     fun setCalamityDays(days: Int) = launch {
         repository.setCalamityUntil(if (days <= 0) 0L else System.currentTimeMillis() + days * 86_400_000L)
     }
 
-    fun setSmartWeather(on: Boolean) = launch { repository.setWeatherEnabled(on) }
-
-    fun setSmartTravel(on: Boolean) = launch { repository.setTravelEnabled(on) }
-
     /** Home is wherever you are when you say so; travel is measured from it. */
     fun anchorHomeHere() = launch {
         val current = repository.current()
         if (!current.location.isDefault) repository.setHome(current.location.latitude, current.location.longitude)
     }
-
-        fun setContinuousPlayback(on: Boolean) = launch { repository.setContinuousPlayback(on) }
 
     fun clearAudioCache() = launch {
         withContext(Dispatchers.IO) { AudioCache.clear() }
@@ -196,7 +182,6 @@ private val _backupMessage = MutableStateFlow<Int?>(null)
         _audioCacheBytes.value = withContext(Dispatchers.IO) { AudioCache.sizeBytes(context) }
     }
 
-    fun setUseIpLocationFallback(enabled: Boolean) = launch { repository.setUseIpLocationFallback(enabled) }
     fun setMethod(method: CalculationMethod) = launch { repository.setMethod(method) }
     fun setMethodAuto() = launch { repository.setMethodAuto() }
     fun setAsrSchool(school: AsrSchool) = launch { repository.setAsrSchool(school) }
@@ -204,19 +189,13 @@ private val _backupMessage = MutableStateFlow<Int?>(null)
     fun setAdjustment(prayer: Prayer, minutes: Int) = launch { repository.setAdjustment(prayer, minutes) }
     fun resetAdjustments() = launch { repository.resetAdjustments() }
     fun setIqama(prayer: Prayer, value: IqamaSetting) = launch { repository.setIqama(prayer, value) }
-fun setHijriDayStartsAtMaghrib(on: Boolean) = launch { repository.setHijriDayStartsAtMaghrib(on) }
 
     fun setHijriAdjustment(days: Int) = launch { repository.setHijriAdjustment(days) }
     fun setNotificationsEnabled(enabled: Boolean) = launch { repository.setNotificationsEnabled(enabled) }
     fun setThemeMode(mode: ThemeMode) = launch { repository.setThemeMode(mode) }
-    fun setDynamicColor(enabled: Boolean) = launch { repository.setDynamicColor(enabled) }
-    fun setPureBlack(enabled: Boolean) = launch { repository.setPureBlack(enabled) }
     fun setQuranFontSize(size: Int) = launch { repository.setQuranFontSize(size) }
     fun setReciter(reciter: Reciter) = launch { repository.setReciter(reciter) }
     fun setAthkarReminders(enabled: Boolean) = launch { repository.setAthkarReminders(enabled) }
-    fun setAthkarFontSize(size: Int) = launch { repository.setAthkarFontSize(size) }
-    fun setAthkarShowTranslation(show: Boolean) = launch { repository.setAthkarShowTranslation(show) }
-    fun setAthkarShowTransliteration(show: Boolean) = launch { repository.setAthkarShowTransliteration(show) }
 
     fun setLanguage(tag: String) = launch {
         repository.setAppLanguage(tag)

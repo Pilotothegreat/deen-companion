@@ -62,16 +62,11 @@ class LocationRepository(
         private set
 
     suspend fun refresh(): Result {
-        val allowIp = settings.current().useIpLocationFallback
         val fix = if (hasPermission()) deviceLocation() else null
         lastFixSpeed = fix?.takeIf { it.hasSpeed() }?.speed
-        val resolved = when {
-            fix != null -> {
-                val place = describe(fix.latitude, fix.longitude)
-                Resolved(fix.latitude, fix.longitude, place.city, place.countryCode, TimeZone.getDefault().id, LocationSource.DEVICE)
-            }
-            allowIp -> ipLocation()
-            else -> null
+        val resolved = fix?.let {
+            val place = describe(it.latitude, it.longitude)
+            Resolved(it.latitude, it.longitude, place.city, place.countryCode, TimeZone.getDefault().id, LocationSource.DEVICE)
         } ?: return if (hasPermission()) Result.UNAVAILABLE else Result.PERMISSION_MISSING
 
         settings.setLocation(
@@ -100,7 +95,7 @@ class LocationRepository(
         val location = current.location
         if (location.source == LocationSource.MANUAL) return
         if (location.isDefault || now - location.updatedAt > ONE_DAY) {
-            if (hasPermission() || current.useIpLocationFallback) refresh()
+            if (hasPermission()) refresh()
             return
         }
         if (!hasPermission()) return
@@ -204,38 +199,7 @@ class LocationRepository(
         }
     }
 
-    private suspend fun ipLocation(): Resolved? {
-        for (provider in IP_PROVIDERS) {
-            try {
-                val json = JSONObject(Http.getText(provider.url, timeoutMs = 5_000))
-                val latitude = json.getDouble(provider.latitude)
-                val longitude = json.getDouble(provider.longitude)
-                val place = describe(latitude, longitude)
-                val city = place.city ?: listOf(json.optString(provider.city), json.optString(provider.country))
-                    .filter { it.isNotBlank() }
-                    .joinToString(", ")
-                    .ifBlank { null }
-                val country = place.countryCode ?: json.optString(provider.countryCode).ifBlank { null }
-                val timezone = json.optString(provider.timezone).ifBlank { TimeZone.getDefault().id }
-                return Resolved(latitude, longitude, city, country, timezone, LocationSource.IP)
-            } catch (e: Exception) {
-                Timber.w(e, "IP location lookup failed: %s", provider.url)
-            }
-        }
-        return null
-    }
-
     private fun appLocale(): Locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
-
-    private class IpProvider(
-        val url: String,
-        val latitude: String,
-        val longitude: String,
-        val city: String,
-        val country: String,
-        val countryCode: String,
-        val timezone: String,
-    )
 
     private companion object {
         const val TWO_HOURS = 2 * 60 * 60 * 1000L
@@ -243,9 +207,5 @@ class LocationRepository(
         const val ONE_DAY = 24 * 60 * 60 * 1000L
         /** Moving further than this from the saved location counts as travel. */
         const val TRAVEL_KM = 25.0
-        val IP_PROVIDERS = listOf(
-            IpProvider("https://ipapi.co/json/", "latitude", "longitude", "city", "country_name", "country_code", "timezone"),
-            IpProvider("https://freeipapi.com/api/json", "latitude", "longitude", "cityName", "countryName", "countryCode", "timeZone"),
-        )
     }
 }

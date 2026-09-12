@@ -52,7 +52,7 @@ object Producers {
      * where you are are the prayer times where you are.
      */
     fun travel(settings: AppSettings, distanceKm: Double?, now: ZonedDateTime): List<Moment> {
-        if (!settings.smart.travel || distanceKm == null) return emptyList()
+        if (!settings.smart.reactToTheWorld || distanceKm == null) return emptyList()
         val dayEnd = now.toLocalDate().plusDays(1).atStartOfDay(now.zone)
         return when (settings.smart.travelState) {
             TravelState.SUSPECTED -> listOf(

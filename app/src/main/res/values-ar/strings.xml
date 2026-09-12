@@ -43,7 +43,7 @@
     <string name="megabytes">%1$s م.ب</string>
     <string name="audio_cache">التلاوة المحفوظة</string>
     <string name="audio_cache_desc">حتى %1$s م.ب · المستخدم %2$s</string>
-    <string name="audio_cache_explainer">تبقى الآيات التي استمعت إليها على الجهاز وتعمل دون اتصال، ويُحذف الأقدم أولاً عند بلوغ الحد.</string>
+    <string name="audio_cache_explainer">الآيات التي استمعت إليها تبقى على الجهاز وتعمل دون اتصال.</string>
     <string name="audio_cache_used">المستخدم حاليًا %1$s</string>
     <string name="audio_cache_clear">مسح</string>
     <!-- Khatma -->
@@ -164,8 +164,6 @@
     <string name="repeat_progress">التكرار %1$s</string>
     <string name="playback_speed">السرعة</string>
     <string name="speed_multiplier">%1$s×</string>
-    <string name="continuous_playback">المتابعة إلى السورة التالية</string>
-    <string name="continuous_playback_desc">مواصلة التلاوة بدل التوقف عند النهاية</string>
     <string name="retry">إعادة المحاولة</string>
     <string name="playback_error_offline">لا يوجد اتصال. الآيات المحفوظة ما زالت تعمل.</string>
     <string name="playback_error_missing">هذه الآية غير متوفرة لهذا القارئ. جرّب قارئًا آخر.</string>
@@ -233,10 +231,7 @@
     <string name="compass_w">غ</string>
 
     <!-- Settings -->
-    <string name="settings_location">الموقع</string>
     <string name="current_location">الموقع الحالي</string>
-    <string name="ip_location_fallback_title">تحديد الموقع عبر الإنترنت</string>
-    <string name="ip_location_fallback_desc">عند تعذّر GPS، تقدير مدينتك من عنوان IP. يُرسَل عنوان IP إلى ipapi.co أو freeipapi.com.</string>
     <string name="prayer_times">مواقيت الصلاة</string>
     <string name="calculation_method">طريقة الحساب</string>
     <string name="asr_juristic_method">وقت العصر</string>
@@ -257,7 +252,7 @@
     <string name="calc_turkey">رئاسة الشؤون الدينية، تركيا</string>
     <string name="calc_moonsighting">لجنة رؤية الهلال العالمية</string>
     <string name="method_automatic">تلقائي</string>
-    <string name="method_automatic_desc">حسب موقعك · %1$s</string>
+    <string name="method_automatic_desc">تبعًا لبلدك · %1$s</string>
     <string name="high_latitude_rule">قاعدة خطوط العرض العليا</string>
     <string name="high_latitude_auto">تلقائي</string>
     <string name="high_latitude_middle">منتصف الليل</string>
@@ -312,16 +307,13 @@
     <string name="athkar_left">المتبقي</string>
     <string name="athkar_show_translation">الترجمة</string>
     <string name="athkar_show_transliteration">النطق باللاتينية</string>
-    <string name="athkar_translation_desc">إظهار المعنى بالإنجليزية</string>
-    <string name="athkar_transliteration_desc">إظهار النطق بالحروف اللاتينية</string>
     <string name="athkar_virtue_source">الفضل والمصدر</string>
     <string name="athkar_reset">ابدأ من جديد</string>
     <string name="athkar_reset_confirm">هل تريد مسح عدّ اليوم لهذه القائمة؟</string>
     <string name="athkar_finished">تمّت، تقبّل الله منك.</string>
     <string name="athkar_back">العودة إلى الأذكار</string>
     <string name="athkar_reminders">تذكير أذكار الصباح والمساء</string>
-    <string name="athkar_reminders_desc">بعد صلاتي الفجر والعصر بقليل</string>
-    <string name="athkar_text_size">حجم خط الأذكار</string>
+    <string name="athkar_reminders_desc">تذكير بأذكار الصباح والمساء بعد الفجر وبعد العصر</string>
     <string name="channel_athkar">تذكير الأذكار</string>
     <string name="channel_athkar_desc">أذكار الصباح والمساء</string>
     <string name="athkar_morning_reminder">أذكار الصباح</string>
@@ -344,24 +336,15 @@
     <string name="iqama_offset_hint">إذا كان الوقت الثابت قبل الأذان فسيُستخدم وقت الأذان.</string>
     <string name="notifications">التنبيهات</string>
     <string name="prayer_notifications">تنبيهات الصلاة</string>
-    <string name="prayer_notifications_desc">تنبيهات الأذان والإقامة</string>
+    <string name="prayer_notifications_desc">إشعار عند كل صلاة يتحوّل إلى عدّ تنازلي حتى الإقامة</string>
     <string name="exact_alarms">التنبيه في الوقت المحدد</string>
-    <string name="exact_alarms_granted">مسموح</string>
-    <string name="exact_alarms_denied">غير مسموح، لذا قد تتأخر التنبيهات بضع دقائق</string>
     <string name="adhan_sound">صوت الأذان</string>
-    <string name="iqama_sound">صوت الإقامة</string>
-    <string name="sound_desc">الصوت والاهتزاز في إعدادات النظام</string>
-    <string name="quran_settings">القرآن</string>
     <string name="arabic_text_size">حجم النص العربي</string>
     <string name="appearance">المظهر</string>
     <string name="theme">السمة</string>
     <string name="theme_system">النظام</string>
     <string name="theme_light">فاتح</string>
     <string name="theme_dark">داكن</string>
-    <string name="dynamic_color">الألوان الديناميكية</string>
-    <string name="dynamic_color_desc">استخدام ألوان الخلفية</string>
-    <string name="pure_black">أسود خالص</string>
-    <string name="pure_black_desc">خلفية سوداء في السمة الداكنة</string>
     <string name="language">اللغة</string>
     <string name="language_system">النظام</string>
     <string name="about">حول التطبيق</string>
@@ -376,7 +359,7 @@
     <string name="source_code">الشيفرة المصدرية</string>
     <string name="privacy_policy">سياسة الخصوصية</string>
     <string name="app_info">معلومات التطبيق</string>
-    <string name="app_info_desc">الأذونات والتخزين</string>
+    <string name="app_info_desc">الأذونات والتخزين والإشعارات في إعدادات النظام</string>
 
     <!-- Support sheet -->
     <string name="support_title">ادعم تطبيق بلال</string>
@@ -405,7 +388,6 @@
     <string name="widget_prayer_times_desc">مواقيت اليوم مع إبراز الصلاة القادمة</string>
     <string name="widget_verse_desc">آية قصيرة لكل يوم</string>
     <string name="widget_athkar_desc">أذكار هذا الوقت وتقدمك فيها</string>
-    <string name="translated_by">ترجمة %1$s · %2$s</string>
 
     <!-- Islamic occasions -->
     <string name="occasion_kahf">سورة الكهف</string>
@@ -446,8 +428,6 @@
     <string name="occasion_white_days_body">اليوم %1$s، وصيام الثالث عشر والرابع عشر والخامس عشر كصيام الشهر كله.</string>
     <string name="occasion_sunnah_fast">الإثنين والخميس</string>
     <string name="occasion_sunnah_fast_body">تُعرض الأعمال على الله فيهما، وكان النبي صلى الله عليه وسلم يحب أن يُعرض عمله وهو صائم.</string>
-    <string name="hijri_maghrib">بدء اليوم الهجري عند المغرب</string>
-    <string name="hijri_maghrib_desc">كما هو اليوم الشرعي، وبدونه تتأخر ليالي الوتر والكهف والتكبير يومًا.</string>
 
     <!-- Weather and travel -->
     <string name="weather_rain">المطر</string>
@@ -474,13 +454,6 @@
     <string name="travel_driving_body">فعّل هذا ويبقى العرض مختصرًا حتى تتوقف.</string>
     <string name="travel_end">عدت إلى بلدي</string>
     <string name="smart_features">الاقتراحات الذكية</string>
-    <string name="smart_weather">الطقس</string>
-    <string name="smart_weather_desc">يعرض دعاء المطر والرعد والريح والحرّ والبرد. يُرسل موقعك مقرّبًا إلى نحو كيلومتر إلى Open-Meteo، مرة كل ساعة على الأكثر، والتطبيق مفتوح فقط.</string>
-    <string name="smart_travel">السفر</string>
-    <string name="smart_travel_desc">يسألك إن كنت مسافرًا إذا تجاوزت %1$s كم من منزلك، ثم يعرض أذكار السفر ويوقف تنبيهات الإقامة.</string>
-    <string name="smart_home">المنزل</string>
-    <string name="smart_home_set">محدّد. اضغط لنقله إلى موقعك الحالي.</string>
-    <string name="smart_home_unset">غير محدّد. اضغط لاستخدام موقعك الحالي.</string>
 
     <!-- Natural events -->
     <string name="eclipse_solar">كسوف الشمس</string>
@@ -494,12 +467,10 @@
     <string name="calamity_body">قنوت النازلة في صلاتك، ودعاء للمستضعفين والمنكوبين، وصدقة. ويمكنك إطفاؤه من الإعدادات متى شئت.</string>
     <string name="calamity_mode">أوقات النوازل</string>
     <string name="calamity_mode_on">مفعّل حتى %1$s</string>
-    <string name="calamity_mode_off">قنوت النازلة وأدعية المنكوبين وتذكير بالصدقة، للمدة التي تختارها</string>
+    <string name="calamity_mode_off">قنوت النازلة، ودعاء للمنكوبين، وتذكير بالصدقة</string>
     <string name="calamity_for_week">لمدة أسبوع</string>
     <string name="calamity_for_month">لمدة شهر</string>
     <string name="calamity_turn_off">إيقاف</string>
-    <string name="smart_events">الكسوف والزلازل</string>
-    <string name="smart_events_desc">الكسوف من جدول مرفق مع التطبيق ويعمل دون اتصال، والزلازل القريبة من بيانات USGS ولا ترفع إشعارًا، فنظام أندرويد يقوم بذلك.</string>
 
     <!-- Alarms -->
     <string name="pre_prayer_title">اقترب وقت %1$s</string>
@@ -507,7 +478,7 @@
     <string name="action_prayed">صليت</string>
     <string name="action_snooze">بعد ١٠ دقائق</string>
     <string name="reliability">ضمان وصول التنبيهات</string>
-    <string name="reliability_intro">يوقف أندرويد وبعض الشركات التطبيقات في الخلفية بطرق لا يراها التطبيق. ما يظهر بالأحمر أدناه يؤخّر تنبيهات الصلاة أو يمنعها.</string>
+    <string name="reliability_intro">ما يظهر بالأحمر أدناه يؤخّر تنبيهات الصلاة أو يمنعها.</string>
     <string name="reliability_notifications">إذن الإشعارات</string>
     <string name="reliability_notifications_body">بدونه يحجب أندرويد كل تنبيه قبل عرضه.</string>
     <string name="reliability_exact">المنبهات الدقيقة</string>
@@ -524,11 +495,10 @@
     <string name="reliability_oem_samsung">في Samsung: الإعدادات > البطارية > حدود الاستخدام في الخلفية، وتأكد أن بلال ليس ضمن التطبيقات النائمة.</string>
     <string name="reliability_oem_other">إن تأخرت التنبيهات، ابحث في إعدادات هاتفك عن خيار البطارية أو التشغيل التلقائي لبلال واسمح له بالعمل في الخلفية.</string>
     <string name="silence_during_prayer">كتم الصوت أثناء الصلاة</string>
-    <string name="silence_during_prayer_desc">يفعّل وضع عدم الإزعاج من الإقامة ثم يعيده، والمنبهات تبقى تعمل، ويُجدول الإرجاع في نفس لحظة الكتم فلا يُنسى.</string>
+    <string name="silence_during_prayer_desc">يُسكت هاتفك من الإقامة ثم يعيده، والمنبهات تبقى تعمل.</string>
     <string name="silence_needs_permission">يحتاج إذن وضع عدم الإزعاج</string>
     <string name="pre_reminder">تذكير قبل الأذان</string>
     <string name="pre_reminder_off">معطّل</string>
-    <string name="adhan_sound_choice">صوت الأذان</string>
     <string name="widget_moment">الآن</string>
     <string name="widget_moment_desc">ما يهمّ في هذه اللحظة: ليلة من رمضان، أو اقتراب الإفطار، أو دعاء المطر. وإن لم يكن شيء عرض تاريخ اليوم.</string>
     <string name="widget_config">الأداة</string>
@@ -543,36 +513,29 @@
     <string name="widget_config_suggested">ما يناسب الوقت</string>
 
     <!-- Accessibility -->
-    <string name="accessibility">إمكانية الوصول</string>
     <string name="simple_mode">الوضع المبسّط</string>
-    <string name="simple_mode_desc">خط أكبر وتباين أقوى وأهداف أوسع وبلا حركة زائدة، بمفتاح واحد.</string>
+    <string name="simple_mode_desc">خط أكبر وتباين أقوى وأزرار أوسع وبلا حركة، بمفتاح واحد</string>
     <string name="text_scale">حجم الخط</string>
-    <string name="text_scale_value">%1$s×</string>
     <string name="contrast">التباين</string>
     <string name="contrast_system">النظام</string>
     <string name="contrast_medium">متوسط</string>
     <string name="contrast_high">عالٍ</string>
-    <string name="reduce_motion">الحركة</string>
     <string name="motion_system">النظام</string>
     <string name="motion_on">مخفّفة</string>
     <string name="motion_off">كاملة</string>
-    <string name="large_targets">أهداف لمس أكبر</string>
-    <string name="large_targets_desc">يوسّع أصغر مساحة قابلة للضغط، لمن لا تثبت يده.</string>
-    <string name="haptics">الاهتزاز</string>
-    <string name="haptics_desc">اهتزاز خفيف عند التسبيح وعدّ الأذكار.</string>
-    <string name="support_link_desc">هدية بلا مقابل، تفتح GitHub Sponsors.</string>
+    <string name="support_link_desc">هدية بلا مقابل</string>
     <string name="general">عام</string>
     <string name="backup_export">حفظ نسخة احتياطية</string>
-    <string name="backup_export_desc">الإعدادات والعلامات والختمة في ملف تحتفظ به، ولا يُرفع شيء.</string>
+    <string name="backup_export_desc">إعداداتك وعلاماتك وختمتك في ملف تحتفظ به</string>
     <string name="backup_import">استعادة نسخة</string>
-    <string name="backup_import_desc">يستبدل ما في الهاتف بما في الملف.</string>
+    <string name="backup_import_desc">يستبدل ما في الهاتف بما في الملف</string>
     <string name="backup_saved">تم حفظ النسخة</string>
     <string name="backup_restored">تمت الاستعادة</string>
     <string name="backup_error_unreadable">تعذّر قراءة الملف.</string>
     <string name="backup_error_wrong_file">هذا ليس ملف نسخة من بلال.</string>
     <string name="backup_error_too_new">أُنشئت النسخة بإصدار أحدث، حدّث التطبيق أولاً.</string>
     <string name="reset_app">إعادة ضبط كل شيء</string>
-    <string name="reset_app_desc">العودة إلى الحالة الأولى، مع بقاء المصحف والتلاوة المحفوظة.</string>
+    <string name="reset_app_desc">العودة إلى البداية، ويبقى المصحف والتلاوة المحفوظة.</string>
     <string name="reset_confirm">إعادة ضبط بلال؟</string>
     <string name="reset_confirm_body">ستُمسح كل الإعدادات والعلامات والخطط في هذا الهاتف، ولا يمكن التراجع، فاحفظ نسخة أولاً إن أردت.</string>
     
@@ -619,4 +582,17 @@
     <string name="onboarding_next">التالي</string>
     <string name="onboarding_start">ابدأ</string>
     <string name="iqama_waiting_body">حتى إقامة %1$s</string>
+    <string name="adhan_sound_desc">اختر صوت الأذان واهتزازه</string>
+    <string name="reliability_summary_ok">كل ما يحتاجه هاتفك لإيصالها مهيّأ</string>
+    <string name="reliability_summary_problem">هناك ما يؤخّر تنبيهاتك أو يكتمها في هذا الهاتف</string>
+    <string name="reading">القراءة</string>
+    <string name="smart_features_desc">يعرض دعاء المطر أو الريح، وليلة رمضان التي أنت فيها، وسورة الكهف يوم الجمعة، وأذكار السفر حين تكون بعيدًا عن منزلك</string>
+    <string name="credits">المصادر</string>
+    <string name="credits_desc">%1$s · %2$s، ترجمة %3$s</string>
+    <string name="text_scale_default">الافتراضي</string>
+    <string name="text_scale_large">كبير</string>
+    <string name="text_scale_larger">أكبر</string>
+    <string name="text_scale_largest">الأكبر</string>
+    <string name="iqama_sheet_intro">كم يفصل بين الأذان والإقامة في مسجدك.</string>
+    <string name="iqama_varies">يختلف من صلاة لأخرى</string>
 </resources>

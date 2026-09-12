@@ -45,7 +45,7 @@ class WeatherRepository(private val fetch: suspend (String) -> String = { Http.g
      * banner for it would be worse than saying nothing.
      */
     suspend fun refresh(settings: AppSettings, nowMillis: Long): WeatherReading? {
-        if (!settings.smart.weather || settings.location.isDefault) return null
+        if (!settings.smart.reactToTheWorld || settings.location.isDefault) return null
         val here = blunt(settings.location.latitude) to blunt(settings.location.longitude)
         cached?.let { if (cachedFor == here && nowMillis - it.observedAt < CACHE_MILLIS) return it }
         return lock.withLock {

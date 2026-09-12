@@ -56,7 +56,7 @@ class EarthquakeRepository(
      * here rather than in the query, so the service is never told where you are.
      */
     suspend fun refresh(settings: AppSettings, nowMillis: Long) {
-        if (!settings.smart.naturalEvents || settings.location.isDefault) return
+        if (!settings.smart.reactToTheWorld || settings.location.isDefault) return
         if (nowMillis - lastFetch < CACHE_MILLIS) return
         lastFetch = nowMillis
         runCatching {

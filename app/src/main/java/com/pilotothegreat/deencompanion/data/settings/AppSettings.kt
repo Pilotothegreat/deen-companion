@@ -21,6 +21,8 @@ enum class LocationSource {
     /** Nothing saved yet; the app uses [Defaults]. */
     DEFAULT,
     DEVICE,
+
+    /** No longer produced; kept so a value saved before 1.9.0 still reads back. */
     IP,
     /** Picked from the city list; automatic updates leave it alone. */
     MANUAL,
@@ -50,14 +52,15 @@ data class IqamaSetting(
 
 /** Whether the app may react to the world, and how far it looks. */
 data class SmartSettings(
-    /** Rain, wind, storms and extreme temperatures surface the matching dua. */
-    val weather: Boolean = true,
-    /** Jumu'ah, Ramadan, the two Eids and the rest of the Islamic year. */
-    val occasions: Boolean = true,
-    /** Offer travel duas and qasr guidance when far from home. */
-    val travel: Boolean = true,
-    /** Nearby earthquakes and eclipses. */
-    val naturalEvents: Boolean = true,
+    /**
+     * Whether the app may react to the day and to the world: the Islamic year, the weather, travel,
+     * eclipses and nearby earthquakes.
+     *
+     * One switch rather than five. They were never really separate choices — nobody wants the dua
+     * for rain but not the dua for wind — and it is the only setting that governs sending anything
+     * off the phone, which is a decision worth being able to find.
+     */
+    val reactToTheWorld: Boolean = true,
     /** Epoch millis until which "times of calamity" stays on; 0 when off. */
     val calamityUntil: Long = 0L,
     /** The Islamic day turns over at Maghrib, as it does in the calendar itself. */
@@ -74,7 +77,7 @@ data class SmartSettings(
 
     val hasHome: Boolean get() = homeLatitude != null && homeLongitude != null
 
-    val isTravelling: Boolean get() = travel && travelState == TravelState.CONFIRMED
+    val isTravelling: Boolean get() = reactToTheWorld && travelState == TravelState.CONFIRMED
 }
 
 /** What each prayer sounds like, and what arrives before it. */
@@ -96,16 +99,10 @@ data class SoundSettings(
 }
 
 data class QuranSettings(
-    val translationId: String = Defaults.TRANSLATION,
-    /** Shown beneath the first when set. */
-    val secondTranslationId: String? = null,
-    val tajweed: Boolean = false,
     val audioCacheMb: Int = Defaults.AUDIO_CACHE_MB,
     val playbackSpeed: Float = 1f,
     val repeatMode: RepeatMode = RepeatMode.OFF,
     val repeatCount: Int = 3,
-    /** Carry on into the next surah instead of stopping at the end of this one. */
-    val continuousPlayback: Boolean = true,
 )
 
 enum class ContrastMode(@get:StringRes val labelRes: Int) {
@@ -148,22 +145,18 @@ data class AppSettings(
     val themeMode: ThemeMode,
     val dynamicColor: Boolean,
     val pureBlack: Boolean,
+    /** One size for all Arabic scripture: the mushaf and the athkar are the same text to read. */
     val quranFontSize: Int,
     val showTranslation: Boolean,
     val reciter: Reciter,
     /** Last Quran page opened (1..604), or 0 if none. */
     val lastReadPage: Int,
-    val useIpLocationFallback: Boolean,
     /** Moment ids sent away, each stamped "id@epochDay". */
     val dismissedMoments: Set<String>,
     /** BCP 47 tag of the UI language, or [AppLanguage.SYSTEM]. */
     val appLanguage: String,
     /** Morning and evening athkar reminders, after Fajr and Asr. */
     val athkarReminders: Boolean,
-    val athkarFontSize: Int,
-    /** Null until chosen: the English meaning is shown by default, except in the Arabic UI. */
-    val athkarShowTranslation: Boolean?,
-    val athkarShowTransliteration: Boolean,
     val smart: SmartSettings = SmartSettings(),
     val sounds: SoundSettings = SoundSettings(),
     val quran: QuranSettings = QuranSettings(),
