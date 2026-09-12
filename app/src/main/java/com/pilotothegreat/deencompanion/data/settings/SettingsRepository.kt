@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -18,6 +19,7 @@ import com.pilotothegreat.deencompanion.core.prayer.AsrSchool
 import com.pilotothegreat.deencompanion.core.prayer.CalculationMethod
 import com.pilotothegreat.deencompanion.core.prayer.HighLatitudeMode
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
+import com.pilotothegreat.deencompanion.core.quran.RepeatMode
 import com.pilotothegreat.deencompanion.data.quran.Reciter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -122,6 +124,69 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
     suspend fun setAthkarShowTransliteration(show: Boolean) = edit { it[Keys.ATHKAR_TRANSLITERATION] = show }
 
+    // Smart features
+    suspend fun setWeatherEnabled(on: Boolean) = edit { it[Keys.SMART_WEATHER] = on }
+
+    suspend fun setOccasionsEnabled(on: Boolean) = edit { it[Keys.SMART_OCCASIONS] = on }
+
+    suspend fun setTravelEnabled(on: Boolean) = edit { it[Keys.SMART_TRAVEL] = on }
+
+    suspend fun setNaturalEventsEnabled(on: Boolean) = edit { it[Keys.SMART_EVENTS] = on }
+
+    /** Pass 0 to turn "times of calamity" off. */
+    suspend fun setCalamityUntil(epochMillis: Long) = edit { it[Keys.CALAMITY_UNTIL] = epochMillis }
+
+    suspend fun setHijriDayStartsAtMaghrib(on: Boolean) = edit { it[Keys.HIJRI_MAGHRIB] = on }
+
+    suspend fun setSafarKm(km: Int) = edit { it[Keys.SAFAR_KM] = km.coerceIn(Defaults.SAFAR_RANGE) }
+
+    // Sounds and early reminders
+    suspend fun setAdhanSound(prayer: Prayer, sound: String) = edit { it[adhanSoundKey(prayer)] = sound }
+
+    suspend fun setPreReminderMinutes(minutes: Int) = edit { it[Keys.PRE_REMINDER_MINUTES] = minutes.coerceAtLeast(0) }
+
+    suspend fun setPreReminderPrayers(prayers: Set<Prayer>) = edit {
+        it[Keys.PRE_REMINDER_PRAYERS] = prayers.map(Prayer::key).toSet()
+    }
+
+    suspend fun setSilenceMinutes(minutes: Int) = edit { it[Keys.SILENCE_MINUTES] = minutes.coerceAtLeast(0) }
+
+    // Quran
+    suspend fun setTranslation(id: String) = edit { it[Keys.QURAN_TRANSLATION] = id }
+
+    suspend fun setSecondTranslation(id: String?) = edit {
+        if (id.isNullOrBlank()) it.remove(Keys.QURAN_TRANSLATION_SECOND) else it[Keys.QURAN_TRANSLATION_SECOND] = id
+    }
+
+    suspend fun setTajweed(on: Boolean) = edit { it[Keys.QURAN_TAJWEED] = on }
+
+    suspend fun setAudioCacheMb(mb: Int) = edit { it[Keys.AUDIO_CACHE_MB] = mb.coerceIn(Defaults.AUDIO_CACHE_RANGE) }
+
+    suspend fun setPlaybackSpeed(speed: Float) = edit { it[Keys.PLAYBACK_SPEED] = speed.coerceIn(0.5f, 2f) }
+
+    suspend fun setRepeat(mode: RepeatMode, count: Int) = edit {
+        it[Keys.REPEAT_MODE] = mode.name
+        it[Keys.REPEAT_COUNT] = count.coerceIn(1, 20)
+    }
+
+    // Accessibility
+    suspend fun setSimpleMode(on: Boolean) = edit { it[Keys.SIMPLE_MODE] = on }
+
+    suspend fun setTextScale(scale: Float) = edit { it[Keys.TEXT_SCALE] = scale.coerceIn(Defaults.TEXT_SCALE_RANGE) }
+
+    suspend fun setContrast(mode: ContrastMode) = edit { it[Keys.CONTRAST] = mode.name }
+
+    suspend fun setReduceMotion(mode: ReduceMotion) = edit { it[Keys.REDUCE_MOTION] = mode.name }
+
+    suspend fun setHaptics(on: Boolean) = edit { it[Keys.HAPTICS] = on }
+
+    suspend fun setLargeTouchTargets(on: Boolean) = edit { it[Keys.LARGE_TARGETS] = on }
+
+    // First run and what's new
+    suspend fun setOnboardingCompleted(done: Boolean) = edit { it[Keys.ONBOARDING_DONE] = done }
+
+    suspend fun setLastSeenVersionCode(code: Int) = edit { it[Keys.LAST_SEEN_VERSION] = code }
+
     /** Timestamp and latest release tag of the last update check. */
     suspend fun lastUpdateCheck(): Pair<Long, String> = dataStore.data.first().let {
         (it[Keys.UPDATE_CHECKED_AT] ?: 0L) to (it[Keys.UPDATE_LATEST] ?: "")
@@ -189,9 +254,47 @@ internal object Keys {
     val ATHKAR_TRANSLITERATION = booleanPreferencesKey("athkar_show_transliteration")
     val METHOD_AUTO = booleanPreferencesKey("calc_method_auto")
     val HIGH_LATITUDE = stringPreferencesKey("high_latitude_rule")
+
+    // Smart features
+    val SMART_WEATHER = booleanPreferencesKey("smart_weather")
+    val SMART_OCCASIONS = booleanPreferencesKey("smart_occasions")
+    val SMART_TRAVEL = booleanPreferencesKey("smart_travel")
+    val SMART_EVENTS = booleanPreferencesKey("smart_natural_events")
+    val CALAMITY_UNTIL = longPreferencesKey("calamity_until")
+    val HIJRI_MAGHRIB = booleanPreferencesKey("hijri_day_starts_at_maghrib")
+    val SAFAR_KM = intPreferencesKey("safar_km")
+
+    // Sounds and early reminders
+    val PRE_REMINDER_MINUTES = intPreferencesKey("pre_reminder_minutes")
+    val PRE_REMINDER_PRAYERS = stringSetPreferencesKey("pre_reminder_prayers")
+    val SILENCE_MINUTES = intPreferencesKey("silence_during_prayer_minutes")
+
+    // Quran
+    val QURAN_TRANSLATION = stringPreferencesKey("quran_translation")
+    val QURAN_TRANSLATION_SECOND = stringPreferencesKey("quran_translation_secondary")
+    val QURAN_TAJWEED = booleanPreferencesKey("quran_tajweed")
+    val AUDIO_CACHE_MB = intPreferencesKey("quran_audio_cache_mb")
+    val PLAYBACK_SPEED = floatPreferencesKey("quran_playback_speed")
+    val REPEAT_MODE = stringPreferencesKey("quran_repeat_mode")
+    val REPEAT_COUNT = intPreferencesKey("quran_repeat_count")
+
+    // Accessibility
+    val SIMPLE_MODE = booleanPreferencesKey("simple_mode")
+    val TEXT_SCALE = floatPreferencesKey("text_scale")
+    val CONTRAST = stringPreferencesKey("contrast_mode")
+    val REDUCE_MOTION = stringPreferencesKey("reduce_motion")
+    val HAPTICS = booleanPreferencesKey("haptics_enabled")
+    val LARGE_TARGETS = booleanPreferencesKey("large_touch_targets")
+
+    // First run and what's new
+    val ONBOARDING_DONE = booleanPreferencesKey("onboarding_completed")
+    val LAST_SEEN_VERSION = intPreferencesKey("last_seen_version_code")
 }
 
 internal fun adjustmentKey(prayer: Prayer) = intPreferencesKey("${prayer.key.lowercase()}_adjustment")
+
+/** The sound chosen for one prayer: a muezzin id, "system", "silent", or a URI the user picked. */
+internal fun adhanSoundKey(prayer: Prayer) = stringPreferencesKey("${prayer.key.lowercase()}_adhan_sound")
 
 /** Per-prayer iqama keys, named as in earlier versions. */
 internal class IqamaKeys(prayer: Prayer) {
@@ -248,6 +351,41 @@ internal fun Preferences.toAppSettings(): AppSettings = AppSettings(
     athkarFontSize = (this[Keys.ATHKAR_FONT_SIZE] ?: Defaults.ATHKAR_FONT_SIZE).coerceIn(Defaults.ATHKAR_FONT_RANGE),
     athkarShowTranslation = this[Keys.ATHKAR_TRANSLATION],
     athkarShowTransliteration = this[Keys.ATHKAR_TRANSLITERATION] ?: false,
+    smart = SmartSettings(
+        weather = this[Keys.SMART_WEATHER] ?: true,
+        occasions = this[Keys.SMART_OCCASIONS] ?: true,
+        travel = this[Keys.SMART_TRAVEL] ?: true,
+        naturalEvents = this[Keys.SMART_EVENTS] ?: true,
+        calamityUntil = this[Keys.CALAMITY_UNTIL] ?: 0L,
+        hijriDayStartsAtMaghrib = this[Keys.HIJRI_MAGHRIB] ?: true,
+        safarKm = (this[Keys.SAFAR_KM] ?: Defaults.SAFAR_KM).coerceIn(Defaults.SAFAR_RANGE),
+    ),
+    sounds = SoundSettings(
+        adhan = Prayer.obligatory.mapNotNull { prayer -> this[adhanSoundKey(prayer)]?.let { prayer to it } }.toMap(),
+        preReminderMinutes = this[Keys.PRE_REMINDER_MINUTES] ?: 0,
+        preReminderPrayers = this[Keys.PRE_REMINDER_PRAYERS]?.mapNotNull(Prayer::fromKey)?.toSet()
+            ?: Prayer.obligatory.toSet(),
+        silenceMinutes = this[Keys.SILENCE_MINUTES] ?: 0,
+    ),
+    quran = QuranSettings(
+        translationId = this[Keys.QURAN_TRANSLATION] ?: Defaults.TRANSLATION,
+        secondTranslationId = this[Keys.QURAN_TRANSLATION_SECOND]?.takeIf { it.isNotBlank() },
+        tajweed = this[Keys.QURAN_TAJWEED] ?: false,
+        audioCacheMb = (this[Keys.AUDIO_CACHE_MB] ?: Defaults.AUDIO_CACHE_MB).coerceIn(Defaults.AUDIO_CACHE_RANGE),
+        playbackSpeed = (this[Keys.PLAYBACK_SPEED] ?: 1f).coerceIn(0.5f, 2f),
+        repeatMode = enumOrNull<RepeatMode>(this[Keys.REPEAT_MODE]) ?: RepeatMode.OFF,
+        repeatCount = (this[Keys.REPEAT_COUNT] ?: 3).coerceIn(1, 20),
+    ),
+    accessibility = AccessibilitySettings(
+        simpleMode = this[Keys.SIMPLE_MODE] ?: false,
+        textScale = (this[Keys.TEXT_SCALE] ?: 1f).coerceIn(Defaults.TEXT_SCALE_RANGE),
+        contrast = enumOrNull<ContrastMode>(this[Keys.CONTRAST]) ?: ContrastMode.SYSTEM,
+        reduceMotion = enumOrNull<ReduceMotion>(this[Keys.REDUCE_MOTION]) ?: ReduceMotion.SYSTEM,
+        haptics = this[Keys.HAPTICS] ?: true,
+        largeTouchTargets = this[Keys.LARGE_TARGETS] ?: false,
+    ),
+    onboardingCompleted = this[Keys.ONBOARDING_DONE] ?: false,
+    lastSeenVersionCode = this[Keys.LAST_SEEN_VERSION] ?: 0,
 )
 
 private inline fun <reified T : Enum<T>> enumOrNull(name: String?): T? =

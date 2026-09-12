@@ -37,7 +37,7 @@ jobs:
           echo "RELEASE_KEYSTORE_FILE=release.jks" >> "$GITHUB_ENV"
 
       - name: Lint, test and build
-        run: ./gradlew lintDebug testDebugUnitTest assembleDebug assembleRelease
+        run: ./gradlew lintDebug testDebugUnitTest assembleDebug assembleRelease bundlePlay
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v4

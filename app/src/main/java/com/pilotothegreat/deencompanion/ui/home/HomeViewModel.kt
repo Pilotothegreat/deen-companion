@@ -14,6 +14,7 @@ import com.pilotothegreat.deencompanion.core.prayer.PrayerSchedule
 import com.pilotothegreat.deencompanion.core.text.DailyVerse
 import com.pilotothegreat.deencompanion.core.text.Inspiration
 import com.pilotothegreat.deencompanion.core.text.Inspirations
+import com.pilotothegreat.deencompanion.core.time.Ticker
 import com.pilotothegreat.deencompanion.data.athkar.AthkarRepository
 import com.pilotothegreat.deencompanion.data.location.LocationRepository
 import com.pilotothegreat.deencompanion.data.quran.QuranRepository
@@ -24,7 +25,6 @@ import com.pilotothegreat.deencompanion.data.settings.LocationSource
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
 import com.pilotothegreat.deencompanion.data.update.UpdateChecker
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -35,7 +35,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -79,14 +78,8 @@ class HomeViewModel(
     private val updates: UpdateChecker,
 ) : ViewModel() {
 
-    private val seconds = flow {
-        while (true) {
-            emit(Unit)
-            delay(1_000 - System.currentTimeMillis() % 1_000)
-        }
-    }
-
-    private val minutes = seconds.map { System.currentTimeMillis() / 60_000 }.distinctUntilChanged()
+    private val seconds = Ticker.seconds
+    private val minutes = Ticker.minutes
 
     val content: StateFlow<HomeContent?> = combine(settings.settings, seconds) { s, _ -> s to LocalDate.now(s.zone) }
         .distinctUntilChanged()

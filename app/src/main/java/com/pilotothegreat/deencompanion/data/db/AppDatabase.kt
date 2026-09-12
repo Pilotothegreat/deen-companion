@@ -122,21 +122,107 @@ abstract class HadithDao {
     abstract suspend fun removeFavorite(hadithId: String)
 }
 
+/**
+ * A natural event worth a dua: an earthquake near the user, or an eclipse. Cached so the card
+ * survives going offline, and so the same event is never surfaced twice.
+ */
+@Entity(tableName = "NaturalEvent")
+data class NaturalEventEntity(
+    /** "quake:us7000abcd" or "eclipse:2027-08-02"; the source's own id keeps it idempotent. */
+    @PrimaryKey val id: String,
+    val kind: String,
+    val at: Long,
+    val magnitude: Double?,
+    val distanceKm: Double?,
+    val place: String,
+    val fetchedAt: Long,
+)
+
+/** One prayer the user marked as prayed; feeds the streak and the after-prayer athkar. */
+@Entity(tableName = "PrayerLog", indices = [Index(value = ["day"])])
+data class PrayerLogEntity(
+    @PrimaryKey val id: String,
+    /** ISO date in the user's own zone, so a streak never breaks on a flight. */
+    val day: String,
+    val prayer: String,
+    val prayedAt: Long,
+) {
+    companion object {
+        fun idFor(day: String, prayer: String) = "$day:$prayer"
+    }
+}
+
+/** The khatma plan. A single row, replaced whenever the plan changes. */
+@Entity(tableName = "ReadingPlan")
+data class ReadingPlanEntity(
+    @PrimaryKey val id: Int = 1,
+    val startedOn: String,
+    val targetDays: Int,
+    val startPage: Int,
+    val lastPage: Int,
+    val updatedAt: Long,
+)
+
+@Dao
+interface NaturalEventDao {
+    @Query("SELECT * FROM NaturalEvent WHERE at >= :since ORDER BY at DESC")
+    fun observeSince(since: Long): Flow<List<NaturalEventEntity>>
+
+    @Upsert
+    suspend fun upsert(events: List<NaturalEventEntity>)
+
+    @Query("DELETE FROM NaturalEvent WHERE at < :before")
+    suspend fun deleteBefore(before: Long)
+}
+
+@Dao
+interface PrayerLogDao {
+    @Query("SELECT * FROM PrayerLog WHERE day = :day")
+    fun observeDay(day: String): Flow<List<PrayerLogEntity>>
+
+    @Query("SELECT COUNT(DISTINCT day) FROM PrayerLog WHERE day BETWEEN :from AND :to")
+    suspend fun daysWithPrayers(from: String, to: String): Int
+
+    @Upsert
+    suspend fun upsert(entry: PrayerLogEntity)
+
+    @Query("DELETE FROM PrayerLog WHERE id = :id")
+    suspend fun delete(id: String)
+}
+
+@Dao
+interface ReadingPlanDao {
+    @Query("SELECT * FROM ReadingPlan WHERE id = 1")
+    fun observe(): Flow<ReadingPlanEntity?>
+
+    @Upsert
+    suspend fun upsert(plan: ReadingPlanEntity)
+
+    @Query("DELETE FROM ReadingPlan")
+    suspend fun clear()
+}
+
 @Database(
-    entities = [BookmarkEntity::class, HadithBookEntity::class, HadithEntity::class, FavoriteHadithEntity::class],
-    version = 7,
+    entities = [
+        BookmarkEntity::class, HadithBookEntity::class, HadithEntity::class, FavoriteHadithEntity::class,
+        NaturalEventEntity::class, PrayerLogEntity::class, ReadingPlanEntity::class,
+    ],
+    version = 8,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun bookmarkDao(): BookmarkDao
     abstract fun hadithDao(): HadithDao
+    abstract fun naturalEventDao(): NaturalEventDao
+    abstract fun prayerLogDao(): PrayerLogDao
+    abstract fun readingPlanDao(): ReadingPlanDao
 
     companion object {
         private const val NAME = "database"
 
         fun build(context: Context): AppDatabase =
             Room.databaseBuilder(context, AppDatabase::class.java, NAME)
-                .addMigrations(MIGRATION_6_7)
+                .addMigrations(MIGRATION_6_7, MIGRATION_7_8)
                 .fallbackToDestructiveMigrationFrom(true, 1, 2, 3, 4, 5)
                 .fallbackToDestructiveMigrationOnDowngrade(true)
                 .build()
@@ -192,5 +278,25 @@ val MIGRATION_6_7 = object : Migration(6, 7) {
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_HadithEntity_bookId_number` ON `HadithEntity` (`bookId`, `number`)")
 
         db.execSQL("DROP TABLE IF EXISTS `TasbihRecord`")
+    }
+}
+
+/** v8: tables for natural events, the prayer log and the khatma plan. Nothing existing is touched. */
+val MIGRATION_7_8 = object : Migration(7, 8) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `NaturalEvent` (`id` TEXT NOT NULL, `kind` TEXT NOT NULL, `at` INTEGER NOT NULL, " +
+                "`magnitude` REAL, `distanceKm` REAL, `place` TEXT NOT NULL, `fetchedAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        )
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `PrayerLog` (`id` TEXT NOT NULL, `day` TEXT NOT NULL, `prayer` TEXT NOT NULL, " +
+                "`prayedAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_PrayerLog_day` ON `PrayerLog` (`day`)")
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `ReadingPlan` (`id` INTEGER NOT NULL, `startedOn` TEXT NOT NULL, " +
+                "`targetDays` INTEGER NOT NULL, `startPage` INTEGER NOT NULL, `lastPage` INTEGER NOT NULL, " +
+                "`updatedAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        )
     }
 }
