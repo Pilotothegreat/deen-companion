@@ -1,0 +1,9 @@
+The mushaf, set the way it is printed. Every page now breaks its fifteen lines exactly where the King Fahd Complex edition breaks them, so a page looks the same on every phone and at every text size — which is what makes one worth memorising from. Before this the app poured a page into a single paragraph and let the text engine break it wherever the screen ran out.
+
+The text reads right. A pause mark now sits tight above the word it belongs to instead of floating between two full word gaps, the quarter-hizb mark is on the page where the print puts it, and the ayah number stays inside its rosette however large you set the type.
+
+Reading and finding. Pinch the page to resize it. A verse you searched for or bookmarked is scrolled to, not just tinted. Choose two ayahs to repeat a span between them. The translation sits under the ayah it translates rather than in a list at the bottom. One letter finds a surah.
+
+Settings that do something. Haptics can be switched off, and off now means off. Reduce motion reaches the screen transitions it never did. The adhan sound is chosen in the app instead of sending you into Android's own settings, and you can say which prayers get the early reminder. Dynamic colour and pure black are back.
+
+And the app remembers. Every "Prayed" you have ever tapped was recorded and shown nowhere; the prayer times now mark what is done and say how many of the last thirty days had anything marked at all. The Quran tab carries a badge when the khatma is behind. Today's cards can be swiped away. Every icon says its name on a long press.
