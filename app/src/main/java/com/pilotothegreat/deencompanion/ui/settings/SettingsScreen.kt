@@ -218,6 +218,9 @@ fun SettingsScreen(
     var showIqama by rememberSaveable { mutableStateOf(false) }
     var showRestore by rememberSaveable { mutableStateOf(false) }
     var showSounds by rememberSaveable { mutableStateOf(false) }
+    val playUpdate = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
+        viewModel.completePlayUpdate()
+    }
     var pickingFor by rememberSaveable { mutableStateOf<Prayer?>(null) }
     val pickSound = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val prayer = pickingFor ?: return@rememberLauncherForActivityResult
@@ -682,8 +685,14 @@ fun SettingsScreen(
             canInstall = viewModel.canInstallUpdates() && available.apkUrl != null,
             onUpdate = { viewModel.downloadAndInstall(available) },
             onOpenPage = {
-                context.startSafely(viewModel.updateIntent())
                 showUpdate = false
+                if (viewModel.isPlayInstall) {
+                    // Play updates in place; only if it has nothing on offer do we send anyone out
+                    // to the listing.
+                    viewModel.startPlayUpdate(playUpdate) { context.startSafely(viewModel.updateIntent()) }
+                } else {
+                    context.startSafely(viewModel.updateIntent())
+                }
             },
             onDismiss = { showUpdate = false },
         )

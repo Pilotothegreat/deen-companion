@@ -3,6 +3,8 @@ package com.pilotothegreat.deencompanion.ui.settings
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.IntentSenderRequest
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.data.backup.AutoBackups
 import com.pilotothegreat.deencompanion.data.backup.BackupRepository
@@ -160,6 +162,20 @@ private val _backupMessage = MutableStateFlow<Int?>(null)
 
     /** True when the system will let this build install an update at all. */
     fun canInstallUpdates(): Boolean = !updates.isPlayInstall && installer.canInstall()
+
+    /**
+     * Play's own flexible update, which downloads in the background while the app keeps working.
+     *
+     * The dependency has been in this app from the beginning and the flow was never once called:
+     * a Play reader tapping Update was sent out to the store listing and left to find their way
+     * back. Falls back to that listing when Play has nothing to offer.
+     */
+    fun startPlayUpdate(launcher: ActivityResultLauncher<IntentSenderRequest>, onFallback: () -> Unit) = launch {
+        if (!updates.startPlayUpdate(launcher)) onFallback()
+    }
+
+    /** Installs what Play has finished downloading. */
+    fun completePlayUpdate() = updates.completePlayUpdate()
 
     /**
      * Downloads the release APK, verifies it against the checksum GitHub publishes, and only then

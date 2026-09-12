@@ -1,10 +1,5 @@
-package com.pilotothegreat.deencompanion.playback
+package com.pilotothegreat.deencompanion.core.quran
 
-import com.pilotothegreat.deencompanion.core.quran.Khatma
-import com.pilotothegreat.deencompanion.core.quran.KhatmaPlan
-import com.pilotothegreat.deencompanion.core.quran.PlaybackStep
-import com.pilotothegreat.deencompanion.core.quran.RepeatMode
-import com.pilotothegreat.deencompanion.core.quran.RepeatPlan
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
