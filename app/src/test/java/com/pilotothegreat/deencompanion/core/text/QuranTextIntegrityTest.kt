@@ -76,6 +76,34 @@ class QuranTextIntegrityTest {
         assertTrue("ayah 1 never repeats the Basmala", openings.none { ArabicText.normalize(it).startsWith(basmala) })
     }
 
+    /**
+     * The marks the text carries itself, which the reader must therefore not add.
+     *
+     * 1.8.0 asked Tanzil for the text with sajdah signs and then appended another in the renderer,
+     * so all fifteen prostration ayahs were printed with two. The rule this pins down is simple: a
+     * mark that is in the text is drawn by the text.
+     */
+    @Test fun theTextCarriesItsOwnSajdahSignAndNothingElse() {
+        val sajdah = "\u06e9"
+        val marked = surahs.flatMapIndexed { index, surah ->
+            surah.jsonObject.getValue("verses").jsonArray.mapIndexedNotNull { i, verse ->
+                val text = verse.jsonPrimitive.content
+                if (sajdah in text) "${index + 1}:${i + 1}" to text.count { it.toString() == sajdah } else null
+            }
+        }
+        assertEquals("the fifteen sajdahs of recitation", 15, marked.size)
+        marked.forEach { (reference, count) -> assertEquals("$reference carries one sign", 1, count) }
+
+        // The rub' al-hizb and the end-of-ayah rosette are NOT in the text, so the reader draws
+        // those two itself. If a future asset rebuild starts including them, this fails and says so.
+        val whole = surahs.joinToString("\n") { surah ->
+            surah.jsonObject.getValue("verses").jsonArray.joinToString("\n") { it.jsonPrimitive.content }
+        }
+        assertEquals("no rub' al-hizb marks in the text", 0, whole.count { it == '\u06de' })
+        assertEquals("no end-of-ayah marks in the text", 0, whole.count { it == '\u06dd' })
+        assertEquals("no Arabic-Indic digits in the text", 0, whole.count { it in '\u0660'..'\u0669' })
+    }
+
     @Test fun theTextAndTranslationAreCredited() {
         val source = arabic.getValue("source").jsonObject
         assertFalse(source.getValue("name").jsonPrimitive.content.isBlank())

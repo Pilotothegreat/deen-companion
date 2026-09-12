@@ -2,6 +2,7 @@ package com.pilotothegreat.deencompanion.ui.reader
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,11 +10,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -25,8 +29,8 @@ import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
@@ -44,16 +48,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextDirection
@@ -61,11 +67,12 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pilotothegreat.deencompanion.R
-import com.pilotothegreat.deencompanion.data.net.NetError
 import com.pilotothegreat.deencompanion.core.text.Numerals
+import com.pilotothegreat.deencompanion.data.net.NetError
 import com.pilotothegreat.deencompanion.data.quran.MushafPage
 import com.pilotothegreat.deencompanion.data.quran.Quran
 import com.pilotothegreat.deencompanion.data.quran.Revelation
@@ -80,7 +87,6 @@ import com.pilotothegreat.deencompanion.ui.theme.UthmanicHafs
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
-
 
 @Composable
 fun ReaderScreen(
@@ -316,6 +322,7 @@ private fun AyahText(
     val colors = MaterialTheme.colorScheme
     // Ayahs are tappable, but must not look like hyperlinks.
     val plainLink = TextLinkStyles(style = SpanStyle(textDecoration = TextDecoration.None))
+    val markers = mutableMapOf<String, InlineTextContent>()
     val text = buildAnnotatedString {
         verses.forEach { verse ->
             val key = verse.surah to verse.number
@@ -323,29 +330,29 @@ private fun AyahText(
                 highlight -> SpanStyle(background = colors.tertiaryContainer, color = colors.onTertiaryContainer)
                 else -> SpanStyle()
             }
-            // ۞ opens a rub' al-hizb; the mushaf prints it before the ayah that begins one.
+            // ۞ opens a rub' al-hizb. Unlike the sajdah sign, this one is not in the text, so the
+            // app draws it.
             if (verse.quarterStart != null) {
                 withStyle(SpanStyle(color = colors.tertiary)) { append("۞ ") }
             }
             withLink(LinkAnnotation.Clickable(tag = "${verse.surah}:${verse.number}", styles = plainLink) { onAyahClick(verse) }) {
-                withStyle(emphasis) {
-                    append(verse.text)
-                    if (verse.isSajdah) withStyle(SpanStyle(color = colors.tertiary)) { append(" ۩") }
-                }
-                withStyle(
-                    SpanStyle(
-                        color = if (key in bookmarks) colors.primary else colors.secondary,
-                        fontWeight = FontWeight.Bold,
-                    ),
-                ) {
-                    // U+06DD draws the ayah rosette around the digits that follow it.
-                    append(" ۝${Numerals.toArabicIndic(verse.number.toString())} ")
-                }
+                // The text already carries its own sajdah sign where there is one; appending
+                // another printed it twice on all fifteen of them.
+                withStyle(emphasis) { append(verse.text) }
+                val id = "$AYAH_MARKER${verse.surah}:${verse.number}"
+                val digits = Numerals.toArabicIndic(verse.number.toString())
+                markers[id] = ayahMarker(
+                    number = digits,
+                    fontSize = fontSize,
+                    color = if (key in bookmarks) colors.primary else colors.secondary,
+                )
+                appendInlineContent(id, digits)
             }
         }
     }
     Text(
         text = text,
+        inlineContent = markers,
         style = TextStyle(
             fontFamily = UthmanicHafs,
             fontSize = fontSize.sp,
@@ -357,6 +364,43 @@ private fun AyahText(
         modifier = Modifier.fillMaxWidth(),
     )
 }
+
+private const val AYAH_MARKER = "ayah:"
+
+/**
+ * The end-of-ayah rosette with its number inside it, as the mushaf prints it.
+ *
+ * It has to be drawn rather than typed. U+06DD is meant to enclose the digits that follow it, but
+ * that composition is a font feature, and the bundled Uthmanic Hafs declares only calt, fina, init,
+ * liga and medi — there is no rule to compose it. Typing "۝٢" therefore produced an empty rosette
+ * followed by loose digits: two marks where the mushaf has one.
+ */
+private fun ayahMarker(number: String, fontSize: Int, color: Color): InlineTextContent =
+    InlineTextContent(
+        Placeholder(width = 1.95.em, height = 1.35.em, placeholderVerticalAlign = PlaceholderVerticalAlign.Center),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                AYAH_ROSETTE,
+                fontFamily = UthmanicHafs,
+                fontSize = (fontSize * 1.15f).sp,
+                color = color,
+            )
+            Text(
+                number,
+                fontFamily = UthmanicHafs,
+                fontSize = (fontSize * 0.62f).sp,
+                color = color,
+                // The rosette's open centre sits well below the middle of its line box, under the
+                // ornamental crown. Centred without this, the number lands on the crown and is lost
+                // in it.
+                modifier = Modifier.offset(y = (fontSize * 0.33f).dp),
+            )
+        }
+    }
+
+/** U+06DD on its own: the rosette, with no digits for the font to fail to compose. */
+private const val AYAH_ROSETTE = "۝"
 
 @Composable
 private fun SurahBanner(surah: Surah) {
