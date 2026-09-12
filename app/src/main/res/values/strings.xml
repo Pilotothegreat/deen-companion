@@ -509,4 +509,23 @@
     <string name="widget_config_iqama">Show iqama times</string>
     <string name="widget_config_athkar">Athkar to show</string>
     <string name="widget_config_suggested">Whatever fits now</string>
+
+    <!-- Accessibility -->
+    <string name="accessibility">Accessibility</string>
+    <string name="simple_mode">Simple mode</string>
+    <string name="simple_mode_desc">Bigger text, stronger contrast, larger targets and no decorative motion, in one switch.</string>
+    <string name="text_scale">Text size</string>
+    <string name="text_scale_value">%1$s×</string>
+    <string name="contrast">Contrast</string>
+    <string name="contrast_system">System</string>
+    <string name="contrast_medium">Medium</string>
+    <string name="contrast_high">High</string>
+    <string name="reduce_motion">Motion</string>
+    <string name="motion_system">System</string>
+    <string name="motion_on">Reduced</string>
+    <string name="motion_off">Full</string>
+    <string name="large_targets">Larger touch targets</string>
+    <string name="large_targets_desc">Raises the smallest tappable area, for anyone whose aim is not steady.</string>
+    <string name="haptics">Vibration</string>
+    <string name="haptics_desc">A short buzz on the tasbih and the athkar counter.</string>
 </resources>

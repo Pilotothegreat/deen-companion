@@ -57,6 +57,8 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
@@ -118,7 +120,10 @@ fun NextPrayerHero(countdown: Countdown, locale: Locale, modifier: Modifier = Mo
                 Odometer(
                     text = remaining,
                     style = MaterialTheme.typography.displayMediumEmphasized.copy(fontFeatureSettings = "tnum"),
-                    modifier = Modifier.clearAndSetSemantics { contentDescription = countdownDescription },
+                    modifier = Modifier.clearAndSetSemantics {
+                        contentDescription = countdownDescription
+                        liveRegion = LiveRegionMode.Polite
+                    },
                 )
                 Text(stringResource(R.string.adhan_at, adhanTime), style = MaterialTheme.typography.bodyLarge)
                 if (iqama != null) {

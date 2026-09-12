@@ -73,3 +73,50 @@ fun deenTypography(arabic: Boolean): Typography {
         labelSmallEmphasized = base.labelSmallEmphasized.adapt(),
     )
 }
+
+/**
+ * Multiplies every size and line height by [scale].
+ *
+ * This is on top of the system font scale rather than instead of it: people who have already turned
+ * the system slider up and still cannot read comfortably have nowhere else to go, and telling them
+ * to change a system setting they have already changed is not an answer.
+ */
+fun Typography.scaledBy(scale: Float): Typography {
+    if (scale == 1f) return this
+    fun TextStyle.scaled(): TextStyle = copy(
+        fontSize = if (fontSize.isSpecified) fontSize * scale else fontSize,
+        lineHeight = if (lineHeight.isSpecified) lineHeight * scale else lineHeight,
+    )
+    return Typography(
+        displayLarge = displayLarge.scaled(),
+        displayMedium = displayMedium.scaled(),
+        displaySmall = displaySmall.scaled(),
+        headlineLarge = headlineLarge.scaled(),
+        headlineMedium = headlineMedium.scaled(),
+        headlineSmall = headlineSmall.scaled(),
+        titleLarge = titleLarge.scaled(),
+        titleMedium = titleMedium.scaled(),
+        titleSmall = titleSmall.scaled(),
+        bodyLarge = bodyLarge.scaled(),
+        bodyMedium = bodyMedium.scaled(),
+        bodySmall = bodySmall.scaled(),
+        labelLarge = labelLarge.scaled(),
+        labelMedium = labelMedium.scaled(),
+        labelSmall = labelSmall.scaled(),
+        displayLargeEmphasized = displayLargeEmphasized.scaled(),
+        displayMediumEmphasized = displayMediumEmphasized.scaled(),
+        displaySmallEmphasized = displaySmallEmphasized.scaled(),
+        headlineLargeEmphasized = headlineLargeEmphasized.scaled(),
+        headlineMediumEmphasized = headlineMediumEmphasized.scaled(),
+        headlineSmallEmphasized = headlineSmallEmphasized.scaled(),
+        titleLargeEmphasized = titleLargeEmphasized.scaled(),
+        titleMediumEmphasized = titleMediumEmphasized.scaled(),
+        titleSmallEmphasized = titleSmallEmphasized.scaled(),
+        bodyLargeEmphasized = bodyLargeEmphasized.scaled(),
+        bodyMediumEmphasized = bodyMediumEmphasized.scaled(),
+        bodySmallEmphasized = bodySmallEmphasized.scaled(),
+        labelLargeEmphasized = labelLargeEmphasized.scaled(),
+        labelMediumEmphasized = labelMediumEmphasized.scaled(),
+        labelSmallEmphasized = labelSmallEmphasized.scaled(),
+    )
+}

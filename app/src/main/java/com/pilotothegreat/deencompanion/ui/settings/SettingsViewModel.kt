@@ -16,6 +16,8 @@ import com.pilotothegreat.deencompanion.data.quran.TextSource
 import com.pilotothegreat.deencompanion.data.quran.TranslationInfo
 import com.pilotothegreat.deencompanion.data.settings.AppLanguage
 import com.pilotothegreat.deencompanion.data.settings.AppSettings
+import com.pilotothegreat.deencompanion.data.settings.ContrastMode
+import com.pilotothegreat.deencompanion.data.settings.ReduceMotion
 import com.pilotothegreat.deencompanion.data.settings.IqamaSetting
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
 import com.pilotothegreat.deencompanion.data.settings.ThemeMode
@@ -66,7 +68,19 @@ class SettingsViewModel(
         AudioCache.setBudgetMb(mb)
     }
 
-fun setPreReminder(minutes: Int) = launch { repository.setPreReminderMinutes(minutes) }
+    fun setSimpleMode(on: Boolean) = launch { repository.setSimpleMode(on) }
+
+    fun setTextScale(scale: Float) = launch { repository.setTextScale(scale) }
+
+    fun setContrast(mode: ContrastMode) = launch { repository.setContrast(mode) }
+
+    fun setReduceMotion(mode: ReduceMotion) = launch { repository.setReduceMotion(mode) }
+
+    fun setLargeTouchTargets(on: Boolean) = launch { repository.setLargeTouchTargets(on) }
+
+    fun setHaptics(on: Boolean) = launch { repository.setHaptics(on) }
+
+    fun setPreReminder(minutes: Int) = launch { repository.setPreReminderMinutes(minutes) }
 
     fun setSilenceMinutes(minutes: Int) = launch { repository.setSilenceMinutes(minutes) }
 

@@ -44,7 +44,12 @@ class MainActivity : AppCompatActivity() {
                 enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)
                 onDispose {}
             }
-            DeenTheme(darkTheme = darkTheme, dynamicColor = current.dynamicColor, pureBlack = current.pureBlack) {
+            DeenTheme(
+                darkTheme = darkTheme,
+                dynamicColor = current.dynamicColor,
+                pureBlack = current.pureBlack,
+                accessibility = current.accessibility,
+            ) {
                 DeenApp(settings = current, destination = destination, onDestinationOpened = { destination = null })
             }
         }

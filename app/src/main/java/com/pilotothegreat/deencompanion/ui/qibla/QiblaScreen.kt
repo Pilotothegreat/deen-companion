@@ -56,6 +56,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -172,6 +175,9 @@ fun QiblaScreen(onBack: () -> Unit, viewModel: QiblaViewModel = koinViewModel())
                 style = MaterialTheme.typography.titleLargeEmphasized,
                 color = if (aligned) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
+                // Spoken as the phone turns: a compass nobody can see is useless without this, and
+                // the dial above it is a picture with nothing to say.
+                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
             )
 
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {

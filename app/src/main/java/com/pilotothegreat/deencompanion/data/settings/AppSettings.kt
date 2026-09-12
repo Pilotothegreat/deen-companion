@@ -4,6 +4,8 @@ import com.pilotothegreat.deencompanion.core.prayer.AsrSchool
 import com.pilotothegreat.deencompanion.core.prayer.CalculationMethod
 import com.pilotothegreat.deencompanion.core.prayer.HighLatitudeMode
 import com.pilotothegreat.deencompanion.core.prayer.IqamaRule
+import androidx.annotation.StringRes
+import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
 import com.pilotothegreat.deencompanion.core.prayer.PrayerConfig
 import com.pilotothegreat.deencompanion.core.quran.RepeatMode
@@ -106,9 +108,17 @@ data class QuranSettings(
     val continuousPlayback: Boolean = true,
 )
 
-enum class ContrastMode { SYSTEM, MEDIUM, HIGH }
+enum class ContrastMode(@get:StringRes val labelRes: Int) {
+    SYSTEM(R.string.contrast_system),
+    MEDIUM(R.string.contrast_medium),
+    HIGH(R.string.contrast_high),
+}
 
-enum class ReduceMotion { SYSTEM, ON, OFF }
+enum class ReduceMotion(@get:StringRes val labelRes: Int) {
+    SYSTEM(R.string.motion_system),
+    ON(R.string.motion_on),
+    OFF(R.string.motion_off),
+}
 
 /** Everything that makes the app usable for people the default design leaves behind. */
 data class AccessibilitySettings(

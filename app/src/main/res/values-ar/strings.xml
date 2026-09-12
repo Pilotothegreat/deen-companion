@@ -541,4 +541,23 @@
     <string name="widget_config_iqama">إظهار أوقات الإقامة</string>
     <string name="widget_config_athkar">الأذكار المعروضة</string>
     <string name="widget_config_suggested">ما يناسب الوقت</string>
+
+    <!-- Accessibility -->
+    <string name="accessibility">إمكانية الوصول</string>
+    <string name="simple_mode">الوضع المبسّط</string>
+    <string name="simple_mode_desc">خط أكبر وتباين أقوى وأهداف أوسع وبلا حركة زائدة، بمفتاح واحد.</string>
+    <string name="text_scale">حجم الخط</string>
+    <string name="text_scale_value">%1$s×</string>
+    <string name="contrast">التباين</string>
+    <string name="contrast_system">النظام</string>
+    <string name="contrast_medium">متوسط</string>
+    <string name="contrast_high">عالٍ</string>
+    <string name="reduce_motion">الحركة</string>
+    <string name="motion_system">النظام</string>
+    <string name="motion_on">مخفّفة</string>
+    <string name="motion_off">كاملة</string>
+    <string name="large_targets">أهداف لمس أكبر</string>
+    <string name="large_targets_desc">يوسّع أصغر مساحة قابلة للضغط، لمن لا تثبت يده.</string>
+    <string name="haptics">الاهتزاز</string>
+    <string name="haptics_desc">اهتزاز خفيف عند التسبيح وعدّ الأذكار.</string>
 </resources>

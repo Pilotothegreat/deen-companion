@@ -23,6 +23,14 @@ import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material.icons.automirrored.rounded.OpenInNew
 import androidx.compose.material.icons.rounded.Abc
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Accessibility
+import androidx.compose.material.icons.rounded.Animation
+import androidx.compose.material.icons.rounded.Contrast
+import androidx.compose.material.icons.rounded.FormatSize
+import androidx.compose.material.icons.rounded.TouchApp
+import androidx.compose.material.icons.rounded.Vibration
+import com.pilotothegreat.deencompanion.data.settings.ContrastMode
+import com.pilotothegreat.deencompanion.data.settings.ReduceMotion
 import androidx.compose.material.icons.rounded.Alarm
 import androidx.compose.material.icons.rounded.AppSettingsAlt
 import androidx.compose.material.icons.rounded.BatteryAlert
@@ -474,6 +482,67 @@ fun SettingsScreen(
                                 shapes, Icons.Rounded.CloudDownload, stringResource(R.string.audio_cache),
                                 stringResource(R.string.audio_cache_desc, Formatters.number(s.quran.audioCacheMb, locale), cacheSummary),
                             ) { dialog = SettingsDialog.AudioCache }
+                        },
+                    ),
+                )
+            }
+
+            item(key = "accessibility") {
+                SettingsGroup(
+                    stringResource(R.string.accessibility),
+                    listOf(
+                        { shapes ->
+                            SwitchRow(
+                                shapes, Icons.Rounded.Accessibility, stringResource(R.string.simple_mode),
+                                stringResource(R.string.simple_mode_desc), s.accessibility.simpleMode,
+                                viewModel::setSimpleMode,
+                            )
+                        },
+                        { shapes ->
+                            ContentRow(shapes, Icons.Rounded.FormatSize, stringResource(R.string.text_scale)) {
+                                ConnectedChoice(
+                                    options = TEXT_SCALES,
+                                    selected = TEXT_SCALES.minByOrNull { kotlin.math.abs(it - s.accessibility.textScale) } ?: 1f,
+                                    onSelect = viewModel::setTextScale,
+                                    label = { stringResource(R.string.text_scale_value, Formatters.decimal(it, locale)) },
+                                    modifier = Modifier.padding(top = 8.dp),
+                                )
+                            }
+                        },
+                        { shapes ->
+                            ContentRow(shapes, Icons.Rounded.Contrast, stringResource(R.string.contrast)) {
+                                ConnectedChoice(
+                                    options = ContrastMode.entries,
+                                    selected = s.accessibility.contrast,
+                                    onSelect = viewModel::setContrast,
+                                    label = { stringResource(it.labelRes) },
+                                    modifier = Modifier.padding(top = 8.dp),
+                                )
+                            }
+                        },
+                        { shapes ->
+                            ContentRow(shapes, Icons.Rounded.Animation, stringResource(R.string.reduce_motion)) {
+                                ConnectedChoice(
+                                    options = ReduceMotion.entries,
+                                    selected = s.accessibility.reduceMotion,
+                                    onSelect = viewModel::setReduceMotion,
+                                    label = { stringResource(it.labelRes) },
+                                    modifier = Modifier.padding(top = 8.dp),
+                                )
+                            }
+                        },
+                        { shapes ->
+                            SwitchRow(
+                                shapes, Icons.Rounded.TouchApp, stringResource(R.string.large_targets),
+                                stringResource(R.string.large_targets_desc), s.accessibility.largeTouchTargets,
+                                viewModel::setLargeTouchTargets,
+                            )
+                        },
+                        { shapes ->
+                            SwitchRow(
+                                shapes, Icons.Rounded.Vibration, stringResource(R.string.haptics),
+                                stringResource(R.string.haptics_desc), s.accessibility.haptics, viewModel::setHaptics,
+                            )
                         },
                     ),
                 )
@@ -980,3 +1049,6 @@ private fun CalamityDialog(active: Boolean, onChoose: (Int) -> Unit, onDismiss: 
         },
     )
 }
+
+/** A short ladder rather than a slider: three named steps are easier to choose between than sixty. */
+private val TEXT_SCALES = listOf(1f, 1.15f, 1.3f, 1.5f)

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.FloatingToolbarDefaults
@@ -20,6 +21,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.pilotothegreat.deencompanion.ui.theme.LocalAccessibility
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -77,10 +79,14 @@ private fun NavPill(tab: TopLevel, selected: Boolean, onClick: () -> Unit) {
         motion.defaultEffectsSpec(),
         label = "pillContent",
     )
+    val accessibility = LocalAccessibility.current
     val width by animateDpAsState(if (selected) 88.dp else 68.dp, motion.fastSpatialSpec(), label = "pillWidth")
     Column(
         modifier = Modifier
             .width(width)
+            // A navigation target below 48 dp is a target people miss; large targets raise the floor
+            // further for anyone whose aim is not steady.
+            .heightIn(min = if (accessibility.largeTouchTargets) 64.dp else 48.dp)
             .clip(CircleShape)
             .background(container)
             .selectable(selected = selected, role = Role.Tab, onClick = onClick)
