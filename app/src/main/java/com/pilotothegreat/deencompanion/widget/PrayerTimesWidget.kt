@@ -77,13 +77,13 @@ class PrayerTimesWidget : GlanceAppWidget() {
     override val sizeMode: SizeMode = SizeMode.Responsive(setOf(COLUMNS, LIST, LIST_WIDE))
     override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(LIST_WIDE))
 
-    override suspend fun provideGlance(context: Context, id: GlanceId) = show(context)
+    override suspend fun provideGlance(context: Context, id: GlanceId) = show(context, configOf(context, id))
 
-    override suspend fun providePreview(context: Context, widgetCategory: Int) = show(context)
+    override suspend fun providePreview(context: Context, widgetCategory: Int) = show(context, WidgetConfig())
 
-    private suspend fun show(context: Context): Nothing {
+    private suspend fun show(context: Context, config: WidgetConfig): Nothing {
         val state = PrayerTimesState.load(context)
-        provideContent { BilalWidgetTheme(state.dynamic) { PrayerTimesContent(state) } }
+        provideContent { BilalWidgetTheme(config.dynamicColor ?: state.dynamic) { PrayerTimesContent(state, config) } }
     }
 
     internal companion object {
@@ -94,11 +94,11 @@ class PrayerTimesWidget : GlanceAppWidget() {
 }
 
 @Composable
-internal fun PrayerTimesContent(state: PrayerTimesState) {
+internal fun PrayerTimesContent(state: PrayerTimesState, config: WidgetConfig = WidgetConfig()) {
     val size = LocalSize.current
     val colors = GlanceTheme.colors
     val open = GlanceModifier.clickable(actionStartActivity(WidgetUpdater.openApp(LocalContext.current)))
-    WidgetSurface(colors.widgetBackground, open) {
+    WidgetSurface(colors.widgetBackground, open, transparency = config.transparency) {
         if (size.height < PrayerTimesWidget.LIST.height) {
             Column(GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
                 Text("${state.title} · ${state.place}", style = textStyle(colors.onSurfaceVariant, 12.sp, FontWeight.Medium), maxLines = 1)
@@ -118,7 +118,7 @@ internal fun PrayerTimesContent(state: PrayerTimesState) {
                 }
             }
         } else {
-            val showIqama = size.width >= PrayerTimesWidget.LIST_WIDE.width
+            val showIqama = config.showIqama && size.width >= PrayerTimesWidget.LIST_WIDE.width
             Column(GlanceModifier.fillMaxSize()) {
                 Text(state.title, style = textStyle(colors.onSurface, 14.sp, FontWeight.Bold), maxLines = 1)
                 Text(state.place, style = textStyle(colors.onSurfaceVariant, 11.sp), maxLines = 1)

@@ -10,6 +10,7 @@ import com.pilotothegreat.deencompanion.core.prayer.HighLatitudeMode
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
 import com.pilotothegreat.deencompanion.core.tasbih.Dhikr
 import com.pilotothegreat.deencompanion.core.text.Numerals
+import com.pilotothegreat.deencompanion.core.calendar.HijriCalendar
 import java.time.Duration
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -101,6 +102,10 @@ object Formatters {
         DateTimeFormatter.ofPattern("d MMM", locale)
             .withDecimalStyle(DecimalStyle.of(locale))
             .format(java.time.Instant.ofEpochMilli(epochMillis).atZone(zone))
+
+    /** The Hijri date in the reader's own digits, for the widget's quiet state. */
+    fun hijri(date: java.time.chrono.HijrahDate, locale: Locale): String =
+        Numerals.localize(HijriCalendar.format(date, locale), locale)
 
     /** A byte count as whole megabytes, for cache sizes. */
     fun megabytes(bytes: Long): String = "${bytes / (1024 * 1024)} MB"

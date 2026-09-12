@@ -93,13 +93,13 @@ class NextPrayerWidget : GlanceAppWidget() {
     override val sizeMode: SizeMode = SizeMode.Responsive(setOf(COMPACT, SMALL, CARD, WIDE, FULL))
     override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(WIDE))
 
-    override suspend fun provideGlance(context: Context, id: GlanceId) = show(context)
+    override suspend fun provideGlance(context: Context, id: GlanceId) = show(context, configOf(context, id))
 
-    override suspend fun providePreview(context: Context, widgetCategory: Int) = show(context)
+    override suspend fun providePreview(context: Context, widgetCategory: Int) = show(context, WidgetConfig())
 
-    private suspend fun show(context: Context): Nothing {
+    private suspend fun show(context: Context, config: WidgetConfig): Nothing {
         val state = NextPrayerState.load(context)
-        provideContent { BilalWidgetTheme(state.dynamic) { NextPrayerContent(state) } }
+        provideContent { BilalWidgetTheme(config.dynamicColor ?: state.dynamic) { NextPrayerContent(state, config) } }
     }
 
     internal companion object {
@@ -112,12 +112,12 @@ class NextPrayerWidget : GlanceAppWidget() {
 }
 
 @Composable
-internal fun NextPrayerContent(state: NextPrayerState) {
+internal fun NextPrayerContent(state: NextPrayerState, config: WidgetConfig = WidgetConfig()) {
     val size = LocalSize.current
     val colors = GlanceTheme.colors
     val content = colors.onPrimaryContainer
     val open = GlanceModifier.clickable(actionStartActivity(WidgetUpdater.openApp(LocalContext.current)))
-    WidgetSurface(colors.primaryContainer, open) {
+    WidgetSurface(colors.primaryContainer, open, transparency = config.transparency) {
         when {
             size.height < NextPrayerWidget.SMALL.height -> Row(
                 modifier = GlanceModifier.fillMaxSize(),

@@ -3,6 +3,7 @@ package com.pilotothegreat.deencompanion.widget
 import android.content.Context
 import android.content.res.Configuration
 import android.os.Build
+import android.os.SystemClock
 import android.text.format.DateFormat
 import android.util.TypedValue
 import android.widget.RemoteViews
@@ -60,13 +61,29 @@ internal fun WidgetSurface(
     color: ColorProvider,
     modifier: GlanceModifier = GlanceModifier,
     padding: Dp = 14.dp,
+    /** 0f is opaque; the widget's own setting, so two copies can sit differently on two screens. */
+    transparency: Float = 0f,
     content: @Composable () -> Unit,
 ) {
+    val context = LocalContext.current
+    val tint = if (transparency <= 0f) {
+        color
+    } else {
+        ColorProvider(color.getColor(context).copy(alpha = (1f - transparency).coerceIn(0.05f, 1f)))
+    }
     Box(
         modifier = GlanceModifier.fillMaxSize()
             .appWidgetBackground()
-            .cornerRadius(28.dp)
-            .background(ImageProvider(R.drawable.widget_shape), colorFilter = ColorFilter.tint(color))
+            // The launcher's own radius, so the widget sits flush with everything beside it instead
+            // of carrying this app's idea of a corner onto someone else's home screen.
+            .then(
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    GlanceModifier.cornerRadius(android.R.dimen.system_app_widget_background_radius)
+                } else {
+                    GlanceModifier.cornerRadius(28.dp)
+                },
+            )
+            .background(ImageProvider(R.drawable.widget_shape), colorFilter = ColorFilter.tint(tint))
             .then(modifier)
             .padding(padding),
         content = content,
@@ -93,8 +110,11 @@ internal fun shortTime(context: Context, time: LocalTime, locale: Locale): Strin
 @Composable
 internal fun Countdown(target: Long, textSizeSp: Float, dynamic: Boolean, modifier: GlanceModifier = GlanceModifier) {
     val context = LocalContext.current
+    // A Chronometer counting down past its target counts back up again, so a widget the launcher
+    // redraws a moment late used to show time since the adhan as though it were time until it.
+    val clamped = target.coerceAtLeast(SystemClock.elapsedRealtime())
     val views = RemoteViews(context.packageName, R.layout.widget_countdown).apply {
-        setChronometer(R.id.countdown, target, null, true)
+        setChronometer(R.id.countdown, clamped, null, true)
         setChronometerCountDown(R.id.countdown, true)
         setTextViewTextSize(R.id.countdown, TypedValue.COMPLEX_UNIT_SP, textSizeSp)
         val (day, night) = countdownColors(context, dynamic)

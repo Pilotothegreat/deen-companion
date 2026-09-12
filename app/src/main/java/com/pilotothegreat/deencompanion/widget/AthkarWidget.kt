@@ -46,7 +46,7 @@ internal data class AthkarWidgetState(
     val meters: List<AthkarMeter>,
 ) {
     companion object {
-        suspend fun load(context: Context): AthkarWidgetState {
+        suspend fun load(context: Context, config: WidgetConfig = WidgetConfig()): AthkarWidgetState {
             val settings = WidgetDeps.settings.current()
             val res = AppLanguage.localizedContext(context, settings.appLanguage)
             val locale = AppLanguage.locale(settings.appLanguage)
@@ -54,7 +54,9 @@ internal data class AthkarWidgetState(
             val today = now.toLocalDate()
             val library = WidgetDeps.athkar.library()
             val progress = WidgetDeps.athkar.progress.first().on(today)
-            val suggested = WidgetDeps.moments.suggestedAthkarNow()
+            // A pinned category wins: someone who placed this beside their bed wants the sleep
+            // athkar at noon too.
+            val suggested = config.pinnedAthkar ?: WidgetDeps.moments.suggestedAthkarNow()
             val category = library.category(suggested) ?: library.core.first()
             return AthkarWidgetState(
                 dynamic = settings.dynamicColor,
@@ -84,13 +86,13 @@ class AthkarWidget : GlanceAppWidget() {
     override val sizeMode: SizeMode = SizeMode.Responsive(setOf(SMALL, TALL))
     override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(TALL))
 
-    override suspend fun provideGlance(context: Context, id: GlanceId) = show(context)
+    override suspend fun provideGlance(context: Context, id: GlanceId) = show(context, configOf(context, id))
 
-    override suspend fun providePreview(context: Context, widgetCategory: Int) = show(context)
+    override suspend fun providePreview(context: Context, widgetCategory: Int) = show(context, WidgetConfig())
 
-    private suspend fun show(context: Context): Nothing {
-        val state = AthkarWidgetState.load(context)
-        provideContent { BilalWidgetTheme(state.dynamic) { AthkarContent(state) } }
+    private suspend fun show(context: Context, config: WidgetConfig): Nothing {
+        val state = AthkarWidgetState.load(context, config)
+        provideContent { BilalWidgetTheme(config.dynamicColor ?: state.dynamic) { AthkarContent(state, config) } }
     }
 
     internal companion object {
@@ -100,12 +102,12 @@ class AthkarWidget : GlanceAppWidget() {
 }
 
 @Composable
-internal fun AthkarContent(state: AthkarWidgetState) {
+internal fun AthkarContent(state: AthkarWidgetState, config: WidgetConfig = WidgetConfig()) {
     val colors = GlanceTheme.colors
     val content = colors.onTertiaryContainer
     val tall = LocalSize.current.height >= AthkarWidget.TALL.height
     val open = GlanceModifier.clickable(actionStartActivity(DeepLinks.athkar(LocalContext.current, state.categoryId)))
-    WidgetSurface(colors.tertiaryContainer, open) {
+    WidgetSurface(colors.tertiaryContainer, open, transparency = config.transparency) {
         Column(GlanceModifier.fillMaxSize()) {
             Text(state.label, style = textStyle(content, 11.sp, FontWeight.Medium), maxLines = 1)
             Text(state.title, style = textStyle(content, 18.sp, FontWeight.Bold), maxLines = 1)

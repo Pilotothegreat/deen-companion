@@ -529,4 +529,16 @@
     <string name="pre_reminder">تذكير قبل الأذان</string>
     <string name="pre_reminder_off">معطّل</string>
     <string name="adhan_sound_choice">صوت الأذان</string>
+    <string name="widget_moment">الآن</string>
+    <string name="widget_moment_desc">ما يهمّ في هذه اللحظة: ليلة من رمضان، أو اقتراب الإفطار، أو دعاء المطر. وإن لم يكن شيء عرض تاريخ اليوم.</string>
+    <string name="widget_config">الأداة</string>
+    <string name="widget_config_intro">كل ما هنا اختياري، وإن تركته تبعت الأداة إعدادات التطبيق.</string>
+    <string name="widget_config_colours">الألوان</string>
+    <string name="widget_config_follow_app">تبعًا للتطبيق</string>
+    <string name="widget_config_wallpaper">ألوان الخلفية</string>
+    <string name="widget_config_brand">ألوان بلال</string>
+    <string name="widget_config_transparency">الشفافية</string>
+    <string name="widget_config_iqama">إظهار أوقات الإقامة</string>
+    <string name="widget_config_athkar">الأذكار المعروضة</string>
+    <string name="widget_config_suggested">ما يناسب الوقت</string>
 </resources>

@@ -56,6 +56,10 @@ class AthkarWidgetProvider : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = AthkarWidget()
 }
 
+class MomentWidgetProvider : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = MomentWidget()
+}
+
 /** Redraws the widgets when the next prayer arrives or the day changes. */
 class WidgetRefreshReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -73,11 +77,15 @@ object WidgetUpdater {
         InspirationWidgetProvider::class,
         AthkarWidgetProvider::class,
         TasbihWidgetProvider::class,
+        MomentWidgetProvider::class,
     )
 
     /** Re-renders every placed widget (widgets that aren't on the home screen are skipped) and sets the next redraw. */
     suspend fun updateAll(context: Context) {
-        listOf(NextPrayerWidget(), PrayerTimesWidget(), VerseWidget(), InspirationWidget(), AthkarWidget(), TasbihWidget())
+        listOf(
+            NextPrayerWidget(), PrayerTimesWidget(), VerseWidget(), InspirationWidget(),
+            AthkarWidget(), TasbihWidget(), MomentWidget(),
+        )
             .forEach { widget ->
                 runCatching { widget.updateAll(context) }
                     .onFailure { Timber.w(it, "%s update failed", widget.javaClass.simpleName) }

@@ -136,6 +136,27 @@
                 android:resource="@xml/widget_athkar_info" />
         </receiver>
 
+        <activity
+            android:name=".widget.WidgetConfigActivity"
+            android:exported="true"
+            android:theme="@style/Theme.DeenCompanion">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
+        <receiver
+            android:name=".widget.MomentWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_moment">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_moment_info" />
+        </receiver>
+
         <receiver
             android:name=".widget.WidgetRefreshReceiver"
             android:exported="false" />

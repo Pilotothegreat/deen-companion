@@ -14,5 +14,7 @@
     android:previewLayout="@layout/prayer_widget_layout"
     android:description="@string/widget_next_prayer_desc"
     android:resizeMode="horizontal|vertical"
+    android:configure="com.pilotothegreat.deencompanion.widget.WidgetConfigActivity"
+    android:widgetFeatures="reconfigurable|configuration_optional"
     android:widgetCategory="home_screen">
 </appwidget-provider>

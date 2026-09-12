@@ -497,4 +497,16 @@
     <string name="pre_reminder">Reminder before the adhan</string>
     <string name="pre_reminder_off">Off</string>
     <string name="adhan_sound_choice">Adhan sound</string>
+    <string name="widget_moment">Right now</string>
+    <string name="widget_moment_desc">Whatever matters most at this moment: the night of Ramadan, iftar approaching, the dua for the rain outside. It falls back to today\'s date when there is nothing to say.</string>
+    <string name="widget_config">Widget</string>
+    <string name="widget_config_intro">Everything here is optional. Left alone, the widget follows the app\'s own settings.</string>
+    <string name="widget_config_colours">Colours</string>
+    <string name="widget_config_follow_app">Follow the app</string>
+    <string name="widget_config_wallpaper">Wallpaper</string>
+    <string name="widget_config_brand">Bilal</string>
+    <string name="widget_config_transparency">Transparency</string>
+    <string name="widget_config_iqama">Show iqama times</string>
+    <string name="widget_config_athkar">Athkar to show</string>
+    <string name="widget_config_suggested">Whatever fits now</string>
 </resources>
