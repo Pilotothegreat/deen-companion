@@ -32,6 +32,7 @@ object Notifications {
     const val CHANNEL_ADHAN = "adhan"
     const val CHANNEL_IQAMA = "iqama"
     const val CHANNEL_ATHKAR = "athkar"
+    const val CHANNEL_KHATMA = "khatma"
     private const val LEGACY_CHANNEL = "prayer_times"
 
     /** Creates or renames the channels in [languageTag]; call on start and when the language changes. */
@@ -47,6 +48,8 @@ object Notifications {
                     .apply { description = res.getString(R.string.channel_iqama_desc) },
                 NotificationChannel(CHANNEL_ATHKAR, res.getString(R.string.channel_athkar), NotificationManager.IMPORTANCE_DEFAULT)
                     .apply { description = res.getString(R.string.channel_athkar_desc) },
+                NotificationChannel(CHANNEL_KHATMA, res.getString(R.string.channel_khatma), NotificationManager.IMPORTANCE_LOW)
+                    .apply { description = res.getString(R.string.channel_khatma_desc) },
             ),
         )
     }
@@ -76,6 +79,37 @@ object Notifications {
             // Permission revoked between the check and the post.
         }
     }
+
+    /**
+     * The khatma nudge. It is low importance and only ever sent on a day the plan is actually
+     * behind, so it never congratulates anyone for reading and never fires twice in a day.
+     */
+    fun showKhatma(context: Context, languageTag: String, pagesDue: Int, page: Int) {
+        if (!canPost(context)) return
+        val res = AppLanguage.localizedContext(context, languageTag)
+        val open = PendingIntent.getActivity(
+            context,
+            KHATMA_REQUEST,
+            DeepLinks.reader(context, page.coerceAtLeast(1)),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        val notification = NotificationCompat.Builder(context, CHANNEL_KHATMA)
+            .setSmallIcon(R.drawable.notification)
+            .setContentTitle(res.getString(R.string.khatma))
+            .setContentText(res.resources.getQuantityString(R.plurals.khatma_pages_due, pagesDue, pagesDue.toString()))
+            .setContentIntent(open)
+            .setAutoCancel(true)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .build()
+        try {
+            NotificationManagerCompat.from(context).notify(KHATMA_NOTIFICATION, notification)
+        } catch (_: SecurityException) {
+            // Permission revoked between the check and the post.
+        }
+    }
+
+    private const val KHATMA_REQUEST = 900
+    private const val KHATMA_NOTIFICATION = 901
 
     fun canPost(context: Context): Boolean =
         Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||

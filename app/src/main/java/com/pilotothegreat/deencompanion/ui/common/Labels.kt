@@ -92,6 +92,13 @@ object Formatters {
 
     fun number(value: Int, locale: Locale): String = Numerals.format(value, locale)
 
+    /** One decimal place at most, in the locale's digits: "1", "1.5", "0.75". */
+    fun decimal(value: Float, locale: Locale): String =
+        Numerals.localize(java.math.BigDecimal(value.toDouble()).setScale(2, java.math.RoundingMode.HALF_UP).stripTrailingZeros().toPlainString(), locale)
+
+    /** A byte count as whole megabytes, for cache sizes. */
+    fun megabytes(bytes: Long): String = "${bytes / (1024 * 1024)} MB"
+
     /** Keeps [text] (e.g. "+3" or "UTC+04:00") in left-to-right order inside Arabic text. */
     fun ltr(text: String): String = "\u2066$text\u2069"
 }

@@ -6,6 +6,7 @@ import com.pilotothegreat.deencompanion.data.db.AppDatabase
 import com.pilotothegreat.deencompanion.data.hadith.HadithRepository
 import com.pilotothegreat.deencompanion.data.location.CityIndex
 import com.pilotothegreat.deencompanion.data.location.LocationRepository
+import com.pilotothegreat.deencompanion.data.quran.KhatmaRepository
 import com.pilotothegreat.deencompanion.data.quran.QuranRepository
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
 import com.pilotothegreat.deencompanion.data.settings.createAppDataStore
@@ -35,21 +36,23 @@ val appModule = module {
     single { AppDatabase.build(androidContext()) }
     single { get<AppDatabase>().bookmarkDao() }
     single { get<AppDatabase>().hadithDao() }
+    single { get<AppDatabase>().readingPlanDao() }
+    single { KhatmaRepository(get()) }
     single { QuranRepository(androidContext(), get()) }
     single { HadithRepository(androidContext(), get()) }
     single { CityIndex { androidContext().assets.open("cities.json").bufferedReader().use { it.readText() } } }
     single { LocationRepository(androidContext(), get(), get()) }
     single { UpdateChecker(androidContext(), get()) }
     single { PrayerAlarmScheduler(androidContext(), get()) }
-    single { QuranPlayer(androidContext()) }
+    single { QuranPlayer(androidContext(), get(), get()) }
 
     viewModelOf(::HomeViewModel)
     viewModelOf(::QuranViewModel)
-    viewModel { params -> ReaderViewModel(params.get(), get(), get(), get()) }
+    viewModel { params -> ReaderViewModel(params.get(), get(), get(), get(), get()) }
     viewModelOf(::HadithViewModel)
     viewModel { params -> HadithBookViewModel(params.get(), get()) }
     viewModelOf(::QiblaViewModel)
-    viewModelOf(::SettingsViewModel)
+    viewModel { SettingsViewModel(androidContext(), get(), get(), get(), get(), get()) }
     viewModelOf(::LocationViewModel)
     viewModelOf(::AthkarViewModel)
     viewModel { params -> AthkarSessionViewModel(params.get(), get(), get()) }

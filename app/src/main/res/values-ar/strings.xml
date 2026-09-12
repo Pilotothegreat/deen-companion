@@ -37,6 +37,53 @@
         <item quantity="other">%1$s دقيقة</item>
     </plurals>
 
+    <string name="channel_khatma">الختمة</string>
+    <string name="channel_khatma_desc">تذكير هادئ في الأيام التي تتأخر فيها عن خطتك</string>
+    <string name="done">تم</string>
+    <string name="megabytes">%1$s م.ب</string>
+    <string name="audio_cache">التلاوة المحفوظة</string>
+    <string name="audio_cache_desc">حتى %1$s م.ب · المستخدم %2$s</string>
+    <string name="audio_cache_explainer">تبقى الآيات التي استمعت إليها على الجهاز وتعمل دون اتصال، ويُحذف الأقدم أولاً عند بلوغ الحد.</string>
+    <string name="audio_cache_used">المستخدم حاليًا %1$s</string>
+    <string name="audio_cache_clear">مسح</string>
+    <!-- Khatma -->
+    <string name="khatma">الختمة</string>
+    <string name="khatma_start">ابدأ ختمة</string>
+    <string name="khatma_start_desc">ختم المصحف في مدة تختارها</string>
+    <string name="khatma_length">الختم خلال</string>
+    <string name="khatma_from">البدء من</string>
+    <string name="khatma_from_beginning">أول المصحف</string>
+    <string name="khatma_from_here">صفحة %1$s</string>
+    <string name="khatma_begin">ابدأ</string>
+    <string name="khatma_end">إنهاء</string>
+    <string name="khatma_complete">تمت الختمة، تقبّل الله.</string>
+    <string name="khatma_on_track">قراءة اليوم تمت · %1$s يوميًا</string>
+    <string name="khatma_progress">%1$s من %2$s صفحة · بقي %3$s يومًا</string>
+    <plurals name="khatma_pages_due">
+        <item quantity="zero">لا صفحات اليوم</item>
+        <item quantity="one">صفحة واحدة لليوم</item>
+        <item quantity="two">صفحتان لليوم</item>
+        <item quantity="few">%1$s صفحات لليوم</item>
+        <item quantity="many">%1$s صفحة لليوم</item>
+        <item quantity="other">%1$s صفحة لليوم</item>
+    </plurals>
+    <plurals name="pages">
+        <item quantity="zero">لا صفحات</item>
+        <item quantity="one">صفحة واحدة</item>
+        <item quantity="two">صفحتان</item>
+        <item quantity="few">%1$s صفحات</item>
+        <item quantity="many">%1$s صفحة</item>
+        <item quantity="other">%1$s صفحة</item>
+    </plurals>
+    <plurals name="days">
+        <item quantity="zero">لا أيام</item>
+        <item quantity="one">يوم واحد</item>
+        <item quantity="two">يومان</item>
+        <item quantity="few">%1$s أيام</item>
+        <item quantity="many">%1$s يومًا</item>
+        <item quantity="other">%1$s يوم</item>
+    </plurals>
+
     <!-- Prayers -->
     <string name="fajr">الفجر</string>
     <string name="sunrise">الشروق</string>
@@ -119,7 +166,20 @@
     <string name="page_juz">صفحة %1$s · الجزء %2$s</string>
     <string name="show_translation">الترجمة</string>
     <string name="play_from_here">التلاوة من هذه الآية</string>
-    <string name="playback_error">تعذّر تحميل التلاوة. تحقق من اتصالك.</string>
+    <string name="repeat">التكرار</string>
+    <string name="repeat_off">إيقاف</string>
+    <string name="repeat_ayah">هذه الآية</string>
+    <string name="repeat_range">من موضع البداية</string>
+    <string name="repeat_surah">السورة كاملة</string>
+    <string name="repeat_progress">التكرار %1$s</string>
+    <string name="playback_speed">السرعة</string>
+    <string name="speed_multiplier">%1$s×</string>
+    <string name="continuous_playback">المتابعة إلى السورة التالية</string>
+    <string name="continuous_playback_desc">مواصلة التلاوة بدل التوقف عند النهاية</string>
+    <string name="retry">إعادة المحاولة</string>
+    <string name="playback_error_offline">لا يوجد اتصال. الآيات المحفوظة ما زالت تعمل.</string>
+    <string name="playback_error_missing">هذه الآية غير متوفرة لهذا القارئ. جرّب قارئًا آخر.</string>
+    <string name="playback_error_failed">لم يستجب خادم التلاوة. أعد المحاولة بعد قليل.</string>
     <string name="player_position">%1$s من %2$s</string>
     <string name="play_pause">تشغيل أو إيقاف مؤقت</string>
     <string name="previous_ayah">الآية السابقة</string>

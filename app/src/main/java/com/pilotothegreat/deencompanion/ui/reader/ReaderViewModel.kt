@@ -2,6 +2,9 @@ package com.pilotothegreat.deencompanion.ui.reader
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pilotothegreat.deencompanion.core.quran.RepeatMode
+import com.pilotothegreat.deencompanion.data.net.NetError
+import com.pilotothegreat.deencompanion.data.quran.KhatmaRepository
 import com.pilotothegreat.deencompanion.data.quran.Quran
 import com.pilotothegreat.deencompanion.data.quran.QuranRepository
 import com.pilotothegreat.deencompanion.data.quran.Reciter
@@ -31,6 +34,7 @@ class ReaderViewModel(
     private val args: ReaderKey,
     private val repository: QuranRepository,
     private val settings: SettingsRepository,
+    private val khatma: KhatmaRepository,
     private val player: QuranPlayer,
 ) : ViewModel() {
 
@@ -52,7 +56,7 @@ class ReaderViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
     val playback: StateFlow<PlaybackState> = player.state
-    val playbackErrors: SharedFlow<Unit> = player.errors
+    val playbackErrors: SharedFlow<NetError> = player.errors
 
     private var saveJob: Job? = null
 
@@ -61,6 +65,8 @@ class ReaderViewModel(
         saveJob = viewModelScope.launch {
             delay(500)
             settings.setLastReadPage(page)
+            // The khatma follows the pages actually reached, not a button someone has to remember.
+            khatma.onPageRead(page)
         }
     }
 
@@ -82,6 +88,22 @@ class ReaderViewModel(
     fun previous() = player.previous()
     fun stop() = player.stop()
     fun setSleepTimer(minutes: Int) = player.setSleepTimer(minutes)
+
+    /** Replays the ayah that failed, which is what the snackbar's retry offers. */
+    fun retry() {
+        val quran = quran.value ?: return
+        val state = player.state.value
+        if (!state.isActive) return
+        player.play(quran.surah(state.surah), state.ayah.coerceAtLeast(1), state.reciter)
+    }
+
+    fun setRepeat(mode: RepeatMode, count: Int) {
+        viewModelScope.launch { settings.setRepeat(mode, count) }
+    }
+
+    fun setSpeed(speed: Float) {
+        viewModelScope.launch { settings.setPlaybackSpeed(speed) }
+    }
 
     fun setReciter(reciter: Reciter) {
         viewModelScope.launch {

@@ -1,5 +1,6 @@
 package com.pilotothegreat.deencompanion.ui.settings
 
+import android.content.Context
 import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -19,16 +20,22 @@ import com.pilotothegreat.deencompanion.data.settings.IqamaSetting
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
 import com.pilotothegreat.deencompanion.data.settings.ThemeMode
 import com.pilotothegreat.deencompanion.data.update.UpdateChecker
+import com.pilotothegreat.deencompanion.playback.AudioCache
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** What the Quran text and its translation must be credited as, read from the assets themselves. */
 data class QuranCredits(val text: TextSource, val translation: TranslationInfo, val edition: String)
 
 class SettingsViewModel(
+    private val context: Context,
     private val repository: SettingsRepository,
     private val location: LocationRepository,
     private val updates: UpdateChecker,
@@ -48,7 +55,27 @@ class SettingsViewModel(
 
     val isPlayInstall: Boolean get() = updates.isPlayInstall
 
+    private val _audioCacheBytes = MutableStateFlow(0L)
+    /** What the recitation cache is holding, refreshed whenever settings are shown. */
+    val audioCacheBytes: StateFlow<Long> = _audioCacheBytes.asStateFlow()
+
     fun canScheduleExactAlarms(): Boolean = scheduler.canScheduleExact()
+
+    fun setAudioCacheMb(mb: Int) = launch {
+        repository.setAudioCacheMb(mb)
+        AudioCache.setBudgetMb(mb)
+    }
+
+    fun setContinuousPlayback(on: Boolean) = launch { repository.setContinuousPlayback(on) }
+
+    fun clearAudioCache() = launch {
+        withContext(Dispatchers.IO) { AudioCache.clear() }
+        refreshAudioCacheSize()
+    }
+
+    fun refreshAudioCacheSize() = launch {
+        _audioCacheBytes.value = withContext(Dispatchers.IO) { AudioCache.sizeBytes(context) }
+    }
 
     fun setUseIpLocationFallback(enabled: Boolean) = launch { repository.setUseIpLocationFallback(enabled) }
     fun setMethod(method: CalculationMethod) = launch { repository.setMethod(method) }

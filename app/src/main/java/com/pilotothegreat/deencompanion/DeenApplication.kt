@@ -3,6 +3,7 @@ package com.pilotothegreat.deencompanion
 import android.app.Application
 import android.util.Log
 import androidx.work.Configuration
+import com.pilotothegreat.deencompanion.alarms.KhatmaReminderWorker
 import com.pilotothegreat.deencompanion.alarms.Notifications
 import com.pilotothegreat.deencompanion.alarms.PrayerAlarmScheduler
 import com.pilotothegreat.deencompanion.alarms.RescheduleWorker
@@ -52,6 +53,7 @@ class DeenApplication : Application(), Configuration.Provider {
             modules(appModule)
         }
         RescheduleWorker.enqueue(this)
+        KhatmaReminderWorker.enqueue(this)
         syncLanguage()
         keepAlarmsInSync()
         keepChannelsLocalized()

@@ -30,6 +30,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -45,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pilotothegreat.deencompanion.R
+import com.pilotothegreat.deencompanion.core.quran.KhatmaProgress
 import com.pilotothegreat.deencompanion.data.quran.Bookmark
 import com.pilotothegreat.deencompanion.data.quran.Quran
 import com.pilotothegreat.deencompanion.data.quran.QuranSearchResults
@@ -71,7 +73,9 @@ fun QuranScreen(onOpenReader: (ReaderKey) -> Unit, viewModel: QuranViewModel = k
     val results by viewModel.results.collectAsStateWithLifecycle()
     val bookmarks by viewModel.bookmarks.collectAsStateWithLifecycle()
     val lastReadPage by viewModel.lastReadPage.collectAsStateWithLifecycle()
+    val khatma by viewModel.khatmaProgress.collectAsStateWithLifecycle()
     var tab by rememberSaveable { mutableIntStateOf(0) }
+    var startingKhatma by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(topBar = { TopAppBar(title = { Text(stringResource(R.string.quran)) }) }) { padding ->
         Column(Modifier.padding(padding).fillMaxSize()) {
@@ -94,15 +98,33 @@ fun QuranScreen(onOpenReader: (ReaderKey) -> Unit, viewModel: QuranViewModel = k
                 Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.bookmarks)) })
             }
             when (tab) {
-                0 -> SurahList(loaded, lastReadPage, onOpenReader)
+                0 -> SurahList(loaded, lastReadPage, khatma, onOpenReader, viewModel::cancelKhatma) { startingKhatma = true }
                 else -> BookmarkList(bookmarks, loaded, onOpenReader, viewModel::removeBookmark)
             }
         }
     }
+
+    if (startingKhatma) {
+        StartKhatmaDialog(
+            currentPage = lastReadPage,
+            onStart = { days, fromPage ->
+                viewModel.startKhatma(days, fromPage)
+                startingKhatma = false
+            },
+            onDismiss = { startingKhatma = false },
+        )
+    }
 }
 
 @Composable
-private fun SurahList(quran: Quran, lastReadPage: Int, onOpenReader: (ReaderKey) -> Unit) {
+private fun SurahList(
+    quran: Quran,
+    lastReadPage: Int,
+    khatma: KhatmaProgress?,
+    onOpenReader: (ReaderKey) -> Unit,
+    onCancelKhatma: () -> Unit,
+    onStartKhatma: () -> Unit,
+) {
     val locale = currentLocale()
     LazyColumn(
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 24.dp + LocalBottomBarPadding.current),
@@ -118,6 +140,19 @@ private fun SurahList(quran: Quran, lastReadPage: Int, onOpenReader: (ReaderKey)
                     onClick = { onOpenReader(ReaderKey(lastReadPage)) },
                     modifier = Modifier.animateItem().padding(bottom = 12.dp),
                 )
+            }
+        }
+        item(key = "khatma") {
+            // One row, and only the one that applies: a running plan, or the offer to start one.
+            if (khatma != null) {
+                KhatmaCard(
+                    progress = khatma,
+                    onOpen = { onOpenReader(ReaderKey(it)) },
+                    onCancel = onCancelKhatma,
+                    modifier = Modifier.animateItem().padding(bottom = 12.dp),
+                )
+            } else {
+                StartKhatmaRow(onStart = onStartKhatma, modifier = Modifier.animateItem().padding(bottom = 12.dp))
             }
         }
         itemsIndexed(quran.surahs, key = { _, surah -> surah.number }) { index, surah ->

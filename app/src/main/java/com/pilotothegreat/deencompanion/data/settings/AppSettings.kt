@@ -92,6 +92,8 @@ data class QuranSettings(
     val playbackSpeed: Float = 1f,
     val repeatMode: RepeatMode = RepeatMode.OFF,
     val repeatCount: Int = 3,
+    /** Carry on into the next surah instead of stopping at the end of this one. */
+    val continuousPlayback: Boolean = true,
 )
 
 enum class ContrastMode { SYSTEM, MEDIUM, HIGH }

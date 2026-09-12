@@ -33,6 +33,41 @@
         <item quantity="other">%1$s minutes</item>
     </plurals>
 
+    <string name="channel_khatma">Khatma</string>
+    <string name="channel_khatma_desc">A quiet nudge on days your reading plan is behind</string>
+    <string name="done">Done</string>
+    <string name="megabytes">%1$s MB</string>
+    <string name="audio_cache">Downloaded recitation</string>
+    <string name="audio_cache_desc">Up to %1$s MB · %2$s used</string>
+    <string name="audio_cache_explainer">Ayahs you have listened to stay on the phone and play without a connection. The oldest are removed first once the limit is reached.</string>
+    <string name="audio_cache_used">Currently using %1$s</string>
+    <string name="audio_cache_clear">Clear</string>
+    <!-- Khatma -->
+    <string name="khatma">Khatma</string>
+    <string name="khatma_start">Start a khatma</string>
+    <string name="khatma_start_desc">Read the whole mushaf by a date you choose</string>
+    <string name="khatma_length">Finish in</string>
+    <string name="khatma_from">Start from</string>
+    <string name="khatma_from_beginning">The beginning</string>
+    <string name="khatma_from_here">Page %1$s</string>
+    <string name="khatma_begin">Begin</string>
+    <string name="khatma_end">End</string>
+    <string name="khatma_complete">Finished. May it be accepted.</string>
+    <string name="khatma_on_track">Today\'s reading is done · %1$s a day</string>
+    <string name="khatma_progress">%1$s of %2$s pages · %3$s days left</string>
+    <plurals name="khatma_pages_due">
+        <item quantity="one">%1$s page to read today</item>
+        <item quantity="other">%1$s pages to read today</item>
+    </plurals>
+    <plurals name="pages">
+        <item quantity="one">%1$s page</item>
+        <item quantity="other">%1$s pages</item>
+    </plurals>
+    <plurals name="days">
+        <item quantity="one">%1$s day</item>
+        <item quantity="other">%1$s days</item>
+    </plurals>
+
     <!-- Prayers -->
     <string name="fajr">Fajr</string>
     <string name="sunrise">Sunrise</string>
@@ -107,7 +142,20 @@
     <string name="page_juz">Page %1$s · Juz %2$s</string>
     <string name="show_translation">Translation</string>
     <string name="play_from_here">Play from this ayah</string>
-    <string name="playback_error">Couldn\'t load the recitation. Check your connection.</string>
+    <string name="repeat">Repeat</string>
+    <string name="repeat_off">Off</string>
+    <string name="repeat_ayah">This ayah</string>
+    <string name="repeat_range">From where I started</string>
+    <string name="repeat_surah">The whole surah</string>
+    <string name="repeat_progress">Repeat %1$s</string>
+    <string name="playback_speed">Speed</string>
+    <string name="speed_multiplier">%1$s×</string>
+    <string name="continuous_playback">Continue into the next surah</string>
+    <string name="continuous_playback_desc">Keep reciting instead of stopping at the end</string>
+    <string name="retry">Retry</string>
+    <string name="playback_error_offline">No connection. Ayahs already downloaded still play.</string>
+    <string name="playback_error_missing">This reciter doesn\'t have that ayah. Try another reciter.</string>
+    <string name="playback_error_failed">The recitation server didn\'t answer. Try again in a moment.</string>
     <string name="player_position">%1$s of %2$s</string>
     <string name="play_pause">Play or pause</string>
     <string name="previous_ayah">Previous ayah</string>

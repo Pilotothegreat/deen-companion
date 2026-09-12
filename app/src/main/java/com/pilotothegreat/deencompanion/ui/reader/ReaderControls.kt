@@ -3,6 +3,7 @@ package com.pilotothegreat.deencompanion.ui.reader
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.rounded.SkipNext
 import androidx.compose.material.icons.rounded.SkipPrevious
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.HorizontalFloatingToolbar
@@ -48,6 +50,7 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pilotothegreat.deencompanion.R
+import com.pilotothegreat.deencompanion.core.quran.RepeatMode
 import com.pilotothegreat.deencompanion.data.quran.Reciter
 import com.pilotothegreat.deencompanion.data.quran.Surah
 import com.pilotothegreat.deencompanion.data.quran.TranslationInfo
@@ -62,6 +65,8 @@ import com.pilotothegreat.deencompanion.ui.quran.verseReference
 import com.pilotothegreat.deencompanion.ui.theme.UthmanicHafs
 
 private val SLEEP_OPTIONS = listOf(0, 10, 15, 30, 60)
+private val SPEED_OPTIONS = listOf(0.75f, 1f, 1.25f, 1.5f)
+private val REPEAT_COUNTS = listOf(3, 5, 10)
 
 /** Floating recitation controls; the play button's shape morphs with its state. */
 @Composable
@@ -74,13 +79,23 @@ fun PlayerToolbar(
     onStop: () -> Unit,
     onReciter: (Reciter) -> Unit,
     onSleepTimer: (Int) -> Unit,
+    onRepeat: (RepeatMode, Int) -> Unit,
+    onSpeed: (Float) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val locale = currentLocale()
     var menuOpen by remember { mutableStateOf(false) }
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
-            text = "$title · ${stringResource(R.string.player_position, Formatters.number(state.ayah, locale), Formatters.number(state.verseCount, locale))}",
+            text = buildString {
+                append(title)
+                append(" · ")
+                append(stringResource(R.string.player_position, Formatters.number(state.ayah, locale), Formatters.number(state.verseCount, locale)))
+                if (state.repeatMode != RepeatMode.OFF) {
+                    append(" · ")
+                    append(stringResource(R.string.repeat_progress, Formatters.number(state.repeatsDone + 1, locale)))
+                }
+            },
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -112,6 +127,49 @@ fun PlayerToolbar(
                                     menuOpen = false
                                 },
                             )
+                        }
+                        HorizontalDivider()
+                        Text(
+                            stringResource(R.string.repeat),
+                            style = MaterialTheme.typography.labelLarge,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        )
+                        RepeatMode.entries.forEach { mode ->
+                            DropdownMenuItem(
+                                text = { Text(stringResource(mode.label)) },
+                                leadingIcon = { RadioButton(selected = mode == state.repeatMode, onClick = null) },
+                                onClick = {
+                                    // Keeping the count on OFF means turning repeat back on resumes what was set.
+                                    onRepeat(mode, state.repeatCount)
+                                    menuOpen = false
+                                },
+                            )
+                        }
+                        if (state.repeatMode != RepeatMode.OFF) {
+                            Row(Modifier.padding(horizontal = 16.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                REPEAT_COUNTS.forEach { count ->
+                                    FilterChip(
+                                        selected = count == state.repeatCount,
+                                        onClick = { onRepeat(state.repeatMode, count) },
+                                        label = { Text(Formatters.number(count, locale)) },
+                                    )
+                                }
+                            }
+                        }
+                        HorizontalDivider()
+                        Text(
+                            stringResource(R.string.playback_speed),
+                            style = MaterialTheme.typography.labelLarge,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        )
+                        Row(Modifier.padding(horizontal = 16.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            SPEED_OPTIONS.forEach { speed ->
+                                FilterChip(
+                                    selected = speed == state.speed,
+                                    onClick = { onSpeed(speed) },
+                                    label = { Text(stringResource(R.string.speed_multiplier, Formatters.decimal(speed, locale))) },
+                                )
+                            }
                         }
                         HorizontalDivider()
                         Text(

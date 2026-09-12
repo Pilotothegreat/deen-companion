@@ -9,6 +9,10 @@ import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import java.time.LocalDate
+import kotlinx.coroutines.flow.first
+import com.pilotothegreat.deencompanion.data.quran.KhatmaRepository
+import com.pilotothegreat.deencompanion.core.quran.KhatmaPlan
 import androidx.work.WorkerParameters
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
 import com.pilotothegreat.deencompanion.data.location.LocationRepository
@@ -128,6 +132,50 @@ class RescheduleWorker(context: Context, params: WorkerParameters) : CoroutineWo
                 ExistingPeriodicWorkPolicy.KEEP,
                 PeriodicWorkRequestBuilder<RescheduleWorker>(12, TimeUnit.HOURS).build(),
             )
+        }
+    }
+}
+
+/**
+ * Checks the khatma once a day. It is a worker rather than an exact alarm because being nudged
+ * about a reading plan a few minutes late costs nothing, and an exact alarm for it would compete
+ * with the ones that must arrive on time.
+ */
+class KhatmaReminderWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params), KoinComponent {
+    private val khatma: KhatmaRepository by inject()
+    private val settings: SettingsRepository by inject()
+
+    override suspend fun doWork(): Result {
+        val plan = khatma.plan.first() ?: return Result.success()
+        val today = LocalDate.now()
+        if (!KhatmaPlan.needsReminder(plan, today)) return Result.success()
+        val progress = KhatmaPlan.progress(plan, today)
+        Notifications.showKhatma(
+            context = applicationContext,
+            languageTag = settings.current().appLanguage,
+            pagesDue = progress.pagesDueToday,
+            page = progress.currentPage + 1,
+        )
+        return Result.success()
+    }
+
+    companion object {
+        private const val WORK_NAME = "khatma_reminder"
+
+        fun enqueue(context: Context) {
+            WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+                WORK_NAME,
+                ExistingPeriodicWorkPolicy.KEEP,
+                PeriodicWorkRequestBuilder<KhatmaReminderWorker>(1, TimeUnit.DAYS)
+                    .setInitialDelay(hoursUntilEvening(), TimeUnit.HOURS)
+                    .build(),
+            )
+        }
+
+        /** Aims for the evening, when there is still time to read but the day is mostly spent. */
+        private fun hoursUntilEvening(): Long {
+            val hour = java.time.LocalTime.now().hour
+            return ((19 - hour) + 24) % 24L
         }
     }
 }

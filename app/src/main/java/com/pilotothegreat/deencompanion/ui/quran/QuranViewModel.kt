@@ -2,7 +2,10 @@ package com.pilotothegreat.deencompanion.ui.quran
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pilotothegreat.deencompanion.core.quran.KhatmaProgress
+import com.pilotothegreat.deencompanion.core.time.Ticker
 import com.pilotothegreat.deencompanion.data.quran.Bookmark
+import com.pilotothegreat.deencompanion.data.quran.KhatmaRepository
 import com.pilotothegreat.deencompanion.data.quran.Quran
 import com.pilotothegreat.deencompanion.data.quran.QuranRepository
 import com.pilotothegreat.deencompanion.data.quran.QuranSearchResults
@@ -14,15 +17,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 @OptIn(FlowPreview::class, kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class QuranViewModel(
     private val repository: QuranRepository,
+    private val khatma: KhatmaRepository,
     settings: SettingsRepository,
 ) : ViewModel() {
 
@@ -47,6 +53,19 @@ class QuranViewModel(
     val lastReadPage: StateFlow<Int> = settings.settings.map { it.lastReadPage }
         .distinctUntilChanged()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
+
+    /** Recomputed each day, so the plan's target moves on without the screen being reopened. */
+    val khatmaProgress: StateFlow<KhatmaProgress?> = Ticker.days
+        .flatMapLatest { khatma.progress(LocalDate.now()) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    fun startKhatma(days: Int, fromPage: Int) {
+        viewModelScope.launch { khatma.start(days, fromPage, LocalDate.now()) }
+    }
+
+    fun cancelKhatma() {
+        viewModelScope.launch { khatma.cancel() }
+    }
 
     fun onQueryChange(value: String) {
         _query.value = value

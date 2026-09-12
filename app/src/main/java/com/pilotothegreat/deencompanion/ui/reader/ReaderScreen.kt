@@ -1,5 +1,6 @@
 package com.pilotothegreat.deencompanion.ui.reader
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,7 +26,9 @@ import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -61,6 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pilotothegreat.deencompanion.R
+import com.pilotothegreat.deencompanion.data.net.NetError
 import com.pilotothegreat.deencompanion.core.text.Numerals
 import com.pilotothegreat.deencompanion.data.quran.MushafPage
 import com.pilotothegreat.deencompanion.data.quran.Quran
@@ -95,7 +99,14 @@ fun ReaderScreen(
     var jumping by remember { mutableStateOf(false) }
 
     LaunchedEffect(viewModel) {
-        viewModel.playbackErrors.collect { snackbar.showSnackbar(resources.getString(R.string.playback_error)) }
+        viewModel.playbackErrors.collect { error ->
+            val result = snackbar.showSnackbar(
+                message = resources.getString(error.playbackMessage()),
+                actionLabel = resources.getString(R.string.retry),
+                duration = SnackbarDuration.Long,
+            )
+            if (result == SnackbarResult.ActionPerformed) viewModel.retry()
+        }
     }
 
     val loaded = quran ?: return LoadingBox()
@@ -176,6 +187,8 @@ fun ReaderScreen(
                     onStop = viewModel::stop,
                     onReciter = viewModel::setReciter,
                     onSleepTimer = viewModel::setSleepTimer,
+                    onRepeat = viewModel::setRepeat,
+                    onSpeed = viewModel::setSpeed,
                     modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp),
                 )
             }
@@ -374,4 +387,12 @@ private fun SurahBanner(surah: Surah) {
             Spacer(Modifier.size(40.dp))
         }
     }
+}
+
+/** Says what actually went wrong, so "check your connection" isn't the answer to a missing file. */
+@StringRes
+private fun NetError.playbackMessage(): Int = when (this) {
+    NetError.OFFLINE -> R.string.playback_error_offline
+    NetError.NOT_FOUND -> R.string.playback_error_missing
+    NetError.RATE_LIMITED, NetError.FAILED -> R.string.playback_error_failed
 }

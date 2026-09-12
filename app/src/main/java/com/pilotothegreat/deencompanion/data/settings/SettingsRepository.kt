@@ -164,6 +164,8 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
     suspend fun setPlaybackSpeed(speed: Float) = edit { it[Keys.PLAYBACK_SPEED] = speed.coerceIn(0.5f, 2f) }
 
+    suspend fun setContinuousPlayback(on: Boolean) = edit { it[Keys.CONTINUOUS_PLAYBACK] = on }
+
     suspend fun setRepeat(mode: RepeatMode, count: Int) = edit {
         it[Keys.REPEAT_MODE] = mode.name
         it[Keys.REPEAT_COUNT] = count.coerceIn(1, 20)
@@ -277,6 +279,7 @@ internal object Keys {
     val PLAYBACK_SPEED = floatPreferencesKey("quran_playback_speed")
     val REPEAT_MODE = stringPreferencesKey("quran_repeat_mode")
     val REPEAT_COUNT = intPreferencesKey("quran_repeat_count")
+    val CONTINUOUS_PLAYBACK = booleanPreferencesKey("quran_continuous_playback")
 
     // Accessibility
     val SIMPLE_MODE = booleanPreferencesKey("simple_mode")
@@ -375,6 +378,7 @@ internal fun Preferences.toAppSettings(): AppSettings = AppSettings(
         playbackSpeed = (this[Keys.PLAYBACK_SPEED] ?: 1f).coerceIn(0.5f, 2f),
         repeatMode = enumOrNull<RepeatMode>(this[Keys.REPEAT_MODE]) ?: RepeatMode.OFF,
         repeatCount = (this[Keys.REPEAT_COUNT] ?: 3).coerceIn(1, 20),
+        continuousPlayback = this[Keys.CONTINUOUS_PLAYBACK] ?: true,
     ),
     accessibility = AccessibilitySettings(
         simpleMode = this[Keys.SIMPLE_MODE] ?: false,

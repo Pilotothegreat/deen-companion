@@ -28,6 +28,7 @@ import androidx.compose.material.icons.rounded.AppSettingsAlt
 import androidx.compose.material.icons.rounded.Brightness5
 import androidx.compose.material.icons.rounded.Calculate
 import androidx.compose.material.icons.rounded.CalendarMonth
+import androidx.compose.material.icons.rounded.CloudDownload
 import androidx.compose.material.icons.rounded.Code
 import androidx.compose.material.icons.rounded.ColorLens
 import androidx.compose.material.icons.rounded.DarkMode
@@ -41,6 +42,7 @@ import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Policy
 import androidx.compose.material.icons.rounded.Public
+import androidx.compose.material.icons.rounded.Repeat
 import androidx.compose.material.icons.rounded.RecordVoiceOver
 import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material.icons.rounded.SystemUpdate
@@ -50,6 +52,7 @@ import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material.icons.rounded.VolumeUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeFlexibleTopAppBar
@@ -138,6 +141,7 @@ private sealed interface SettingsDialog {
     data object HighLatitude : SettingsDialog
     data object FineTune : SettingsDialog
     data object ReciterChoice : SettingsDialog
+    data object AudioCache : SettingsDialog
     data class Iqama(val prayer: Prayer) : SettingsDialog
 }
 
@@ -152,6 +156,9 @@ fun SettingsScreen(
     val s = live ?: settings
     val updateState by viewModel.updateState.collectAsStateWithLifecycle()
     val credits by viewModel.quranCredits.collectAsStateWithLifecycle()
+    val cacheBytes by viewModel.audioCacheBytes.collectAsStateWithLifecycle()
+    val cacheSummary = remember(cacheBytes) { Formatters.megabytes(cacheBytes) }
+    LaunchedEffect(Unit) { viewModel.refreshAudioCacheSize() }
     val context = LocalContext.current
     val locale = currentLocale()
     val snackbar = remember { SnackbarHostState() }
@@ -344,6 +351,19 @@ fun SettingsScreen(
                                 dialog = SettingsDialog.ReciterChoice
                             }
                         },
+                        { shapes ->
+                            SwitchRow(
+                                shapes, Icons.Rounded.Repeat, stringResource(R.string.continuous_playback),
+                                stringResource(R.string.continuous_playback_desc), s.quran.continuousPlayback,
+                                viewModel::setContinuousPlayback,
+                            )
+                        },
+                        { shapes ->
+                            NavRow(
+                                shapes, Icons.Rounded.CloudDownload, stringResource(R.string.audio_cache),
+                                stringResource(R.string.audio_cache_desc, Formatters.number(s.quran.audioCacheMb, locale), cacheSummary),
+                            ) { dialog = SettingsDialog.AudioCache }
+                        },
                     ),
                 )
             }
@@ -490,6 +510,13 @@ fun SettingsScreen(
             selected = s.reciter,
             label = { stringResource(it.label) },
             onSelect = viewModel::setReciter,
+            onDismiss = { dialog = null },
+        )
+        SettingsDialog.AudioCache -> AudioCacheDialog(
+            currentMb = s.quran.audioCacheMb,
+            usedBytes = cacheBytes,
+            onSelect = viewModel::setAudioCacheMb,
+            onClear = viewModel::clearAudioCache,
             onDismiss = { dialog = null },
         )
         is SettingsDialog.Iqama -> IqamaDialog(
@@ -767,3 +794,42 @@ private val ThemeMode.labelRes: Int
         ThemeMode.LIGHT -> R.string.theme_light
         ThemeMode.DARK -> R.string.theme_dark
     }
+
+/** How much of the phone recitation may use, and a way to hand it back. */
+@Composable
+private fun AudioCacheDialog(
+    currentMb: Int,
+    usedBytes: Long,
+    onSelect: (Int) -> Unit,
+    onClear: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val locale = currentLocale()
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.audio_cache)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(stringResource(R.string.audio_cache_explainer))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    AUDIO_CACHE_CHOICES.forEach { mb ->
+                        FilterChip(
+                            selected = mb == currentMb,
+                            onClick = { onSelect(mb) },
+                            label = { Text(stringResource(R.string.megabytes, Formatters.number(mb, locale))) },
+                        )
+                    }
+                }
+                Text(
+                    stringResource(R.string.audio_cache_used, Formatters.megabytes(usedBytes)),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.done)) } },
+        dismissButton = { TextButton(onClick = onClear) { Text(stringResource(R.string.audio_cache_clear)) } },
+    )
+}
+
+private val AUDIO_CACHE_CHOICES = listOf(128, 256, 512, 1024)
