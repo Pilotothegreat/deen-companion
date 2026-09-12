@@ -129,3 +129,39 @@ class KhatmaPlanTest {
         assertFalse(KhatmaPlan.needsReminder(plan(), start.minusDays(1)))
     }
 }
+
+/**
+ * The range repeat was fully implemented in QuranPlayer and reachable from nothing: RepeatMode.RANGE
+ * silently repeated "from where you pressed play to the end of the surah". These pin down the plan
+ * the range drives, so the UI that now sets it has something to be right against.
+ */
+class RepeatRangeTest {
+
+    private val lastIndex = 19
+
+    private fun step(finished: Int, range: IntRange, done: Int = 0) = RepeatPlan.onAyahFinished(
+        finished = finished,
+        lastIndex = lastIndex,
+        mode = RepeatMode.RANGE,
+        repeatCount = 3,
+        repeatsDone = done,
+        range = range,
+        continueToNextSurah = true,
+    )
+
+    @Test fun theRangeRestartsAtItsOwnBeginningAndNotTheSurahs() {
+        assertEquals(PlaybackStep.SeekTo(4), step(finished = 8, range = 4..8))
+    }
+
+    @Test fun insideTheRangePlaybackSimplyCarriesOn() {
+        assertEquals(PlaybackStep.Advance, step(finished = 5, range = 4..8))
+    }
+
+    @Test fun theRangeStopsRepeatingOnceItHasBeenHeardEnoughTimes() {
+        assertEquals(PlaybackStep.Advance, step(finished = 8, range = 4..8, done = 3))
+    }
+
+    @Test fun aSingleAyahIsAValidRange() {
+        assertEquals(PlaybackStep.SeekTo(7), step(finished = 7, range = 7..7))
+    }
+}

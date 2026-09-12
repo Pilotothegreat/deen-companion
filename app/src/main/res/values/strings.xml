@@ -137,6 +137,10 @@
     <string name="show_translation">Translation</string>
     <string name="reader_mushaf_page">Show the printed page</string>
     <string name="play_from_here">Play from this ayah</string>
+    <string name="repeat_from_here">Repeat from here</string>
+    <string name="repeat_to_here">Repeat to here</string>
+    <string name="repeat_range_set">Repeating %1$s to %2$s</string>
+    <string name="repeat_range_clear">Stop repeating</string>
     <string name="repeat">Repeat</string>
     <string name="repeat_off">Off</string>
     <string name="repeat_ayah">This ayah</string>

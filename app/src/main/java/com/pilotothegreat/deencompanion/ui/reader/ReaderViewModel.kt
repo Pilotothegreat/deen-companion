@@ -12,13 +12,16 @@ import com.pilotothegreat.deencompanion.data.quran.Quran
 import com.pilotothegreat.deencompanion.data.quran.QuranRepository
 import com.pilotothegreat.deencompanion.data.quran.Reciter
 import com.pilotothegreat.deencompanion.data.quran.Verse
+import com.pilotothegreat.deencompanion.data.settings.Defaults
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
 import com.pilotothegreat.deencompanion.playback.PlaybackState
 import com.pilotothegreat.deencompanion.playback.QuranPlayer
 import com.pilotothegreat.deencompanion.ui.navigation.ReaderKey
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -27,6 +30,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 data class ReaderPrefs(
     val fontSize: Int = 28,
@@ -90,6 +94,18 @@ class ReaderViewModel(
         }
     }
 
+    /**
+     * Pinching the page changes the size of the Arabic, and keeps it: reaching for Settings to
+     * make the text bigger means putting the mushaf down first, which is the moment most people
+     * stop reading.
+     */
+    fun zoom(factor: Float) {
+        val current = prefs.value.fontSize
+        val next = (current * factor).roundToInt().coerceIn(Defaults.QURAN_FONT_RANGE)
+        if (next == current) return
+        viewModelScope.launch { settings.setQuranFontSize(next) }
+    }
+
     fun toggleTranslation() {
         viewModelScope.launch { settings.setShowTranslation(!prefs.value.showTranslation) }
     }
@@ -115,6 +131,38 @@ class ReaderViewModel(
         val state = player.state.value
         if (!state.isActive) return
         player.play(quran.surah(state.surah), state.ayah.coerceAtLeast(1), state.reciter)
+    }
+
+    /**
+     * Repeat a span of ayahs, which the player has always been able to do and nothing could ask it
+     * for. Choosing an ayah sets one end; choosing a second sets the other and starts the repeat.
+     */
+    fun repeatFrom(verse: Verse) {
+        val quran = quran.value ?: return
+        val anchor = _rangeAnchor.value
+        if (anchor == null || anchor.first != verse.surah) {
+            _rangeAnchor.value = verse.surah to verse.number
+            if (!player.state.value.isActive) player.play(quran.surah(verse.surah), verse.number, prefs.value.reciter)
+            return
+        }
+        val from = minOf(anchor.second, verse.number)
+        val to = maxOf(anchor.second, verse.number)
+        _rangeAnchor.value = null
+        viewModelScope.launch { settings.setRepeat(RepeatMode.RANGE, player.state.value.repeatCount) }
+        player.setRepeatRange(from, to)
+        if (player.state.value.ayah !in from..to) {
+            player.play(quran.surah(verse.surah), from, prefs.value.reciter)
+        }
+    }
+
+    /** The first end of a range the reader has chosen, waiting for the second. */
+    private val _rangeAnchor = MutableStateFlow<Pair<Int, Int>?>(null)
+    val rangeAnchor: StateFlow<Pair<Int, Int>?> = _rangeAnchor.asStateFlow()
+
+    fun clearRange() {
+        _rangeAnchor.value = null
+        player.clearRepeatRange()
+        viewModelScope.launch { settings.setRepeat(RepeatMode.OFF, player.state.value.repeatCount) }
     }
 
     fun setRepeat(mode: RepeatMode, count: Int) {

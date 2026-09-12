@@ -157,6 +157,10 @@
     <string name="show_translation">الترجمة</string>
     <string name="reader_mushaf_page">عرض الصفحة كما تُطبع</string>
     <string name="play_from_here">التلاوة من هذه الآية</string>
+    <string name="repeat_from_here">كرّر من هنا</string>
+    <string name="repeat_to_here">كرّر إلى هنا</string>
+    <string name="repeat_range_set">يكرّر من %1$s إلى %2$s</string>
+    <string name="repeat_range_clear">إيقاف التكرار</string>
     <string name="repeat">التكرار</string>
     <string name="repeat_off">إيقاف</string>
     <string name="repeat_ayah">هذه الآية</string>

@@ -92,6 +92,11 @@ class Quran internal constructor(
 
 class QuranRepository(private val context: Context, private val bookmarkDao: BookmarkDao) {
 
+    private companion object {
+        /** Below this, a query searches surah names only. */
+        const val MIN_VERSE_QUERY = 2
+    }
+
     private val lock = Mutex()
     @Volatile private var cached: Quran? = null
     @Volatile private var searchIndex: List<String>? = null
@@ -125,14 +130,18 @@ class QuranRepository(private val context: Context, private val bookmarkDao: Boo
     /** Matches surah names and verse text or translation, ignoring diacritics and case. */
     suspend fun search(query: String, limit: Int = 100): QuranSearchResults = withContext(Dispatchers.Default) {
         val normalized = ArabicText.normalize(query).trim()
-        if (normalized.length < 2) return@withContext QuranSearchResults(emptyList(), emptyList())
+        if (normalized.isEmpty()) return@withContext QuranSearchResults(emptyList(), emptyList())
         val quran = quran()
-        val index = searchIndex ?: quran.surahs.flatMap { s -> s.verses.map { ArabicText.normalize(it.text) } }
-            .also { searchIndex = it }
 
         val surahs = quran.surahs.filter {
             it.nameEnglish.contains(normalized, ignoreCase = true) || ArabicText.normalize(it.nameArabic).contains(normalized)
         }
+        // One letter is a reasonable way to look for a surah and a hopeless way to look through six
+        // thousand ayahs, which would match nearly all of them and take a moment doing it.
+        if (normalized.length < MIN_VERSE_QUERY) return@withContext QuranSearchResults(surahs, emptyList())
+
+        val index = searchIndex ?: quran.surahs.flatMap { s -> s.verses.map { ArabicText.normalize(it.text) } }
+            .also { searchIndex = it }
         val verses = ArrayList<VerseMatch>()
         var i = 0
         for (surah in quran.surahs) {

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
@@ -88,6 +89,7 @@ import com.pilotothegreat.deencompanion.data.quran.Revelation
 import com.pilotothegreat.deencompanion.data.quran.Surah
 import com.pilotothegreat.deencompanion.data.quran.Verse
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import com.pilotothegreat.deencompanion.ui.common.KeepScreenOn
@@ -213,10 +215,14 @@ fun ReaderScreen(
                             fontSize = prefs.fontSize,
                             showTranslation = prefs.showTranslation,
                             highlight = highlight,
-                            follow = if (playback.isActive && playback.isPlaying) highlight else null,
+                            // Whatever is highlighted is worth scrolling to: the recited ayah as
+                            // it moves, and the one a search or a bookmark opened, which used to be
+                            // tinted somewhere below the fold and left there.
+                            follow = highlight,
                             bookmarks = bookmarks,
                             bottomSpace = playback.isActive,
                             flowing = flowing,
+                            onZoom = viewModel::zoom,
                             onAyahClick = {
                                 haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
                                 selected = it
@@ -237,6 +243,7 @@ fun ReaderScreen(
                     onSleepTimer = viewModel::setSleepTimer,
                     onRepeat = viewModel::setRepeat,
                     onSpeed = viewModel::setSpeed,
+                    onClearRange = viewModel::clearRange,
                     modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp),
                 )
             }
@@ -258,15 +265,18 @@ fun ReaderScreen(
 
     selected?.let { verse ->
         val bookmarked = (verse.surah to verse.number) in bookmarks
+        val anchor by viewModel.rangeAnchor.collectAsStateWithLifecycle()
         AyahSheet(
             verse = verse,
             surah = loaded.surah(verse.surah),
             translation = loaded.translation,
             bookmarked = bookmarked,
+            rangeAnchor = anchor,
             onPlay = {
                 viewModel.play(verse)
                 selected = null
             },
+            onRepeatRange = { viewModel.repeatFrom(verse) },
             onBookmark = { viewModel.setBookmark(verse, !bookmarked) },
             onDismiss = { selected = null },
         )
@@ -286,28 +296,46 @@ private fun MushafPageView(
     bottomSpace: Boolean,
     /** True to flow the page as a paragraph instead of setting it line for line. */
     flowing: Boolean,
+    onZoom: (Float) -> Unit,
     onAyahClick: (Verse) -> Unit,
 ) {
     val locale = currentLocale()
     val scroll = rememberScrollState()
-    // Where the page begins on screen, and where the recited ayah sits, both in root coordinates:
-    // the ayah lives inside a single justified Text, so there is no list item to scroll to and its
-    // position has to come from the text layout itself.
+    val density = LocalDensity.current
+    // Where the page begins on screen, and where the followed ayah sits, both in root coordinates.
+    // On a set page that is the line the ayah opens on; on a flowing one the ayah lives inside a
+    // single justified paragraph, so its position has to come from the text layout itself.
     var pageTop by remember { mutableFloatStateOf(0f) }
     var ayahTop by remember { mutableStateOf<Float?>(null) }
     LaunchedEffect(follow, ayahTop, pageTop) {
         val top = ayahTop ?: return@LaunchedEffect
         if (follow == null) return@LaunchedEffect
-        // A third of the way down rather than at the very top: an ayah pinned to the edge of the
-        // screen reads like the page is about to run out.
-        val target = (scroll.value + (top - pageTop) - FOLLOW_MARGIN_PX).toInt().coerceAtLeast(0)
-        if (kotlin.math.abs(target - scroll.value) > FOLLOW_SLACK_PX) scroll.animateScrollTo(target)
+        // Parked a little way down rather than at the very edge: an ayah pinned to the top of the
+        // screen reads like the page is about to run out. In dp, because these used to be raw
+        // pixels and so sat three times further down a dense screen than a coarse one.
+        val margin = with(density) { FOLLOW_MARGIN.toPx() }
+        val slack = with(density) { FOLLOW_SLACK.toPx() }
+        val target = (scroll.value + (top - pageTop) - margin).toInt().coerceAtLeast(0)
+        if (kotlin.math.abs(target - scroll.value) > slack) scroll.animateScrollTo(target)
     }
     Column(
         Modifier
             .fillMaxSize()
             .verticalScroll(scroll)
             .onGloballyPositioned { pageTop = it.positionInRoot().y }
+            // Pinch the page to resize the Arabic, as one would a photograph. The gesture reports
+            // continuously, so only a pinch that has actually changed the size by a noticeable
+            // amount is passed on, and the setting is written at most once per step.
+            .pointerInput(Unit) {
+                var pending = 1f
+                detectTransformGestures { _, _, zoom, _ ->
+                    pending *= zoom
+                    if (pending > ZOOM_STEP || pending < 1f / ZOOM_STEP) {
+                        onZoom(pending)
+                        pending = 1f
+                    }
+                }
+            }
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
@@ -324,8 +352,10 @@ private fun MushafPageView(
                         quran = quran,
                         fontSize = fontSize,
                         highlight = highlight,
+                        follow = follow,
                         bookmarks = bookmarks,
                         onAyahClick = onAyahClick,
+                        onFollowedLinePositioned = { ayahTop = it },
                     )
                 } else {
                     page.verses.groupBy { it.surah }.forEach { (surahNumber, verses) ->
@@ -368,14 +398,31 @@ private fun MushafPageView(
             )
         }
         if (showTranslation) {
+            // Each ayah with its meaning directly under it, rather than the page's Arabic followed
+            // by a list of numbered sentences the reader has to match up by eye.
             page.verses.forEach { verse ->
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
                     Text(
-                        "${Formatters.number(verse.surah, locale)}:${Formatters.number(verse.number, locale)}",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary,
+                        verse.text,
+                        fontFamily = UthmanicHafs,
+                        fontSize = (fontSize * 0.8f).sp,
+                        lineHeight = (fontSize * 1.5f).sp,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = TextStyle(textDirection = TextDirection.Rtl),
+                        modifier = Modifier.fillMaxWidth(),
                     )
-                    Text(verse.standaloneTranslation, style = MaterialTheme.typography.bodyMedium)
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            verseReference(verse, locale),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                        Text(
+                            verse.standaloneTranslation,
+                            style = MaterialTheme.typography.bodyMedium.copy(textDirection = TextDirection.Ltr),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
             }
         }
@@ -454,11 +501,14 @@ private fun AyahText(
     )
 }
 
-/** How far below the top of the page the recited ayah is parked, in pixels. */
-private const val FOLLOW_MARGIN_PX = 180f
+/** A pinch has to change the size by this much before it counts, so the text does not flicker. */
+private const val ZOOM_STEP = 1.08f
+
+/** How far below the top of the page the followed ayah is parked. */
+private val FOLLOW_MARGIN = 64.dp
 
 /** Below this, the ayah is near enough already and scrolling would only be a twitch. */
-private const val FOLLOW_SLACK_PX = 48f
+private val FOLLOW_SLACK = 16.dp
 
 /** After Isha the page comes down to this, and returns to full at Fajr. */
 private const val NIGHT_DIM = 0.88f
@@ -471,6 +521,10 @@ private const val NIGHT_DIM = 0.88f
  */
 private const val FLOW_ABOVE_FONT_SCALE = 1.3f
 
+/** "2:255", in the reader's own numerals. */
+private fun verseReference(verse: Verse, locale: java.util.Locale): String =
+    "${Formatters.number(verse.surah, locale)}:${Formatters.number(verse.number, locale)}"
+
 private const val AYAH_MARKER = "ayah:"
 
 /**
@@ -482,7 +536,7 @@ private const val AYAH_MARKER = "ayah:"
  * followed by loose digits: two marks where the mushaf has one.
  */
 @Composable
-fun AyahRosette(number: Int, size: Float, color: Color) {
+fun AyahRosette(number: Int, size: Float, color: Color, drop: Float = 0f) {
     Box(contentAlignment = Alignment.Center) {
         Text(AYAH_ROSETTE, fontFamily = UthmanicHafs, fontSize = (size * ROSETTE_SIZE).sp, color = color)
         Text(
@@ -490,25 +544,30 @@ fun AyahRosette(number: Int, size: Float, color: Color) {
             fontFamily = UthmanicHafs,
             fontSize = (size * DIGIT_SIZE).sp,
             color = color,
-            // The rosette's open centre sits well below the middle of its line box, under the
-            // ornamental crown; centred without this, the number lands on the crown and is lost in
-            // it. The nudge is expressed in sp rather than dp so that it grows with the glyph it
-            // corrects — as dp it stayed put while the rosette grew, and at a large accessibility
-            // text scale the digit climbed back onto the crown.
-            modifier = Modifier.offset { IntOffset(0, (size * DIGIT_DROP).sp.roundToPx()) },
+            modifier = Modifier.offset { IntOffset(0, (size * drop).sp.roundToPx()) },
         )
     }
 }
 
 private const val ROSETTE_SIZE = 1.15f
 private const val DIGIT_SIZE = 0.62f
-private const val DIGIT_DROP = 0f
+
+/**
+ * How far the digit drops inside the rosette when the rosette is set inline in a paragraph.
+ *
+ * On a line of its own the ring's opening falls where the Box centres it and no correction is
+ * wanted. Inline, the glyph sits on the paragraph's baseline inside a placeholder box, so its
+ * opening lands above centre and the digit would otherwise sit on the ornamental crown. In sp
+ * rather than dp so it grows with the glyph it corrects — as dp it stayed put while the rosette
+ * grew, and at a large accessibility text scale the digit climbed back onto the crown.
+ */
+private const val INLINE_DIGIT_DROP = 0.33f
 
 private fun ayahMarker(number: Int, fontSize: Int, color: Color): InlineTextContent =
     InlineTextContent(
         Placeholder(width = 1.95.em, height = 1.35.em, placeholderVerticalAlign = PlaceholderVerticalAlign.Center),
     ) {
-        AyahRosette(number = number, size = fontSize.toFloat(), color = color)
+        AyahRosette(number = number, size = fontSize.toFloat(), color = color, drop = INLINE_DIGIT_DROP)
     }
 
 /** U+06DD on its own: the rosette, with no digits for the font to fail to compose. */

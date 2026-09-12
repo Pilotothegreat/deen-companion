@@ -19,6 +19,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
@@ -54,8 +56,11 @@ fun MushafPageLines(
     quran: Quran,
     fontSize: Int,
     highlight: Pair<Int, Int>?,
+    /** The ayah to keep in view: the one being recited, or the one a search or bookmark opened. */
+    follow: Pair<Int, Int>?,
     bookmarks: Set<Pair<Int, Int>>,
     onAyahClick: (Verse) -> Unit,
+    onFollowedLinePositioned: (Float) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val measurer = rememberTextMeasurer()
@@ -64,6 +69,13 @@ fun MushafPageLines(
         val fit = remember(lines, fontSize, widthPx) { fitSize(lines, fontSize, widthPx, measurer) }
         val size = fit.size
         val height = (size * LINE_HEIGHT).dp
+        // The first line the followed ayah appears on is the one worth scrolling to; the ayah may
+        // run over several.
+        val followedLine = remember(lines, follow) {
+            follow?.let { (surah, ayah) ->
+                lines.firstOrNull { line -> line.words.any { it.surah == surah && it.ayah == ayah } }
+            }
+        }
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
             Column(Modifier.fillMaxWidth()) {
                 lines.forEach { line ->
@@ -83,6 +95,11 @@ fun MushafPageLines(
                             highlight = highlight,
                             bookmarks = bookmarks,
                             onAyahClick = onAyahClick,
+                            modifier = if (line === followedLine) {
+                                Modifier.onGloballyPositioned { onFollowedLinePositioned(it.positionInRoot().y) }
+                            } else {
+                                Modifier
+                            },
                         )
                     }
                 }
@@ -101,10 +118,11 @@ private fun WordLine(
     highlight: Pair<Int, Int>?,
     bookmarks: Set<Pair<Int, Int>>,
     onAyahClick: (Verse) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
     Row(
-        modifier = Modifier.fillMaxWidth().height(height),
+        modifier = modifier.fillMaxWidth().height(height),
         // Justified to both margins, because the break was chosen to make that look right. A
         // surah's closing line is centred instead, as the print sets it.
         horizontalArrangement = if (centred) CENTRED_WORDS else Arrangement.SpaceBetween,

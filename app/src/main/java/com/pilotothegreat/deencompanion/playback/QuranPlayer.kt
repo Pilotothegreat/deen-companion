@@ -49,6 +49,8 @@ data class PlaybackState(
     val repeatCount: Int = 3,
     /** How many times the repeating unit has already come round. */
     val repeatsDone: Int = 0,
+    /** The ayahs a RANGE repeat covers, 1-based and inclusive, or null for the rest of the surah. */
+    val range: IntRange? = null,
     val speed: Float = 1f,
 ) {
     val isActive: Boolean get() = surah > 0
@@ -135,6 +137,7 @@ class QuranPlayer(
                 reciter = reciter,
                 isPlaying = true,
                 repeatsDone = 0,
+                range = null,
             )
         }
     }
@@ -146,6 +149,15 @@ class QuranPlayer(
         val to = (toAyah - 1).coerceIn(from, verses.lastIndex)
         repeatRange = from..to
         repeatsDone = 0
+        _state.update { it.copy(range = (from + 1)..(to + 1), repeatsDone = 0) }
+    }
+
+    /** Back to repeating from where playback started to the end of the surah. */
+    fun clearRepeatRange() {
+        val verses = current?.verses ?: return
+        repeatRange = (_state.value.ayah - 1).coerceIn(0, verses.lastIndex)..verses.lastIndex
+        repeatsDone = 0
+        _state.update { it.copy(range = null, repeatsDone = 0) }
     }
 
     /** Restarts the current ayah with another reciter. */

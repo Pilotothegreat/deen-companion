@@ -17,6 +17,7 @@ import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.Repeat
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.SkipNext
 import androidx.compose.material.icons.rounded.SkipPrevious
@@ -26,8 +27,11 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.HorizontalFloatingToolbar
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Icon
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LoadingIndicator
@@ -81,11 +85,31 @@ fun PlayerToolbar(
     onSleepTimer: (Int) -> Unit,
     onRepeat: (RepeatMode, Int) -> Unit,
     onSpeed: (Float) -> Unit,
+    onClearRange: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val locale = currentLocale()
     var menuOpen by remember { mutableStateOf(false) }
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        // A chosen range is the one piece of playback state that is invisible otherwise, and the
+        // one a reader most needs a way out of.
+        state.range?.let { range ->
+            AssistChip(
+                onClick = onClearRange,
+                label = {
+                    Text(
+                        stringResource(
+                            R.string.repeat_range_set,
+                            Formatters.number(range.first, locale),
+                            Formatters.number(range.last, locale),
+                        ),
+                    )
+                },
+                trailingIcon = {
+                    Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.repeat_range_clear))
+                },
+            )
+        }
         Text(
             text = buildString {
                 append(title)
@@ -222,7 +246,10 @@ fun AyahSheet(
     surah: Surah,
     translation: TranslationInfo,
     bookmarked: Boolean,
+    /** The ayah already chosen as one end of a repeat, if the reader is part-way through choosing. */
+    rangeAnchor: Pair<Int, Int>?,
     onPlay: () -> Unit,
+    onRepeatRange: () -> Unit,
     onBookmark: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -250,8 +277,16 @@ fun AyahSheet(
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            val waiting = rangeAnchor != null && rangeAnchor.first == verse.surah
             val actions = listOf(
                 Triple(Icons.Rounded.PlayArrow, stringResource(R.string.play_from_here), onPlay),
+                Triple(
+                    Icons.Rounded.Repeat,
+                    stringResource(if (waiting) R.string.repeat_to_here else R.string.repeat_from_here),
+                ) {
+                    onRepeatRange()
+                    onDismiss()
+                },
                 Triple(
                     if (bookmarked) Icons.Rounded.Bookmark else Icons.Rounded.BookmarkBorder,
                     stringResource(if (bookmarked) R.string.remove_bookmark else R.string.bookmark),
