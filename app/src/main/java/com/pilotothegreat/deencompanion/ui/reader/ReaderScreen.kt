@@ -375,7 +375,7 @@ private fun MushafPageView(
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary,
                     )
-                    Text(verse.translation, style = MaterialTheme.typography.bodyMedium)
+                    Text(verse.standaloneTranslation, style = MaterialTheme.typography.bodyMedium)
                 }
             }
         }

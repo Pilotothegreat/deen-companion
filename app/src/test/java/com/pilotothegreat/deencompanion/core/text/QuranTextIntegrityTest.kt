@@ -104,6 +104,29 @@ class QuranTextIntegrityTest {
         assertEquals("no Arabic-Indic digits in the text", 0, whole.count { it in '\u0660'..'\u0669' })
     }
 
+    /**
+     * The line table is generated against this exact text. If one is regenerated without the other,
+     * every word after the first difference lands on the wrong line and the page still looks
+     * plausible — which is precisely why this is checked rather than trusted.
+     */
+    @Test fun theLineTableCoversThisTextAndNoOther() {
+        val table = Json.parseToJsonElement(File("src/main/assets/mushaf-lines.json").readText()).jsonObject
+        val tokens = surahs.sumOf { surah ->
+            surah.jsonObject.getValue("verses").jsonArray.sumOf { verse ->
+                verse.jsonPrimitive.content.split(" ").count { it.isNotEmpty() }
+            }
+        }
+        assertEquals("the table was built against a different text", tokens, table.getValue("tokens").jsonPrimitive.content.toInt())
+        assertEquals(604, table.getValue("pages").jsonPrimitive.content.toInt())
+        assertEquals(15, table.getValue("linesPerPage").jsonPrimitive.content.toInt())
+
+        // Every line ends on a real token, and the last line of the mushaf ends on the last one.
+        val ends = table.getValue("ends").jsonArray.flatMap { page -> page.jsonArray.map { it.jsonPrimitive.content.toInt() } }
+        assertEquals(604 * 15, ends.size)
+        assertEquals(tokens - 1, ends.last())
+        assertTrue("the lines run backwards somewhere", ends.zipWithNext().all { (a, b) -> b >= a })
+    }
+
     @Test fun theTextAndTranslationAreCredited() {
         val source = arabic.getValue("source").jsonObject
         assertFalse(source.getValue("name").jsonPrimitive.content.isBlank())

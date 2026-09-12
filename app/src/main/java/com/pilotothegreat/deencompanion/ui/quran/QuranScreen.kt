@@ -303,7 +303,7 @@ private fun SearchResults(results: QuranSearchResults?, quran: Quran, onOpenRead
                                 )
                                 if (!locale.isArabic || match.translationMatch != null) {
                                     Text(
-                                        highlighted(verse.translation, match.translationMatch, highlight),
+                                        highlighted(verse.standaloneTranslation, match.translationMatch, highlight),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )

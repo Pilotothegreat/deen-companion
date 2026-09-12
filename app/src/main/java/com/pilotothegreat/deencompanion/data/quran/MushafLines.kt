@@ -32,6 +32,8 @@ data class LineWord(
     val surah: Int,
     val ayah: Int,
     val text: String,
+    /** True when this word opens its ayah, which is where a rub' al-hizb mark goes. */
+    val startsAyah: Boolean,
     /** True when this word closes its ayah, so the numbered rosette follows it. */
     val endsAyah: Boolean,
 )
@@ -110,7 +112,7 @@ object MushafLines {
             for (verse in surah.verses) {
                 val parts = verse.text.split(' ').filter { it.isNotEmpty() }
                 parts.forEachIndexed { index, text ->
-                    out += Token(surah.number, verse.number, text, index == parts.lastIndex)
+                    out += Token(surah.number, verse.number, text, index == 0, index == parts.lastIndex)
                 }
             }
         }
@@ -152,9 +154,16 @@ object MushafLines {
             surah = first.surah,
             ayah = first.ayah,
             text = builder.toString(),
+            startsAyah = first.startsAyah,
             endsAyah = tokens[end].endsAyah,
         )
     }
 
-    private data class Token(val surah: Int, val ayah: Int, val text: String, val endsAyah: Boolean)
+    private data class Token(
+        val surah: Int,
+        val ayah: Int,
+        val text: String,
+        val startsAyah: Boolean,
+        val endsAyah: Boolean,
+    )
 }

@@ -115,6 +115,19 @@ private fun WordLine(
             val verse = quran.verse(word.surah, word.ayah)
             val interaction = remember(key) { MutableInteractionSource() }
             Row(verticalAlignment = Alignment.CenterVertically) {
+                // ۞ opens a rub' al-hizb. Unlike the sajdah sign it is not in Tanzil's text, so the
+                // app draws it — on the first word of the ayah that opens the quarter, which is
+                // where the print sets it.
+                if (word.startsAyah && verse?.quarterStart != null) {
+                    Text(
+                        QUARTER,
+                        fontFamily = UthmanicHafs,
+                        fontSize = size.sp,
+                        // The same ornamental colour as the rosettes: in print they are one family
+                        // of marks, and picking the accent colour made the quarter mark shout.
+                        color = colors.secondary,
+                    )
+                }
                 Text(
                     text = word.text,
                     fontFamily = UthmanicHafs,
@@ -191,6 +204,9 @@ private fun fitSize(lines: List<MushafLine>, fontSize: Int, widthPx: Int, measur
     val short = widths.filterValues { it < widest * JUSTIFY_ABOVE }.keys
     return PageFit((fontSize * ratio).coerceAtLeast(MIN_SIZE), short)
 }
+
+/** U+06DE, the mark that opens a quarter of a hizb. */
+private const val QUARTER = "\u06de"
 
 /** A centred line keeps a normal word gap rather than being pushed to the margins. */
 private val CENTRED_WORDS = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)

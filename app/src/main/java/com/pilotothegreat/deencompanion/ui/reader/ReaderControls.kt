@@ -229,7 +229,7 @@ fun AyahSheet(
     val context = LocalContext.current
     val locale = currentLocale()
     val reference = verseReference(surah, verse.number, locale)
-    val shareText = "${verse.text}\n\n${verse.translation}\n— ${surah.nameEnglish} ${verse.surah}:${verse.number}"
+    val shareText = "${verse.text}\n\n${verse.standaloneTranslation}\n— ${surah.nameEnglish} ${verse.surah}:${verse.number}"
         .let { if (verse.translation.isBlank()) it else "$it\n${translation.attribution}" }
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
@@ -243,7 +243,7 @@ fun AyahSheet(
                 style = MaterialTheme.typography.bodyLarge.copy(textDirection = TextDirection.Rtl),
                 modifier = Modifier.fillMaxWidth(),
             )
-            Text(verse.translation, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(verse.standaloneTranslation, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             // The licence asks for the translator to be named wherever the translation is read.
             Text(
                 translation.attribution,
