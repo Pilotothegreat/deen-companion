@@ -80,6 +80,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pilotothegreat.deencompanion.ui.common.rememberHaptics
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.core.text.Numerals
 import com.pilotothegreat.deencompanion.data.net.NetError
@@ -88,10 +89,8 @@ import com.pilotothegreat.deencompanion.data.quran.Quran
 import com.pilotothegreat.deencompanion.data.quran.Revelation
 import com.pilotothegreat.deencompanion.data.quran.Surah
 import com.pilotothegreat.deencompanion.data.quran.Verse
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalHapticFeedback
 import com.pilotothegreat.deencompanion.ui.common.KeepScreenOn
 import com.pilotothegreat.deencompanion.ui.common.Formatters
 import com.pilotothegreat.deencompanion.ui.common.currentLocale
@@ -122,7 +121,7 @@ fun ReaderScreen(
     val resources = LocalResources.current
     val locale = currentLocale()
     val snackbar = remember { SnackbarHostState() }
-    val haptics = LocalHapticFeedback.current
+    val haptics = rememberHaptics()
     var selected by remember { mutableStateOf<Verse?>(null) }
     var jumping by remember { mutableStateOf(false) }
 
@@ -224,7 +223,7 @@ fun ReaderScreen(
                             flowing = flowing,
                             onZoom = viewModel::zoom,
                             onAyahClick = {
-                                haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
+                                haptics.click()
                                 selected = it
                             },
                         )

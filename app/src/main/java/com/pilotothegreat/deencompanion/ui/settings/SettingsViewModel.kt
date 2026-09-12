@@ -146,6 +146,11 @@ private val _backupMessage = MutableStateFlow<Int?>(null)
         _backupMessage.value = message
     }
 
+    /** The sound one prayer's adhan plays: a picked URI, the phone's alarm sound, or silence. */
+    fun setAdhanSound(prayer: Prayer, sound: String) = launch { repository.setAdhanSound(prayer, sound) }
+
+    fun setPreReminderPrayers(prayers: Set<Prayer>) = launch { repository.setPreReminderPrayers(prayers) }
+
     fun resetEverything() = launch { backup.reset() }
 
     private val _install = MutableStateFlow<InstallState>(InstallState.Idle)

@@ -133,7 +133,9 @@ import com.pilotothegreat.deencompanion.data.quran.Reciter
 import com.pilotothegreat.deencompanion.data.settings.AppLanguage
 import com.pilotothegreat.deencompanion.data.settings.AppSettings
 import com.pilotothegreat.deencompanion.data.settings.Defaults
+import androidx.core.net.toUri
 import com.pilotothegreat.deencompanion.data.settings.IqamaSetting
+import com.pilotothegreat.deencompanion.data.settings.SoundSettings
 import com.pilotothegreat.deencompanion.data.settings.ThemeMode
 import com.pilotothegreat.deencompanion.data.update.UpdateChecker
 import com.pilotothegreat.deencompanion.ui.common.Formatters
@@ -214,6 +216,15 @@ fun SettingsScreen(
     var showUpdate by rememberSaveable { mutableStateOf(false) }
     var showIqama by rememberSaveable { mutableStateOf(false) }
     var showRestore by rememberSaveable { mutableStateOf(false) }
+    var showSounds by rememberSaveable { mutableStateOf(false) }
+    var pickingFor by rememberSaveable { mutableStateOf<Prayer?>(null) }
+    val pickSound = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val prayer = pickingFor ?: return@rememberLauncherForActivityResult
+        pickingFor = null
+        if (result.resultCode != android.app.Activity.RESULT_OK) return@rememberLauncherForActivityResult
+        val uri = result.data?.getParcelableExtra<android.net.Uri>(android.media.RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
+        viewModel.setAdhanSound(prayer, uri?.toString() ?: SoundSettings.SILENT)
+    }
     val install by viewModel.install.collectAsStateWithLifecycle()
     var exactAllowed by remember { mutableStateOf(viewModel.canScheduleExactAlarms()) }
     LifecycleResumeEffect(Unit) {
@@ -299,9 +310,12 @@ fun SettingsScreen(
                         )
                     }
                     add { shapes ->
-                        NavRow(shapes, Icons.Rounded.VolumeUp, stringResource(R.string.adhan_sound), stringResource(R.string.adhan_sound_desc), trailing = { OpenIcon() }) {
-                            context.startSafely(SystemIntents.channel(context, Notifications.CHANNEL_ADHAN))
-                        }
+                        NavRow(
+                            shapes,
+                            Icons.Rounded.VolumeUp,
+                            stringResource(R.string.adhan_sound),
+                            stringResource(R.string.adhan_sound_desc),
+                        ) { showSounds = true }
                     }
                     add { shapes ->
                         ContentRow(shapes, Icons.Rounded.Schedule, stringResource(R.string.pre_reminder)) {
@@ -315,6 +329,32 @@ fun SettingsScreen(
                                 },
                                 modifier = Modifier.padding(top = 8.dp),
                             )
+                        }
+                    }
+                    // Which prayers it applies to only matters once it is on, and asking before
+                    // then is a question about nothing.
+                    if (s.sounds.preReminderMinutes > 0) {
+                        add { shapes ->
+                            ContentRow(shapes, Icons.Rounded.NotificationsActive, stringResource(R.string.pre_reminder_which)) {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    modifier = Modifier.padding(top = 8.dp),
+                                ) {
+                                    Prayer.obligatory.forEach { prayer ->
+                                        val chosen = prayer in s.sounds.preReminderPrayers
+                                        FilterChip(
+                                            selected = chosen,
+                                            onClick = {
+                                                viewModel.setPreReminderPrayers(
+                                                    if (chosen) s.sounds.preReminderPrayers - prayer
+                                                    else s.sounds.preReminderPrayers + prayer,
+                                                )
+                                            },
+                                            label = { Text(stringResource(prayer.nameRes)) },
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                     add { shapes ->
@@ -630,6 +670,20 @@ fun SettingsScreen(
             onDismiss = { showUpdate = false },
         )
     }
+    if (showSounds) {
+        AdhanSoundSheet(
+            sounds = s.sounds,
+            onSystem = { viewModel.setAdhanSound(it, SoundSettings.SYSTEM_SOUND) },
+            onSilent = { viewModel.setAdhanSound(it, SoundSettings.SILENT) },
+            onPick = { prayer, title ->
+                pickingFor = prayer
+                val current = s.sounds.adhanFor(prayer).takeIf { it.startsWith("content://") }?.toUri()
+                pickSound.launch(SystemIntents.pickAdhanSound(title, current))
+            },
+            onDismiss = { showSounds = false },
+        )
+    }
+
     if (showRestore) {
         val autoBackups by viewModel.autoBackups.collectAsStateWithLifecycle()
         RestoreSheet(
@@ -999,6 +1053,80 @@ private val Float.labelRes: Int
         this <= 1.3f -> R.string.text_scale_larger
         else -> R.string.text_scale_largest
     }
+
+/**
+ * The sound each prayer's adhan plays.
+ *
+ * 1.9.0 promised this row and shipped a deep link into the system's notification-channel settings
+ * instead, which is a different app's screen, in a different language, describing a channel sound
+ * this app deliberately does not use — the adhan plays as alarm audio so that it is heard through
+ * Do Not Disturb. The picker offered here is the system's own, which previews as it scrolls, and
+ * asks for alarm sounds because those are the ones the player can actually honour.
+ */
+@Composable
+private fun AdhanSoundSheet(
+    sounds: SoundSettings,
+    onSystem: (Prayer) -> Unit,
+    onSilent: (Prayer) -> Unit,
+    onPick: (Prayer, String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var editing by remember { mutableStateOf<Prayer?>(null) }
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(
+            Modifier.padding(start = 16.dp, end = 16.dp, bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+        ) {
+            Text(
+                stringResource(R.string.adhan_sound_desc),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(vertical = 12.dp),
+            )
+            Prayer.obligatory.forEachIndexed { index, prayer ->
+                NavRow(
+                    ListItemDefaults.segmentedShapes(index, Prayer.obligatory.size),
+                    prayer.icon,
+                    stringResource(prayer.nameRes),
+                    stringResource(soundLabel(sounds.adhanFor(prayer))),
+                ) { editing = prayer }
+            }
+        }
+    }
+    editing?.let { prayer ->
+        val title = stringResource(prayer.nameRes)
+        val current = soundLabel(sounds.adhanFor(prayer))
+        ChoiceDialog(
+            title = title,
+            options = SOUND_CHOICES,
+            selected = if (current in SOUND_CHOICES) current else R.string.adhan_sound_pick,
+            label = { stringResource(it) },
+            onSelect = { choice ->
+                when (choice) {
+                    R.string.adhan_sound_system -> onSystem(prayer)
+                    R.string.adhan_sound_silent -> onSilent(prayer)
+                    else -> onPick(prayer, title)
+                }
+                editing = null
+            },
+            onDismiss = { editing = null },
+        )
+    }
+}
+
+/** The three answers, in the order they are worth offering. */
+private val SOUND_CHOICES = listOf(
+    R.string.adhan_sound_system,
+    R.string.adhan_sound_pick,
+    R.string.adhan_sound_silent,
+)
+
+@StringRes
+private fun soundLabel(sound: String): Int = when (sound) {
+    SoundSettings.SYSTEM_SOUND -> R.string.adhan_sound_system
+    SoundSettings.SILENT -> R.string.adhan_sound_silent
+    else -> R.string.adhan_sound_custom
+}
 
 /**
  * Where a restore comes from.

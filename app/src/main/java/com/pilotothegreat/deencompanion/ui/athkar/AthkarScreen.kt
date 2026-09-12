@@ -43,9 +43,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -53,6 +51,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pilotothegreat.deencompanion.ui.common.rememberHaptics
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.core.athkar.AthkarCategory
 import com.pilotothegreat.deencompanion.core.athkar.AthkarLibrary
@@ -76,7 +75,7 @@ fun AthkarScreen(onOpenCategory: (String) -> Unit, viewModel: AthkarViewModel = 
     val results by viewModel.results.collectAsStateWithLifecycle()
     val tasbih by viewModel.tasbihState.collectAsStateWithLifecycle()
     val locale = currentLocale()
-    val haptics = LocalHapticFeedback.current
+    val haptics = rememberHaptics()
     val resources = LocalResources.current
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -84,7 +83,7 @@ fun AthkarScreen(onOpenCategory: (String) -> Unit, viewModel: AthkarViewModel = 
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when (event) {
-                AthkarEvent.RoundCompleted -> haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+                AthkarEvent.RoundCompleted -> haptics.confirm()
                 is AthkarEvent.TasbihReset -> scope.launch {
                     val result = snackbar.showSnackbar(
                         message = resources.getString(R.string.tasbih_reset_done),
@@ -134,7 +133,7 @@ fun AthkarScreen(onOpenCategory: (String) -> Unit, viewModel: AthkarViewModel = 
                     state = tasbih,
                     locale = locale,
                     onTap = {
-                        haptics.performHapticFeedback(HapticFeedbackType.SegmentTick)
+                        haptics.tick()
                         viewModel.incrementTasbih()
                     },
                     onReset = viewModel::resetTasbih,

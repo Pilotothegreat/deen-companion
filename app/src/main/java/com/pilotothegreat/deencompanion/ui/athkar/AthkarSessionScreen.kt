@@ -58,8 +58,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
@@ -75,6 +73,7 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pilotothegreat.deencompanion.ui.common.rememberHaptics
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.core.athkar.AthkarItem
 import com.pilotothegreat.deencompanion.ui.common.Formatters
@@ -102,7 +101,7 @@ fun AthkarSessionScreen(
     val state by viewModel.session.collectAsStateWithLifecycle()
     val session = state ?: return LoadingBox()
     val locale = currentLocale()
-    val haptics = LocalHapticFeedback.current
+    val haptics = rememberHaptics()
     val reducedMotion = rememberReducedMotion()
     val category = session.category
     val items = category.items
@@ -126,7 +125,7 @@ fun AthkarSessionScreen(
 
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
-            haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+            haptics.confirm()
             delay(if (reducedMotion) 150 else 450)
             val next = when (event) {
                 is SessionEvent.ItemCompleted -> event.index + 1
@@ -191,7 +190,7 @@ fun AthkarSessionScreen(
                         showTransliteration = showTransliteration,
                         locale = locale,
                         onCount = {
-                            haptics.performHapticFeedback(HapticFeedbackType.SegmentTick)
+                            haptics.tick()
                             viewModel.count(page)
                         },
                     )
@@ -205,7 +204,7 @@ fun AthkarSessionScreen(
                     target = item.count,
                     locale = locale,
                     onCount = {
-                        haptics.performHapticFeedback(HapticFeedbackType.SegmentTick)
+                        haptics.tick()
                         viewModel.count(page)
                     },
                     modifier = Modifier.align(Alignment.CenterHorizontally).navigationBarsPadding().padding(vertical = 16.dp),

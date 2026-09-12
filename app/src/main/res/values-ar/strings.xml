@@ -521,7 +521,6 @@
     <string name="simple_mode">الوضع المبسّط</string>
     <string name="simple_mode_desc">خط أكبر وتباين أقوى وأزرار أوسع وبلا حركة، بمفتاح واحد</string>
     <string name="text_scale">حجم الخط</string>
-    <string name="contrast">التباين</string>
     <string name="contrast_system">النظام</string>
     <string name="contrast_medium">متوسط</string>
     <string name="contrast_high">عالٍ</string>
@@ -533,7 +532,6 @@
     <string name="backup_export">حفظ نسخة احتياطية</string>
     <string name="backup_export_desc">إعداداتك وعلاماتك وختمتك في ملف تحتفظ به</string>
     <string name="backup_import">استعادة نسخة</string>
-    <string name="backup_auto_title">نسخ بلال الخاصة</string>
     <string name="backup_auto_desc">تُكتب بهدوء مرة كل أسبوع وتُحفظ ثلاثة أسابيع، على هذا الهاتف وحده</string>
     <string name="backup_auto_none">لا توجد نسخة تلقائية بعد، وتُكتب الأولى خلال أسبوع من التثبيت.</string>
     <string name="backup_choose_file">اختيار ملف بدلاً من ذلك…</string>
@@ -594,6 +592,11 @@
     <string name="onboarding_start">ابدأ</string>
     <string name="iqama_waiting_body">حتى إقامة %1$s</string>
     <string name="adhan_sound_desc">اختر صوت الأذان واهتزازه</string>
+    <string name="adhan_sound_system">صوت المنبّه في الهاتف</string>
+    <string name="adhan_sound_pick">اختيار صوت…</string>
+    <string name="adhan_sound_silent">صامت</string>
+    <string name="adhan_sound_custom">صوت اخترته</string>
+    <string name="pre_reminder_which">أي الصلوات</string>
     <string name="reliability_summary_ok">كل ما يحتاجه هاتفك لإيصالها مهيّأ</string>
     <string name="reliability_summary_problem">هناك ما يؤخّر تنبيهاتك أو يكتمها في هذا الهاتف</string>
     <string name="reading">القراءة</string>

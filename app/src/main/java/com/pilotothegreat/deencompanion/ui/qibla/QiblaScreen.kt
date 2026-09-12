@@ -48,9 +48,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -62,6 +60,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pilotothegreat.deencompanion.ui.common.rememberHaptics
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.core.qibla.QiblaMath
 import com.pilotothegreat.deencompanion.data.location.LocationRepository
@@ -83,7 +82,7 @@ fun QiblaScreen(onBack: () -> Unit, viewModel: QiblaViewModel = koinViewModel())
     val context = LocalContext.current
     val resources = LocalResources.current
     val locale = currentLocale()
-    val haptics = LocalHapticFeedback.current
+    val haptics = rememberHaptics()
     val snackbar = remember { SnackbarHostState() }
     val locationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
         if (result.values.any { it }) viewModel.refresh()
@@ -133,7 +132,7 @@ fun QiblaScreen(onBack: () -> Unit, viewModel: QiblaViewModel = koinViewModel())
         val compass = rememberCompass(qibla.latitude, qibla.longitude)
         val heading = compass.heading
         val aligned = heading != null && QiblaMath.isAligned(heading.toDouble(), qibla.bearing, ALIGNMENT_TOLERANCE_DEGREES)
-        LaunchedEffect(aligned) { if (aligned) haptics.performHapticFeedback(HapticFeedbackType.Confirm) }
+        LaunchedEffect(aligned) { if (aligned) haptics.confirm() }
         val bearingText = Formatters.number(qibla.bearing.roundToInt(), locale)
 
         Column(

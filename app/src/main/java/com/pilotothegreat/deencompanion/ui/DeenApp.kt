@@ -59,6 +59,7 @@ import com.pilotothegreat.deencompanion.ui.hadith.HadithBookScreen
 import com.pilotothegreat.deencompanion.ui.hadith.HadithScreen
 import com.pilotothegreat.deencompanion.ui.home.HomeScreen
 import com.pilotothegreat.deencompanion.ui.location.LocationPickerScreen
+import com.pilotothegreat.deencompanion.ui.theme.LocalAccessibility
 import com.pilotothegreat.deencompanion.ui.navigation.AthkarKey
 import com.pilotothegreat.deencompanion.ui.navigation.AthkarSessionKey
 import com.pilotothegreat.deencompanion.ui.navigation.FloatingBarClearance
@@ -150,6 +151,10 @@ fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpe
     // Every screen change, including coming back to a tab, starts with the bar showing.
     LaunchedEffect(backStack.lastOrNull()) { barScroll.state.offset = 0f }
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    // Navigation is the one place the app kept moving in Simple mode: the theme swaps the motion
+    // scheme, but a transition spec is read once when the entry is declared, so it never noticed.
+    val stillMotion = LocalAccessibility.current.reduceMotion
+    val tabMotion = if (stillMotion) StillTabTransition else TabTransition
 
     NavigationSuiteScaffold(
         navigationSuiteType = railType,
@@ -175,11 +180,11 @@ fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpe
                         rememberSaveableStateHolderNavEntryDecorator(),
                         rememberViewModelStoreNavEntryDecorator(),
                     ),
-                    transitionSpec = { sharedAxis(forward = true, rtl = rtl) },
-                    popTransitionSpec = { sharedAxis(forward = false, rtl = rtl) },
-                    predictivePopTransitionSpec = { _ -> predictiveBack() },
+                    transitionSpec = { sharedAxis(forward = true, rtl = rtl, still = stillMotion) },
+                    popTransitionSpec = { sharedAxis(forward = false, rtl = rtl, still = stillMotion) },
+                    predictivePopTransitionSpec = { _ -> predictiveBack(still = stillMotion) },
                     entryProvider = entryProvider {
-                        entry<HomeKey>(metadata = TabTransition) {
+                        entry<HomeKey>(metadata = tabMotion) {
                             HomeScreen(
                                 onOpenSettings = { navigator.navigate(SettingsKey) },
                                 onOpenQibla = { navigator.navigate(QiblaKey) },
@@ -188,13 +193,13 @@ fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpe
                                 onOpenReader = navigator::navigate,
                             )
                         }
-                        entry<QuranKey>(metadata = TabTransition) { QuranScreen(onOpenReader = navigator::navigate) }
+                        entry<QuranKey>(metadata = tabMotion) { QuranScreen(onOpenReader = navigator::navigate) }
                         entry<ReaderKey> { key -> ReaderScreen(key, onBack = navigator::back) }
-                        entry<AthkarKey>(metadata = TabTransition) {
+                        entry<AthkarKey>(metadata = tabMotion) {
                             AthkarScreen(onOpenCategory = { navigator.navigate(AthkarSessionKey(it)) })
                         }
                         entry<AthkarSessionKey> { key -> AthkarSessionScreen(key, onBack = navigator::back) }
-                        entry<HadithKey>(metadata = TabTransition) {
+                        entry<HadithKey>(metadata = tabMotion) {
                             HadithScreen(onOpenBook = { navigator.navigate(HadithBookKey(it)) })
                         }
                         entry<HadithBookKey> { key -> HadithBookScreen(key, onBack = navigator::back) }
@@ -232,14 +237,27 @@ fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpe
     }
 }
 
-/** Switching tabs fades through: the old tab fades out, the new one fades and grows in. */
+/**
+ * Switching tabs fades through: the old tab fades out, the new one fades and grows in.
+ *
+ * Nothing here reads the motion scheme, because a transition spec is read once when the entry is
+ * declared. Reduce-motion is honoured by [still] instead, which the navigator swaps in wholesale —
+ * the theme could switch the scheme all it liked and the app still slid and scaled its way between
+ * every screen in Simple mode.
+ */
 private val TabTransition: Map<String, Any> = NavDisplay.transitionSpec {
     (fadeIn(tween(durationMillis = 210, delayMillis = 90)) + scaleIn(tween(durationMillis = 210, delayMillis = 90), initialScale = 0.96f)) togetherWith
         fadeOut(tween(durationMillis = 90))
 }
 
+/** The same, with the movement taken out: a plain cross-fade, short enough not to be a wait. */
+private val StillTabTransition: Map<String, Any> = NavDisplay.transitionSpec {
+    fadeIn(tween(durationMillis = 120)) togetherWith fadeOut(tween(durationMillis = 90))
+}
+
 /** Shared-axis slide on a spring for opening and closing screens; mirrored in right-to-left layouts. */
-private fun sharedAxis(forward: Boolean, rtl: Boolean): ContentTransform {
+private fun sharedAxis(forward: Boolean, rtl: Boolean, still: Boolean): ContentTransform {
+    if (still) return still()
     val direction = (if (forward) 1 else -1) * (if (rtl) -1 else 1)
     val slide = spring<IntOffset>(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
     return (slideInHorizontally(slide) { direction * it / 5 } + fadeIn(tween(durationMillis = 210, delayMillis = 60))) togetherWith
@@ -247,5 +265,9 @@ private fun sharedAxis(forward: Boolean, rtl: Boolean): ContentTransform {
 }
 
 /** While swiping back, the leaving screen shrinks away and the previous one fades in. */
-private fun predictiveBack(): ContentTransform =
-    fadeIn(tween(durationMillis = 200)) togetherWith (scaleOut(targetScale = 0.9f) + fadeOut())
+private fun predictiveBack(still: Boolean): ContentTransform =
+    if (still) still() else fadeIn(tween(durationMillis = 200)) togetherWith (scaleOut(targetScale = 0.9f) + fadeOut())
+
+/** No movement at all: what "reduce motion" has to mean if it is to mean anything. */
+private fun still(): ContentTransform =
+    fadeIn(tween(durationMillis = 120)) togetherWith fadeOut(tween(durationMillis = 90))

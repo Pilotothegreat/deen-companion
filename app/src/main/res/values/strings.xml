@@ -489,7 +489,6 @@
     <string name="simple_mode">Simple mode</string>
     <string name="simple_mode_desc">Bigger text, stronger contrast, wider buttons and no movement, in one switch</string>
     <string name="text_scale">Text size</string>
-    <string name="contrast">Contrast</string>
     <string name="contrast_system">System</string>
     <string name="contrast_medium">Medium</string>
     <string name="contrast_high">High</string>
@@ -501,7 +500,6 @@
     <string name="backup_export">Save a backup</string>
     <string name="backup_export_desc">Your settings, bookmarks and khatma, in a file you keep</string>
     <string name="backup_import">Restore a backup</string>
-    <string name="backup_auto_title">Bilal\'s own copies</string>
     <string name="backup_auto_desc">Written quietly once a week and kept for three weeks, on this phone only</string>
     <string name="backup_auto_none">There is no automatic copy yet. The first is written within a week of installing.</string>
     <string name="backup_choose_file">Choose a file instead…</string>
@@ -562,6 +560,11 @@ And the small things. The screen stays awake while you read. The page follows th
     <string name="onboarding_start">Start</string>
     <string name="iqama_waiting_body">Until the iqama for %1$s</string>
     <string name="adhan_sound_desc">Choose the sound and vibration for the call to prayer</string>
+    <string name="adhan_sound_system">The phone\'s alarm sound</string>
+    <string name="adhan_sound_pick">Choose a sound…</string>
+    <string name="adhan_sound_silent">Silent</string>
+    <string name="adhan_sound_custom">A sound you chose</string>
+    <string name="pre_reminder_which">Which prayers</string>
     <string name="reliability_summary_ok">Everything your phone needs to deliver them is in place</string>
     <string name="reliability_summary_problem">Something on this phone is delaying or silencing your alerts</string>
     <string name="reading">Reading</string>

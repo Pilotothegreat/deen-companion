@@ -79,6 +79,21 @@ object SystemIntents {
 
     fun url(url: String) = Intent(Intent.ACTION_VIEW, url.toUri())
 
+    /**
+     * The system's own sound picker, which previews as you scroll it.
+     *
+     * Alarm sounds rather than notification sounds: the adhan is played as alarm audio so it is
+     * heard through Do Not Disturb, and offering a list the player cannot honour would be a lie.
+     */
+    fun pickAdhanSound(title: String, current: android.net.Uri?): Intent =
+        Intent(android.media.RingtoneManager.ACTION_RINGTONE_PICKER).apply {
+            putExtra(android.media.RingtoneManager.EXTRA_RINGTONE_TYPE, android.media.RingtoneManager.TYPE_ALARM)
+            putExtra(android.media.RingtoneManager.EXTRA_RINGTONE_TITLE, title)
+            putExtra(android.media.RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
+            putExtra(android.media.RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, true)
+            putExtra(android.media.RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, current)
+        }
+
     fun shareText(text: String): Intent =
         Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text), null)
 }
