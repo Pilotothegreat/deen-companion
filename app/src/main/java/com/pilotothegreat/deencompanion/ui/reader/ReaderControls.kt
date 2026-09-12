@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.sp
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.data.quran.Reciter
 import com.pilotothegreat.deencompanion.data.quran.Surah
+import com.pilotothegreat.deencompanion.data.quran.TranslationInfo
 import com.pilotothegreat.deencompanion.data.quran.Verse
 import com.pilotothegreat.deencompanion.playback.PlaybackState
 import com.pilotothegreat.deencompanion.ui.common.Formatters
@@ -161,6 +162,7 @@ fun PlayerToolbar(
 fun AyahSheet(
     verse: Verse,
     surah: Surah,
+    translation: TranslationInfo,
     bookmarked: Boolean,
     onPlay: () -> Unit,
     onBookmark: () -> Unit,
@@ -170,6 +172,7 @@ fun AyahSheet(
     val locale = currentLocale()
     val reference = verseReference(surah, verse.number, locale)
     val shareText = "${verse.text}\n\n${verse.translation}\n— ${surah.nameEnglish} ${verse.surah}:${verse.number}"
+        .let { if (verse.translation.isBlank()) it else "$it\n${translation.attribution}" }
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.padding(start = 24.dp, end = 24.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -183,6 +186,12 @@ fun AyahSheet(
                 modifier = Modifier.fillMaxWidth(),
             )
             Text(verse.translation, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            // The licence asks for the translator to be named wherever the translation is read.
+            Text(
+                translation.attribution,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             val actions = listOf(
                 Triple(Icons.Rounded.PlayArrow, stringResource(R.string.play_from_here), onPlay),
                 Triple(

@@ -293,6 +293,7 @@
     <string name="support_development">Support development</string>
     <string name="support_development_desc">Bilal is free and ad-free</string>
     <string name="source_code">Source code</string>
+    <string name="translated_by">Translated by %1$s · %2$s</string>
     <string name="source_code_desc" translatable="false">github.com/Pilotothegreat/deen-companion</string>
     <string name="privacy_policy">Privacy policy</string>
     <string name="app_info">App info</string>

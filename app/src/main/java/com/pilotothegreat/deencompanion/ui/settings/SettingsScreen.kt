@@ -19,6 +19,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material.icons.automirrored.rounded.OpenInNew
 import androidx.compose.material.icons.rounded.Abc
 import androidx.compose.material.icons.rounded.Add
@@ -150,6 +151,7 @@ fun SettingsScreen(
     val live by viewModel.settings.collectAsStateWithLifecycle()
     val s = live ?: settings
     val updateState by viewModel.updateState.collectAsStateWithLifecycle()
+    val credits by viewModel.quranCredits.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val locale = currentLocale()
     val snackbar = remember { SnackbarHostState() }
@@ -408,6 +410,23 @@ fun SettingsScreen(
                             }
                         },
                         if (BuildConfig.SUPPORT_SHEET) supportRow { showSupport = true } else null,
+                        // Both licences ask to be named with a link back to the source.
+                        credits?.let { c ->
+                            @Composable { shapes: ListItemShapes ->
+                                NavRow(shapes, Icons.AutoMirrored.Rounded.MenuBook, c.text.name, c.text.terms, trailing = { OpenIcon() }) {
+                                    context.startSafely(SystemIntents.url(c.text.source))
+                                }
+                            }
+                        },
+                        credits?.let { c ->
+                            @Composable { shapes: ListItemShapes ->
+                                NavRow(
+                                    shapes, Icons.Rounded.Translate, c.translation.name,
+                                    stringResource(R.string.translated_by, c.translation.translator, c.translation.license),
+                                    trailing = { OpenIcon() },
+                                ) { context.startSafely(SystemIntents.url(c.translation.source)) }
+                            }
+                        },
                         { shapes ->
                             SegmentedListItem(
                                 onClick = { context.startSafely(SystemIntents.url(REPOSITORY_URL)) },

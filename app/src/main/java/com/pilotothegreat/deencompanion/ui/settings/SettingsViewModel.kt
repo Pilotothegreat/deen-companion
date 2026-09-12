@@ -9,7 +9,10 @@ import com.pilotothegreat.deencompanion.core.prayer.CalculationMethod
 import com.pilotothegreat.deencompanion.core.prayer.HighLatitudeMode
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
 import com.pilotothegreat.deencompanion.data.location.LocationRepository
+import com.pilotothegreat.deencompanion.data.quran.QuranRepository
 import com.pilotothegreat.deencompanion.data.quran.Reciter
+import com.pilotothegreat.deencompanion.data.quran.TextSource
+import com.pilotothegreat.deencompanion.data.quran.TranslationInfo
 import com.pilotothegreat.deencompanion.data.settings.AppLanguage
 import com.pilotothegreat.deencompanion.data.settings.AppSettings
 import com.pilotothegreat.deencompanion.data.settings.IqamaSetting
@@ -17,16 +20,24 @@ import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
 import com.pilotothegreat.deencompanion.data.settings.ThemeMode
 import com.pilotothegreat.deencompanion.data.update.UpdateChecker
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+
+/** What the Quran text and its translation must be credited as, read from the assets themselves. */
+data class QuranCredits(val text: TextSource, val translation: TranslationInfo)
 
 class SettingsViewModel(
     private val repository: SettingsRepository,
     private val location: LocationRepository,
     private val updates: UpdateChecker,
     private val scheduler: PrayerAlarmScheduler,
+    quran: QuranRepository,
 ) : ViewModel() {
+
+    val quranCredits: StateFlow<QuranCredits?> = flow { quran.quran().let { emit(QuranCredits(it.textSource, it.translation)) } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     val settings: StateFlow<AppSettings?> =
         repository.settings.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)

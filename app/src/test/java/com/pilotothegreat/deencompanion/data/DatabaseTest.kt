@@ -7,6 +7,7 @@ import androidx.room.testing.MigrationTestHelper
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.pilotothegreat.deencompanion.core.text.ArabicText
 import com.pilotothegreat.deencompanion.data.db.AppDatabase
 import com.pilotothegreat.deencompanion.data.db.MIGRATION_6_7
 import com.pilotothegreat.deencompanion.data.quran.QuranRepository
@@ -95,10 +96,12 @@ class QuranRepositoryTest {
     }
 
     @Test fun searchIgnoresDiacritics() = runTest {
-        val results = repository.search("الله الصمد")
-        val hit = results.verses.first { it.verse.surah == 112 && it.verse.number == 2 }
-        val range = hit.arabicMatch!!
-        assertTrue(hit.verse.text.substring(range.first, range.last + 1).startsWith("ٱللَّهُ"))
+        val query = "الله الصمد"
+        val hit = repository.search(query).verses.first { it.verse.surah == 112 && it.verse.number == 2 }
+        // The query carries no harakat; the range comes back over the original, fully vowelled text.
+        val matched = hit.verse.text.substring(hit.arabicMatch!!)
+        assertEquals(ArabicText.normalize(query), ArabicText.normalize(matched))
+        assertTrue("the match keeps its harakat", matched.any { it in 'ً'..'ٟ' })
     }
 
     @Test fun searchFindsSurahsByName() = runTest {

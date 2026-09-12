@@ -349,4 +349,5 @@
     <string name="widget_prayer_times_desc">مواقيت اليوم مع إبراز الصلاة القادمة</string>
     <string name="widget_verse_desc">آية قصيرة لكل يوم</string>
     <string name="widget_athkar_desc">أذكار هذا الوقت وتقدمك فيها</string>
+    <string name="translated_by">ترجمة %1$s · %2$s</string>
 </resources>

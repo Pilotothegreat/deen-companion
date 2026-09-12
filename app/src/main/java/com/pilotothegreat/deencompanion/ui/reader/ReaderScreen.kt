@@ -74,7 +74,6 @@ import com.pilotothegreat.deencompanion.ui.theme.UthmanicHafs
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-private const val BISMILLAH = "بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ"
 
 @Composable
 fun ReaderScreen(
@@ -173,6 +172,7 @@ fun ReaderScreen(
         AyahSheet(
             verse = verse,
             surah = loaded.surah(verse.surah),
+            translation = loaded.translation,
             bookmarked = bookmarked,
             onPlay = {
                 viewModel.play(verse)
@@ -214,9 +214,11 @@ private fun MushafPageView(
                     val surah = quran.surah(surahNumber)
                     if (verses.first().number == 1) {
                         SurahBanner(surah)
-                        if (surahNumber != 1 && surahNumber != 9) {
+                        // From the text itself, so it matches the mushaf's own script and is absent
+                        // exactly where the mushaf omits it.
+                        surah.bismillah?.let { basmala ->
                             Text(
-                                BISMILLAH,
+                                basmala,
                                 fontFamily = UthmanicHafs,
                                 fontSize = (fontSize * 1.05f).sp,
                                 color = MaterialTheme.colorScheme.primary,

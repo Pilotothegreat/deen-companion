@@ -11,7 +11,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
-import java.text.Normalizer
+import org.json.JSONObject
 
 enum class Revelation { MECCAN, MEDINAN }
 
@@ -29,6 +29,11 @@ data class Surah(
     val nameEnglish: String,
     val revelation: Revelation,
     val verses: List<Verse>,
+    /**
+     * The Basmala the mushaf writes above this surah, or null where it has none: al-Fatihah, whose
+     * first ayah it is, and at-Tawbah, which opens without it. It is a heading, never part of ayah 1.
+     */
+    val bismillah: String?,
 )
 
 data class MushafPage(val number: Int, val juz: Int, val verses: List<Verse>)
@@ -41,27 +46,21 @@ data class QuranSearchResults(val surahs: List<Surah>, val verses: List<VerseMat
     val isEmpty: Boolean get() = surahs.isEmpty() && verses.isEmpty()
 }
 
-class Quran internal constructor(val surahs: List<Surah>, val pages: List<MushafPage>) {
+class Quran internal constructor(
+    val surahs: List<Surah>,
+    val pages: List<MushafPage>,
+    /** Shown wherever the translation is, because its licence asks for the credit. */
+    val translation: TranslationInfo,
+    val textSource: TextSource,
+) {
     fun surah(number: Int): Surah = surahs[number - 1]
 
     fun verse(surah: Int, ayah: Int): Verse? = surahs.getOrNull(surah - 1)?.verses?.getOrNull(ayah - 1)
 
     /** Mushaf page (1..604) containing the ayah. */
-    fun pageOf(surah: Int, ayah: Int): Int = lastStartAtOrBefore(MushafLayout.pageStarts, surah, ayah) + 1
+    fun pageOf(surah: Int, ayah: Int): Int = MushafLayout.pageOf(surah, ayah)
 
-    fun juzOf(surah: Int, ayah: Int): Int = lastStartAtOrBefore(MushafLayout.juzStarts, surah, ayah) + 1
-
-    private fun lastStartAtOrBefore(starts: IntArray, surah: Int, ayah: Int): Int {
-        var low = 0
-        var high = starts.size / 2 - 1
-        while (low < high) {
-            val mid = (low + high + 1) / 2
-            val s = starts[mid * 2]
-            val a = starts[mid * 2 + 1]
-            if (s < surah || (s == surah && a <= ayah)) low = mid else high = mid - 1
-        }
-        return low
-    }
+    fun juzOf(surah: Int, ayah: Int): Int = MushafLayout.juzOf(surah, ayah)
 }
 
 class QuranRepository(private val context: Context, private val bookmarkDao: BookmarkDao) {
@@ -70,8 +69,16 @@ class QuranRepository(private val context: Context, private val bookmarkDao: Boo
     @Volatile private var cached: Quran? = null
     @Volatile private var searchIndex: List<String>? = null
 
-    suspend fun quran(): Quran = cached ?: lock.withLock {
-        cached ?: withContext(Dispatchers.IO) { load() }.also { cached = it }
+    /**
+     * The mushaf with [translationId] alongside it. The Arabic is parsed once; switching translation
+     * only re-reads the much smaller translation file.
+     */
+    suspend fun quran(translationId: String = Translations.DEFAULT_ID): Quran {
+        cached?.takeIf { it.translation.id == translationId }?.let { return it }
+        return lock.withLock {
+            cached?.takeIf { it.translation.id == translationId }
+                ?: withContext(Dispatchers.IO) { load(translationId) }.also { cached = it }
+        }
     }
 
     val bookmarks: Flow<List<Bookmark>> = bookmarkDao.observeAll().map { list ->
@@ -118,28 +125,48 @@ class QuranRepository(private val context: Context, private val bookmarkDao: Boo
         QuranSearchResults(surahs, verses)
     }
 
-    private fun load(): Quran {
-        val json = context.assets.open("quran.json").bufferedReader().use { it.readText() }
-        val array = JSONArray(json)
-        val surahs = (0 until array.length()).map { i ->
-            val obj = array.getJSONObject(i)
+    /**
+     * Reads the Uthmani text and the chosen translation. The text is used exactly as published:
+     * Tanzil's licence forbids altering it, and an earlier "font fix" here silently dropped more
+     * than fifteen thousand vowel marks.
+     */
+    private fun load(translationId: String): Quran {
+        val root = JSONObject(context.assets.open("quran-ar.json").bufferedReader().use { it.readText() })
+        val sourceJson = root.getJSONObject("source")
+        val surahsJson = root.getJSONArray("surahs")
+        val info = Translations.byId(translationId)
+        val translated = readTranslation(info)
+
+        val surahs = (0 until surahsJson.length()).map { i ->
+            val obj = surahsJson.getJSONObject(i)
             val number = obj.getInt("id")
             val versesJson = obj.getJSONArray("verses")
+            val meanings = translated?.optJSONArray(i)
             Surah(
                 number = number,
                 nameArabic = obj.getString("name"),
                 nameEnglish = obj.getString("transliteration"),
                 revelation = if (obj.getString("type").equals("meccan", ignoreCase = true)) Revelation.MECCAN else Revelation.MEDINAN,
                 verses = (0 until versesJson.length()).map { j ->
-                    val v = versesJson.getJSONObject(j)
-                    Verse(number, v.getInt("id"), cleanArabic(v.getString("text")), v.getString("translation"))
+                    Verse(number, j + 1, versesJson.getString(j), meanings?.optString(j).orEmpty())
                 },
+                bismillah = obj.optString("bismillah").takeIf { it.isNotEmpty() },
             )
         }
-        return Quran(surahs, buildPages(surahs))
+        val source = TextSource(
+            name = sourceJson.getString("name"),
+            source = sourceJson.getString("source"),
+            terms = sourceJson.getString("terms"),
+        )
+        return Quran(surahs, buildPages(surahs), info, source)
     }
 
-    /** Splits the ayahs into the 604 mushaf pages in a single pass. */
+    /** Null when the translation file is missing, so the Arabic still opens. */
+    private fun readTranslation(info: TranslationInfo): JSONArray? = runCatching {
+        val json = context.assets.open(Translations.assetFor(info.id)).bufferedReader().use { it.readText() }
+        JSONObject(json).getJSONArray("verses")
+    }.getOrNull()
+
     private fun buildPages(surahs: List<Surah>): List<MushafPage> {
         val starts = MushafLayout.pageStarts
         val pages = ArrayList<MushafPage>(MushafLayout.PAGE_COUNT)
@@ -153,26 +180,17 @@ class QuranRepository(private val context: Context, private val bookmarkDao: Boo
             return verse.surah > s || (verse.surah == s && verse.number >= a)
         }
 
-        val quranForJuz = Quran(surahs, emptyList())
         for (surah in surahs) {
             for (verse in surah.verses) {
                 while (current.isNotEmpty() && isStartOf(pageIndex + 1, verse)) {
-                    pages += MushafPage(pageIndex + 1, quranForJuz.juzOf(current[0].surah, current[0].number), current)
+                    pages += MushafPage(pageIndex + 1, MushafLayout.juzOf(current[0].surah, current[0].number), current)
                     current = ArrayList()
                     pageIndex++
                 }
                 current += verse
             }
         }
-        pages += MushafPage(pageIndex + 1, quranForJuz.juzOf(current[0].surah, current[0].number), current)
+        pages += MushafPage(pageIndex + 1, MushafLayout.juzOf(current[0].surah, current[0].number), current)
         return pages
     }
-
-    /** Precomposes hamza forms that the Uthmanic Hafs font renders poorly when decomposed. */
-    private fun cleanArabic(raw: String): String = Normalizer.normalize(raw, Normalizer.Form.NFC)
-        .replace("إِ", "إ")
-        .replace("أُ", "أ")
-        .replace("أَ", "أ")
-        .replace("ءَأَ", "أَأَ")
-        .replace("ءَا", "آ")
 }

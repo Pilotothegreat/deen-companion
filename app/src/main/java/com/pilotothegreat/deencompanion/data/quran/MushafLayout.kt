@@ -97,4 +97,26 @@ internal object MushafLayout {
         7 to 206, 13 to 15, 16 to 50, 17 to 109, 19 to 58, 22 to 18, 22 to 77,
         25 to 60, 27 to 26, 32 to 15, 38 to 24, 41 to 38, 53 to 62, 84 to 21, 96 to 19,
     )
+
+    /** Mushaf page (1..604) holding the ayah. */
+    fun pageOf(surah: Int, ayah: Int): Int = lastStartAtOrBefore(pageStarts, surah, ayah) + 1
+
+    /** Juz (1..30) holding the ayah. */
+    fun juzOf(surah: Int, ayah: Int): Int = lastStartAtOrBefore(juzStarts, surah, ayah) + 1
+
+    /**
+     * Index of the last entry in [starts] (pairs of surah and ayah) that begins at or before the
+     * ayah. The tables are sorted, so this is a binary search.
+     */
+    internal fun lastStartAtOrBefore(starts: IntArray, surah: Int, ayah: Int): Int {
+        var low = 0
+        var high = starts.size / 2 - 1
+        while (low < high) {
+            val mid = (low + high + 1) / 2
+            val s = starts[mid * 2]
+            val a = starts[mid * 2 + 1]
+            if (s < surah || (s == surah && a <= ayah)) low = mid else high = mid - 1
+        }
+        return low
+    }
 }

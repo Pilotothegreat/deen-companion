@@ -8,7 +8,7 @@ A private, offline-first Islamic companion for Android, built with Jetpack Compo
 - **Location.** GPS or network location with travel detection, or an offline search of about 11,600 cities in English and Arabic. A chosen city keeps its own time zone.
 - **Adhan and iqama notifications.** Per-prayer mute, iqama as an offset or a fixed time, exact alarms when allowed, and automatic rescheduling after reboots, clock changes and time-zone changes.
 - **Athkar.** Morning and evening, after prayer, sleep and waking, plus 31 everyday situations. Each dhikr has its count, virtue and source, with a big tap counter, a daily streak, optional morning and evening reminders, and a time-aware suggestion on Today.
-- **Quran.** The 604-page Madinah mushaf layout in the Uthmanic Hafs script with the Saheeh International translation, diacritic-insensitive search, bookmarks, "continue reading", and ayah-by-ayah recitation (Mishary Alafasy, Al-Husary, Abdul Basit) with a sleep timer.
+- **Quran.** The 604-page Madinah mushaf layout in the Uthmanic Hafs script from the Tanzil Project, verbatim and fully vowelled, with The Clear Quran translation by Talal Itani, diacritic-insensitive search, bookmarks, "continue reading", and ayah-by-ayah recitation (Mishary Alafasy, Al-Husary, Abdul Basit) with a sleep timer.
 - **Hadith.** Six major collections with a bundled sample. Full collections download only when you ask. Includes favorites, grades and search.
 - **Qibla.** True-north compass with calibration guidance, turn-by-turn directions and the distance to Makkah.
 - **Tasbih.** The post-prayer 33/33/34 cycle or 99/100 goals, with haptic feedback.
@@ -55,7 +55,7 @@ The same values can come from the `RELEASE_KEYSTORE_FILE`, `RELEASE_KEYSTORE_PAS
 
 ## Data sources
 
-- Quran text and translation: bundled in `app/src/main/assets/quran.json`.
+- Quran text and translation: bundled in `app/src/main/assets/quran-ar.json` and `quran-tr-clearquran.json`, rebuilt from source by `scripts/quran/build_quran.py` and checksummed by `QuranTextIntegrityTest`.
 - Recitation: streamed from [everyayah.com](https://everyayah.com).
 - Hadith collections: [fawazahmed0/hadith-api](https://github.com/fawazahmed0/hadith-api) via jsDelivr.
 - Athkar: [Morning & Evening Adhkar DB](https://github.com/Seen-Arabic/Morning-And-Evening-Adhkar-DB) and Hisn al-Muslim via [hisnmuslim.com](https://hisnmuslim.com), bundled in `app/src/main/assets/athkar.json` (rebuilt with `scripts/athkar/build_athkar.py`).
