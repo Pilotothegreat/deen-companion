@@ -35,6 +35,9 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.ListItemDefaults
@@ -509,12 +512,37 @@ fun MomentCard(
             }
         }
     }
-    if (onOpen != null) {
-        Card(onClick = onOpen, modifier = modifier, shape = MaterialTheme.shapes.extraLarge, colors = colors, content = content)
-    } else {
-        Card(modifier = modifier, shape = MaterialTheme.shapes.extraLarge, colors = colors, content = content)
+    // A card that can be sent away can be swiped away. The engine has modelled Dismissal since
+    // 1.8.0 and the only way to act on it was a text button in the corner.
+    val swipeable: @Composable (@Composable () -> Unit) -> Unit = { card ->
+        if (onDismiss == null) {
+            card()
+        } else {
+            val state = rememberSwipeToDismissBoxState(
+                positionalThreshold = { it * SWIPE_AWAY },
+                confirmValueChange = { value ->
+                    if (value != SwipeToDismissBoxValue.Settled) onDismiss()
+                    true
+                },
+            )
+            SwipeToDismissBox(
+                state = state,
+                backgroundContent = {},
+                content = { card() },
+            )
+        }
+    }
+    swipeable {
+        if (onOpen != null) {
+            Card(onClick = onOpen, modifier = modifier, shape = MaterialTheme.shapes.extraLarge, colors = colors, content = content)
+        } else {
+            Card(modifier = modifier, shape = MaterialTheme.shapes.extraLarge, colors = colors, content = content)
+        }
     }
 }
+
+/** How far a card must travel before letting go sends it away. */
+private const val SWIPE_AWAY = 0.5f
 
 private val MomentKind.icon: ImageVector
     get() = when (this) {

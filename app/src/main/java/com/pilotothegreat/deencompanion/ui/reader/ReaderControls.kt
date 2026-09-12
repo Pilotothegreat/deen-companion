@@ -61,6 +61,7 @@ import com.pilotothegreat.deencompanion.data.quran.Surah
 import com.pilotothegreat.deencompanion.data.quran.TranslationInfo
 import com.pilotothegreat.deencompanion.data.quran.Verse
 import com.pilotothegreat.deencompanion.playback.PlaybackState
+import com.pilotothegreat.deencompanion.ui.common.Labelled
 import com.pilotothegreat.deencompanion.ui.common.Formatters
 import com.pilotothegreat.deencompanion.ui.common.SystemIntents
 import com.pilotothegreat.deencompanion.ui.common.copyToClipboard
@@ -127,15 +128,21 @@ fun PlayerToolbar(
         HorizontalFloatingToolbar(
             expanded = true,
             leadingContent = {
-                IconButton(onClick = onStop) { Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.stop_playback)) }
+                Labelled(stringResource(R.string.stop_playback)) {
+                    IconButton(onClick = onStop) {
+                        Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.stop_playback))
+                    }
+                }
             },
             trailingContent = {
                 Box {
-                    IconButton(onClick = { menuOpen = true }) {
-                        Icon(
-                            if (state.sleepTimerEndsAt != null) Icons.Rounded.Bedtime else Icons.Rounded.MoreVert,
-                            contentDescription = stringResource(R.string.playback_options),
-                        )
+                    Labelled(stringResource(R.string.playback_options)) {
+                        IconButton(onClick = { menuOpen = true }) {
+                            Icon(
+                                if (state.sleepTimerEndsAt != null) Icons.Rounded.Bedtime else Icons.Rounded.MoreVert,
+                                contentDescription = stringResource(R.string.playback_options),
+                            )
+                        }
                     }
                     DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                         Text(

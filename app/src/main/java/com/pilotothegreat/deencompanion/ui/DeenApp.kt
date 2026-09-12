@@ -52,6 +52,7 @@ import com.pilotothegreat.deencompanion.ui.settings.WhatsNewSheet
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.setValue
 import com.pilotothegreat.deencompanion.data.settings.AppSettings
 import com.pilotothegreat.deencompanion.ui.athkar.AthkarScreen
@@ -154,6 +155,7 @@ fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpe
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     // Navigation is the one place the app kept moving in Simple mode: the theme swaps the motion
     // scheme, but a transition spec is read once when the entry is declared, so it never noticed.
+    val pagesDue by settingsViewModel.khatmaPagesDue.collectAsStateWithLifecycle()
     val stillMotion = LocalAccessibility.current.reduceMotion
     val tabMotion = if (stillMotion) StillTabTransition else TabTransition
 
@@ -231,6 +233,7 @@ fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpe
                         current = navigator.currentTab,
                         onSelect = navigator::selectTab,
                         scrollBehavior = barScroll,
+                        badges = mapOf(TopLevel.QURAN to pagesDue),
                         modifier = Modifier.navigationBarsPadding().padding(bottom = Spacing.large),
                     )
                 }

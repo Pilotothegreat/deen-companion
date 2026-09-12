@@ -24,7 +24,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.automirrored.rounded.MenuBook
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Translate
+import androidx.compose.material3.AppBarRow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconToggleButton
@@ -93,6 +95,7 @@ import com.pilotothegreat.deencompanion.data.quran.Verse
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import com.pilotothegreat.deencompanion.ui.common.KeepScreenOn
+import com.pilotothegreat.deencompanion.ui.common.Labelled
 import com.pilotothegreat.deencompanion.ui.common.Formatters
 import com.pilotothegreat.deencompanion.ui.common.currentLocale
 import com.pilotothegreat.deencompanion.ui.components.LoadingBox
@@ -177,18 +180,55 @@ fun ReaderScreen(
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.go_back))
                     }
                 },
+                // AppBarRow folds what will not fit into an overflow menu rather than crowding the
+                // surah name off the bar, which is what happened at narrow widths once the page
+                // toggle joined the other two.
                 actions = {
-                    IconButton(onClick = { jumping = true }) {
-                        Icon(Icons.AutoMirrored.Rounded.List, contentDescription = stringResource(R.string.jump_to))
-                    }
-                    IconToggleButton(checked = !flowing, onCheckedChange = { flowingOverride = !it }) {
-                        Icon(
-                            Icons.AutoMirrored.Rounded.MenuBook,
-                            contentDescription = stringResource(R.string.reader_mushaf_page),
+                    val moreLabel = stringResource(R.string.more)
+                    val jumpLabel = stringResource(R.string.jump_to)
+                    val pageLabel = stringResource(R.string.reader_mushaf_page)
+                    val translationLabel = stringResource(R.string.show_translation)
+                    AppBarRow(
+                        overflowIndicator = { menu ->
+                            Labelled(moreLabel) {
+                                IconButton(onClick = { menu.show() }) {
+                                    Icon(Icons.Rounded.MoreVert, contentDescription = moreLabel)
+                                }
+                            }
+                        },
+                    ) {
+                        clickableItem(
+                            onClick = { jumping = true },
+                            icon = {
+                                Labelled(jumpLabel) {
+                                    Icon(Icons.AutoMirrored.Rounded.List, contentDescription = jumpLabel)
+                                }
+                            },
+                            label = jumpLabel,
                         )
-                    }
-                    IconToggleButton(checked = prefs.showTranslation, onCheckedChange = { viewModel.toggleTranslation() }) {
-                        Icon(Icons.Rounded.Translate, contentDescription = stringResource(R.string.show_translation))
+                        toggleableItem(
+                            checked = !flowing,
+                            onCheckedChange = { flowingOverride = !it },
+                            icon = {
+                                Labelled(pageLabel) {
+                                    Icon(
+                                        Icons.AutoMirrored.Rounded.MenuBook,
+                                        contentDescription = pageLabel,
+                                    )
+                                }
+                            },
+                            label = pageLabel,
+                        )
+                        toggleableItem(
+                            checked = prefs.showTranslation,
+                            onCheckedChange = { viewModel.toggleTranslation() },
+                            icon = {
+                                Labelled(translationLabel) {
+                                    Icon(Icons.Rounded.Translate, contentDescription = translationLabel)
+                                }
+                            },
+                            label = translationLabel,
+                        )
                     }
                 },
             )

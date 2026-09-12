@@ -13,6 +13,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.FloatingToolbarDefaults
 import androidx.compose.material3.FloatingToolbarScrollBehavior
 import androidx.compose.material3.HorizontalFloatingToolbar
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,6 +23,8 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.pilotothegreat.deencompanion.ui.common.Formatters
+import com.pilotothegreat.deencompanion.ui.common.currentLocale
 import com.pilotothegreat.deencompanion.ui.common.rememberHaptics
 import com.pilotothegreat.deencompanion.ui.theme.LocalAccessibility
 import androidx.compose.ui.draw.clip
@@ -46,6 +50,8 @@ fun FloatingNavBar(
     current: TopLevel,
     onSelect: (TopLevel) -> Unit,
     scrollBehavior: FloatingToolbarScrollBehavior,
+    /** A count to show on a tab, or null. Zero is treated as nothing, not as a badge saying "0". */
+    badges: Map<TopLevel, Int?> = emptyMap(),
     modifier: Modifier = Modifier,
 ) {
     val haptics = rememberHaptics()
@@ -56,7 +62,7 @@ fun FloatingNavBar(
         scrollBehavior = scrollBehavior,
     ) {
         TopLevel.entries.forEach { tab ->
-            NavPill(tab, selected = tab == current) {
+            NavPill(tab, selected = tab == current, badge = badges[tab]?.takeIf { it > 0 }) {
                 if (tab != current) haptics.tick()
                 onSelect(tab)
             }
@@ -65,7 +71,7 @@ fun FloatingNavBar(
 }
 
 @Composable
-private fun NavPill(tab: TopLevel, selected: Boolean, onClick: () -> Unit) {
+private fun NavPill(tab: TopLevel, selected: Boolean, badge: Int?, onClick: () -> Unit) {
     val motion = MaterialTheme.motionScheme
     val colors = MaterialTheme.colorScheme
     val container by animateColorAsState(
@@ -93,7 +99,16 @@ private fun NavPill(tab: TopLevel, selected: Boolean, onClick: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-        Icon(if (selected) tab.selectedIcon else tab.icon, contentDescription = null, tint = content)
+        // The badge says how much is waiting without making anyone open the tab to find out.
+        BadgedBox(
+            badge = {
+                if (badge != null) {
+                    Badge { Text(Formatters.number(badge, currentLocale())) }
+                }
+            },
+        ) {
+            Icon(if (selected) tab.selectedIcon else tab.icon, contentDescription = null, tint = content)
+        }
         Text(
             stringResource(tab.label),
             style = MaterialTheme.typography.labelMedium,

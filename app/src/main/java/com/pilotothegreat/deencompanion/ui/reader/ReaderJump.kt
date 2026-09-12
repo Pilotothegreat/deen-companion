@@ -101,7 +101,7 @@ fun JumpSheet(quran: Quran, currentPage: Int, onJump: (Int) -> Unit, onDismiss: 
                             contentPadding = PaddingValues(horizontal = Spacing.large),
                             verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
                         ) {
-                            itemsIndexed(juzs) { index, (surah, ayah) ->
+                            itemsIndexed(juzs, key = { index, _ -> index }) { index, (surah, ayah) ->
                                 SegmentedListItem(
                                     onClick = { onJump(quran.pageOf(surah, ayah)) },
                                     shapes = ListItemDefaults.segmentedShapes(index, juzs.size),
@@ -124,7 +124,7 @@ fun JumpSheet(quran: Quran, currentPage: Int, onJump: (Int) -> Unit, onDismiss: 
                     horizontalArrangement = Arrangement.spacedBy(Spacing.small),
                     verticalArrangement = Arrangement.spacedBy(Spacing.small),
                 ) {
-                    items((1..quran.pages.size).toList()) { page ->
+                    items((1..quran.pages.size).toList(), key = { it }) { page ->
                         val selected = page == currentPage
                         Surface(
                             onClick = { onJump(page) },

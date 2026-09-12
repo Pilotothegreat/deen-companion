@@ -17,6 +17,7 @@ import com.pilotothegreat.deencompanion.core.prayer.CalculationMethod
 import com.pilotothegreat.deencompanion.core.prayer.HighLatitudeMode
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
 import com.pilotothegreat.deencompanion.data.location.LocationRepository
+import com.pilotothegreat.deencompanion.data.quran.KhatmaRepository
 import com.pilotothegreat.deencompanion.data.quran.QuranRepository
 import com.pilotothegreat.deencompanion.data.quran.Reciter
 import com.pilotothegreat.deencompanion.data.quran.TextSource
@@ -36,7 +37,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -48,6 +52,7 @@ data class AutoBackup(val path: String, val savedAt: Long, val bytes: Long)
 /** What the Quran text and its translation must be credited as, read from the assets themselves. */
 data class QuranCredits(val text: TextSource, val translation: TranslationInfo, val edition: String)
 
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class SettingsViewModel(
     private val context: Context,
     private val repository: SettingsRepository,
@@ -55,6 +60,7 @@ class SettingsViewModel(
     private val updates: UpdateChecker,
     private val scheduler: PrayerAlarmScheduler,
     quran: QuranRepository,
+    private val khatma: KhatmaRepository,
     private val backup: BackupRepository,
     private val installer: ApkInstaller,
 ) : ViewModel() {
@@ -70,6 +76,20 @@ class SettingsViewModel(
         updates.lastCheckedAt.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0L)
 
     val isPlayInstall: Boolean get() = updates.isPlayInstall
+
+    /**
+     * Pages the khatma is behind by today, for the badge on the Quran tab.
+     *
+     * The plan already knew this and only said it on a card you had to open the tab to see, which
+     * is the one place it is no use — the point of a reading plan is to be remembered from outside
+     * it.
+     */
+    val khatmaPagesDue: StateFlow<Int> = repository.settings
+        .map { java.time.LocalDate.now(it.zone) }
+        .distinctUntilChanged()
+        .flatMapLatest { khatma.progress(it) }
+        .map { it?.pagesDueToday ?: 0 }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 
     private val _audioCacheBytes = MutableStateFlow(0L)
     /** What the recitation cache is holding, refreshed whenever settings are shown. */
