@@ -265,8 +265,8 @@ private fun DhikrPage(
                 Text(
                     item.arabic,
                     fontFamily = Amiri,
-                    fontSize = session.fontSize.sp,
-                    lineHeight = (session.fontSize * 1.9f).sp,
+                    fontSize = ARABIC_SP.sp,
+                    lineHeight = (ARABIC_SP * 1.9f).sp,
                     style = MaterialTheme.typography.bodyLarge.copy(textDirection = TextDirection.Rtl),
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
@@ -396,3 +396,6 @@ private fun FinishPage(reducedMotion: Boolean, onBack: () -> Unit) {
         FilledTonalButton(onClick = onBack) { Text(stringResource(R.string.athkar_back)) }
     }
 }
+
+/** The Arabic of a dhikr, in sp so it follows the phone's text size like everything else in the app. */
+private const val ARABIC_SP = 28

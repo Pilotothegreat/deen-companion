@@ -14,7 +14,6 @@
     <string name="undo">Undo</string>
     <string name="allow">Allow</string>
     <string name="dismiss">Dismiss</string>
-    <string name="more">More</string>
     <string name="open_settings">Open settings</string>
     <string name="clear_search">Clear search</string>
     <string name="copy">Copy</string>
@@ -137,19 +136,11 @@
     <string name="page_juz_hizb">Page %1$s · Juz %2$s · Hizb %3$s/%4$s</string>
     <string name="sajdah_note">۩ A prostration of recitation at %1$s. The schools differ on whether it is obligatory or recommended.</string>
     <string name="page_juz">Page %1$s · Juz %2$s</string>
-    <string name="show_translation">Translation</string>
-    <string name="reader_mushaf_page">Show the printed page</string>
-    <string name="play_from_here">Play from this ayah</string>
-    <string name="repeat_from_here">Repeat from here</string>
-    <string name="repeat_to_here">Repeat to here</string>
-    <string name="repeat_range_set">Repeating %1$s to %2$s</string>
-    <string name="repeat_range_clear">Stop repeating</string>
     <string name="repeat">Repeat</string>
     <string name="repeat_off">Off</string>
     <string name="repeat_ayah">This ayah</string>
     <string name="repeat_range">From where I started</string>
     <string name="repeat_surah">The whole surah</string>
-    <string name="repeat_progress">Repeat %1$s</string>
     <string name="playback_speed">Speed</string>
     <string name="speed_multiplier">%1$s×</string>
     <string name="retry">Retry</string>
@@ -161,7 +152,6 @@
     <string name="previous_ayah">Previous ayah</string>
     <string name="next_ayah">Next ayah</string>
     <string name="stop_playback">Stop recitation</string>
-    <string name="playback_options">Recitation options</string>
     <string name="reciter">Reciter</string>
     <string name="reciter_mishary">Mishary Alafasy</string>
     <string name="reciter_husary">Mahmoud Khalil Al-Husary</string>
@@ -312,7 +302,6 @@
     <string name="prayer_notifications_desc">A notification at each prayer that becomes a countdown to the iqama</string>
     <string name="exact_alarms">On-time alarms</string>
     <string name="adhan_sound">Adhan sound</string>
-    <string name="arabic_text_size">Arabic text size</string>
     <string name="appearance">Appearance</string>
     <string name="theme">Theme</string>
     <string name="theme_wallpaper">Use your wallpaper\'s colours</string>
@@ -590,4 +579,7 @@ And the app remembers. Every "Prayed" you have ever tapped was recorded and show
         <item quantity="one">%1$s day in the last thirty</item>
         <item quantity="other">%1$s days in the last thirty</item>
     </plurals>
+    <string name="repeat_this_ayah">Repeat this ayah</string>
+    <string name="clear_downloaded_recitations">Clear downloaded recitations</string>
+    <string name="back_to_recitation">Back to the recitation</string>
 </resources>

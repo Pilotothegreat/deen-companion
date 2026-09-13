@@ -270,7 +270,6 @@ private val _backupMessage = MutableStateFlow<Int?>(null)
     fun setDynamicColor(on: Boolean) = launch { repository.setDynamicColor(on) }
 
     fun setPureBlack(on: Boolean) = launch { repository.setPureBlack(on) }
-    fun setQuranFontSize(size: Int) = launch { repository.setQuranFontSize(size) }
     fun setReciter(reciter: Reciter) = launch { repository.setReciter(reciter) }
     fun setAthkarReminders(enabled: Boolean) = launch { repository.setAthkarReminders(enabled) }
 

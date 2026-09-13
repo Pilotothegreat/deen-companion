@@ -69,7 +69,6 @@ import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.RecordVoiceOver
 import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material.icons.rounded.SystemUpdate
-import androidx.compose.material.icons.rounded.TextFields
 import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material.icons.rounded.VolunteerActivism
 import androidx.compose.material.icons.rounded.Tune
@@ -87,7 +86,6 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedListItem
-import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
@@ -99,7 +97,6 @@ import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -114,7 +111,6 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -152,12 +148,10 @@ import com.pilotothegreat.deencompanion.ui.components.ConnectedChoice
 import com.pilotothegreat.deencompanion.ui.components.SectionHeader
 import com.pilotothegreat.deencompanion.ui.location.locationStatus
 import com.pilotothegreat.deencompanion.ui.theme.Amiri
-import com.pilotothegreat.deencompanion.ui.theme.UthmanicHafs
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDate
 import java.time.LocalTime
 import java.util.Locale
-import kotlin.math.roundToInt
 
 private const val REPOSITORY_URL = "https://github.com/Pilotothegreat/deen-companion"
 private const val SPONSORS_URL = "https://github.com/sponsors/Pilotothegreat"
@@ -408,7 +402,6 @@ fun SettingsScreen(
                 SettingsGroup(
                     stringResource(R.string.reading),
                     listOf(
-                        { shapes -> FontSizeRow(shapes, s.quranFontSize, viewModel::setQuranFontSize) },
                         { shapes ->
                             NavRow(shapes, Icons.Rounded.RecordVoiceOver, stringResource(R.string.reciter), stringResource(s.reciter.label)) {
                                 dialog = SettingsDialog.ReciterChoice
@@ -824,38 +817,6 @@ private fun HijriAdjustmentRow(shapes: ListItemShapes, settings: AppSettings, on
             IconButton(onClick = { onChange(value + 1) }, enabled = value < range.last) {
                 Icon(Icons.Rounded.Add, contentDescription = stringResource(R.string.increase))
             }
-        }
-    }
-}
-
-@Composable
-private fun FontSizeRow(
-    shapes: ListItemShapes,
-    size: Int,
-    onChange: (Int) -> Unit,
-    range: IntRange = Defaults.QURAN_FONT_RANGE,
-    title: String = stringResource(R.string.arabic_text_size),
-    fontFamily: FontFamily = UthmanicHafs,
-    sample: String = "بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ",
-) {
-    var value by remember(size) { mutableFloatStateOf(size.toFloat()) }
-    ContentRow(shapes, Icons.Rounded.TextFields, title) {
-        Column {
-            Slider(
-                value = value,
-                onValueChange = { value = it },
-                onValueChangeFinished = { onChange(value.roundToInt()) },
-                valueRange = range.first.toFloat()..range.last.toFloat(),
-                steps = (range.last - range.first) / 2 - 1,
-            )
-            Text(
-                sample,
-                fontFamily = fontFamily,
-                fontSize = value.sp,
-                lineHeight = (value * 1.8f).sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth(),
-            )
         }
     }
 }

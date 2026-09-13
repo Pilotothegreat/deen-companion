@@ -21,7 +21,6 @@ import java.time.LocalDate
 data class AthkarSession(
     val category: AthkarCategory,
     val progress: DayProgress,
-    val fontSize: Int,
     /** The dhikr this session was last left on, or null if it was never left part-way. */
     val resumeAt: Int?,
 )
@@ -47,7 +46,6 @@ class AthkarSessionViewModel(
             AthkarSession(
                 category = it,
                 progress = progress.on(LocalDate.now(s.zone)),
-                fontSize = s.quranFontSize,
                 resumeAt = s.athkarPlace.takeIf { place -> place.substringBefore(':') == key.categoryId }
                     ?.substringAfter(':')
                     ?.toIntOrNull()

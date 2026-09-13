@@ -12,16 +12,14 @@ import com.pilotothegreat.deencompanion.data.quran.Quran
 import com.pilotothegreat.deencompanion.data.quran.QuranRepository
 import com.pilotothegreat.deencompanion.data.quran.Reciter
 import com.pilotothegreat.deencompanion.data.quran.Verse
-import com.pilotothegreat.deencompanion.data.settings.Defaults
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
+import com.pilotothegreat.deencompanion.playback.AudioCache
 import com.pilotothegreat.deencompanion.playback.PlaybackState
 import com.pilotothegreat.deencompanion.playback.QuranPlayer
 import com.pilotothegreat.deencompanion.ui.navigation.ReaderKey
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -30,13 +28,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
-
-data class ReaderPrefs(
-    val fontSize: Int = 28,
-    val showTranslation: Boolean = false,
-    val reciter: Reciter = Reciter.MISHARY,
-)
+import kotlin.math.abs
 
 class ReaderViewModel(
     private val args: ReaderKey,
@@ -54,10 +46,10 @@ class ReaderViewModel(
     val quran: StateFlow<Quran?> = flow { emit(repository.quran()) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    val prefs: StateFlow<ReaderPrefs> = settings.settings
-        .map { ReaderPrefs(it.quranFontSize, it.showTranslation, it.reciter) }
+    private val reciter: StateFlow<Reciter> = settings.settings
+        .map { it.reciter }
         .distinctUntilChanged()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ReaderPrefs())
+        .stateIn(viewModelScope, SharingStarted.Eagerly, Reciter.MISHARY)
 
     val bookmarks: StateFlow<Set<Pair<Int, Int>>> = repository.bookmarks
         .map { list -> list.map { it.surah to it.ayah }.toSet() }
@@ -94,29 +86,24 @@ class ReaderViewModel(
         }
     }
 
-    /**
-     * Pinching the page changes the size of the Arabic, and keeps it: reaching for Settings to
-     * make the text bigger means putting the mushaf down first, which is the moment most people
-     * stop reading.
-     */
-    fun zoom(factor: Float) {
-        val current = prefs.value.fontSize
-        val next = (current * factor).roundToInt().coerceIn(Defaults.QURAN_FONT_RANGE)
-        if (next == current) return
-        viewModelScope.launch { settings.setQuranFontSize(next) }
-    }
-
-    fun toggleTranslation() {
-        viewModelScope.launch { settings.setShowTranslation(!prefs.value.showTranslation) }
-    }
-
     fun setBookmark(verse: Verse, bookmarked: Boolean) {
         viewModelScope.launch { repository.setBookmark(verse, bookmarked) }
     }
 
-    fun play(verse: Verse) {
+    /**
+     * A single tap on an ayah: the player comes up on it, ready but not reciting. With a recitation
+     * already going, it moves there and carries on.
+     */
+    fun cue(verse: Verse) {
         val quran = quran.value ?: return
-        player.play(quran.surah(verse.surah), verse.number, prefs.value.reciter)
+        player.cue(quran.surah(verse.surah), verse.number, reciter.value)
+    }
+
+    /** From the long-press menu: recite this ayah over and over, for memorising. */
+    fun repeatAyah(verse: Verse) {
+        val quran = quran.value ?: return
+        viewModelScope.launch { settings.setRepeat(RepeatMode.AYAH, player.state.value.repeatCount) }
+        player.play(quran.surah(verse.surah), verse.number, reciter.value)
     }
 
     fun togglePlayPause() = player.togglePlayPause()
@@ -124,6 +111,34 @@ class ReaderViewModel(
     fun previous() = player.previous()
     fun stop() = player.stop()
     fun setSleepTimer(minutes: Int) = player.setSleepTimer(minutes)
+
+    /** One button, no menu: off, this ayah, the whole surah, and round again. */
+    fun cycleRepeat() {
+        val state = player.state.value
+        val next = when (state.repeatMode) {
+            RepeatMode.OFF -> RepeatMode.AYAH
+            RepeatMode.AYAH -> RepeatMode.SURAH
+            RepeatMode.SURAH, RepeatMode.RANGE -> RepeatMode.OFF
+        }
+        viewModelScope.launch { settings.setRepeat(next, state.repeatCount) }
+    }
+
+    /** One button, no menu: 1×, 1.25×, 1.5×, 0.75×, and round again. */
+    fun cycleSpeed() {
+        val current = player.state.value.speed
+        val index = SPEEDS.indexOfFirst { abs(it - current) < 0.01f }
+        viewModelScope.launch { settings.setPlaybackSpeed(SPEEDS[(index + 1) % SPEEDS.size]) }
+    }
+
+    fun setReciter(reciter: Reciter) {
+        viewModelScope.launch {
+            settings.setReciter(reciter)
+            if (player.state.value.isActive) player.changeReciter(reciter)
+        }
+    }
+
+    /** Empties the downloaded recitations; whatever plays next is fetched again. */
+    fun clearDownloads() = AudioCache.clear()
 
     /** Replays the ayah that failed, which is what the snackbar's retry offers. */
     fun retry() {
@@ -133,50 +148,7 @@ class ReaderViewModel(
         player.play(quran.surah(state.surah), state.ayah.coerceAtLeast(1), state.reciter)
     }
 
-    /**
-     * Repeat a span of ayahs, which the player has always been able to do and nothing could ask it
-     * for. Choosing an ayah sets one end; choosing a second sets the other and starts the repeat.
-     */
-    fun repeatFrom(verse: Verse) {
-        val quran = quran.value ?: return
-        val anchor = _rangeAnchor.value
-        if (anchor == null || anchor.first != verse.surah) {
-            _rangeAnchor.value = verse.surah to verse.number
-            if (!player.state.value.isActive) player.play(quran.surah(verse.surah), verse.number, prefs.value.reciter)
-            return
-        }
-        val from = minOf(anchor.second, verse.number)
-        val to = maxOf(anchor.second, verse.number)
-        _rangeAnchor.value = null
-        viewModelScope.launch { settings.setRepeat(RepeatMode.RANGE, player.state.value.repeatCount) }
-        player.setRepeatRange(from, to)
-        if (player.state.value.ayah !in from..to) {
-            player.play(quran.surah(verse.surah), from, prefs.value.reciter)
-        }
-    }
-
-    /** The first end of a range the reader has chosen, waiting for the second. */
-    private val _rangeAnchor = MutableStateFlow<Pair<Int, Int>?>(null)
-    val rangeAnchor: StateFlow<Pair<Int, Int>?> = _rangeAnchor.asStateFlow()
-
-    fun clearRange() {
-        _rangeAnchor.value = null
-        player.clearRepeatRange()
-        viewModelScope.launch { settings.setRepeat(RepeatMode.OFF, player.state.value.repeatCount) }
-    }
-
-    fun setRepeat(mode: RepeatMode, count: Int) {
-        viewModelScope.launch { settings.setRepeat(mode, count) }
-    }
-
-    fun setSpeed(speed: Float) {
-        viewModelScope.launch { settings.setPlaybackSpeed(speed) }
-    }
-
-    fun setReciter(reciter: Reciter) {
-        viewModelScope.launch {
-            settings.setReciter(reciter)
-            if (player.state.value.isActive) player.changeReciter(reciter)
-        }
+    private companion object {
+        val SPEEDS = listOf(1f, 1.25f, 1.5f, 0.75f)
     }
 }

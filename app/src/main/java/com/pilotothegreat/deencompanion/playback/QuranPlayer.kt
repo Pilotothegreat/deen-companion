@@ -49,8 +49,6 @@ data class PlaybackState(
     val repeatCount: Int = 3,
     /** How many times the repeating unit has already come round. */
     val repeatsDone: Int = 0,
-    /** The ayahs a RANGE repeat covers, 1-based and inclusive, or null for the rest of the surah. */
-    val range: IntRange? = null,
     val speed: Float = 1f,
 ) {
     val isActive: Boolean get() = surah > 0
@@ -107,10 +105,25 @@ class QuranPlayer(
         }
     }
 
-    fun play(surah: Surah, fromAyah: Int, reciter: Reciter) = withController { player ->
+    /**
+     * Brings the player up on an ayah, ready but not reciting — what a single tap on an ayah does. If
+     * that surah is already loaded it only moves there, and keeps playing or paused as it was.
+     */
+    fun cue(surah: Surah, ayah: Int, reciter: Reciter) {
+        val state = _state.value
+        if (state.isActive && state.surah == surah.number && state.reciter == reciter) {
+            withController { it.seekTo((ayah - 1).coerceIn(0, surah.verses.lastIndex), 0L) }
+            repeatsDone = 0
+            _state.update { it.copy(ayah = ayah, repeatsDone = 0) }
+        } else {
+            play(surah, ayah, reciter, start = false)
+        }
+    }
+
+    fun play(surah: Surah, fromAyah: Int, reciter: Reciter, start: Boolean = true) = withController { player ->
         current = surah
         repeatsDone = 0
-        // A range repeat with nothing chosen runs from where playback started to the end of the surah.
+        // The span a RANGE repeat left in settings by 2.0 covers: from where playback started to the end.
         repeatRange = (fromAyah - 1).coerceIn(0, surah.verses.lastIndex)..surah.verses.lastIndex
         val items = surah.verses.map { verse ->
             MediaItem.Builder()
@@ -128,36 +141,17 @@ class QuranPlayer(
         player.setMediaItems(items, (fromAyah - 1).coerceIn(0, items.lastIndex), 0L)
         player.setPlaybackSpeed(prefs.speed)
         player.prepare()
-        player.play()
+        if (start) player.play()
         _state.update {
             it.copy(
                 surah = surah.number,
                 ayah = fromAyah,
                 verseCount = items.size,
                 reciter = reciter,
-                isPlaying = true,
+                isPlaying = start,
                 repeatsDone = 0,
-                range = null,
             )
         }
-    }
-
-    /** Repeat this span of ayahs (inclusive, 1-based) when the mode is RANGE. */
-    fun setRepeatRange(fromAyah: Int, toAyah: Int) {
-        val verses = current?.verses ?: return
-        val from = (fromAyah - 1).coerceIn(0, verses.lastIndex)
-        val to = (toAyah - 1).coerceIn(from, verses.lastIndex)
-        repeatRange = from..to
-        repeatsDone = 0
-        _state.update { it.copy(range = (from + 1)..(to + 1), repeatsDone = 0) }
-    }
-
-    /** Back to repeating from where playback started to the end of the surah. */
-    fun clearRepeatRange() {
-        val verses = current?.verses ?: return
-        repeatRange = (_state.value.ayah - 1).coerceIn(0, verses.lastIndex)..verses.lastIndex
-        repeatsDone = 0
-        _state.update { it.copy(range = null, repeatsDone = 0) }
     }
 
     /** Restarts the current ayah with another reciter. */

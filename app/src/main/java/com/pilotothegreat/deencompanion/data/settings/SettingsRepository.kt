@@ -103,11 +103,6 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
     suspend fun setPureBlack(enabled: Boolean) = edit { it[Keys.PURE_BLACK] = enabled }
 
-    suspend fun setQuranFontSize(size: Int) =
-        edit { it[Keys.QURAN_FONT_SIZE] = size.coerceIn(Defaults.QURAN_FONT_RANGE) }
-
-    suspend fun setShowTranslation(show: Boolean) = edit { it[Keys.SHOW_TRANSLATION] = show }
-
     suspend fun setReciter(reciter: Reciter) = edit { it[Keys.RECITER] = reciter.name }
 
     suspend fun setLastReadPage(page: Int) = edit { it[Keys.LAST_READ_PAGE] = page }
@@ -255,8 +250,6 @@ internal object Keys {
     val THEME_MODE = stringPreferencesKey("theme_mode")
     val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
     val PURE_BLACK = booleanPreferencesKey("amoled_black_mode")
-    val QURAN_FONT_SIZE = intPreferencesKey("quran_arabic_font_size")
-    val SHOW_TRANSLATION = booleanPreferencesKey("show_translation")
     val RECITER = stringPreferencesKey("reciter")
     val LAST_READ_PAGE = intPreferencesKey("quran_last_page")
     val ATHKAR_PLACE = stringPreferencesKey("athkar_last_place")
@@ -347,8 +340,6 @@ internal fun Preferences.toAppSettings(): AppSettings = AppSettings(
     themeMode = enumOrNull<ThemeMode>(this[Keys.THEME_MODE]) ?: ThemeMode.SYSTEM,
     dynamicColor = this[Keys.DYNAMIC_COLOR] ?: true,
     pureBlack = this[Keys.PURE_BLACK] ?: false,
-    quranFontSize = (this[Keys.QURAN_FONT_SIZE] ?: Defaults.QURAN_FONT_SIZE).coerceIn(Defaults.QURAN_FONT_RANGE),
-    showTranslation = this[Keys.SHOW_TRANSLATION] ?: false,
     reciter = enumOrNull<Reciter>(this[Keys.RECITER]) ?: Reciter.MISHARY,
     lastReadPage = this[Keys.LAST_READ_PAGE] ?: 0,
     athkarPlace = this[Keys.ATHKAR_PLACE].orEmpty(),

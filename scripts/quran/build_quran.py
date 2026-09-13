@@ -1,32 +1,40 @@
 #!/usr/bin/env python3
-"""Builds the Quran assets from Tanzil.
+"""Builds the Quran assets from the King Fahd Complex's own text.
 
-The text must reach the screen exactly as Tanzil publishes it: their licence forbids modifying it,
-and so does respect for what it is. Earlier versions of this app rewrote hamza sequences at load
-time to paper over a font problem, which silently deleted 15,607 vowel marks.
+Until 2.1 the Arabic was Tanzil's Uthmani text, drawn with KFGQPC's Uthmanic Hafs font. The two do not
+agree on how the Quranic marks are encoded, and the disagreement is visible: in that font Tanzil's
+silent-letter circle (U+06DF, nearly four thousand times) is a spacing glyph rather than a mark, so it
+drew as a dotted circle standing inside the word, and every sukun came out as that circle instead of
+the printed jazm. Rendering the words with HarfBuzz showed it plainly; checking that every codepoint
+had a glyph did not, which is how it shipped.
 
-The Arabic comes from Tanzil's XML rather than their plain text, because the plain text glues the
-Basmala onto the first ayah of every surah but at-Tawbah. The mushaf writes it as a heading above
-the surah, and the translation files keep it out of ayah 1, so the XML is the only form where the
-two line up. Its `bismillah` attribute becomes the heading, and is absent exactly where the mushaf
-has none: al-Fatihah, where it is ayah 1, and at-Tawbah, which opens without it.
+The fix is to draw the font with the text it was made for. KFGQPC's QPC Hafs text, rendered with its
+v18 font, puts the silent circle over its letter, sets pause marks on their word, ligates each sajdah
+word the way the print does, and draws the numbered ayah rosette itself from a no-break space and the
+ayah's digits. The text is used exactly as published; the only thing separated out is that trailing
+number, so search, copy and share get the words and the page puts the number back.
+
+The Basmala heading comes from al-Fatihah's first ayah, which is the Basmala, and is written above
+every surah except al-Fatihah, where it is ayah 1, and at-Tawbah, which opens without it.
 
 Usage:
     python3 scripts/quran/build_quran.py [--cache DIR]
 
 Writes:
-    app/src/main/assets/quran-ar.json            the Uthmani text with surah metadata
+    app/src/main/assets/quran-ar.json            the text with surah metadata
     app/src/main/assets/quran-tr-clearquran.json The Clear Quran (Talal Itani)
     app/src/test/resources/quran-hashes.json     per-surah checksums the integrity test asserts
 
 Sources:
-    Quran text      https://tanzil.net  (Tanzil Uthmani 1.1, CC BY 3.0, verbatim only)
+    Quran text      https://api.quran.com/api/v4/quran/verses/qpc_hafs  (KFGQPC QPC Hafs)
     Translation     https://tanzil.net/trans/en.itani  (The Clear Quran, CC BY-ND 4.0)
+    Surah metadata  https://tanzil.net/res/text/metadata/quran-data.xml  (CC BY 3.0)
 """
 import argparse
 import hashlib
 import json
 import pathlib
+import re
 import sys
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -36,16 +44,17 @@ ASSETS = ROOT / "app/src/main/assets"
 TEST_RESOURCES = ROOT / "app/src/test/resources"
 
 SOURCES = {
-    "uthmani.xml": "https://tanzil.net/pub/download/index.php?quranType=uthmani&outType=xml&agree=true&marks=true&sajdah=true",
+    "qpc_hafs.json": "https://api.quran.com/api/v4/quran/verses/qpc_hafs",
     "itani.txt": "https://tanzil.net/trans/en.itani",
     "quran-data.xml": "https://tanzil.net/res/text/metadata/quran-data.xml",
 }
 
 TEXT_LICENCE = {
-    "name": "Tanzil Quran Text (Uthmani, version 1.1)",
-    "source": "https://tanzil.net",
-    "license": "CC BY 3.0",
-    "terms": "Verbatim copies may be distributed with the source indicated; changing the text is not allowed.",
+    "name": "King Fahd Glorious Quran Printing Complex — Uthmanic Hafs (QPC)",
+    "source": "https://qurancomplex.gov.sa",
+    "license": "KFGQPC",
+    "terms": "Published by the King Fahd Glorious Quran Printing Complex for the Madinah Mushaf. "
+             "Distributed free of cost and unmodified; changing the text is not allowed.",
 }
 TRANSLATION = {
     "id": "clearquran",
@@ -57,6 +66,12 @@ TRANSLATION = {
     "attribution": "Translation by Talal Itani, ClearQuran.com",
 }
 
+# The ayah number the text carries at its end: a no-break space and Arabic-Indic digits. One ayah
+# (2:72) has an ordinary space there instead, so either is accepted; the page always puts the number
+# back after a no-break space, which is what keeps it on the line of the word it closes.
+AYAH_NUMBER = re.compile("[  ]([٠-٩]+)$")
+ARABIC_INDIC = str.maketrans("٠١٢٣٤٥٦٧٨٩", "0123456789")
+
 
 def fetch(cache: pathlib.Path, name: str) -> pathlib.Path:
     cache.mkdir(parents=True, exist_ok=True)
@@ -64,23 +79,22 @@ def fetch(cache: pathlib.Path, name: str) -> pathlib.Path:
     if not path.exists():
         print(f"downloading {name}")
         request = urllib.request.Request(SOURCES[name], headers={"User-Agent": "bilal-build-script"})
-        with urllib.request.urlopen(request, timeout=120) as response:
+        with urllib.request.urlopen(request, timeout=180) as response:
             path.write_bytes(response.read())
     return path
 
 
-def read_arabic(path: pathlib.Path) -> tuple[dict[int, list[str]], dict[int, str]]:
-    """Returns the ayahs of each surah and, where the mushaf has one, its Basmala heading."""
-    verses: dict[int, list[str]] = {}
-    bismillah: dict[int, str] = {}
-    for sura in ET.parse(path).getroot().findall("sura"):
-        index = int(sura.get("index"))
-        ayas = sura.findall("aya")
-        verses[index] = [aya.get("text") for aya in ayas]
-        heading = ayas[0].get("bismillah")
-        if heading:
-            bismillah[index] = heading
-    return verses, bismillah
+def read_arabic(path: pathlib.Path) -> dict[int, list[str]]:
+    """The ayahs of each surah, in order, with their trailing number checked and removed."""
+    verses: dict[int, dict[int, str]] = {}
+    for verse in json.loads(path.read_text(encoding="utf-8"))["verses"]:
+        surah, ayah = (int(part) for part in verse["verse_key"].split(":"))
+        text = verse["text_qpc_hafs"]
+        match = AYAH_NUMBER.search(text)
+        if match is None or int(match.group(1).translate(ARABIC_INDIC)) != ayah:
+            raise ValueError(f"{surah}:{ayah} does not end with its own number")
+        verses.setdefault(surah, {})[ayah] = text[: match.start()]
+    return {surah: [by_ayah[a] for a in sorted(by_ayah)] for surah, by_ayah in verses.items()}
 
 
 def read_translation(path: pathlib.Path) -> dict[tuple[int, int], str]:
@@ -101,11 +115,11 @@ def write_json(path: pathlib.Path, payload: object) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--cache", default="/tmp/bilal-quran", help="where downloads are kept")
+    parser.add_argument("--cache", default="/tmp/bilal-quran-qpc", help="where downloads are kept")
     args = parser.parse_args()
     cache = pathlib.Path(args.cache)
 
-    arabic, bismillah = read_arabic(fetch(cache, "uthmani.xml"))
+    arabic = read_arabic(fetch(cache, "qpc_hafs.json"))
     english = read_translation(fetch(cache, "itani.txt"))
     suras = ET.parse(fetch(cache, "quran-data.xml")).getroot().find("suras")
     counts = {int(s.get("index")): int(s.get("ayas")) for s in suras}
@@ -116,9 +130,13 @@ def main() -> int:
     if total != 6236 or len(english) != 6236:
         print(f"expected 6236 ayahs, got {total} Arabic and {len(english)} translated", file=sys.stderr)
         return 1
-    # The Basmala is a heading everywhere except al-Fatihah, where it is ayah 1, and at-Tawbah.
-    if sorted(set(range(1, 115)) - bismillah.keys()) != [1, 9]:
-        print("unexpected Basmala placement in the source text", file=sys.stderr)
+
+    basmala = arabic[1][0]
+    # No surah but al-Fatihah may carry the Basmala inside its first ayah: it is a heading everywhere
+    # else, and printing it from the heading and the ayah would show it twice.
+    doubled = [s for s in range(2, 115) if arabic[s][0].startswith(basmala)]
+    if doubled:
+        print(f"the Basmala is inside ayah 1 of {doubled}", file=sys.stderr)
         return 1
 
     surahs, translated, hashes = [], [], {}
@@ -136,8 +154,8 @@ def main() -> int:
             "revelationOrder": order[index],
             "verses": verses,
         }
-        if index in bismillah:
-            surah["bismillah"] = bismillah[index]
+        if index not in (1, 9):
+            surah["bismillah"] = basmala
         surahs.append(surah)
         translated.append([english[(index, ayah)] for ayah in range(1, counts[index] + 1)])
         hashes[str(index)] = hashlib.sha256("\n".join(verses).encode("utf-8")).hexdigest()
@@ -145,7 +163,8 @@ def main() -> int:
     write_json(ASSETS / "quran-ar.json", {"source": TEXT_LICENCE, "surahs": surahs})
     write_json(ASSETS / "quran-tr-clearquran.json", {**TRANSLATION, "verses": translated})
     write_json(TEST_RESOURCES / "quran-hashes.json", hashes)
-    print(f"{total} ayahs, {len(surahs)} surahs, {len(bismillah)} Basmala headings")
+    headings = sum(1 for s in surahs if "bismillah" in s)
+    print(f"{total} ayahs, {len(surahs)} surahs, {headings} Basmala headings")
     return 0
 
 

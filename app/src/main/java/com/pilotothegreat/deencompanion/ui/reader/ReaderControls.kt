@@ -1,50 +1,47 @@
 package com.pilotothegreat.deencompanion.ui.reader
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Bedtime
-import androidx.compose.material.icons.rounded.Bedtime
 import androidx.compose.material.icons.rounded.Bookmark
 import androidx.compose.material.icons.rounded.BookmarkBorder
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.ContentCopy
-import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.rounded.DeleteSweep
+import androidx.compose.material.icons.rounded.MyLocation
 import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.RecordVoiceOver
 import androidx.compose.material.icons.rounded.Repeat
+import androidx.compose.material.icons.rounded.RepeatOn
+import androidx.compose.material.icons.rounded.RepeatOneOn
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.SkipNext
 import androidx.compose.material.icons.rounded.SkipPrevious
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FilterChip
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.FilledIconToggleButton
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.HorizontalFloatingToolbar
-import androidx.compose.material3.AssistChip
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SegmentedListItem
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -53,7 +50,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.core.quran.RepeatMode
 import com.pilotothegreat.deencompanion.data.quran.Reciter
@@ -61,245 +57,250 @@ import com.pilotothegreat.deencompanion.data.quran.Surah
 import com.pilotothegreat.deencompanion.data.quran.TranslationInfo
 import com.pilotothegreat.deencompanion.data.quran.Verse
 import com.pilotothegreat.deencompanion.playback.PlaybackState
-import com.pilotothegreat.deencompanion.ui.common.Labelled
 import com.pilotothegreat.deencompanion.ui.common.Formatters
+import com.pilotothegreat.deencompanion.ui.common.Labelled
 import com.pilotothegreat.deencompanion.ui.common.SystemIntents
 import com.pilotothegreat.deencompanion.ui.common.copyToClipboard
 import com.pilotothegreat.deencompanion.ui.common.currentLocale
 import com.pilotothegreat.deencompanion.ui.common.startSafely
 import com.pilotothegreat.deencompanion.ui.quran.verseReference
+import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.ui.theme.UthmanicHafs
 
 private val SLEEP_OPTIONS = listOf(0, 10, 15, 30, 60)
-private val SPEED_OPTIONS = listOf(0.75f, 1f, 1.25f, 1.5f)
-private val REPEAT_COUNTS = listOf(3, 5, 10)
 
-/** Floating recitation controls; the play button's shape morphs with its state. */
+/**
+ * The recitation bar, docked at the foot of the reader the way Quran for Android docks its audio bar.
+ *
+ * Everything it does is on its face: previous and next ayah around a large play button whose shape
+ * morphs with its state, and repeat and speed as single buttons that step through their values and
+ * show where they are. The reciter is a chip that opens a short sheet. There is no menu.
+ */
 @Composable
-fun PlayerToolbar(
+fun PlayerBar(
     state: PlaybackState,
     title: String,
+    /** True when the reader has turned away from the page being recited. */
+    awayFromRecitation: Boolean,
     onTogglePlay: () -> Unit,
     onPrevious: () -> Unit,
     onNext: () -> Unit,
     onStop: () -> Unit,
-    onReciter: (Reciter) -> Unit,
-    onSleepTimer: (Int) -> Unit,
-    onRepeat: (RepeatMode, Int) -> Unit,
-    onSpeed: (Float) -> Unit,
-    onClearRange: () -> Unit,
+    onRepeat: () -> Unit,
+    onSpeed: () -> Unit,
+    onReciter: () -> Unit,
+    onBackToRecitation: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val locale = currentLocale()
-    var menuOpen by remember { mutableStateOf(false) }
-    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
-        // A chosen range is the one piece of playback state that is invisible otherwise, and the
-        // one a reader most needs a way out of.
-        state.range?.let { range ->
-            AssistChip(
-                onClick = onClearRange,
-                label = {
-                    Text(
-                        stringResource(
-                            R.string.repeat_range_set,
-                            Formatters.number(range.first, locale),
-                            Formatters.number(range.last, locale),
-                        ),
-                    )
-                },
-                trailingIcon = {
-                    Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.repeat_range_clear))
-                },
+    Surface(
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.navigationBarsPadding().padding(top = Spacing.medium, bottom = Spacing.small)) {
+            // How far through the surah, as a thin line — not a seek bar, since ayahs are the steps.
+            LinearProgressIndicator(
+                progress = { if (state.verseCount > 0) state.ayah.toFloat() / state.verseCount else 0f },
+                modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.xxlarge),
             )
-        }
-        Text(
-            text = buildString {
-                append(title)
-                append(" · ")
-                append(stringResource(R.string.player_position, Formatters.number(state.ayah, locale), Formatters.number(state.verseCount, locale)))
-                if (state.repeatMode != RepeatMode.OFF) {
-                    append(" · ")
-                    append(stringResource(R.string.repeat_progress, Formatters.number(state.repeatsDone + 1, locale)))
-                }
-            },
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        HorizontalFloatingToolbar(
-            expanded = true,
-            leadingContent = {
-                Labelled(stringResource(R.string.stop_playback)) {
-                    IconButton(onClick = onStop) {
-                        Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.stop_playback))
-                    }
-                }
-            },
-            trailingContent = {
-                Box {
-                    Labelled(stringResource(R.string.playback_options)) {
-                        IconButton(onClick = { menuOpen = true }) {
-                            Icon(
-                                if (state.sleepTimerEndsAt != null) Icons.Rounded.Bedtime else Icons.Rounded.MoreVert,
-                                contentDescription = stringResource(R.string.playback_options),
-                            )
-                        }
-                    }
-                    DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                        Text(
-                            stringResource(R.string.reciter),
-                            style = MaterialTheme.typography.labelLarge,
-                            modifier = Modifier.padding(horizontal = Spacing.large, vertical = Spacing.small),
-                        )
-                        Reciter.entries.forEach { reciter ->
-                            DropdownMenuItem(
-                                text = { Text(stringResource(reciter.label)) },
-                                leadingIcon = { RadioButton(selected = reciter == state.reciter, onClick = null) },
-                                onClick = {
-                                    onReciter(reciter)
-                                    menuOpen = false
-                                },
-                            )
-                        }
-                        HorizontalDivider()
-                        Text(
-                            stringResource(R.string.repeat),
-                            style = MaterialTheme.typography.labelLarge,
-                            modifier = Modifier.padding(horizontal = Spacing.large, vertical = Spacing.small),
-                        )
-                        RepeatMode.entries.forEach { mode ->
-                            DropdownMenuItem(
-                                text = { Text(stringResource(mode.label)) },
-                                leadingIcon = { RadioButton(selected = mode == state.repeatMode, onClick = null) },
-                                onClick = {
-                                    // Keeping the count on OFF means turning repeat back on resumes what was set.
-                                    onRepeat(mode, state.repeatCount)
-                                    menuOpen = false
-                                },
-                            )
-                        }
-                        if (state.repeatMode != RepeatMode.OFF) {
-                            Row(Modifier.padding(horizontal = Spacing.large, vertical = Spacing.hair), horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
-                                REPEAT_COUNTS.forEach { count ->
-                                    FilterChip(
-                                        selected = count == state.repeatCount,
-                                        onClick = { onRepeat(state.repeatMode, count) },
-                                        label = { Text(Formatters.number(count, locale)) },
-                                    )
-                                }
-                            }
-                        }
-                        HorizontalDivider()
-                        Text(
-                            stringResource(R.string.playback_speed),
-                            style = MaterialTheme.typography.labelLarge,
-                            modifier = Modifier.padding(horizontal = Spacing.large, vertical = Spacing.small),
-                        )
-                        Row(Modifier.padding(horizontal = Spacing.large, vertical = Spacing.hair), horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
-                            SPEED_OPTIONS.forEach { speed ->
-                                FilterChip(
-                                    selected = speed == state.speed,
-                                    onClick = { onSpeed(speed) },
-                                    label = { Text(stringResource(R.string.speed_multiplier, Formatters.decimal(speed, locale))) },
-                                )
-                            }
-                        }
-                        HorizontalDivider()
-                        Text(
-                            stringResource(R.string.sleep_timer),
-                            style = MaterialTheme.typography.labelLarge,
-                            modifier = Modifier.padding(horizontal = Spacing.large, vertical = Spacing.small),
-                        )
-                        SLEEP_OPTIONS.forEach { minutes ->
-                            DropdownMenuItem(
-                                text = {
-                                    Text(
-                                        if (minutes == 0) stringResource(R.string.timer_off)
-                                        else pluralStringResource(R.plurals.minutes, minutes, Formatters.number(minutes, locale)),
-                                    )
-                                },
-                                leadingIcon = { Icon(Icons.Outlined.Bedtime, contentDescription = null) },
-                                onClick = {
-                                    onSleepTimer(minutes)
-                                    menuOpen = false
-                                },
-                            )
-                        }
-                    }
-                }
-            },
-        ) {
-            IconButton(onClick = onPrevious) { Icon(Icons.Rounded.SkipPrevious, contentDescription = stringResource(R.string.previous_ayah)) }
-            FilledIconToggleButton(
-                checked = state.isPlaying,
-                onCheckedChange = { onTogglePlay() },
-                shapes = IconButtonDefaults.toggleableShapes(),
+            Row(
+                Modifier.fillMaxWidth().padding(start = Spacing.xxlarge, end = Spacing.large, top = Spacing.small),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Spacing.small),
             ) {
-                if (state.isBuffering) {
-                    LoadingIndicator(Modifier.size(24.dp))
-                } else {
-                    Icon(
-                        if (state.isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
-                        contentDescription = stringResource(R.string.play_pause),
+                Column(Modifier.weight(1f)) {
+                    Text(title, style = MaterialTheme.typography.titleSmall, maxLines = 1)
+                    Text(
+                        stringResource(R.string.player_position, Formatters.number(state.ayah, locale), Formatters.number(state.verseCount, locale)),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                }
+                AssistChip(
+                    onClick = onReciter,
+                    label = { Text(stringResource(state.reciter.label), maxLines = 1) },
+                    leadingIcon = { Icon(Icons.Rounded.RecordVoiceOver, contentDescription = null, Modifier.size(18.dp)) },
+                )
+            }
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = Spacing.small),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceEvenly,
+            ) {
+                val repeatLabel = stringResource(R.string.repeat) + ": " + stringResource(state.repeatMode.label)
+                Labelled(repeatLabel) {
+                    IconButton(onClick = onRepeat) {
+                        Icon(
+                            when (state.repeatMode) {
+                                RepeatMode.OFF -> Icons.Rounded.Repeat
+                                RepeatMode.AYAH -> Icons.Rounded.RepeatOneOn
+                                RepeatMode.SURAH, RepeatMode.RANGE -> Icons.Rounded.RepeatOn
+                            },
+                            contentDescription = repeatLabel,
+                            tint = if (state.repeatMode == RepeatMode.OFF) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
+                IconButton(onClick = onPrevious) {
+                    Icon(Icons.Rounded.SkipPrevious, contentDescription = stringResource(R.string.previous_ayah))
+                }
+                FilledIconToggleButton(
+                    checked = state.isPlaying,
+                    onCheckedChange = { onTogglePlay() },
+                    shapes = IconButtonDefaults.toggleableShapes(),
+                    modifier = Modifier.size(64.dp),
+                ) {
+                    if (state.isBuffering) {
+                        LoadingIndicator(Modifier.size(32.dp))
+                    } else {
+                        Icon(
+                            if (state.isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
+                            contentDescription = stringResource(R.string.play_pause),
+                            modifier = Modifier.size(32.dp),
+                        )
+                    }
+                }
+                IconButton(onClick = onNext) {
+                    Icon(Icons.Rounded.SkipNext, contentDescription = stringResource(R.string.next_ayah))
+                }
+                val speedLabel = stringResource(R.string.speed_multiplier, Formatters.decimal(state.speed, locale))
+                Labelled(stringResource(R.string.playback_speed)) {
+                    TextButton(onClick = onSpeed) { Text(speedLabel) }
                 }
             }
-            IconButton(onClick = onNext) { Icon(Icons.Rounded.SkipNext, contentDescription = stringResource(R.string.next_ayah)) }
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = Spacing.small),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (awayFromRecitation) {
+                    TextButton(onClick = onBackToRecitation) {
+                        Icon(Icons.Rounded.MyLocation, contentDescription = null, Modifier.size(18.dp))
+                        Text(stringResource(R.string.back_to_recitation), modifier = Modifier.padding(start = Spacing.small))
+                    }
+                }
+                Row(Modifier.weight(1f), horizontalArrangement = Arrangement.End) {
+                    TextButton(onClick = onStop) {
+                        Icon(Icons.Rounded.Close, contentDescription = null, Modifier.size(18.dp))
+                        Text(stringResource(R.string.stop_playback), modifier = Modifier.padding(start = Spacing.small))
+                    }
+                }
+            }
         }
     }
 }
 
+/** The player's occasional choices: who recites, when to stop, and the downloaded recitations. */
 @Composable
-fun AyahSheet(
+fun ReciterSheet(
+    state: PlaybackState,
+    onReciter: (Reciter) -> Unit,
+    onSleepTimer: (Int) -> Unit,
+    onClearDownloads: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val locale = currentLocale()
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(Modifier.padding(start = Spacing.large, end = Spacing.large, bottom = Spacing.xxlarge)) {
+            Text(
+                stringResource(R.string.reciter),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(start = Spacing.small, bottom = Spacing.small),
+            )
+            Column(verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
+                Reciter.entries.forEachIndexed { index, reciter ->
+                    SegmentedListItem(
+                        selected = reciter == state.reciter,
+                        onClick = { onReciter(reciter) },
+                        shapes = ListItemDefaults.segmentedShapes(index, Reciter.entries.size),
+                        leadingContent = { RadioButton(selected = reciter == state.reciter, onClick = null) },
+                    ) { Text(stringResource(reciter.label)) }
+                }
+            }
+            Text(
+                stringResource(R.string.sleep_timer),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(start = Spacing.small, top = Spacing.xxlarge, bottom = Spacing.small),
+            )
+            val timerOn = state.sleepTimerEndsAt != null
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
+                SLEEP_OPTIONS.forEach { minutes ->
+                    FilterChip(
+                        selected = minutes == 0 && !timerOn,
+                        onClick = { onSleepTimer(minutes) },
+                        label = {
+                            Text(
+                                if (minutes == 0) stringResource(R.string.timer_off)
+                                else pluralStringResource(R.plurals.minutes, minutes, Formatters.number(minutes, locale)),
+                            )
+                        },
+                    )
+                }
+            }
+            TextButton(onClick = onClearDownloads, modifier = Modifier.padding(top = Spacing.large)) {
+                Icon(Icons.Rounded.DeleteSweep, contentDescription = null, Modifier.size(18.dp))
+                Text(stringResource(R.string.clear_downloaded_recitations), modifier = Modifier.padding(start = Spacing.small))
+            }
+        }
+    }
+}
+
+/** What a long press on an ayah opens: its meaning, and what can be done with it. */
+@Composable
+fun AyahMenu(
     verse: Verse,
     surah: Surah,
     translation: TranslationInfo,
     bookmarked: Boolean,
-    /** The ayah already chosen as one end of a repeat, if the reader is part-way through choosing. */
-    rangeAnchor: Pair<Int, Int>?,
-    onPlay: () -> Unit,
-    onRepeatRange: () -> Unit,
+    onRepeat: () -> Unit,
     onBookmark: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current
     val locale = currentLocale()
     val reference = verseReference(surah, verse.number, locale)
-    val shareText = "${verse.text}\n\n${verse.standaloneTranslation}\n— ${surah.nameEnglish} ${verse.surah}:${verse.number}"
-        .let { if (verse.translation.isBlank()) it else "$it\n${translation.attribution}" }
+    val shareText = buildString {
+        append(verse.text).append("\n\n").append(verse.standaloneTranslation)
+        append("\n— ").append(surah.nameEnglish).append(' ').append(verse.surah).append(':').append(verse.number)
+        // The translation's licence asks for its translator to be named wherever it goes.
+        if (verse.translation.isNotBlank()) append('\n').append(translation.attribution)
+    }
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(Modifier.padding(start = Spacing.xxlarge, end = Spacing.xxlarge, bottom = Spacing.xxlarge), verticalArrangement = Arrangement.spacedBy(Spacing.large)) {
+        Column(
+            Modifier.padding(start = Spacing.xxlarge, end = Spacing.xxlarge, bottom = Spacing.xxlarge),
+            verticalArrangement = Arrangement.spacedBy(Spacing.medium),
+        ) {
             Text(reference, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
             Text(
                 verse.text,
                 fontFamily = UthmanicHafs,
                 fontSize = 24.sp,
-                lineHeight = 44.sp,
+                lineHeight = 46.sp,
                 style = MaterialTheme.typography.bodyLarge.copy(textDirection = TextDirection.Rtl),
                 modifier = Modifier.fillMaxWidth(),
             )
-            Text(verse.standaloneTranslation, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            // The licence asks for the translator to be named wherever the translation is read.
-            Text(
-                translation.attribution,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            val waiting = rangeAnchor != null && rangeAnchor.first == verse.surah
+            if (verse.translation.isNotBlank()) {
+                Text(verse.standaloneTranslation, style = MaterialTheme.typography.bodyLarge)
+                Text(translation.attribution, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            if (verse.isSajdah) {
+                Text(
+                    stringResource(R.string.sajdah_note, "${Formatters.number(verse.surah, locale)}:${Formatters.number(verse.number, locale)}"),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.tertiary,
+                )
+            }
             val actions = listOf(
-                Triple(Icons.Rounded.PlayArrow, stringResource(R.string.play_from_here), onPlay),
-                Triple(
-                    Icons.Rounded.Repeat,
-                    stringResource(if (waiting) R.string.repeat_to_here else R.string.repeat_from_here),
-                ) {
-                    onRepeatRange()
-                    onDismiss()
-                },
                 Triple(
                     if (bookmarked) Icons.Rounded.Bookmark else Icons.Rounded.BookmarkBorder,
                     stringResource(if (bookmarked) R.string.remove_bookmark else R.string.bookmark),
                     onBookmark,
                 ),
+                Triple(Icons.Rounded.RepeatOneOn, stringResource(R.string.repeat_this_ayah)) {
+                    onRepeat()
+                    onDismiss()
+                },
                 Triple(Icons.Rounded.ContentCopy, stringResource(R.string.copy)) {
                     context.copyToClipboard(reference, shareText)
                     onDismiss()
@@ -308,7 +309,7 @@ fun AyahSheet(
                     context.startSafely(SystemIntents.shareText(shareText))
                 },
             )
-            Column(verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
+            Column(Modifier.padding(top = Spacing.small), verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
                 actions.forEachIndexed { index, (icon, label, action) ->
                     SegmentedListItem(
                         onClick = action,

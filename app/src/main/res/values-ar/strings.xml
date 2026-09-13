@@ -14,7 +14,6 @@
     <string name="undo">تراجع</string>
     <string name="allow">سماح</string>
     <string name="dismiss">إخفاء</string>
-    <string name="more">المزيد</string>
     <string name="open_settings">فتح الإعدادات</string>
     <string name="clear_search">مسح البحث</string>
     <string name="copy">نسخ</string>
@@ -157,19 +156,11 @@
     <string name="page_juz_hizb">صفحة %1$s · الجزء %2$s · الحزب %3$s/%4$s</string>
     <string name="sajdah_note">۩ سجدة تلاوة عند %1$s، وقد اختلف الفقهاء في وجوبها أو استحبابها.</string>
     <string name="page_juz">صفحة %1$s · الجزء %2$s</string>
-    <string name="show_translation">الترجمة</string>
-    <string name="reader_mushaf_page">عرض الصفحة كما تُطبع</string>
-    <string name="play_from_here">التلاوة من هذه الآية</string>
-    <string name="repeat_from_here">كرّر من هنا</string>
-    <string name="repeat_to_here">كرّر إلى هنا</string>
-    <string name="repeat_range_set">يكرّر من %1$s إلى %2$s</string>
-    <string name="repeat_range_clear">إيقاف التكرار</string>
     <string name="repeat">التكرار</string>
     <string name="repeat_off">إيقاف</string>
     <string name="repeat_ayah">هذه الآية</string>
     <string name="repeat_range">من موضع البداية</string>
     <string name="repeat_surah">السورة كاملة</string>
-    <string name="repeat_progress">التكرار %1$s</string>
     <string name="playback_speed">السرعة</string>
     <string name="speed_multiplier">%1$s×</string>
     <string name="retry">إعادة المحاولة</string>
@@ -181,7 +172,6 @@
     <string name="previous_ayah">الآية السابقة</string>
     <string name="next_ayah">الآية التالية</string>
     <string name="stop_playback">إيقاف التلاوة</string>
-    <string name="playback_options">خيارات التلاوة</string>
     <string name="reciter">القارئ</string>
     <string name="reciter_mishary">مشاري العفاسي</string>
     <string name="reciter_husary">محمود خليل الحصري</string>
@@ -347,7 +337,6 @@
     <string name="prayer_notifications_desc">إشعار عند كل صلاة يتحوّل إلى عدّ تنازلي حتى الإقامة</string>
     <string name="exact_alarms">التنبيه في الوقت المحدد</string>
     <string name="adhan_sound">صوت الأذان</string>
-    <string name="arabic_text_size">حجم النص العربي</string>
     <string name="appearance">المظهر</string>
     <string name="theme">السمة</string>
     <string name="theme_wallpaper">استخدام ألوان الخلفية</string>
@@ -626,4 +615,7 @@
         <item quantity="many">%1$s يومًا في آخر ثلاثين</item>
         <item quantity="other">%1$s يوم في آخر ثلاثين</item>
     </plurals>
+    <string name="repeat_this_ayah">كرّر هذه الآية</string>
+    <string name="clear_downloaded_recitations">حذف التلاوات المحفوظة</string>
+    <string name="back_to_recitation">العودة إلى موضع التلاوة</string>
 </resources>

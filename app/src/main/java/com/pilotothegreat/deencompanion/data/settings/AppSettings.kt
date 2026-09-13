@@ -145,9 +145,6 @@ data class AppSettings(
     val themeMode: ThemeMode,
     val dynamicColor: Boolean,
     val pureBlack: Boolean,
-    /** One size for all Arabic scripture: the mushaf and the athkar are the same text to read. */
-    val quranFontSize: Int,
-    val showTranslation: Boolean,
     val reciter: Reciter,
     /** Last Quran page opened (1..604), or 0 if none. */
     val lastReadPage: Int,
@@ -195,8 +192,6 @@ object Defaults {
     const val TIMEZONE = "Asia/Muscat"
     const val COUNTRY = "OM"
     val METHOD = CalculationMethod.OMAN
-    const val QURAN_FONT_SIZE = 28
-    val QURAN_FONT_RANGE = 20..44
     val HIJRI_ADJUSTMENT_RANGE = -2..2
     val IQAMA_OFFSET_RANGE = 0..60
     val ADJUSTMENT_RANGE = -30..30

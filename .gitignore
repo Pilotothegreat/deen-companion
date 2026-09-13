@@ -42,3 +42,7 @@ bugreport.zip
 framework*.jar
 
 *.salive
+
+# Downloaded build inputs (quran.com line data, printed page images)
+.cache/
+__pycache__/

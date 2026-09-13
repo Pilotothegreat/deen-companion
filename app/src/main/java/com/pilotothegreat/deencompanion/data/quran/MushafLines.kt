@@ -1,17 +1,16 @@
 package com.pilotothegreat.deencompanion.data.quran
 
-import org.json.JSONArray
 import org.json.JSONObject
 
 /** What a line of the printed page carries. */
 enum class LineKind {
-    /** Words, set justified to both margins. */
+    /** Words, stretched to both margins. */
     AYAH,
 
-    /** Words, centred: the closing line of a surah, which the print does not stretch. */
+    /** Words, centred: a surah's closing line, and every line of the two opening pages. */
     CENTRED,
 
-    /** The ornamental band carrying the surah's name. */
+    /** The band carrying the surah's name. */
     SURAH_HEADER,
 
     /** The Basmala, centred under the band. */
@@ -22,45 +21,34 @@ enum class LineKind {
 }
 
 /**
- * One printed word.
- *
- * Usually one of Tanzil's space-separated tokens. Sometimes more than one, because the print sets
- * them as a single unit — a pause mark sits tight above the word it follows, and a few pairs such
- * as بَعْدَ مَا are written joined — and justification must not open a gap inside one.
+ * One printed word, exactly as the King Fahd Complex text writes it — pause marks, the rub' al-hizb
+ * sign and the sajdah overline included, since those are part of the word in the print.
  */
 data class LineWord(
     val surah: Int,
     val ayah: Int,
     val text: String,
-    /** True when this word opens its ayah, which is where a rub' al-hizb mark goes. */
-    val startsAyah: Boolean,
-    /** True when this word closes its ayah, so the numbered rosette follows it. */
+    /** True when this word closes its ayah, so the ayah's number follows it and the font draws the rosette. */
     val endsAyah: Boolean,
 )
 
 data class MushafLine(
     val kind: LineKind,
     val words: List<LineWord>,
-    /** The surah a banner or Basmala line announces; 0 on a line of words. */
+    /** The surah a band or Basmala line announces; 0 on a line of words. */
     val owner: Int = 0,
 ) {
-    val isOrnament: Boolean get() = words.isEmpty()
-
     /** The surah this line belongs to: the one it announces, or the one its first word is from. */
     val surah: Int? get() = owner.takeIf { it > 0 } ?: words.firstOrNull()?.surah
 }
 
 /**
- * Where the printed mushaf breaks its lines.
+ * Where the printed mushaf breaks its fifteen lines.
  *
- * The app has always known which ayahs belong to which page. Without this it did not know where the
- * page breaks its fifteen lines, so the reader poured a page into one justified paragraph and let
- * the text engine break it wherever the phone's width ran out: a different shape on every device,
- * half-empty lines stretched to the margins, and nothing a memoriser could hold a picture of.
- *
- * The table is deliberately small. Tanzil's tokens run in one global order, so a line needs only the
- * index of its last token and what kind of line it is; the print's own grouping of tokens into words
- * is the short list of tokens that join the one before them.
+ * The words run in one global order — surah 1 to 114, ayah 1 to n, word 1 to m — so the table stores,
+ * for each line, only the index of its last word and what kind of line it is. The words themselves
+ * are the ayahs' own text split on their spaces; the build script refuses to write a table unless
+ * those are character for character the print's words.
  */
 object MushafLines {
 
@@ -68,102 +56,73 @@ object MushafLines {
     const val LINES_PER_PAGE = 15
 
     /**
-     * Reads the table and cuts [surahs] into pages of lines.
-     *
-     * Returns null when the asset is missing or does not fit the text, which is all the reader needs
-     * to fall back to flowing the page. The build script asserts the fit, and a unit test asserts it
-     * again, so this is a belt for a brace rather than an expected path.
+     * Reads the table and cuts [surahs] into pages of lines, or returns null when the asset is missing
+     * or does not fit the text. The build script and a unit test both assert the fit, so null means a
+     * broken build rather than a normal path.
      */
     fun parse(json: String, surahs: List<Surah>): List<List<MushafLine>>? {
         val root = runCatching { JSONObject(json) }.getOrNull() ?: return null
         val ends = root.optJSONArray("ends") ?: return null
         val kinds = root.optJSONArray("kinds") ?: return null
-        val owners = root.optJSONArray("owners")
+        val owners = root.optJSONArray("owners") ?: return null
+        val joinArray = root.optJSONArray("joins") ?: return null
         if (ends.length() != MushafLayout.PAGE_COUNT || kinds.length() != ends.length()) return null
 
         val tokens = tokenStream(surahs)
         if (root.optInt("tokens") != tokens.size) return null
-        val glued = glueSet(root.optJSONArray("glue"))
+        val joins = HashSet<Int>(joinArray.length() * 2).apply {
+            for (i in 0 until joinArray.length()) add(joinArray.getInt(i))
+        }
 
         val pages = ArrayList<List<MushafLine>>(ends.length())
         var cursor = 0
         for (page in 0 until ends.length()) {
             val pageEnds = ends.optJSONArray(page) ?: return null
             val pageKinds = kinds.optJSONArray(page) ?: return null
-            val pageOwners = owners?.optJSONArray(page)
+            val pageOwners = owners.optJSONArray(page) ?: return null
             if (pageEnds.length() != LINES_PER_PAGE) return null
             val lines = ArrayList<MushafLine>(LINES_PER_PAGE)
             for (line in 0 until LINES_PER_PAGE) {
                 val end = pageEnds.getInt(line)
                 val kind = LineKind.entries.getOrNull(pageKinds.getInt(line)) ?: LineKind.BLANK
-                val words = if (end >= cursor) wordsBetween(tokens, glued, cursor, end) else emptyList()
+                val onLine = if (end >= cursor) printedWords(tokens, joins, cursor, end) else emptyList()
                 if (end >= cursor) cursor = end + 1
-                lines += MushafLine(kind, words, pageOwners?.optInt(line) ?: 0)
+                lines += MushafLine(kind, onLine, pageOwners.optInt(line))
             }
             pages += lines
         }
         return pages.takeIf { cursor == tokens.size }
     }
 
-    /** One entry per Tanzil token, in mushaf order, remembering which ayah it closes. */
-    private fun tokenStream(surahs: List<Surah>): List<Token> {
-        val out = ArrayList<Token>(82_000)
+    /** Every token of the text in mushaf order: each ayah split on its ordinary spaces. */
+    private fun tokenStream(surahs: List<Surah>): List<LineWord> {
+        val out = ArrayList<LineWord>(80_000)
         for (surah in surahs) {
             for (verse in surah.verses) {
-                val parts = verse.text.split(' ').filter { it.isNotEmpty() }
+                val parts = verse.text.split(' ')
                 parts.forEachIndexed { index, text ->
-                    out += Token(surah.number, verse.number, text, index == 0, index == parts.lastIndex)
+                    out += LineWord(surah.number, verse.number, text, endsAyah = index == parts.lastIndex)
                 }
             }
         }
         return out
     }
 
-    private fun glueSet(array: JSONArray?): Set<Int> {
-        if (array == null) return emptySet()
-        val out = HashSet<Int>(array.length() * 2)
-        for (i in 0 until array.length()) out += array.getInt(i)
-        return out
-    }
-
-    /** Tokens [from]..[to] gathered into printed words, joining each glued token to the one before. */
-    private fun wordsBetween(tokens: List<Token>, glued: Set<Int>, from: Int, to: Int): List<LineWord> {
-        val out = ArrayList<LineWord>((to - from + 1).coerceAtLeast(1))
-        val builder = StringBuilder()
-        var start = from
-        var index = from
-        while (index <= to) {
+    /**
+     * Tokens [from]..[to] as the print's words. A token in [joins] continues the word before it — the
+     * print sets بَعۡدَ مَا as one word — and keeps the space the text has between them.
+     */
+    private fun printedWords(tokens: List<LineWord>, joins: Set<Int>, from: Int, to: Int): List<LineWord> {
+        val out = ArrayList<LineWord>(to - from + 1)
+        for (index in from..to) {
             val token = tokens[index]
-            // A glued token continues the word already being built; anything else begins a new one.
-            if (index > start && index !in glued) {
-                out += finish(tokens, start, index - 1, builder)
-                builder.setLength(0)
-                start = index
+            if (index in joins && out.isNotEmpty()) {
+                val previous = out.removeAt(out.lastIndex)
+                out += previous.copy(text = previous.text + " " + token.text, endsAyah = token.endsAyah)
+            } else {
+                out += token
             }
-            if (builder.isNotEmpty()) builder.append(' ')
-            builder.append(token.text)
-            index++
         }
-        if (builder.isNotEmpty()) out += finish(tokens, start, to, builder)
         return out
     }
-
-    private fun finish(tokens: List<Token>, start: Int, end: Int, builder: StringBuilder): LineWord {
-        val first = tokens[start]
-        return LineWord(
-            surah = first.surah,
-            ayah = first.ayah,
-            text = builder.toString(),
-            startsAyah = first.startsAyah,
-            endsAyah = tokens[end].endsAyah,
-        )
-    }
-
-    private data class Token(
-        val surah: Int,
-        val ayah: Int,
-        val text: String,
-        val startsAyah: Boolean,
-        val endsAyah: Boolean,
-    )
 }
