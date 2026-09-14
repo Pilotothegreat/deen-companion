@@ -80,7 +80,6 @@
     <string name="mark_prayed">Mark %1$s as prayed</string>
     <string name="unmark_prayed">Unmark %1$s</string>
     <string name="unmute_prayer">Turn on %1$s notifications</string>
-    <string name="calculated_with">Prayer times: %1$s</string>
     <string name="permission_location_title">Use your location</string>
     <string name="permission_location_body">Prayer times and the Qibla are calculated for where you are. Your location stays on this device.</string>
     <string name="permission_notifications_title">Turn on prayer notifications</string>

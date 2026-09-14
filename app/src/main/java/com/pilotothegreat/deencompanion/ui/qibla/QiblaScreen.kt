@@ -2,7 +2,15 @@ package com.pilotothegreat.deencompanion.ui.qibla
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.SpringSpec
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import com.pilotothegreat.deencompanion.ui.components.toComposePath
+import com.pilotothegreat.deencompanion.ui.theme.rememberReducedMotion
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -158,6 +166,9 @@ fun QiblaScreen(onBack: () -> Unit, viewModel: QiblaViewModel = koinViewModel())
                 heading = heading ?: 0f,
                 bearing = qibla.bearing.toFloat(),
                 aligned = aligned,
+                readout = heading?.let { stringResource(R.string.degrees, Formatters.number(it.roundToInt(), locale)) },
+                pitch = compass.pitch,
+                roll = compass.roll,
                 modifier = Modifier.widthIn(max = 360.dp).fillMaxWidth().aspectRatio(1f),
             )
 
@@ -200,13 +211,51 @@ fun QiblaScreen(onBack: () -> Unit, viewModel: QiblaViewModel = koinViewModel())
     }
 }
 
-/** Dial that turns with the phone; the Kaaba marker sits at the Qibla bearing and morphs when aligned. */
+/**
+ * The dial, as a physical thing. Its rim is a scalloped MaterialShapes cookie with a degree ring inside and
+ * the heading in the middle, and the Kaaba marker rides the rim at the Qibla bearing. The dial turns on an
+ * underdamped spring fed by the sensor, so a quick swing overshoots and settles instead of gliding. Coming
+ * onto the Qibla it locks there with a haptic, a morph and a pulse, and tilting the phone leans it a little.
+ * With reduced motion or Simple mode the dial is steady: no bounce, no lean, no pulse.
+ */
 @Composable
-private fun CompassDial(heading: Float, bearing: Float, aligned: Boolean, modifier: Modifier = Modifier) {
+private fun CompassDial(
+    heading: Float,
+    bearing: Float,
+    aligned: Boolean,
+    readout: String?,
+    pitch: Float,
+    roll: Float,
+    modifier: Modifier = Modifier,
+) {
     val colors = MaterialTheme.colorScheme
-    val rotation = remember { Animatable(-heading) }
-    val spec = MaterialTheme.motionScheme.defaultSpatialSpec<Float>()
-    LaunchedEffect(heading) { rotation.animateTo(QiblaMath.unwrap(-heading, rotation.value), spec) }
+    val reduced = rememberReducedMotion()
+    // On the Qibla the dial locks there, rather than trembling inside the tolerance.
+    val target = -(if (aligned) bearing else heading)
+    val rotation = remember { Animatable(target) }
+    val physics: SpringSpec<Float> = when {
+        reduced -> spring(Spring.DampingRatioNoBouncy, Spring.StiffnessMedium)
+        aligned -> spring(Spring.DampingRatioLowBouncy, Spring.StiffnessMediumLow)
+        else -> spring(NEEDLE_DAMPING, Spring.StiffnessLow)
+    }
+    // Each reading retargets the running spring, which keeps its velocity: that is the swing.
+    LaunchedEffect(target, physics) { rotation.animateTo(QiblaMath.unwrap(target, rotation.value), physics) }
+
+    val pulse = remember { Animatable(1f) }
+    LaunchedEffect(aligned) {
+        if (aligned && !reduced) {
+            pulse.snapTo(0f)
+            pulse.animateTo(1f, tween(PULSE_MILLIS))
+        }
+    }
+    val lean = MaterialTheme.motionScheme.slowSpatialSpec<Float>()
+    val tiltX by animateFloatAsState(if (reduced) 0f else (pitch * TILT).coerceIn(-MAX_TILT, MAX_TILT), lean, label = "tiltX")
+    val tiltY by animateFloatAsState(if (reduced) 0f else (-roll * TILT).coerceIn(-MAX_TILT, MAX_TILT), lean, label = "tiltY")
+    val rim by animateColorAsState(
+        if (aligned) colors.primary else colors.outlineVariant,
+        MaterialTheme.motionScheme.defaultEffectsSpec(),
+        label = "rim",
+    )
 
     val textMeasurer = rememberTextMeasurer()
     val cardinals = listOf(
@@ -219,19 +268,34 @@ private fun CompassDial(heading: Float, bearing: Float, aligned: Boolean, modifi
     val markerShape = animatedPolygonShape(if (aligned) MaterialShapes.Sunny else MaterialShapes.Cookie9Sided)
     val description = stringResource(R.string.cd_qibla_compass)
 
-    Box(modifier, contentAlignment = Alignment.Center) {
-        Canvas(Modifier.fillMaxSize().graphicsLayer { rotationZ = rotation.value }) {
+    Box(
+        modifier.graphicsLayer {
+            rotationX = tiltX
+            rotationY = tiltY
+            cameraDistance = 12f * density
+        },
+        contentAlignment = Alignment.Center,
+    ) {
+        // The pulse when the Qibla is found, spreading out from behind the dial.
+        Canvas(Modifier.fillMaxSize()) {
+            val progress = pulse.value
+            if (progress < 1f) {
+                drawCircle(colors.primary.copy(alpha = (1f - progress) * 0.4f), radius = size.minDimension / 2 * (0.85f + 0.2f * progress))
+            }
+        }
+        Canvas(Modifier.fillMaxSize().padding(DIAL_INSET).graphicsLayer { rotationZ = rotation.value }) {
+            val dial = DIAL_SHAPE.toComposePath(size)
+            drawPath(dial, colors.surfaceContainerHigh)
+            drawPath(dial, rim, style = Stroke(3.dp.toPx()))
             val radius = size.minDimension / 2
-            drawCircle(colors.surfaceContainerHigh, radius)
-            drawCircle(if (aligned) colors.primary else colors.outlineVariant, radius - 1.dp.toPx(), style = Stroke(2.dp.toPx()))
             for (degree in 0 until 360 step 5) {
                 val major = degree % 30 == 0
-                val top = center.y - radius + 8.dp.toPx()
+                val top = center.y - radius + 24.dp.toPx()
                 rotate(degree.toFloat()) {
                     drawLine(
                         color = if (major) colors.onSurfaceVariant else colors.outlineVariant,
                         start = Offset(center.x, top),
-                        end = Offset(center.x, top + if (major) 14.dp.toPx() else 6.dp.toPx()),
+                        end = Offset(center.x, top + if (major) 12.dp.toPx() else 5.dp.toPx()),
                         strokeWidth = if (major) 2.dp.toPx() else 1.dp.toPx(),
                     )
                 }
@@ -239,9 +303,17 @@ private fun CompassDial(heading: Float, bearing: Float, aligned: Boolean, modifi
             cardinals.forEachIndexed { index, label ->
                 rotate(index * 90f) {
                     val layout = textMeasurer.measure(label, labelStyle.copy(color = if (index == 0) colors.error else colors.onSurface))
-                    drawText(layout, topLeft = Offset(center.x - layout.size.width / 2f, center.y - radius + 28.dp.toPx()))
+                    drawText(layout, topLeft = Offset(center.x - layout.size.width / 2f, center.y - radius + 42.dp.toPx()))
                 }
             }
+        }
+        // The heading stays upright in the middle while the dial turns around it.
+        if (readout != null) {
+            Text(
+                readout,
+                style = MaterialTheme.typography.displaySmallEmphasized,
+                color = if (aligned) colors.primary else colors.onSurface,
+            )
         }
         Box(
             Modifier.fillMaxSize().graphicsLayer { rotationZ = rotation.value + bearing },
@@ -249,8 +321,8 @@ private fun CompassDial(heading: Float, bearing: Float, aligned: Boolean, modifi
         ) {
             Box(
                 modifier = Modifier
-                    .padding(top = 64.dp)
-                    .size(56.dp)
+                    .padding(top = MARKER_TOP)
+                    .size(MARKER_SIZE)
                     .clip(markerShape)
                     .background(if (aligned) colors.primary else colors.secondaryContainer),
                 contentAlignment = Alignment.Center,
@@ -262,18 +334,28 @@ private fun CompassDial(heading: Float, bearing: Float, aligned: Boolean, modifi
                 )
             }
         }
-        // Fixed marker showing where the top of the phone points.
+        // Fixed marker showing where the top of the phone points, above the dial's rim.
         Canvas(Modifier.fillMaxSize()) {
             val tip = Path().apply {
-                moveTo(center.x, 0f)
-                lineTo(center.x - 10.dp.toPx(), 16.dp.toPx())
-                lineTo(center.x + 10.dp.toPx(), 16.dp.toPx())
+                moveTo(center.x, 14.dp.toPx())
+                lineTo(center.x - 9.dp.toPx(), 0f)
+                lineTo(center.x + 9.dp.toPx(), 0f)
                 close()
             }
             drawPath(tip, colors.primary)
         }
     }
 }
+
+private const val NEEDLE_DAMPING = 0.4f
+private const val TILT = 0.2f
+private const val MAX_TILT = 10f
+private const val PULSE_MILLIS = 900
+private val DIAL_INSET = 16.dp
+/** The Kaaba rides the rim itself, outside the cardinal letters, so it never sits on top of one. */
+private val MARKER_TOP = 4.dp
+private val MARKER_SIZE = 48.dp
+private val DIAL_SHAPE = MaterialShapes.Cookie12Sided
 
 @Composable
 private fun InfoCard(icon: ImageVector, title: String, body: String) {

@@ -97,7 +97,6 @@
     <string name="mark_prayed">تعليم %1$s كمُصلّاة</string>
     <string name="unmark_prayed">إلغاء تعليم %1$s</string>
     <string name="unmute_prayer">تفعيل تنبيهات %1$s</string>
-    <string name="calculated_with">مواقيت الصلاة: %1$s</string>
     <string name="permission_location_title">استخدم موقعك</string>
     <string name="permission_location_body">تُحسب مواقيت الصلاة واتجاه القبلة حسب مكانك، ويبقى موقعك على جهازك.</string>
     <string name="permission_notifications_title">فعّل تنبيهات الصلاة</string>

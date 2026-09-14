@@ -5,7 +5,21 @@ import android.content.Context
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material3.MaterialShapes
+import androidx.compose.material3.ripple
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import com.pilotothegreat.deencompanion.ui.common.rememberHaptics
+import com.pilotothegreat.deencompanion.ui.components.MorphBadge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -107,7 +121,6 @@ fun HomeScreen(
     val prayed by viewModel.prayedToday.collectAsStateWithLifecycle()
     val daysObserved by viewModel.daysObserved.collectAsStateWithLifecycle()
     val cards by viewModel.cards.collectAsStateWithLifecycle()
-    val verseOfDay by viewModel.verseOfDay.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val resources = LocalResources.current
@@ -167,21 +180,29 @@ fun HomeScreen(
                 subtitle = {
                     if (current != null) {
                         val city = current.settings.location.cityName ?: stringResource(R.string.default_location)
-                        Text("${gregorianDate(locale, current.today.date)} · $city", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        // Where the times are for, and pressed to change it: the location card at the bottom
+                        // of Today said the same thing a long scroll away.
+                        LocationChip("${gregorianDate(locale, current.today.date)} · $city", onOpenLocation)
                     }
                 },
                 actions = {
-                    // Plain text, so it lands readably in any message rather than as a picture
-                    // nobody can select from. Hidden until the times exist.
-                    content?.let { today ->
-                        IconButton(onClick = {
-                            context.startSafely(SystemIntents.shareText(shareTimes(resources, today, locale, context)))
-                        }) {
-                            Icon(Icons.Rounded.Share, contentDescription = stringResource(R.string.share))
-                        }
-                    }
-                    IconButton(onClick = onOpenQibla) {
-                        Icon(Icons.Rounded.Explore, contentDescription = stringResource(R.string.qibla_compass))
+                    // The same compass, in the same cookie, as the Qibla card further down.
+                    val qiblaPress = remember { MutableInteractionSource() }
+                    val qiblaLabel = stringResource(R.string.qibla_compass)
+                    IconButton(
+                        onClick = onOpenQibla,
+                        interactionSource = qiblaPress,
+                        modifier = Modifier.semantics { contentDescription = qiblaLabel },
+                    ) {
+                        MorphBadge(
+                            Icons.Rounded.Explore,
+                            qiblaPress,
+                            rest = MaterialShapes.Cookie7Sided,
+                            pressed = MaterialShapes.Cookie4Sided,
+                            size = 36.dp,
+                            containerColor = MaterialTheme.colorScheme.secondary,
+                            contentColor = MaterialTheme.colorScheme.onSecondary,
+                        )
                     }
                     IconButton(onClick = onOpenSettings) {
                         Icon(Icons.Rounded.Settings, contentDescription = stringResource(R.string.settings))
@@ -280,7 +301,7 @@ fun HomeScreen(
                     }
                 }
                 repairs.firstOrNull()?.let { repair ->
-                    item(key = "repair") { Box(Modifier.animateItem()) { repair() } }
+                    item(key = "repair") { Box(springItem()) { repair() } }
                 }
                 items(cards.take(MomentEngine.TODAY_CARDS - repairs.take(1).size), key = { it.id }) { moment ->
                     MomentCard(
@@ -288,7 +309,7 @@ fun HomeScreen(
                         locale = locale,
                         onOpen = moment.athkarCategory?.let { category -> { onOpenAthkar(category) } },
                         onDismiss = if (moment.dismissal == Dismissal.NONE) null else { { viewModel.dismiss(moment) } },
-                        modifier = Modifier.animateItem(),
+                        modifier = springItem(),
                         // Travel is the one thing the app suspects but never decides: it asks.
                         answer = when (moment.id) {
                             "travel-ask" -> stringResource(R.string.travel_yes) to { viewModel.setTravelling(true) }
@@ -302,44 +323,30 @@ fun HomeScreen(
                         },
                     )
                 }
-                countdown?.let { cd -> item(key = "hero") { NextPrayerHero(cd, locale, Modifier.animateItem()) } }
+                countdown?.let { cd -> item(key = "hero") { NextPrayerHero(cd, locale, springItem()) } }
                 item(key = "times") {
-                    PrayerTimesCard(
-                        schedule = current.today,
-                        nextPrayer = countdown?.next?.takeIf { it.adhan.toLocalDate() == current.today.date }?.prayer,
-                        muted = current.settings.mutedPrayers,
-                        notificationsEnabled = current.settings.notificationsEnabled,
-                        prayed = prayed,
-                        daysObserved = daysObserved,
-                        locale = locale,
-                        onToggleMute = viewModel::setMuted,
-                        onTogglePrayed = viewModel::setPrayed,
-                    )
-                }
-                athkarNow?.let { now ->
-                    item(key = "athkar") {
-                        AthkarNowCard(now.category, now.progress, locale, onOpen = { onOpenAthkar(now.category.id) })
-                    }
-                }
-                verseOfDay?.let { verse ->
-                    item(key = "verse") {
-                        VerseOfDayCard(
-                            verse = verse,
+                    Box(springItem()) {
+                        PrayerTimesCard(
+                            schedule = current.today,
+                            nextPrayer = countdown?.next?.takeIf { it.adhan.toLocalDate() == current.today.date }?.prayer,
+                            muted = current.settings.mutedPrayers,
+                            notificationsEnabled = current.settings.notificationsEnabled,
+                            prayed = prayed,
+                            daysObserved = daysObserved,
                             locale = locale,
-                            onOpen = { onOpenReader(ReaderKey(verse.page, verse.verse.surah, verse.verse.number)) },
-                            modifier = Modifier.animateItem(),
+                            onToggleMute = viewModel::setMuted,
+                            onTogglePrayed = viewModel::setPrayed,
                         )
                     }
                 }
-                item(key = "inspiration") { InspirationCard(current.inspiration, locale) }
-                item(key = "qibla") { QiblaShortcut(current.settings.location, locale, onOpenQibla) }
-                item(key = "location") {
-                    LocationCard(
-                        location = current.settings.location,
-                        methodLabel = stringResource(current.settings.effectiveMethod.labelRes),
-                        onOpen = onOpenLocation,
-                    )
+                athkarNow?.let { now ->
+                    item(key = "athkar") {
+                        Box(springItem()) {
+                            AthkarNowCard(now.category, now.progress, locale, onOpen = { onOpenAthkar(now.category.id) })
+                        }
+                    }
                 }
+                item(key = "qibla") { Box(springItem()) { QiblaShortcut(current.settings.location, locale, onOpenQibla) } }
             }
         }
     }
@@ -348,19 +355,42 @@ fun HomeScreen(
 private fun gregorianDate(locale: Locale, date: LocalDate): String =
     Formatters.pattern(if (locale.language == "ar") "EEEE، d MMMM" else "EEEE, d MMMM", locale).format(date)
 
-/** Today's times as a message: the date, the place, and one prayer per line. */
-private fun shareTimes(
-    resources: android.content.res.Resources,
-    content: HomeContent,
-    locale: java.util.Locale,
-    context: android.content.Context,
-): String = buildString {
-    appendLine(resources.getString(R.string.app_name))
-    appendLine(Formatters.date(content.today.date.atStartOfDay(content.settings.zone).toInstant().toEpochMilli(), content.settings.zone, locale))
-    content.settings.location.cityName?.let { appendLine(it) }
-    appendLine()
-    Prayer.obligatory.forEach { prayer ->
-        val time = content.today.adhan[prayer] ?: return@forEach
-        appendLine("${resources.getString(prayer.nameRes)}  ${Formatters.time(context, time.toLocalTime(), locale)}")
+/** The date and the place under the Hijri date, pressed to choose another place; its pin morphs as it is pressed. */
+@Composable
+private fun LocationChip(text: String, onClick: () -> Unit) {
+    val press = remember { MutableInteractionSource() }
+    val haptics = rememberHaptics()
+    Row(
+        Modifier
+            .clip(CircleShape)
+            .clickable(interactionSource = press, indication = ripple(), role = Role.Button) {
+                haptics.click()
+                onClick()
+            }
+            .padding(end = Spacing.medium, top = Spacing.hair, bottom = Spacing.hair),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.small),
+    ) {
+        MorphBadge(
+            Icons.Rounded.LocationOn,
+            press,
+            rest = MaterialShapes.Clover4Leaf,
+            pressed = MaterialShapes.Cookie4Sided,
+            size = 28.dp,
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        )
+        Text(text, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
+}
+
+/** Cards arrive, leave and trade places on the expressive springs rather than the list's default tween. */
+@Composable
+private fun LazyItemScope.springItem(): Modifier {
+    val motion = MaterialTheme.motionScheme
+    return Modifier.animateItem(
+        fadeInSpec = motion.defaultEffectsSpec(),
+        placementSpec = motion.defaultSpatialSpec(),
+        fadeOutSpec = motion.fastEffectsSpec(),
+    )
 }

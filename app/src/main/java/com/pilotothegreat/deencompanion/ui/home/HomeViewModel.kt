@@ -53,16 +53,12 @@ data class HomeContent(
     val settings: AppSettings,
     val today: PrayerSchedule,
     val hijri: HijrahDate?,
-    val inspiration: Inspiration,
 )
 
 data class Countdown(val next: NextPrayer, val remaining: Duration)
 
 /** The athkar that fit the time of day, with today's progress. */
 data class AthkarNow(val category: AthkarCategory, val progress: DayProgress)
-
-/** Today's ayah with its surah and the mushaf page it sits on. */
-data class VerseOfDay(val verse: Verse, val surah: Surah, val page: Int)
 
 sealed interface HomeEvent {
     data object LocationUnavailable : HomeEvent
@@ -76,7 +72,6 @@ class HomeViewModel(
     private val location: LocationRepository,
     private val athkar: AthkarRepository,
     private val moments: MomentRepository,
-    private val quran: QuranRepository,
     private val updates: UpdateChecker,
     private val prayerLog: PrayerLogRepository,
 ) : ViewModel() {
@@ -118,20 +113,7 @@ class HomeViewModel(
                 settings = s,
                 today = DaySchedule.forDate(date, s.prayerConfig),
                 hijri = HijriCalendar.date(date, s.hijriAdjustment),
-                inspiration = Inspirations.forDate(date),
             )
-        }
-        .flowOn(Dispatchers.Default)
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
-
-    /** Loaded separately so the prayer times never wait for the Quran text. */
-    val verseOfDay: StateFlow<VerseOfDay?> = content.filterNotNull()
-        .map { it.today.date }
-        .distinctUntilChanged()
-        .map { date ->
-            val ref = DailyVerse.forDate(date)
-            val book = quran.quran()
-            book.verse(ref.surah, ref.ayah)?.let { VerseOfDay(it, book.surah(ref.surah), book.pageOf(ref.surah, ref.ayah)) }
         }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)

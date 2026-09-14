@@ -10,6 +10,9 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import com.pilotothegreat.deencompanion.ui.components.MorphBadge
+import com.pilotothegreat.deencompanion.ui.components.squashOnPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -284,13 +287,16 @@ fun PrayerTimesCard(
 @Composable
 fun AthkarNowCard(category: AthkarCategory, progress: DayProgress, locale: Locale, onOpen: () -> Unit) {
     val fraction by animateFloatAsState(progress.fraction(category), MaterialTheme.motionScheme.slowSpatialSpec(), label = "athkarNow")
+    val press = remember { MutableInteractionSource() }
     Card(
         onClick = onOpen,
+        modifier = Modifier.squashOnPress(press),
         shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.tertiaryContainer,
             contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
         ),
+        interactionSource = press,
     ) {
         Row(Modifier.padding(Spacing.xlarge), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.large)) {
             Box(Modifier.size(56.dp), contentAlignment = Alignment.Center) {
@@ -323,74 +329,32 @@ fun AthkarNowCard(category: AthkarCategory, progress: DayProgress, locale: Local
     }
 }
 
-/** Today's ayah in the mushaf script; opens the mushaf at it. */
-@Composable
-fun VerseOfDayCard(verse: VerseOfDay, locale: Locale, onOpen: () -> Unit, modifier: Modifier = Modifier) {
-    Card(
-        onClick = onOpen,
-        modifier = modifier,
-        shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-    ) {
-        Column(Modifier.fillMaxWidth().padding(Spacing.xlarge), verticalArrangement = Arrangement.spacedBy(Spacing.medium)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
-                Icon(
-                    Icons.AutoMirrored.Rounded.MenuBook,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(18.dp),
-                )
-                Text(
-                    stringResource(R.string.verse_of_the_day),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.weight(1f),
-                )
-                Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null)
-            }
-            Text(
-                text = verse.verse.text,
-                fontFamily = UthmanicHafs,
-                fontSize = 24.sp,
-                lineHeight = 44.sp,
-                style = MaterialTheme.typography.bodyLarge.copy(textDirection = TextDirection.Rtl),
-                modifier = Modifier.fillMaxWidth(),
-            )
-            if (!locale.isArabic) {
-                Text(verse.verse.standaloneTranslation, style = MaterialTheme.typography.bodyLarge)
-            }
-            Text(
-                verseReference(verse.surah, verse.verse.number, locale),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.End,
-            )
-        }
-    }
-}
-
 @Composable
 fun QiblaShortcut(location: SavedLocation, locale: Locale, onOpen: () -> Unit) {
     val bearing = remember(location) { QiblaMath.bearing(location.latitude, location.longitude) }
     val distance = remember(location) { QiblaMath.distanceKm(location.latitude, location.longitude) }
+    val press = remember { MutableInteractionSource() }
     Card(
         onClick = onOpen,
+        modifier = Modifier.squashOnPress(press),
         shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
             contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         ),
+        interactionSource = press,
     ) {
         Row(Modifier.padding(Spacing.xlarge), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.large)) {
-            Surface(
-                shape = MaterialShapes.Cookie7Sided.toShape(),
-                color = MaterialTheme.colorScheme.secondary,
+            // The top bar's Qibla button is this same compass in this same cookie.
+            MorphBadge(
+                Icons.Rounded.Explore,
+                press,
+                rest = MaterialShapes.Cookie7Sided,
+                pressed = MaterialShapes.Cookie4Sided,
+                size = 56.dp,
+                containerColor = MaterialTheme.colorScheme.secondary,
                 contentColor = MaterialTheme.colorScheme.onSecondary,
-                modifier = Modifier.size(56.dp),
-            ) {
-                Box(contentAlignment = Alignment.Center) { Icon(Icons.Rounded.Explore, contentDescription = null) }
-            }
+            )
             Column(Modifier.weight(1f)) {
                 Text(stringResource(R.string.qibla_compass), style = MaterialTheme.typography.titleMedium)
                 Text(
@@ -403,68 +367,6 @@ fun QiblaShortcut(location: SavedLocation, locale: Locale, onOpen: () -> Unit) {
                 )
             }
             Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null)
-        }
-    }
-}
-
-/** Where and how prayer times are calculated; opens the location picker. */
-@Composable
-fun LocationCard(location: SavedLocation, methodLabel: String, onOpen: () -> Unit, modifier: Modifier = Modifier) {
-    Card(
-        onClick = onOpen,
-        modifier = modifier,
-        shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-    ) {
-        Row(Modifier.padding(Spacing.xlarge), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.large)) {
-            Surface(
-                shape = MaterialShapes.Clover4Leaf.toShape(),
-                color = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                modifier = Modifier.size(48.dp),
-            ) {
-                Box(contentAlignment = Alignment.Center) { Icon(Icons.Rounded.LocationOn, contentDescription = null) }
-            }
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(location.cityName ?: stringResource(R.string.default_location), style = MaterialTheme.typography.titleMedium)
-                if (!location.isDefault) Text(locationStatus(location), style = MaterialTheme.typography.bodyMedium)
-                Text(
-                    stringResource(R.string.calculated_with, methodLabel),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null)
-        }
-    }
-}
-
-@Composable
-fun InspirationCard(inspiration: Inspiration, locale: Locale) {
-    Card(
-        shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-    ) {
-        Column(Modifier.fillMaxWidth().padding(Spacing.xlarge), verticalArrangement = Arrangement.spacedBy(Spacing.medium)) {
-            Text(stringResource(R.string.daily_inspiration), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
-            Text(
-                text = inspiration.arabic,
-                fontFamily = Amiri,
-                fontSize = 24.sp,
-                lineHeight = 42.sp,
-                style = MaterialTheme.typography.bodyLarge.copy(textDirection = TextDirection.Rtl),
-                modifier = Modifier.fillMaxWidth(),
-            )
-            if (!locale.isArabic) {
-                Text(inspiration.english, style = MaterialTheme.typography.bodyLarge, fontStyle = FontStyle.Italic)
-            }
-            Text(
-                inspiration.source(locale),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.End,
-            )
         }
     }
 }
@@ -489,10 +391,17 @@ fun MomentCard(
         containerColor = MaterialTheme.colorScheme.tertiaryContainer,
         contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
     )
+    val press = remember { MutableInteractionSource() }
     val content: @Composable ColumnScope.() -> Unit = {
         Column(Modifier.fillMaxWidth().padding(Spacing.xlarge), verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Spacing.medium)) {
-                Icon(moment.kind.icon, contentDescription = null)
+                MorphBadge(
+                    moment.kind.icon,
+                    press,
+                    size = 36.dp,
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    contentColor = MaterialTheme.colorScheme.onTertiary,
+                )
                 Text(stringResource(moment.title), style = MaterialTheme.typography.titleMedium)
             }
             moment.body?.let { body ->
@@ -534,7 +443,14 @@ fun MomentCard(
     }
     swipeable {
         if (onOpen != null) {
-            Card(onClick = onOpen, modifier = modifier, shape = MaterialTheme.shapes.extraLarge, colors = colors, content = content)
+            Card(
+                onClick = onOpen,
+                modifier = modifier.squashOnPress(press),
+                shape = MaterialTheme.shapes.extraLarge,
+                colors = colors,
+                interactionSource = press,
+                content = content,
+            )
         } else {
             Card(modifier = modifier, shape = MaterialTheme.shapes.extraLarge, colors = colors, content = content)
         }

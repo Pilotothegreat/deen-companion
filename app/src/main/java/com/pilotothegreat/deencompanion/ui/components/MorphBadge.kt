@@ -17,6 +17,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -55,6 +56,23 @@ fun MorphBadge(
         Icon(icon, contentDescription = null, tint = contentColor, modifier = Modifier.size(size * 0.55f))
     }
 }
+
+/** A soft squash while pressed and a springy release, for cards that open something. */
+@Composable
+fun Modifier.squashOnPress(interactionSource: InteractionSource): Modifier {
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) PRESSED_SCALE else 1f,
+        animationSpec = MaterialTheme.motionScheme.fastSpatialSpec(),
+        label = "squash",
+    )
+    return graphicsLayer {
+        scaleX = scale
+        scaleY = scale
+    }
+}
+
+private const val PRESSED_SCALE = 0.96f
 
 /** The morph at [progress] as a path filling [size]; MaterialShapes are drawn in a unit square. */
 internal fun Morph.toComposePath(progress: Float, size: Size, into: Path = Path()): Path {
