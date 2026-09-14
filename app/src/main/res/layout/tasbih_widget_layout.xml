@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@android:id/background"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -34,7 +33,7 @@
             android:textColor="@color/widget_text_primary"
             android:textSize="32sp"
             android:textStyle="bold"
-            tools:text="33" />
+            android:text="@string/preview_tasbih_count" />
 
         <TextView
             android:id="@+id/widget_dhikr_name"
@@ -43,7 +42,7 @@
             android:textColor="@color/widget_accent"
             android:textSize="12sp"
             android:textStyle="bold"
-            tools:text="SubhanAllah" />
+            android:text="@string/tasbih_dhikr_subhanallah" />
     </LinearLayout>
 
     <LinearLayout

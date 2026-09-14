@@ -1,5 +1,6 @@
 package com.pilotothegreat.deencompanion.widget
 
+import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.floatPreferencesKey
@@ -13,12 +14,11 @@ import androidx.datastore.preferences.core.stringPreferencesKey
  * buried in the app cannot tell them apart.
  */
 data class WidgetConfig(
-    /** Follow the wallpaper's colours instead of the app's. */
+    /** Follow the wallpaper's colours (true) or Bilal's (false) instead of the app's own choice (null). */
     val dynamicColor: Boolean? = null,
     /** 0f is opaque; higher values let the wallpaper through. */
     val transparency: Float = 0f,
     val showIqama: Boolean = true,
-    val twentyFourHour: Boolean? = null,
     /** An athkar category pinned in place of the one the engine suggests. */
     val pinnedAthkar: String? = null,
 ) {
@@ -26,7 +26,6 @@ data class WidgetConfig(
         private val DYNAMIC = stringPreferencesKey("widget_dynamic")
         private val TRANSPARENCY = floatPreferencesKey("widget_transparency")
         private val SHOW_IQAMA = booleanPreferencesKey("widget_show_iqama")
-        private val HOUR_FORMAT = stringPreferencesKey("widget_hour_format")
         private val PINNED_ATHKAR = stringPreferencesKey("widget_pinned_athkar")
 
         /** Unset values fall back to the app's own settings, which is what an unconfigured widget wants. */
@@ -34,15 +33,13 @@ data class WidgetConfig(
             dynamicColor = preferences[DYNAMIC]?.toBooleanStrictOrNull(),
             transparency = preferences[TRANSPARENCY] ?: 0f,
             showIqama = preferences[SHOW_IQAMA] ?: true,
-            twentyFourHour = preferences[HOUR_FORMAT]?.toBooleanStrictOrNull(),
             pinnedAthkar = preferences[PINNED_ATHKAR],
         )
 
-        fun write(preferences: androidx.datastore.preferences.core.MutablePreferences, config: WidgetConfig) {
+        fun write(preferences: MutablePreferences, config: WidgetConfig) {
             config.dynamicColor?.let { preferences[DYNAMIC] = it.toString() } ?: preferences.remove(DYNAMIC)
             preferences[TRANSPARENCY] = config.transparency
             preferences[SHOW_IQAMA] = config.showIqama
-            config.twentyFourHour?.let { preferences[HOUR_FORMAT] = it.toString() } ?: preferences.remove(HOUR_FORMAT)
             config.pinnedAthkar?.let { preferences[PINNED_ATHKAR] = it } ?: preferences.remove(PINNED_ATHKAR)
         }
     }

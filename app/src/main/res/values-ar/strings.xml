@@ -507,13 +507,13 @@
     <string name="widget_config">الأداة</string>
     <string name="widget_config_intro">كل ما هنا اختياري، وإن تركته تبعت الأداة إعدادات التطبيق.</string>
     <string name="widget_config_colours">الألوان</string>
-    <string name="widget_config_follow_app">تبعًا للتطبيق</string>
-    <string name="widget_config_wallpaper">ألوان الخلفية</string>
-    <string name="widget_config_brand">ألوان بلال</string>
+    <string name="widget_config_follow_app">التطبيق</string>
+    <string name="widget_config_wallpaper">الخلفية</string>
+    <string name="widget_config_brand">بلال</string>
     <string name="widget_config_transparency">الشفافية</string>
     <string name="widget_config_iqama">إظهار أوقات الإقامة</string>
     <string name="widget_config_athkar">الأذكار المعروضة</string>
-    <string name="widget_config_suggested">ما يناسب الوقت</string>
+    <string name="widget_config_suggested">الآن</string>
 
     <!-- Accessibility -->
     <string name="simple_mode">الوضع المبسّط</string>
@@ -618,4 +618,12 @@
     <string name="repeat_this_ayah">كرّر هذه الآية</string>
     <string name="clear_downloaded_recitations">حذف التلاوات المحفوظة</string>
     <string name="back_to_recitation">العودة إلى موضع التلاوة</string>
+    <string name="widget_config_save_failed">تعذّر حفظ إعدادات هذه الأداة. حاول مرة أخرى.</string>
+    <string name="widget_config_percent">%1$s٪</string>
+    <string name="preview_countdown">١:٢٤:٠٥</string>
+    <string name="preview_tasbih_count">٣٣</string>
+    <string name="preview_inspiration">فَإِنَّ مَعَ الْعُسْرِ يُسْرًا</string>
+    <string name="preview_inspiration_ref">الشرح ٥</string>
+    <string name="preview_moment_title">الجمعة</string>
+    <string name="preview_moment_body">اقرأ سورة الكهف، وأكثر من الصلاة على النبي ﷺ.</string>
 </resources>

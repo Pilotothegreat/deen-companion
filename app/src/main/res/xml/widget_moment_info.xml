@@ -10,6 +10,7 @@
     android:maxResizeHeight="560dp"
     android:updatePeriodMillis="1800000"
     android:initialLayout="@layout/glance_default_loading_layout"
+    android:previewLayout="@layout/moment_widget_preview"
     android:description="@string/widget_moment_desc"
     android:resizeMode="horizontal|vertical"
     android:configure="com.pilotothegreat.deencompanion.widget.WidgetConfigActivity"

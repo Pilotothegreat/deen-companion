@@ -17,7 +17,6 @@ class WidgetConfigTest {
     @Test fun aWidgetNeverConfiguredFollowsTheApp() {
         val config = WidgetConfig.from(emptyPreferences())
         assertNull("colours follow the app's own setting", config.dynamicColor)
-        assertNull("so does the clock", config.twentyFourHour)
         assertNull("and the athkar are whatever fits now", config.pinnedAthkar)
         assertEquals("opaque", 0f, config.transparency, 0f)
         assertTrue("iqama stays visible where it fits", config.showIqama)
@@ -28,7 +27,6 @@ class WidgetConfigTest {
             dynamicColor = true,
             transparency = 0.4f,
             showIqama = false,
-            twentyFourHour = false,
             pinnedAthkar = AthkarIds.SLEEP,
         )
         val preferences = mutablePreferencesOf().apply { WidgetConfig.write(this, chosen) }

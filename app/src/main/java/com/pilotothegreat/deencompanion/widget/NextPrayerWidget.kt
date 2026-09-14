@@ -3,7 +3,6 @@ package com.pilotothegreat.deencompanion.widget
 import android.content.Context
 import android.os.SystemClock
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.ColorFilter
@@ -38,6 +37,7 @@ import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.core.prayer.DaySchedule
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
 import com.pilotothegreat.deencompanion.data.settings.AppLanguage
+import com.pilotothegreat.deencompanion.data.settings.AppSettings
 import com.pilotothegreat.deencompanion.ui.common.Formatters
 import com.pilotothegreat.deencompanion.ui.common.nameRes
 import java.time.Duration
@@ -68,13 +68,8 @@ internal data class NextPrayerState(
             val next = DaySchedule.next(now, settings.prayerConfig)
             val schedule = DaySchedule.forDate(next.adhan.toLocalDate(), settings.prayerConfig)
             val iqama = next.iqama?.takeIf { it != next.adhan }
-            // The arc fills from one prayer to the next. It advances on every redraw, and the
-            // widget is redrawn at each prayer and on unlock, so it is never far behind.
-            val today = DaySchedule.forDate(now.toLocalDate(), settings.prayerConfig)
-            val yesterday = DaySchedule.forDate(now.toLocalDate().minusDays(1), settings.prayerConfig)
-            val previous = (Prayer.obligatory.mapNotNull { today.adhan[it] } + listOfNotNull(yesterday.adhan[Prayer.ISHA]))
-                .filter { !it.isAfter(now) }
-                .maxOrNull()
+            // The bar fills from one prayer to the next; RefreshPlan redraws it through the gap.
+            val previous = previousAdhan(settings, now)
             return NextPrayerState(
                 dynamic = settings.dynamicColor,
                 prayer = next.prayer,
@@ -99,30 +94,44 @@ internal data class NextPrayerState(
     }
 }
 
+/** The last obligatory prayer's adhan at or before [now], reaching back to yesterday's Isha after midnight. */
+internal fun previousAdhan(settings: AppSettings, now: ZonedDateTime): ZonedDateTime? {
+    val today = DaySchedule.forDate(now.toLocalDate(), settings.prayerConfig)
+    val yesterday = DaySchedule.forDate(now.toLocalDate().minusDays(1), settings.prayerConfig)
+    return (Prayer.obligatory.mapNotNull { today.adhan[it] } + listOfNotNull(yesterday.adhan[Prayer.ISHA]))
+        .filter { !it.isAfter(now) }
+        .maxOrNull()
+}
+
 /**
  * The next prayer, designed like the Today card: label, name, live countdown, adhan and iqama, and
- * the prayer's shape. Larger sizes add the day's five times.
+ * the prayer's shape. With room, the day's five times.
  */
 class NextPrayerWidget : GlanceAppWidget() {
-    override val sizeMode: SizeMode = SizeMode.Responsive(setOf(COMPACT, SMALL, CARD, WIDE, FULL))
-    override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(WIDE))
+    // Laid out for the size it is given, not the nearest of a few declared sizes: a One UI stack
+    // gives less height than any bucket, and the bucket's layout was cropped from the bottom.
+    override val sizeMode: SizeMode = SizeMode.Exact
+    override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(WidgetKind.NEXT_PRAYER.previewSize))
 
-    override suspend fun provideGlance(context: Context, id: GlanceId) = show(context, configOf(context, id))
+    override suspend fun provideGlance(context: Context, id: GlanceId) = provideContent(loadNextPrayer(context, configOf(context, id)))
 
-    override suspend fun providePreview(context: Context, widgetCategory: Int) = show(context, WidgetConfig())
-
-    private suspend fun show(context: Context, config: WidgetConfig): Nothing {
-        val state = NextPrayerState.load(context)
-        provideContent { BilalWidgetTheme(config.dynamicColor ?: state.dynamic) { NextPrayerContent(state, config) } }
-    }
+    override suspend fun providePreview(context: Context, widgetCategory: Int) = provideContent(loadNextPrayer(context, WidgetConfig()))
 
     internal companion object {
-        val COMPACT = DpSize(100.dp, 48.dp)
-        val SMALL = DpSize(120.dp, 100.dp)
-        val CARD = DpSize(130.dp, 140.dp)
-        val WIDE = DpSize(200.dp, 140.dp)
-        val FULL = DpSize(250.dp, 200.dp)
+        /** Too short for the card, from this width the name and the countdown share one line; narrower, the name goes above. */
+        val ONE_LINE_FROM = 180.dp
+
+        /** From this width the prayer's shape sits beside the countdown. */
+        val BADGE_FROM = 150.dp
+
+        /** From this width the day's five times fit in a strip. */
+        val STRIP_FROM = 220.dp
     }
+}
+
+internal suspend fun loadNextPrayer(context: Context, config: WidgetConfig): @Composable () -> Unit {
+    val state = NextPrayerState.load(context)
+    return { BilalWidgetTheme(config.dynamicColor ?: state.dynamic) { NextPrayerContent(state, config) } }
 }
 
 @Composable
@@ -132,37 +141,43 @@ internal fun NextPrayerContent(state: NextPrayerState, config: WidgetConfig = Wi
     val content = colors.onPrimaryContainer
     val open = GlanceModifier.clickable(actionStartActivity(WidgetUpdater.openApp(LocalContext.current)))
     WidgetSurface(colors.primaryContainer, open, transparency = config.transparency) {
-        when {
-            size.height < NextPrayerWidget.SMALL.height -> Row(
-                modifier = GlanceModifier.fillMaxSize(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(state.name, GlanceModifier.defaultWeight(), textStyle(content, 17.sp, FontWeight.Bold), maxLines = 1)
-                Countdown(state.countdownTarget, 20f, state.dynamic)
+        val budget = rememberBudget()
+        val roomy = budget.left >= 150.dp
+        val nameSp = if (roomy) 20f else 18f
+        val countdownSp = if (roomy) 30f else 24f
+        // The name, the countdown and the bar make the card; when even those three do not fit, a one-line form.
+        val essentials = budget.line(nameSp) + budget.line(countdownSp) + WidgetBar
+        if (budget.left < essentials && size.width >= NextPrayerWidget.ONE_LINE_FROM) {
+            // The name inside the chronometer's own text: side by side, the countdown's view took the whole row
+            // and the name was squeezed to nothing. One line of text shares one baseline and cannot lose half.
+            Column(GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
+                Countdown(state.countdownTarget, 20f, state.dynamic, format = "${state.name.replace("%", "%%")}  %s")
             }
-            size.height < NextPrayerWidget.CARD.height -> Column(
-                modifier = GlanceModifier.fillMaxSize(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(state.name, style = textStyle(content, 18.sp, FontWeight.Bold), maxLines = 1)
-                Countdown(state.countdownTarget, 24f, state.dynamic)
-                Text(state.adhan, style = textStyle(content, 12.sp), maxLines = 1)
-                Spacer(GlanceModifier.height(6.dp))
-                LinearProgressIndicator(
-                    progress = state.elapsed,
-                    modifier = GlanceModifier.fillMaxWidth(),
-                    color = colors.primary,
-                    backgroundColor = colors.surfaceVariant,
-                )
+        } else if (budget.left < essentials) {
+            // Too narrow for "Maghrib 2:59:59" on a line: the name small above a countdown as large as the height allows.
+            val showName = budget.takeLine(11f)
+            val fontScale = LocalContext.current.resources.configuration.fontScale
+            val countdownSp = (budget.left.value / (COUNTDOWN_LINE * fontScale)).coerceIn(12f, 20f)
+            Column(GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
+                if (showName) Text(state.name, style = textStyle(content, 11.sp, FontWeight.Bold), maxLines = 1)
+                Countdown(state.countdownTarget, countdownSp, state.dynamic)
             }
-            else -> Column(GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
+        } else {
+            // The card's three essentials, then the rest, most useful first, while it fits.
+            budget.spend(essentials)
+            val showAdhan = budget.takeLine(12f)
+            val showStrip = size.width >= NextPrayerWidget.STRIP_FROM &&
+                budget.take(STRIP_GAP + budget.line(11f) + budget.line(13f) + CELL_PADDING)
+            val showIqama = config.showIqama && state.iqama != null && budget.takeLine(12f)
+            val showLabel = budget.takeLine(11f)
+            Column(GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
                 Row(GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Column(GlanceModifier.defaultWeight()) {
-                        Text(state.label, style = textStyle(content, 11.sp, FontWeight.Medium), maxLines = 1)
-                        Text(state.name, style = textStyle(content, 20.sp, FontWeight.Bold), maxLines = 1)
-                        Countdown(state.countdownTarget, if (size.width >= NextPrayerWidget.WIDE.width) 30f else 26f, state.dynamic)
-                        Text(state.adhan, style = textStyle(content, 12.sp), maxLines = 1)
-                        if (config.showIqama) state.iqama?.let { Text(it, style = textStyle(content, 12.sp), maxLines = 1) }
+                        if (showLabel) Text(state.label, style = textStyle(content, 11.sp, FontWeight.Medium), maxLines = 1)
+                        Text(state.name, style = textStyle(content, nameSp.sp, FontWeight.Bold), maxLines = 1)
+                        Countdown(state.countdownTarget, countdownSp, state.dynamic)
+                        if (showAdhan) Text(state.adhan, style = textStyle(content, 12.sp), maxLines = 1)
+                        if (showIqama) Text(state.iqama, style = textStyle(content, 12.sp), maxLines = 1)
                         Spacer(GlanceModifier.height(6.dp))
                         LinearProgressIndicator(
                             progress = state.elapsed,
@@ -171,16 +186,14 @@ internal fun NextPrayerContent(state: NextPrayerState, config: WidgetConfig = Wi
                             backgroundColor = colors.surfaceVariant,
                         )
                     }
-                    // Each prayer has its own shape, and it changes as the day moves — the same
-                    // language as the Today card, drawn as a bitmap so it looks identical on One UI,
-                    // Pixel and everything else.
-                    if (size.width >= NextPrayerWidget.CARD.width) {
+                    // Each prayer has its own shape, the same language as the Today card.
+                    if (size.width >= NextPrayerWidget.BADGE_FROM) {
                         Spacer(GlanceModifier.width(8.dp))
-                        PrayerBadge(state.prayer, if (size.width >= NextPrayerWidget.WIDE.width) 64.dp else 44.dp)
+                        PrayerBadge(state.prayer, if (roomy && size.width >= 200.dp) 56.dp else 44.dp)
                     }
                 }
-                if (size.height >= NextPrayerWidget.FULL.height && size.width >= NextPrayerWidget.FULL.width) {
-                    Spacer(GlanceModifier.height(12.dp))
+                if (showStrip) {
+                    Spacer(GlanceModifier.height(STRIP_GAP))
                     TimeStrip(state.day, content)
                 }
             }
@@ -201,7 +214,7 @@ private fun TimeStrip(cells: List<TimeCell>, content: ColorProvider) {
             }
             val color = if (cell.isNext) colors.onPrimary else content
             Column(
-                modifier = GlanceModifier.defaultWeight().then(pill).padding(vertical = 5.dp),
+                modifier = GlanceModifier.defaultWeight().then(pill).padding(vertical = CELL_PADDING / 2),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(cell.name, style = textStyle(color, 11.sp, align = TextAlign.Center), maxLines = 1)
@@ -210,3 +223,9 @@ private fun TimeStrip(cells: List<TimeCell>, content: ColorProvider) {
         }
     }
 }
+
+private val STRIP_GAP = 10.dp
+
+/** The countdown's line height to its size; it has no font padding, so barely taller than the text. */
+private const val COUNTDOWN_LINE = 1.17f
+private val CELL_PADDING = 10.dp

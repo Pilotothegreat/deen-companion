@@ -60,15 +60,19 @@ class MomentWidgetProvider : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = MomentWidget()
 }
 
-/** Redraws the widgets when the next prayer arrives or the day changes. */
+/** Redraws the widgets: all of them at a prayer or midnight, and only the next-prayer bar in between. */
 class WidgetRefreshReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action == WidgetUpdater.ACTION_REFRESH) launchAsync { WidgetUpdater.updateAll(context) }
+        if (intent.action != WidgetUpdater.ACTION_REFRESH) return
+        // An alarm booked before this extra existed meant everything.
+        val everything = intent.getBooleanExtra(WidgetUpdater.EXTRA_EVERYTHING, true)
+        launchAsync { if (everything) WidgetUpdater.updateAll(context) else WidgetUpdater.moveTheBar(context) }
     }
 }
 
 object WidgetUpdater {
     internal const val ACTION_REFRESH = "com.pilotothegreat.deencompanion.widget.ACTION_REFRESH"
+    internal const val EXTRA_EVERYTHING = "everything"
 
     private val receivers = listOf(
         PrayerWidgetProvider::class,
@@ -82,14 +86,16 @@ object WidgetUpdater {
 
     /** Re-renders every placed widget (widgets that aren't on the home screen are skipped) and sets the next redraw. */
     suspend fun updateAll(context: Context) {
-        listOf(
-            NextPrayerWidget(), PrayerTimesWidget(), VerseWidget(), InspirationWidget(),
-            AthkarWidget(), TasbihWidget(), MomentWidget(),
-        )
-            .forEach { widget ->
-                runCatching { widget.updateAll(context) }
-                    .onFailure { Timber.w(it, "%s update failed", widget.javaClass.simpleName) }
-            }
+        WidgetKind.entries.map { it.widget() }.forEach { widget ->
+            runCatching { widget.updateAll(context) }
+                .onFailure { Timber.w(it, "%s update failed", widget.javaClass.simpleName) }
+        }
+        runCatching { scheduleRefresh(context) }.onFailure { Timber.w(it, "Couldn't schedule the widget refresh") }
+    }
+
+    /** Redraws only the next-prayer widget, whose bar is the one thing that moves between prayers, and books the next step. */
+    internal suspend fun moveTheBar(context: Context) {
+        runCatching { NextPrayerWidget().updateAll(context) }.onFailure { Timber.w(it, "NextPrayerWidget update failed") }
         runCatching { scheduleRefresh(context) }.onFailure { Timber.w(it, "Couldn't schedule the widget refresh") }
     }
 
@@ -100,23 +106,24 @@ object WidgetUpdater {
         receivers.forEach { receiver -> runCatching { manager.setWidgetPreviews(receiver) } }
     }
 
-    /**
-     * Wakes the widgets at the next prayer (the countdown and the suggested athkar move on) or at
-     * midnight (the daily verse, hadith and table), whichever comes first. A non-waking alarm is enough.
-     */
+    /** Books the next redraw with [RefreshPlan]. A non-waking alarm: nobody needs a bar moved in a pocket. */
     private suspend fun scheduleRefresh(context: Context) {
         val settings = WidgetDeps.settings.current()
         val now = ZonedDateTime.now(settings.zone)
-        val nextPrayer = DaySchedule.next(now, settings.prayerConfig).adhan
-        val midnight = now.toLocalDate().plusDays(1).atStartOfDay(settings.zone)
-        val at = minOf(nextPrayer, midnight).toInstant().toEpochMilli() + 1_000
-        context.getSystemService(AlarmManager::class.java)?.set(AlarmManager.RTC, at, refreshIntent(context))
+        val refresh = RefreshPlan.next(
+            now = now,
+            previousPrayer = previousAdhan(settings, now),
+            nextPrayer = DaySchedule.next(now, settings.prayerConfig).adhan,
+            midnight = now.toLocalDate().plusDays(1).atStartOfDay(settings.zone),
+        )
+        context.getSystemService(AlarmManager::class.java)
+            ?.set(AlarmManager.RTC, refresh.at.toInstant().toEpochMilli(), refreshIntent(context, refresh.everything))
     }
 
-    private fun refreshIntent(context: Context): PendingIntent = PendingIntent.getBroadcast(
+    private fun refreshIntent(context: Context, everything: Boolean): PendingIntent = PendingIntent.getBroadcast(
         context,
         2002,
-        Intent(context, WidgetRefreshReceiver::class.java).setAction(ACTION_REFRESH),
+        Intent(context, WidgetRefreshReceiver::class.java).setAction(ACTION_REFRESH).putExtra(EXTRA_EVERYTHING, everything),
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
 

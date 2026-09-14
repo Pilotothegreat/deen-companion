@@ -475,13 +475,13 @@
     <string name="widget_config">Widget</string>
     <string name="widget_config_intro">Everything here is optional. Left alone, the widget follows the app\'s own settings.</string>
     <string name="widget_config_colours">Colours</string>
-    <string name="widget_config_follow_app">Follow the app</string>
+    <string name="widget_config_follow_app">App</string>
     <string name="widget_config_wallpaper">Wallpaper</string>
     <string name="widget_config_brand">Bilal</string>
     <string name="widget_config_transparency">Transparency</string>
     <string name="widget_config_iqama">Show iqama times</string>
     <string name="widget_config_athkar">Athkar to show</string>
-    <string name="widget_config_suggested">Whatever fits now</string>
+    <string name="widget_config_suggested">Now</string>
 
     <!-- Accessibility -->
     <string name="simple_mode">Simple mode</string>
@@ -582,4 +582,12 @@ And the app remembers. Every "Prayed" you have ever tapped was recorded and show
     <string name="repeat_this_ayah">Repeat this ayah</string>
     <string name="clear_downloaded_recitations">Clear downloaded recitations</string>
     <string name="back_to_recitation">Back to the recitation</string>
+    <string name="widget_config_save_failed">Couldn\'t save this widget\'s settings. Try again.</string>
+    <string name="widget_config_percent">%1$s%%</string>
+    <string name="preview_countdown">1:24:05</string>
+    <string name="preview_tasbih_count">33</string>
+    <string name="preview_inspiration">Verily, with hardship comes ease.</string>
+    <string name="preview_inspiration_ref">Ash-Sharh 94:6</string>
+    <string name="preview_moment_title">Friday</string>
+    <string name="preview_moment_body">Read Surat al-Kahf, and send many blessings on the Prophet ﷺ.</string>
 </resources>
