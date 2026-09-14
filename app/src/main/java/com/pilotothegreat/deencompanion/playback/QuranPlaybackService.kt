@@ -46,7 +46,7 @@ class QuranPlaybackService : MediaSessionService() {
             .setAllowCrossProtocolRedirects(true)
         // Ayahs never change, so anything already on disk is played from there and never fetched again.
         val dataSource = CacheDataSource.Factory()
-            .setCache(AudioCache.get(this, AudioCache.budgetBytes))
+            .setCache(AudioCache.get(this, AudioCache.BUDGET_BYTES))
             .setUpstreamDataSourceFactory(http)
             .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
         val player = ExoPlayer.Builder(this)

@@ -40,12 +40,6 @@
     <string name="channel_khatma">الختمة</string>
     <string name="channel_khatma_desc">تذكير هادئ في الأيام التي تتأخر فيها عن خطتك</string>
     <string name="done">تم</string>
-    <string name="megabytes">%1$s م.ب</string>
-    <string name="audio_cache">التلاوة المحفوظة</string>
-    <string name="audio_cache_desc">حتى %1$s م.ب · المستخدم %2$s</string>
-    <string name="audio_cache_explainer">الآيات التي استمعت إليها تبقى على الجهاز وتعمل دون اتصال.</string>
-    <string name="audio_cache_used">المستخدم حاليًا %1$s</string>
-    <string name="audio_cache_clear">مسح</string>
     <!-- Khatma -->
     <string name="khatma">الختمة</string>
     <string name="khatma_start">ابدأ ختمة</string>
@@ -339,11 +333,10 @@
     <string name="adhan_sound">صوت الأذان</string>
     <string name="appearance">المظهر</string>
     <string name="theme">السمة</string>
-    <string name="theme_wallpaper">استخدام ألوان الخلفية</string>
-    <string name="theme_wallpaper_desc">يأخذ التطبيق ألوانه من الصورة خلفه</string>
-    <string name="theme_pure_black">أسود خالص ليلاً</string>
-    <string name="theme_pure_black_desc">أسود بدل الرمادي الداكن، وشاشة OLED تُبقيه مطفأً</string>
-    <string name="theme_system">النظام</string>
+    <string name="theme_wallpaper">ألوان خلفيتك</string>
+    <string name="theme_bilal">ألوان بلال</string>
+    <string name="theme_pure_black">OLED</string>
+    <string name="theme_system">تلقائي</string>
     <string name="theme_light">فاتح</string>
     <string name="theme_dark">داكن</string>
     <string name="language">اللغة</string>
@@ -454,7 +447,6 @@
     <string name="travel_driving">هل أنت على الطريق؟</string>
     <string name="travel_driving_body">فعّل هذا ويبقى العرض مختصرًا حتى تتوقف.</string>
     <string name="travel_end">عدت إلى بلدي</string>
-    <string name="smart_features">الاقتراحات الذكية</string>
 
     <!-- Natural events -->
     <string name="eclipse_solar">كسوف الشمس</string>
@@ -464,14 +456,6 @@
     <string name="eclipse_lunar_elsewhere_body">القمر تحت الأفق عندك وقت الخسوف، فلا يُرى من مكانك، والصلاة تتبع الرؤية.</string>
     <string name="quake_title">زلزال قريب</string>
     <string name="quake_body">على بُعد نحو %1$s كم. اذكر دعاء الخوف والكرب، وتصدّق على المتضررين.</string>
-    <string name="calamity_title">أوقات النوازل</string>
-    <string name="calamity_body">قنوت النازلة في صلاتك، ودعاء للمستضعفين والمنكوبين، وصدقة. ويمكنك إطفاؤه من الإعدادات متى شئت.</string>
-    <string name="calamity_mode">أوقات النوازل</string>
-    <string name="calamity_mode_on">مفعّل حتى %1$s</string>
-    <string name="calamity_mode_off">قنوت النازلة، ودعاء للمنكوبين، وتذكير بالصدقة</string>
-    <string name="calamity_for_week">لمدة أسبوع</string>
-    <string name="calamity_for_month">لمدة شهر</string>
-    <string name="calamity_turn_off">إيقاف</string>
 
     <!-- Alarms -->
     <string name="pre_prayer_title">اقترب وقت %1$s</string>
@@ -500,6 +484,7 @@
     <string name="silence_during_prayer">كتم الصوت أثناء الصلاة</string>
     <string name="silence_during_prayer_desc">يُسكت هاتفك من الإقامة ثم يعيده، والمنبهات تبقى تعمل.</string>
     <string name="silence_needs_permission">يحتاج إذن وضع عدم الإزعاج</string>
+    <string name="silence_grant">السماح</string>
     <string name="pre_reminder">تذكير قبل الأذان</string>
     <string name="pre_reminder_off">معطّل</string>
     <string name="widget_moment">الآن</string>
@@ -598,7 +583,6 @@
     <string name="reliability_summary_ok">كل ما يحتاجه هاتفك لإيصالها مهيّأ</string>
     <string name="reliability_summary_problem">هناك ما يؤخّر تنبيهاتك أو يكتمها في هذا الهاتف</string>
     <string name="reading">القراءة</string>
-    <string name="smart_features_desc">يعرض دعاء المطر أو الريح، وليلة رمضان التي أنت فيها، وسورة الكهف يوم الجمعة، وأذكار السفر حين تكون بعيدًا عن منزلك</string>
     <string name="credits">المصادر</string>
     <string name="credits_desc">%1$s · %2$s، ترجمة %3$s</string>
     <string name="text_scale_default">الافتراضي</string>

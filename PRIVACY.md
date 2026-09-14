@@ -19,13 +19,13 @@ The app works offline for prayer times, city search, the Quran text, athkar, the
 | Feature | Service | When | What the service receives |
 | --- | --- | --- | --- |
 | City name | Android's system geocoder | After a location is found. Without it, the name comes from the city list bundled with the app | Your coordinates, handled by your device's geocoding provider |
-| Weather | api.open-meteo.com | While the app is open, at most once an hour, when "React to the day and the weather" is on in Settings (it is on by default), and never while battery saver is on | **Your approximate location**, rounded to two decimal places — about a kilometre — and your IP address. No account, no key, and nothing identifying you |
-| Nearby earthquakes | earthquake.usgs.gov | While the app is open, at most once an hour, under the same setting, and never while battery saver is on | Your IP address. The feed is the same worldwide list for everyone; the filtering by distance happens on your device, so the service is never told where you are |
+| Weather | api.open-meteo.com | While the app is open, at most once an hour, and never while battery saver is on | **Your approximate location**, rounded to two decimal places — about a kilometre — and your IP address. No account, no key, and nothing identifying you |
+| Nearby earthquakes | earthquake.usgs.gov | While the app is open, at most once an hour, and never while battery saver is on | Your IP address. The feed is the same worldwide list for everyone; the filtering by distance happens on your device, so the service is never told where you are |
 | Quran recitation | everyayah.com | When you play a recitation | Your IP address and the ayah requested |
 | Full hadith collections | cdn.jsdelivr.net | Only when you tap Download | Your IP address |
 | Update check | api.github.com (sideloaded installs) or Google Play (Play Store installs) | At most once a day, or when you tap the version in Settings | Your IP address |
 
-Weather is the only feature that sends anything about where you are. The coordinates are blunted to about a kilometre before they leave the device, which is enough to know whether it is raining over you and not enough to place a house. Turning "React to the day and the weather" off in Settings stops the request entirely, and the rest of the app carries on working.
+Weather is the only feature that sends anything about where you are. The coordinates are blunted to about a kilometre before they leave the device, which is enough to know whether it is raining over you and not enough to place a house. Under battery saver the request is not made at all, and the rest of the app carries on without it.
 
 **1.9.0 removed the internet location fallback.** It was the one feature that sent your IP address to a third party — ipapi.co and freeipapi.com — for an approximate city that the device's own location and the offline city list bundled with the app already provide. It is gone, along with those two hosts, rather than hidden behind a switch that nobody reads.
 
@@ -43,7 +43,7 @@ No personal information beyond what any web request carries (such as your IP add
 | Notifications | Alert you at adhan and iqama times. |
 | Alarms and reminders (`SCHEDULE_EXACT_ALARM`) | Deliver notifications on time. You grant it in system settings; without it, alerts may be a few minutes late. |
 | Run at startup (`RECEIVE_BOOT_COMPLETED`) | Reschedule prayer alerts after the device restarts. |
-| Internet | The optional features in the table above. |
+| Internet | The features in the table above. |
 | Install packages (`REQUEST_INSTALL_PACKAGES`) | Only in the version downloaded from GitHub, so it can install its own update after checking it against the published checksum. The Google Play version does not have this permission at all. |
 | Do Not Disturb access | Only if you turn on "silence during prayer". The app asks at that moment and never otherwise. |
 | Foreground media playback | Keep recitation playing with media controls when the app is in the background. |

@@ -6,6 +6,7 @@ import android.text.format.DateFormat
 import androidx.annotation.StringRes
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -75,6 +76,9 @@ import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material.icons.rounded.WbTwilight
 import androidx.compose.material.icons.rounded.VolumeUp
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -145,6 +149,7 @@ import com.pilotothegreat.deencompanion.ui.common.nameRes
 import com.pilotothegreat.deencompanion.ui.common.startSafely
 import com.pilotothegreat.deencompanion.ui.components.ChoiceDialog
 import com.pilotothegreat.deencompanion.ui.components.ConnectedChoice
+import com.pilotothegreat.deencompanion.ui.components.MorphBadge
 import com.pilotothegreat.deencompanion.ui.components.SectionHeader
 import com.pilotothegreat.deencompanion.ui.location.locationStatus
 import com.pilotothegreat.deencompanion.ui.theme.Amiri
@@ -165,8 +170,6 @@ private sealed interface SettingsDialog {
     data object HighLatitude : SettingsDialog
     data object FineTune : SettingsDialog
     data object ReciterChoice : SettingsDialog
-    data object AudioCache : SettingsDialog
-    data object Calamity : SettingsDialog
     data object Reset : SettingsDialog
     data class Iqama(val prayer: Prayer) : SettingsDialog
 }
@@ -183,9 +186,6 @@ fun SettingsScreen(
     val s = live ?: settings
     val updateState by viewModel.updateState.collectAsStateWithLifecycle()
     val credits by viewModel.quranCredits.collectAsStateWithLifecycle()
-    val cacheBytes by viewModel.audioCacheBytes.collectAsStateWithLifecycle()
-    val cacheSummary = remember(cacheBytes) { Formatters.megabytes(cacheBytes) }
-    LaunchedEffect(Unit) { viewModel.refreshAudioCacheSize() }
 
     // Storage Access Framework, so the file lands wherever the reader keeps things and the app never
     // asks for a storage permission it would otherwise have no use for.
@@ -225,8 +225,11 @@ fun SettingsScreen(
     }
     val install by viewModel.install.collectAsStateWithLifecycle()
     var exactAllowed by remember { mutableStateOf(viewModel.canScheduleExactAlarms()) }
+    // Both are granted in Android's own settings, so both are read again on the way back from there.
+    var silenceAllowed by remember { mutableStateOf(QuietDuringPrayer.isAllowed(context)) }
     LifecycleResumeEffect(Unit) {
         exactAllowed = viewModel.canScheduleExactAlarms()
+        silenceAllowed = QuietDuringPrayer.isAllowed(context)
         onPauseOrDispose { }
     }
     val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
@@ -356,28 +359,34 @@ fun SettingsScreen(
                         }
                     }
                     add { shapes ->
-                        val allowed = QuietDuringPrayer.isAllowed(context)
                         ContentRow(shapes, Icons.Rounded.DoNotDisturbOn, stringResource(R.string.silence_during_prayer)) {
                             Column(verticalArrangement = Arrangement.spacedBy(Spacing.hair)) {
                                 Text(
-                                    if (allowed) stringResource(R.string.silence_during_prayer_desc)
+                                    if (silenceAllowed) stringResource(R.string.silence_during_prayer_desc)
                                     else stringResource(R.string.silence_needs_permission),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
-                                ConnectedChoice(
-                                    options = Defaults.SILENCE_CHOICES,
-                                    selected = s.sounds.silenceMinutes,
-                                    onSelect = { minutes ->
-                                        if (minutes > 0 && !allowed) context.startSafely(SystemIntents.doNotDisturbAccess())
-                                        else viewModel.setSilenceMinutes(minutes)
-                                    },
-                                    label = {
-                                        if (it == 0) stringResource(R.string.pre_reminder_off)
-                                        else pluralStringResource(R.plurals.minutes, it, Formatters.number(it, locale))
-                                    },
-                                    modifier = Modifier.padding(top = Spacing.small),
-                                )
+                                if (silenceAllowed) {
+                                    ConnectedChoice(
+                                        options = Defaults.SILENCE_CHOICES,
+                                        selected = s.sounds.silenceMinutes,
+                                        onSelect = viewModel::setSilenceMinutes,
+                                        label = {
+                                            if (it == 0) stringResource(R.string.pre_reminder_off)
+                                            else pluralStringResource(R.plurals.minutes, it, Formatters.number(it, locale))
+                                        },
+                                        modifier = Modifier.padding(top = Spacing.small),
+                                    )
+                                } else {
+                                    // Durations it could not honour were offered here, and choosing one threw the reader
+                                    // into Android's settings without a word. Now the row says what it needs and asks.
+                                    FilledTonalButton(
+                                        onClick = { context.startSafely(SystemIntents.doNotDisturbAccess()) },
+                                        shapes = ButtonDefaults.shapes(),
+                                        modifier = Modifier.padding(top = Spacing.small),
+                                    ) { Text(stringResource(R.string.silence_grant)) }
+                                }
                             }
                         }
                     }
@@ -407,29 +416,6 @@ fun SettingsScreen(
                                 dialog = SettingsDialog.ReciterChoice
                             }
                         },
-                        { shapes ->
-                            NavRow(
-                                shapes, Icons.Rounded.CloudDownload, stringResource(R.string.audio_cache),
-                                stringResource(R.string.audio_cache_desc, Formatters.number(s.quran.audioCacheMb, locale), cacheSummary),
-                            ) { dialog = SettingsDialog.AudioCache }
-                        },
-                        { shapes ->
-                            SwitchRow(
-                                shapes, Icons.Rounded.AutoAwesome, stringResource(R.string.smart_features),
-                                stringResource(R.string.smart_features_desc), s.smart.reactToTheWorld,
-                                viewModel::setReactToTheWorld,
-                            )
-                        },
-                        { shapes ->
-                            NavRow(
-                                shapes, Icons.Rounded.VolunteerActivism, stringResource(R.string.calamity_mode),
-                                if (s.smart.calamityActive(System.currentTimeMillis())) {
-                                    stringResource(R.string.calamity_mode_on, Formatters.date(s.smart.calamityUntil, s.zone, locale))
-                                } else {
-                                    stringResource(R.string.calamity_mode_off)
-                                },
-                            ) { dialog = SettingsDialog.Calamity }
-                        },
                     ),
                 )
             }
@@ -438,33 +424,16 @@ fun SettingsScreen(
                 SettingsGroup(
                     stringResource(R.string.appearance),
                     listOf(
+                        // The theme, the wallpaper's colours and OLED black in one picker. 1.9.0 folded two of
+                        // them out of existence, and 2.0 brought them back as switches beside a row.
                         { shapes ->
-                            ContentRow(shapes, Icons.Rounded.Palette, stringResource(R.string.theme)) {
-                                ConnectedChoice(
-                                    options = ThemeMode.entries,
-                                    selected = s.themeMode,
-                                    onSelect = viewModel::setThemeMode,
-                                    label = { stringResource(it.labelRes) },
-                                    modifier = Modifier.padding(top = Spacing.small),
+                            Surface(shape = shapes.shape, color = MaterialTheme.colorScheme.surfaceContainer) {
+                                ThemePicker(
+                                    state = ThemeState(s.themeMode, s.dynamicColor, s.pureBlack),
+                                    onTheme = viewModel::setTheme,
+                                    onPureBlack = viewModel::setPureBlack,
                                 )
                             }
-                        },
-                        // 1.9.0 said these two were folded into the Theme row and folded them out
-                        // of existence instead: nothing could set either, so the app was stuck on
-                        // its defaults with no way back.
-                        { shapes ->
-                            SwitchRow(
-                                shapes, Icons.Rounded.ColorLens, stringResource(R.string.theme_wallpaper),
-                                stringResource(R.string.theme_wallpaper_desc), s.dynamicColor,
-                                viewModel::setDynamicColor,
-                            )
-                        },
-                        { shapes ->
-                            SwitchRow(
-                                shapes, Icons.Rounded.DarkMode, stringResource(R.string.theme_pure_black),
-                                stringResource(R.string.theme_pure_black_desc), s.pureBlack,
-                                viewModel::setPureBlack,
-                            )
                         },
                         { shapes ->
                             ContentRow(shapes, Icons.Rounded.Language, stringResource(R.string.language)) {
@@ -647,21 +616,6 @@ fun SettingsScreen(
             },
             dismissButton = { TextButton(onClick = { dialog = null }) { Text(stringResource(R.string.cancel)) } },
         )
-        SettingsDialog.Calamity -> CalamityDialog(
-            active = s.smart.calamityActive(System.currentTimeMillis()),
-            onChoose = { days ->
-                viewModel.setCalamityDays(days)
-                dialog = null
-            },
-            onDismiss = { dialog = null },
-        )
-        SettingsDialog.AudioCache -> AudioCacheDialog(
-            currentMb = s.quran.audioCacheMb,
-            usedBytes = cacheBytes,
-            onSelect = viewModel::setAudioCacheMb,
-            onClear = viewModel::clearAudioCache,
-            onDismiss = { dialog = null },
-        )
         is SettingsDialog.Iqama -> IqamaDialog(
             prayer = current.prayer,
             current = s.iqama.getValue(current.prayer),
@@ -756,12 +710,14 @@ private fun NavRow(
     trailing: (@Composable () -> Unit)? = null,
     onClick: () -> Unit,
 ) {
+    val interaction = remember { MutableInteractionSource() }
     SegmentedListItem(
         onClick = onClick,
         shapes = shapes,
-        leadingContent = { Icon(icon, contentDescription = null) },
+        leadingContent = { MorphBadge(icon, interaction) },
         supportingContent = summary?.let { { Text(it) } },
         trailingContent = trailing,
+        interactionSource = interaction,
     ) { Text(title) }
 }
 
@@ -774,21 +730,32 @@ private fun SwitchRow(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
 ) {
+    val interaction = remember { MutableInteractionSource() }
     SegmentedListItem(
         checked = checked,
         onCheckedChange = onCheckedChange,
         shapes = shapes,
-        leadingContent = { Icon(icon, contentDescription = null) },
+        // A row that is on fills with the badge's usual colour, so its badge takes the primary one.
+        leadingContent = {
+            MorphBadge(
+                icon,
+                interaction,
+                containerColor = if (checked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = if (checked) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer,
+            )
+        },
         supportingContent = { Text(summary) },
         trailingContent = { Switch(checked = checked, onCheckedChange = null) },
+        interactionSource = interaction,
     ) { Text(title) }
 }
 
 @Composable
 private fun ContentRow(shapes: ListItemShapes, icon: ImageVector, title: String, content: @Composable () -> Unit) {
+    val interaction = remember { MutableInteractionSource() }
     SegmentedListItem(
         shapes = shapes,
-        leadingContent = { Icon(icon, contentDescription = null) },
+        leadingContent = { MorphBadge(icon, interaction) },
         supportingContent = content,
     ) { Text(title) }
 }
@@ -954,80 +921,6 @@ private fun languageLabel(tag: String): String = when (tag) {
     AppLanguage.SYSTEM -> stringResource(R.string.language_system)
     "en" -> stringResource(R.string.language_english)
     else -> stringResource(R.string.language_arabic)
-}
-
-private val ThemeMode.labelRes: Int
-    get() = when (this) {
-        ThemeMode.SYSTEM -> R.string.theme_system
-        ThemeMode.LIGHT -> R.string.theme_light
-        ThemeMode.DARK -> R.string.theme_dark
-    }
-
-/** How much of the phone recitation may use, and a way to hand it back. */
-@Composable
-private fun AudioCacheDialog(
-    currentMb: Int,
-    usedBytes: Long,
-    onSelect: (Int) -> Unit,
-    onClear: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    val locale = currentLocale()
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.audio_cache)) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(Spacing.medium)) {
-                Text(stringResource(R.string.audio_cache_explainer))
-                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
-                    AUDIO_CACHE_CHOICES.forEach { mb ->
-                        FilterChip(
-                            selected = mb == currentMb,
-                            onClick = { onSelect(mb) },
-                            label = { Text(stringResource(R.string.megabytes, Formatters.number(mb, locale))) },
-                        )
-                    }
-                }
-                Text(
-                    stringResource(R.string.audio_cache_used, Formatters.megabytes(usedBytes)),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        },
-        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.done)) } },
-        dismissButton = { TextButton(onClick = onClear) { Text(stringResource(R.string.audio_cache_clear)) } },
-    )
-}
-
-private val AUDIO_CACHE_CHOICES = listOf(128, 256, 512, 1024)
-
-/**
- * "Times of calamity" is a mode you turn on, with an end date, rather than a feed the app decides
- * for you. No neutral source of "what is happening" exists, one maintainer could not moderate one,
- * and an app meant to pull people out of the feed should not become one.
- */
-@Composable
-private fun CalamityDialog(active: Boolean, onChoose: (Int) -> Unit, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.calamity_mode)) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(Spacing.medium)) {
-                Text(stringResource(R.string.calamity_body))
-                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
-                    FilterChip(selected = false, onClick = { onChoose(7) }, label = { Text(stringResource(R.string.calamity_for_week)) })
-                    FilterChip(selected = false, onClick = { onChoose(30) }, label = { Text(stringResource(R.string.calamity_for_month)) })
-                }
-            }
-        },
-        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
-        dismissButton = if (active) {
-            { TextButton(onClick = { onChoose(0) }) { Text(stringResource(R.string.calamity_turn_off)) } }
-        } else {
-            null
-        },
-    )
 }
 
 /** A short ladder rather than a slider: four named steps are easier to choose between than sixty. */

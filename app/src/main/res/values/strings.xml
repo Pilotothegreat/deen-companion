@@ -36,12 +36,6 @@
     <string name="channel_khatma">Khatma</string>
     <string name="channel_khatma_desc">A quiet nudge on days your reading plan is behind</string>
     <string name="done">Done</string>
-    <string name="megabytes">%1$s MB</string>
-    <string name="audio_cache">Downloaded recitation</string>
-    <string name="audio_cache_desc">Up to %1$s MB · %2$s used</string>
-    <string name="audio_cache_explainer">Ayahs you have listened to stay on the phone and play again without a connection.</string>
-    <string name="audio_cache_used">Currently using %1$s</string>
-    <string name="audio_cache_clear">Clear</string>
     <!-- Khatma -->
     <string name="khatma">Khatma</string>
     <string name="khatma_start">Start a khatma</string>
@@ -304,11 +298,10 @@
     <string name="adhan_sound">Adhan sound</string>
     <string name="appearance">Appearance</string>
     <string name="theme">Theme</string>
-    <string name="theme_wallpaper">Use your wallpaper\'s colours</string>
-    <string name="theme_wallpaper_desc">The app takes its palette from the picture behind it</string>
-    <string name="theme_pure_black">Pure black at night</string>
-    <string name="theme_pure_black_desc">Black rather than dark grey, which an OLED screen leaves switched off</string>
-    <string name="theme_system">System</string>
+    <string name="theme_wallpaper">Your wallpaper\'s colours</string>
+    <string name="theme_bilal">Bilal\'s colours</string>
+    <string name="theme_pure_black">OLED</string>
+    <string name="theme_system">Auto</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
     <string name="language">Language</string>
@@ -422,7 +415,6 @@
     <string name="travel_driving">On the road?</string>
     <string name="travel_driving_body">Turn this on and the app keeps things brief until you stop.</string>
     <string name="travel_end">I am home again</string>
-    <string name="smart_features">Smart suggestions</string>
 
     <!-- Natural events -->
     <string name="eclipse_solar">A solar eclipse</string>
@@ -432,14 +424,6 @@
     <string name="eclipse_lunar_elsewhere_body">The moon will be below your horizon here, so it cannot be seen from where you are. The prayer follows seeing the eclipse.</string>
     <string name="quake_title">An earthquake nearby</string>
     <string name="quake_body">About %1$s km away. Say the dua for fear and distress, and give what you can to those affected.</string>
-    <string name="calamity_title">Times of calamity</string>
-    <string name="calamity_body">Qunut an-nazilah in your prayers, dua for the oppressed and the afflicted, and sadaqah. Turn this off in Settings when you wish.</string>
-    <string name="calamity_mode">Times of calamity</string>
-    <string name="calamity_mode_on">On until %1$s</string>
-    <string name="calamity_mode_off">Qunut an-nazilah, duas for the afflicted, and a reminder to give</string>
-    <string name="calamity_for_week">For a week</string>
-    <string name="calamity_for_month">For a month</string>
-    <string name="calamity_turn_off">Turn off</string>
 
     <!-- Alarms -->
     <string name="pre_prayer_title">%1$s soon</string>
@@ -468,6 +452,7 @@
     <string name="silence_during_prayer">Silence during prayer</string>
     <string name="silence_during_prayer_desc">Holds your phone quiet from the iqama and gives it back afterwards. Alarms still sound.</string>
     <string name="silence_needs_permission">Needs Do Not Disturb access</string>
+    <string name="silence_grant">Allow</string>
     <string name="pre_reminder">Reminder before the adhan</string>
     <string name="pre_reminder_off">Off</string>
     <string name="widget_moment">Right now</string>
@@ -566,7 +551,6 @@ And the app remembers. Every "Prayed" you have ever tapped was recorded and show
     <string name="reliability_summary_ok">Everything your phone needs to deliver them is in place</string>
     <string name="reliability_summary_problem">Something on this phone is delaying or silencing your alerts</string>
     <string name="reading">Reading</string>
-    <string name="smart_features_desc">Shows the dua for the rain or wind outside, the night of Ramadan you are in, Surah al-Kahf on Friday, and the duas for travel when you are away from home</string>
     <string name="credits">Credits</string>
     <string name="credits_desc">%1$s · %2$s, translated by %3$s</string>
     <string name="text_scale_default">Default</string>

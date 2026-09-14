@@ -52,7 +52,7 @@ object Producers {
      * where you are are the prayer times where you are.
      */
     fun travel(settings: AppSettings, distanceKm: Double?, now: ZonedDateTime): List<Moment> {
-        if (!settings.smart.reactToTheWorld || distanceKm == null) return emptyList()
+        if (distanceKm == null) return emptyList()
         val dayEnd = now.toLocalDate().plusDays(1).atStartOfDay(now.zone)
         return when (settings.smart.travelState) {
             TravelState.SUSPECTED -> listOf(
@@ -141,26 +141,6 @@ object Producers {
             endsAt = java.time.Instant.ofEpochMilli(quake.atMillis).atZone(now.zone).plusHours(24),
             athkarCategory = "fear",
             dismissal = Dismissal.PERMANENT,
-        )
-    }
-
-    /**
-     * Times of calamity: a mode you switch on with an expiry, not a feed the app decides for you.
-     * There is no neutral source of "what is happening", one maintainer cannot moderate one, and an
-     * app that exists to pull people out of the feed should not become one.
-     */
-    fun calamity(settings: AppSettings, now: ZonedDateTime): Moment? {
-        if (!settings.smart.calamityActive(now.toInstant().toEpochMilli())) return null
-        return Moment(
-            id = "calamity",
-            kind = MomentKind.OCCASION,
-            priority = 88,
-            title = R.string.calamity_title,
-            body = R.string.calamity_body,
-            startsAt = now.minusMinutes(1),
-            endsAt = java.time.Instant.ofEpochMilli(settings.smart.calamityUntil).atZone(now.zone),
-            athkarCategory = "calamity",
-            dismissal = Dismissal.NONE,
         )
     }
 

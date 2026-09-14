@@ -66,10 +66,9 @@ class MomentRepository(
             val now = ZonedDateTime.now(s.zone)
             val live = occasions(s, now) +
                 listOfNotNull(
-                    Producers.calamity(s, now),
                     Producers.weather(weather.current(), now),
-                    Producers.eclipse(nextEclipse.takeIf { s.smart.reactToTheWorld }, eclipseVisibleHere, now),
-                    Producers.earthquake(quakes.firstOrNull().takeIf { s.smart.reactToTheWorld }, now),
+                    Producers.eclipse(nextEclipse, eclipseVisibleHere, now),
+                    Producers.earthquake(quakes.firstOrNull(), now),
                     Producers.driving(location.lastFixSpeed, now),
                 ) +
                 Producers.travel(s, distanceFromHome(s), now)
@@ -82,7 +81,7 @@ class MomentRepository(
     /**
      * Which athkar to offer. The top moment wins when it names one — the rain dua while it rains,
      * the iftar dua at Maghrib in Ramadan — and the time of day is the fallback, as before. This is
-     * what finally surfaces the rain, thunder, wind, new-moon, travel, fear and calamity categories
+     * what finally surfaces the rain, thunder, wind, new-moon, travel and fear categories
      * that have been sitting unreachable in athkar.json since they were bundled.
      */
     val suggestedAthkar: Flow<String> = combine(settings.settings, moments) { s, live ->
@@ -113,18 +112,11 @@ class MomentRepository(
     }
 
     private suspend fun refreshEclipse(s: AppSettings, nowMillis: Long) {
-        if (!s.smart.reactToTheWorld) {
-            nextEclipse = null
-            return
-        }
         val next = eclipses.upcoming(java.time.Instant.ofEpochMilli(nowMillis)).firstOrNull()
         nextEclipse = next
         eclipseVisibleHere = next != null && !s.location.isDefault &&
             eclipses.isLunarEclipseVisible(next, s.location.latitude, s.location.longitude)
     }
-
-    /** Turns "times of calamity" on for a while, or off when given zero. */
-    suspend fun setCalamity(untilMillis: Long) = settings.setCalamityUntil(untilMillis)
 
     suspend fun setTravelling(travelling: Boolean) {
         settings.setTravelState(if (travelling) TravelState.CONFIRMED else TravelState.HOME)
@@ -142,7 +134,6 @@ class MomentRepository(
     }
 
     private suspend fun updateTravelState(s: AppSettings) {
-        if (!s.smart.reactToTheWorld) return
         val distance = distanceFromHome(s) ?: return
         val next = Travel.state(distance, s.smart.safarKm, s.smart.travelState)
         if (next != s.smart.travelState) settings.setTravelState(next)

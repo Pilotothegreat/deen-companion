@@ -85,13 +85,10 @@ class EarthquakeRepositoryTest {
         assertTrue("and it knows how far away it was", recent.first().distanceKm < EarthquakeRepository.NEARBY_KM)
     }
 
-    @Test fun theFeedIsNotAskedWhenTheFeatureIsOffOrTheLocationIsUnknown() = runTest {
+    @Test fun theFeedIsNotAskedWhenTheLocationIsUnknown() = runTest {
         val now = 1_800_000_000_000L
         var calls = 0
         val counting: suspend (String) -> String = { calls++; feed(now) }
-
-        EarthquakeRepository(FakeDao(), counting).refresh(settings(SmartSettings(reactToTheWorld = false)), now)
-        assertEquals("off means off", 0, calls)
 
         EarthquakeRepository(FakeDao(), counting).refresh(
             settings(location = muscat.copy(isDefault = true)),

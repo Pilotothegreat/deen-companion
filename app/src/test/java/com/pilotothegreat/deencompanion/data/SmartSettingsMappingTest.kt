@@ -26,9 +26,7 @@ class SmartSettingsMappingTest {
     @Test fun defaultsMatchTheShippedBehaviour() {
         val settings = emptyPreferences().toAppSettings()
 
-        assertTrue("the app reacts to the day and the weather by default", settings.smart.reactToTheWorld)
         assertTrue("the Islamic day turns over at Maghrib, which is not a preference", settings.smart.hijriDayStartsAtMaghrib)
-        assertFalse("calamity mode stays off until asked for", settings.smart.calamityActive(nowMillis = 1_000))
         assertEquals(Defaults.SAFAR_KM, settings.smart.safarKm)
 
         assertEquals(SoundSettings.SYSTEM_SOUND, settings.sounds.adhanFor(Prayer.FAJR))
@@ -48,8 +46,6 @@ class SmartSettingsMappingTest {
 
     @Test fun storedValuesRoundTrip() {
         val settings = preferencesOf(
-            booleanPreferencesKey("react_to_the_world") to false,
-            longPreferencesKey("calamity_until") to 5_000L,
             intPreferencesKey("safar_km") to 100,
             stringPreferencesKey("fajr_adhan_sound") to "makkah",
             stringPreferencesKey("asr_adhan_sound") to SoundSettings.SILENT,
@@ -68,9 +64,6 @@ class SmartSettingsMappingTest {
             intPreferencesKey("last_seen_version_code") to 195,
         ).toAppSettings()
 
-        assertFalse(settings.smart.reactToTheWorld)
-        assertTrue(settings.smart.calamityActive(nowMillis = 4_000))
-        assertFalse(settings.smart.calamityActive(nowMillis = 6_000))
         assertEquals(100, settings.smart.safarKm)
 
         assertEquals("makkah", settings.sounds.adhanFor(Prayer.FAJR))
@@ -96,14 +89,12 @@ class SmartSettingsMappingTest {
     @Test fun outOfRangeValuesAreClamped() {
         val settings = preferencesOf(
             intPreferencesKey("safar_km") to 5,
-            intPreferencesKey("quran_audio_cache_mb") to 99_999,
             floatPreferencesKey("quran_playback_speed") to 9f,
             floatPreferencesKey("text_scale") to 4f,
             intPreferencesKey("quran_repeat_count") to 0,
         ).toAppSettings()
 
         assertEquals(Defaults.SAFAR_RANGE.first, settings.smart.safarKm)
-        assertEquals(Defaults.AUDIO_CACHE_RANGE.last, settings.quran.audioCacheMb)
         assertEquals(2f, settings.quran.playbackSpeed, 0.001f)
         assertEquals(Defaults.TEXT_SCALE_RANGE.endInclusive, settings.accessibility.textScale, 0.001f)
         assertEquals(1, settings.quran.repeatCount)

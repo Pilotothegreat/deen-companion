@@ -91,16 +91,7 @@ class SettingsViewModel(
         .map { it?.pagesDueToday ?: 0 }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 
-    private val _audioCacheBytes = MutableStateFlow(0L)
-    /** What the recitation cache is holding, refreshed whenever settings are shown. */
-    val audioCacheBytes: StateFlow<Long> = _audioCacheBytes.asStateFlow()
-
     fun canScheduleExactAlarms(): Boolean = scheduler.canScheduleExact()
-
-    fun setAudioCacheMb(mb: Int) = launch {
-        repository.setAudioCacheMb(mb)
-        AudioCache.setBudgetMb(mb)
-    }
 
 private val _backupMessage = MutableStateFlow<Int?>(null)
 
@@ -229,30 +220,14 @@ private val _backupMessage = MutableStateFlow<Int?>(null)
 
     fun setTextScale(scale: Float) = launch { repository.setTextScale(scale) }
 
-    fun setReactToTheWorld(on: Boolean) = launch { repository.setReactToTheWorld(on) }
-
     fun setPreReminder(minutes: Int) = launch { repository.setPreReminderMinutes(minutes) }
 
     fun setSilenceMinutes(minutes: Int) = launch { repository.setSilenceMinutes(minutes) }
-
-    /** Zero turns it off; otherwise it runs for this many days and then lapses on its own. */
-    fun setCalamityDays(days: Int) = launch {
-        repository.setCalamityUntil(if (days <= 0) 0L else System.currentTimeMillis() + days * 86_400_000L)
-    }
 
     /** Home is wherever you are when you say so; travel is measured from it. */
     fun anchorHomeHere() = launch {
         val current = repository.current()
         if (!current.location.isDefault) repository.setHome(current.location.latitude, current.location.longitude)
-    }
-
-    fun clearAudioCache() = launch {
-        withContext(Dispatchers.IO) { AudioCache.clear() }
-        refreshAudioCacheSize()
-    }
-
-    fun refreshAudioCacheSize() = launch {
-        _audioCacheBytes.value = withContext(Dispatchers.IO) { AudioCache.sizeBytes(context) }
     }
 
     fun setMethod(method: CalculationMethod) = launch { repository.setMethod(method) }
@@ -265,9 +240,7 @@ private val _backupMessage = MutableStateFlow<Int?>(null)
 
     fun setHijriAdjustment(days: Int) = launch { repository.setHijriAdjustment(days) }
     fun setNotificationsEnabled(enabled: Boolean) = launch { repository.setNotificationsEnabled(enabled) }
-    fun setThemeMode(mode: ThemeMode) = launch { repository.setThemeMode(mode) }
-
-    fun setDynamicColor(on: Boolean) = launch { repository.setDynamicColor(on) }
+    fun setTheme(mode: ThemeMode, dynamicColor: Boolean) = launch { repository.setTheme(mode, dynamicColor) }
 
     fun setPureBlack(on: Boolean) = launch { repository.setPureBlack(on) }
     fun setReciter(reciter: Reciter) = launch { repository.setReciter(reciter) }

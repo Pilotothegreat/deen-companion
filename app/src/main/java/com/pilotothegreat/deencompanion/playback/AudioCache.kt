@@ -11,7 +11,7 @@ import java.io.File
 /**
  * The recitation cache. Every ayah used to be fetched again each time it played, so listening to a
  * surah twice cost twice the data and nothing worked without a connection. Ayahs now stay on disk
- * up to a budget the reader sets, least-recently-used first out.
+ * up to a fixed budget, least-recently-used first out.
  *
  * SimpleCache locks its directory, so exactly one instance may exist per process.
  */
@@ -23,15 +23,10 @@ object AudioCache {
     @Volatile private var cache: SimpleCache? = null
 
     /**
-     * The size the cache is built with. An evictor's budget is fixed once the cache is open, so the
-     * app keeps this in step with the setting; a change takes effect the next time playback starts.
+     * The size the cache is built with. 2.1 removed the setting for it: a number of megabytes is not a
+     * choice anyone makes knowingly, and the space comes back from the reciter sheet in the player.
      */
-    @Volatile var budgetBytes: Long = 256L * 1024 * 1024
-        private set
-
-    fun setBudgetMb(mb: Int) {
-        budgetBytes = mb.coerceAtLeast(16) * 1024L * 1024L
-    }
+    const val BUDGET_BYTES: Long = 512L * 1024 * 1024
 
     /** Kept in files rather than the cache directory, so an offline surah survives a cleanup. */
     private fun directory(context: Context) = File(context.filesDir, DIRECTORY)

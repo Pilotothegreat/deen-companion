@@ -50,19 +50,13 @@ data class IqamaSetting(
     val rule: IqamaRule get() = if (fixed) IqamaRule.Fixed(fixedTime) else IqamaRule.Offset(offsetMinutes)
 }
 
-/** Whether the app may react to the world, and how far it looks. */
+/**
+ * How the app follows the day and the world: the Islamic year, the weather, travel, eclipses and nearby
+ * earthquakes. They are simply on. 2.1 removed the switch that turned them all off: nobody wants the dua
+ * for rain without the dua for wind, and the one request that says where you are already sends a place
+ * blunted to a kilometre, and never under battery saver.
+ */
 data class SmartSettings(
-    /**
-     * Whether the app may react to the day and to the world: the Islamic year, the weather, travel,
-     * eclipses and nearby earthquakes.
-     *
-     * One switch rather than five. They were never really separate choices — nobody wants the dua
-     * for rain but not the dua for wind — and it is the only setting that governs sending anything
-     * off the phone, which is a decision worth being able to find.
-     */
-    val reactToTheWorld: Boolean = true,
-    /** Epoch millis until which "times of calamity" stays on; 0 when off. */
-    val calamityUntil: Long = 0L,
     /** The Islamic day turns over at Maghrib, as it does in the calendar itself. */
     val hijriDayStartsAtMaghrib: Boolean = true,
     /** Distance from home past which travel is suspected. */
@@ -73,11 +67,9 @@ data class SmartSettings(
     /** What the reader last told the app about travelling, which outranks any guess. */
     val travelState: TravelState = TravelState.HOME,
 ) {
-    fun calamityActive(nowMillis: Long): Boolean = calamityUntil > nowMillis
-
     val hasHome: Boolean get() = homeLatitude != null && homeLongitude != null
 
-    val isTravelling: Boolean get() = reactToTheWorld && travelState == TravelState.CONFIRMED
+    val isTravelling: Boolean get() = travelState == TravelState.CONFIRMED
 }
 
 /** What each prayer sounds like, and what arrives before it. */
@@ -99,7 +91,6 @@ data class SoundSettings(
 }
 
 data class QuranSettings(
-    val audioCacheMb: Int = Defaults.AUDIO_CACHE_MB,
     val playbackSpeed: Float = 1f,
     val repeatMode: RepeatMode = RepeatMode.OFF,
     val repeatCount: Int = 3,
@@ -201,8 +192,6 @@ object Defaults {
     const val SAFAR_KM = 80
     val SAFAR_RANGE = 60..120
     const val TRANSLATION = "clearquran"
-    const val AUDIO_CACHE_MB = 256
-    val AUDIO_CACHE_RANGE = 64..2048
     val PRE_REMINDER_CHOICES = listOf(0, 5, 10, 15, 20, 30)
     val SILENCE_CHOICES = listOf(0, 10, 15, 20, 30)
     val TEXT_SCALE_RANGE = 0.9f..1.6f

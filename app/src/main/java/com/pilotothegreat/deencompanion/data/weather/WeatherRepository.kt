@@ -40,12 +40,12 @@ class WeatherRepository(private val fetch: suspend (String) -> String = { Http.g
     fun current(): WeatherReading? = cached
 
     /**
-     * Conditions where the settings say you are, or null when weather is off, the location is still
+     * Conditions where the settings say you are, or null when the location is still
      * the default, or the call fails. A failure is never surfaced: weather is a nicety, and an error
      * banner for it would be worse than saying nothing.
      */
     suspend fun refresh(settings: AppSettings, nowMillis: Long): WeatherReading? {
-        if (!settings.smart.reactToTheWorld || settings.location.isDefault) return null
+        if (settings.location.isDefault) return null
         val here = blunt(settings.location.latitude) to blunt(settings.location.longitude)
         cached?.let { if (cachedFor == here && nowMillis - it.observedAt < CACHE_MILLIS) return it }
         return lock.withLock {

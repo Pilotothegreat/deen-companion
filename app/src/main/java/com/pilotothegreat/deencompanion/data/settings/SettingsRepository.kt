@@ -97,9 +97,11 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         it[Keys.MUTED_PRAYERS] = if (muted) current + prayer.key else current - prayer.key
     }
 
-    suspend fun setThemeMode(mode: ThemeMode) = edit { it[Keys.THEME_MODE] = mode.name }
-
-    suspend fun setDynamicColor(enabled: Boolean) = edit { it[Keys.DYNAMIC_COLOR] = enabled }
+    /** Light, dark or automatic, in the wallpaper's colours or Bilal's: one theme card, one write. */
+    suspend fun setTheme(mode: ThemeMode, dynamicColor: Boolean) = edit {
+        it[Keys.THEME_MODE] = mode.name
+        it[Keys.DYNAMIC_COLOR] = dynamicColor
+    }
 
     suspend fun setPureBlack(enabled: Boolean) = edit { it[Keys.PURE_BLACK] = enabled }
 
@@ -120,13 +122,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     suspend fun setAthkarReminders(enabled: Boolean) = edit { it[Keys.ATHKAR_REMINDERS] = enabled }
 
 
-    // Smart features
-    /** The one switch for the Islamic year, the weather, travel and natural events. */
-    suspend fun setReactToTheWorld(on: Boolean) = edit { it[Keys.REACT_TO_WORLD] = on }
-
-    /** Pass 0 to turn "times of calamity" off. */
-    suspend fun setCalamityUntil(epochMillis: Long) = edit { it[Keys.CALAMITY_UNTIL] = epochMillis }
-
+    // Travel
     /** Anchors home where you are now; travel is measured from here. */
     suspend fun setHome(latitude: Double, longitude: Double) = edit {
         it[Keys.HOME_LATITUDE] = latitude
@@ -155,8 +151,6 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     suspend fun setSilenceMinutes(minutes: Int) = edit { it[Keys.SILENCE_MINUTES] = minutes.coerceAtLeast(0) }
 
     // Quran
-
-    suspend fun setAudioCacheMb(mb: Int) = edit { it[Keys.AUDIO_CACHE_MB] = mb.coerceIn(Defaults.AUDIO_CACHE_RANGE) }
 
     suspend fun setPlaybackSpeed(speed: Float) = edit { it[Keys.PLAYBACK_SPEED] = speed.coerceIn(0.5f, 2f) }
 
@@ -242,8 +236,6 @@ internal object Keys {
     val MUTED_PRAYERS = stringSetPreferencesKey("muted_prayers")
     val DISMISSED_MOMENTS = stringSetPreferencesKey("dismissed_moments")
 
-    /** One switch where five used to be: the Islamic year, weather, travel and natural events. */
-    val REACT_TO_WORLD = booleanPreferencesKey("react_to_the_world")
     val HOME_LATITUDE = doublePreferencesKey("home_latitude")
     val HOME_LONGITUDE = doublePreferencesKey("home_longitude")
     val TRAVEL_STATE = stringPreferencesKey("travel_state")
@@ -263,7 +255,6 @@ internal object Keys {
     val METHOD_AUTO = booleanPreferencesKey("calc_method_auto")
     val HIGH_LATITUDE = stringPreferencesKey("high_latitude_rule")
 
-    val CALAMITY_UNTIL = longPreferencesKey("calamity_until")
     val SAFAR_KM = intPreferencesKey("safar_km")
 
     // Sounds and early reminders
@@ -272,7 +263,6 @@ internal object Keys {
     val SILENCE_MINUTES = intPreferencesKey("silence_during_prayer_minutes")
 
     // Quran
-    val AUDIO_CACHE_MB = intPreferencesKey("quran_audio_cache_mb")
     val PLAYBACK_SPEED = floatPreferencesKey("quran_playback_speed")
     val REPEAT_MODE = stringPreferencesKey("quran_repeat_mode")
     val REPEAT_COUNT = intPreferencesKey("quran_repeat_count")
@@ -346,8 +336,6 @@ internal fun Preferences.toAppSettings(): AppSettings = AppSettings(
     appLanguage = this[Keys.LANGUAGE] ?: AppLanguage.SYSTEM,
     athkarReminders = this[Keys.ATHKAR_REMINDERS] ?: false,
     smart = SmartSettings(
-        reactToTheWorld = this[Keys.REACT_TO_WORLD] ?: true,
-        calamityUntil = this[Keys.CALAMITY_UNTIL] ?: 0L,
         safarKm = (this[Keys.SAFAR_KM] ?: Defaults.SAFAR_KM).coerceIn(Defaults.SAFAR_RANGE),
         homeLatitude = this[Keys.HOME_LATITUDE],
         homeLongitude = this[Keys.HOME_LONGITUDE],
@@ -361,7 +349,6 @@ internal fun Preferences.toAppSettings(): AppSettings = AppSettings(
         silenceMinutes = this[Keys.SILENCE_MINUTES] ?: 0,
     ),
     quran = QuranSettings(
-        audioCacheMb = (this[Keys.AUDIO_CACHE_MB] ?: Defaults.AUDIO_CACHE_MB).coerceIn(Defaults.AUDIO_CACHE_RANGE),
         playbackSpeed = (this[Keys.PLAYBACK_SPEED] ?: 1f).coerceIn(0.5f, 2f),
         repeatMode = enumOrNull<RepeatMode>(this[Keys.REPEAT_MODE]) ?: RepeatMode.OFF,
         repeatCount = (this[Keys.REPEAT_COUNT] ?: 3).coerceIn(1, 20),
@@ -400,6 +387,10 @@ internal object LegacySettingsMigration : DataMigration<Preferences> {
         intPreferencesKey("tasbih_bead_size"),
         intPreferencesKey("tasbih_bead_preset"),
         stringSetPreferencesKey("favorited_hadiths"),
+        // Removed in 2.1: the smart-features switch, times of calamity and the recitation cache size.
+        booleanPreferencesKey("react_to_the_world"),
+        longPreferencesKey("calamity_until"),
+        intPreferencesKey("quran_audio_cache_mb"),
     )
 
     override suspend fun shouldMigrate(currentData: Preferences): Boolean =
