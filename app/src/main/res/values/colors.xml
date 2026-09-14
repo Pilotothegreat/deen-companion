@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="white">#FFFFFFFF</color>
-    <color name="icon_bg_simple">#FF0F0F0F</color>
+    <!-- Matches the theme's light surface so launch and first frame blend. -->
+    <color name="window_background">#FFF8F3</color>
 
-    <!-- Widget Light Mode Colors -->
-    <color name="widget_background">#FAF8F5</color>
-    <color name="widget_border">#E6E1DA</color>
-    <color name="widget_text_primary">#2C2724</color>
-    <color name="widget_text_secondary">#7A726C</color>
-    <color name="widget_accent">#C5A059</color>
-    <color name="widget_button_background">#F0EAE1</color>
-    <color name="widget_success">#2E7D32</color>
+    <!-- Widgets (API 30 and below; dynamic colors are used on API 31+). -->
+    <color name="widget_background">#FFF8F3</color>
+    <color name="widget_border">#D1C5B4</color>
+    <color name="widget_text_primary">#1E1B16</color>
+    <color name="widget_text_secondary">#4E4639</color>
+    <color name="widget_accent">#156C44</color>
+    <color name="widget_button_background">#FFDEA5</color>
 </resources>

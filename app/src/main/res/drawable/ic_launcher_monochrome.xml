@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Themed-icon layer: the Kufic بلال mark in one colour; the system tints it. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+  <group
+      android:scaleX="0.8772"
+      android:scaleY="0.8772"
+      android:translateX="8.386"
+      android:translateY="2.684">
+    <path
+        android:pathData="M77,61V70H49M63,70V36M49,70V36M36,36V70H27V62"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="7"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M70,80m-4.5,0a4.5,4.5 0,1 1,9 0a4.5,4.5 0,1 1,-9 0"
+        android:fillColor="#FFFFFFFF" />
+  </group>
+</vector>

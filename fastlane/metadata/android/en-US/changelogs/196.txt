@@ -1,0 +1,9 @@
+The Quran, corrected. The text is now the Tanzil Project's Uthmani script, shipped exactly as published — the previous build quietly stripped vowel marks from 82% of the ayahs. The translation is The Clear Quran by Talal Itani, credited wherever it appears, and the mushaf now shows the divisions it always had: hizb, rub' al-hizb, manzil, ruku', the ayah rosette and the sajdah marks. Jump to any surah, juz or page.
+
+Bilal now knows what day it is. Jumu'ah and Surah al-Kahf from Thursday sunset, Ramadan's last ten and its odd nights, suhoor and iftar, Arafah, the two Eids and the takbir, Ashura, the white days. The Islamic date turns over at sunset, as it should.
+
+And what is happening outside. The dua for the rain that is actually falling, a question rather than an assumption when you are far from home, and eclipses from a table that works offline — with a real answer about whether the moon will be above your horizon.
+
+Alerts that arrive. The adhan plays as audio through Do Not Disturb instead of as a notification sound that gets cut short. Notifications carry "Prayed" and a snooze, there is a reminder before the adhan, and a new screen shows exactly what on your phone is stopping alerts — including your manufacturer's own battery manager.
+
+Also: recitation that works offline, with repeat and speed for memorisation; a khatma plan that follows the pages you reach; widgets you can configure and a "Right Now" widget; simple mode, larger text and stronger contrast; and backup to a file you keep.

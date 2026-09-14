@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500">
+  <!-- Play Store feature graphic (Arabic): mirrored, with the Arabic wordmark leading. -->
+  <rect width="1024" height="500" fill="#156C44"/>
+  <g transform="translate(646 128) scale(5.1) translate(-29 -31.2)"><g transform="translate(8.386 2.684) scale(0.8772)"><path d="M77 61V70H49M63 70V36M49 70V36M36 36V70H27V62" fill="none" stroke="#FFF8F3" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="70" cy="80" r="4.5" fill="#F2C572"/></g></g>
+  <text x="572" y="226" text-anchor="end" font-family="Reem Kufi" font-weight="700" font-size="168" fill="#FFF8F3">بلال</text>
+  <text x="568" y="334" text-anchor="end" font-family="Reem Kufi" font-weight="700" font-size="72" fill="#F2C572">Bilal</text>
+  <text x="568" y="400" text-anchor="end" font-family="Readex Pro" font-weight="400" font-size="28" fill="#FFF8F3" fill-opacity="0.86">مواقيت الصلاة · الأذكار · القرآن · القبلة</text>
+</svg>

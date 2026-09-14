@@ -1,118 +1,85 @@
-# Deen Companion — App Store Listing & Metadata (ASO)
+# Bilal: Play Store listing
 
-> **Package Name:** `com.pilotothegreat.deencompanion`  
-> **Version Name:** `1.5.43` (`versionCode = 193`)  
-> **Category:** Lifestyle / Books & Reference  
-> **Content Rating:** Everyone (3+)  
-> **Privacy / Ads:** 100% Free, No Ads, No Remote User Tracking, Offline-First  
+Everything Google Play asks for, in one place. The listing text itself lives in `fastlane/metadata/android/` (`en-US` and `ar`), so it can be pasted into the Play Console or uploaded with `fastlane supply`.
 
----
+## App details
 
-## 📱 Store Listing Details
+| Field | Value |
+| --- | --- |
+| Package (Google Play) | `com.pilotothegreat.bilal`, a new listing |
+| Package (GitHub APK) | `com.pilotothegreat.deencompanion` |
+| Version | 2.1.0 (`versionCode` 199) |
+| Category | Books & Reference |
+| Tags | Prayer times, Quran, Islam |
+| Price | Free, no ads, no in-app purchases |
+| Privacy policy | https://pilotothegreat.github.io/deen-companion/privacy.html |
+| Website | https://github.com/Pilotothegreat/deen-companion |
 
-### App Title
-- **English:** `Deen Companion - Quran, Hadith & Prayer Times`
-- **Arabic:** `رفيق الدين - القرآن، الحديث ومواقيت الصلاة`
+## Listing text
 
-### Short Description (Max 80 Characters)
-- **English:** `Private, offline Islamic companion: Prayer times, Quran audio, Hadith & Qibla.`
-- **Arabic:** `رفيقك الإسلامي اليومي: مواقيت الصلاة، القرآن الكريم، الأحاديث والقبلة دون إنترنت.`
+| Field | Limit | English | Arabic |
+| --- | --- | --- | --- |
+| App name | 30 | Bilal: Prayer Times & Athkar | بلال: مواقيت الصلاة والأذكار |
+| Short description | 80 | `en-US/short_description.txt` | `ar/short_description.txt` |
+| Full description | 4000 | `en-US/full_description.txt` | `ar/full_description.txt` |
+| Release notes | 500 | `en-US/changelogs/196.txt` | `ar/changelogs/196.txt` |
 
----
+## Graphics
 
-## 📝 Full Description (English)
+| Asset | Spec | File |
+| --- | --- | --- |
+| App icon | 512 x 512 PNG | `fastlane/metadata/android/en-US/images/icon.png` |
+| Feature graphic | 1024 x 500 PNG | `…/en-US/images/featureGraphic.png`, `…/ar/images/featureGraphic.png` |
+| Phone screenshots | 1080 x 1920 PNG, 9:16 | `…/en-US/images/phoneScreenshots/`, `…/ar/images/phoneScreenshots/` |
 
-Assalamu Alaikum. **Deen Companion** is an elegant, modern, privacy-focused Islamic application designed according to Material 3 Expressive principles. Built for Muslims worldwide, it provides accurate prayer calculations, rich Quran audio recitation, authentic Hadith collections, precise Qibla direction, and interactive Tasbih counters—completely free of advertisements and tracking.
+Sources are in `branding/` (the icon and mark) and `branding/store/` (the feature graphics). The raw screenshots come from `StoreScreenshotTest`, and `scripts/store/frame_screenshots.py` frames them with captions.
 
-### 🌟 Key Features
+## Play Console answers
 
-1. 🕌 **Accurate Prayer Times & Iqama Alarms**
-   - Precise prayer calculations using verified astronomical formulas for all global calculation methods (Oman Endowments, Umm Al-Qura / Makkah, Muslim World League, ISNA, Egypt Survey Authority, Karachi, Tehran, Jafari).
-   - Configurable Asr schools (Standard / Shafi'i / Maliki / Hanbali & Hanafi).
-   - Exact alarm scheduling ensuring Adhan and Iqama alerts ring at the precise second.
-   - Customizable fixed Iqama times or relative offsets per prayer.
-   - Beautiful lock screen and home screen prayer countdown widgets.
+**App access:** everything works without an account or login.
 
-2. 📖 **Noble Quran with Ayah-by-Ayah Audio & Translation**
-   - Complete 114 Surahs in clear, legible Uthmani script with adjustable typography and AMOLED black reading mode.
-   - Ayah-by-Ayah crystal-clear audio streaming with renowned reciters (Mishary Rashid Alafasy, Abdul Rahman Al-Sudais, Saad Al-Ghamadi, Mahmoud Khalil Al-Husary).
-   - Full English translation with synchronized audio highlighting.
-   - Sleep timer and End-of-Surah automatic playback management.
+**Ads:** the app contains no ads.
 
-3. 📚 **Authentic Hadith Library & Instant Search**
-   - Comprehensive collection of major Hadith books (Sahih Bukhari, Sahih Muslim, Sunan Abi Dawud, Jami` at-Tirmidhi, Sunan an-Nasa'i, Sunan Ibn Majah, Muwatta Malik, Musnad Ahmad, 40 Hadith Nawawi).
-   - Arabic normalization search engine matching root words across Arabic narrations and English meanings.
-   - One-tap full-book offline synchronization for uninterrupted reading anywhere.
+**Content rating (IARC questionnaire):** reference or educational app with no violence, sexual content, profanity, drugs, gambling or user-generated content. Expected rating: Everyone / PEGI 3.
 
-4. 🧭 **Expressive Qibla Compass**
-   - Real-time geomagnetic compass with dynamic 12-point star shape-morphing pointer.
-   - Sensor accuracy indicators and instant calibration feedback.
-   - Direct distance and degree bearing to the Holy Kaaba in Makkah.
+**Target audience:** 13 and over. Choosing a younger age group enrols the app in the Families programme, which has extra requirements.
 
-5. 📿 **Interactive Tasbih Counter**
-   - Circular wavy progress counter with haptic feedback.
-   - Customizable targets (33, 99, 100, custom) and traditional post-prayer Dhikr cycles.
-   - Quick-increment interactive home screen Tasbih widget.
+**Data safety:**
+- *Does your app collect or share any of the required user data types?* **Yes, one: approximate location.**
+  - *Approximate location* is **shared** with Open-Meteo to fetch the weather, rounded to about a kilometre, at most once an hour and only while the app is open. It is **not collected** (nothing is stored off the device), the purpose is **App functionality**, and it is **optional** — the "React to the day and the weather" setting turns it off, and battery saver suspends it.
+  - Nothing else leaves the device.
+  - Settings, bookmarks, the khatma plan and athkar progress are stored and processed only on the device. Nothing is sent to the developer. The weekly automatic backup is written to the app's own private storage and never uploaded.
+  - Travel detection compares your position with a home point entirely on the device.
+- *Is data encrypted in transit?* Yes, every request uses HTTPS.
+- *Can users request deletion?* There's no account and nothing held off the device; uninstalling removes everything.
 
-6. 🔒 **100% Private & Ad-Free**
-   - No accounts, no sign-in required, no tracking analytics, and no third-party advertisements.
-   - Fully functional offline.
+**Permissions that need a declaration:**
+- *Do Not Disturb access (optional):* only if the reader turns on "silence during prayer"; the app asks for it at that moment and never otherwise.
+- *Foreground service (media playback):* keeps Quran recitation playing with media controls while the app is in the background. Play asks for a short video of starting a recitation and leaving the app.
+- *Exact alarms (`SCHEDULE_EXACT_ALARM`):* adhan and iqama notifications must arrive at the prayer time. The user grants it in system settings, and the app still works without it.
+- *Location:* used only in the foreground to calculate prayer times and the Qibla. It's never used in the background.
 
----
+## App signing
 
-## 📝 الوصف الكامل (باللغة العربية)
+Upload `bilal-2.1.0-play.aab`, built with `./gradlew bundlePlay`. It's the release build without the donation sheet, packaged as `com.pilotothegreat.bilal` and signed with the key in `~/Documents/bilal-signing/`, which becomes the Play **upload key**. When Play asks about app signing, choose **Use Google-generated key**.
 
-السلام عليكم ورحمة الله وبركاته. **رفيق الدين (Deen Companion)** هو تطبيقك الإسلامي الشامل والمصمم بأحدث معايير **Material 3 Expressive** ليكون رفيقك اليومي في العبادة والأذكار بخصوصية تامة ودون أي إعلانات أو تتبع.
+The old Deen Companion listing (`com.pilotothegreat.deencompanion`) can't take updates, because its upload key (SHA1 `4A:55:35:8F:16:20:FB:FB:E6:DA:27:41:C2:06:4B:D5:60:28:F1:EA`) is lost. Its text can still be edited, so point its users to Bilal once the new app is live, then unpublish it. If that listing is ever needed again, `upload_certificate.pem` on the v1.7.0 release can register the new key there through an upload key reset.
 
-### 🌟 أهم مميزات التطبيق
+Play installs are signed by Google and use a different package from the GitHub APK, so the two are separate apps that can sit side by side.
 
-1. 🕌 **مواقيت الصلاة وتنبيهات الإقامة الدقيقة**
-   - حساب فلكي دقيق لمواقيت الصلاة وفق مختلف الهيئات الإسلامية المعتمدة (وزارة الأوقاف والشؤون الدينية بسلطنة عُمان، أم القرى بمكة المكرمة، رابطة العالم الإسلامي، الهيئة المصرية العامة للمساحة، وغيرها).
-   - دعم المذهب القياسي (الشافعي والمالكي والحنبلي) والمذهب الحنفي لحساب صلاة العصر.
-   - تنبيهات أذان وإقامة دقيقة تعمل في الثانية المحددة.
-   - ويدجت أنيق للشاشة الرئيسية مع عداد تنازلي للصلاة القادمة.
+## Automation
 
-2. 📖 **القرآن الكريم مع التلاوة الصوتية والترجمة**
-   - المصحف الشريف بالرسم العثماني الواضح مع إمكانية تكبير الخط والوضع الليلي الداكن AMOLED.
-   - استماع صوتي آية بآية لأشهر القراء (مشاري راشد العفاسي، عبد الرحمن السديس، سعد الغامدي، محمود خليل الحصري).
-   - مؤقت نوم ذكي وإيقاف تلقائي عند نهاية السورة.
+After the app exists on Play and its first bundle has been uploaded by hand, two workflows keep Play in sync:
 
-3. 📚 **موسوعة الحديث الشريف والبحث الذكي**
-   - كتب الحديث التسعة (صحيح البخاري، صحيح مسلم، سنن أبي داود، جامع الترمذي، سنن النسائي، سنن ابن ماجه، موطأ مالك، مسند أحمد، والأربعون النووية).
-   - بحث ذكي يدعم تطبيع الحروف العربية والبحث الفوري في المتون والأسانيد.
-   - إمكانية تحميل الكتب كاملة للقراءة دون اتصال بالإنترنت.
+- `.github/workflows/play-listing.yml` pushes the listing in `fastlane/metadata/android` (text and graphics, English and Arabic) whenever it changes, or on demand from the Actions tab.
+- `.github/workflows/release.yml` uploads the Play bundle to **internal testing**, with the release notes for its version code, on every `v*` tag.
 
-4. 🧭 **بوصلة القبلة التفاعلية**
-   - تحديد اتجاه القبلة نحو الكعبة المشرفة في مكة المكرمة بدقة عالية عبر مستشعرات الجهاز.
-   - تصميم تفاعلي مميز بأشكال مادية متحركة ومؤشر معايرة ذكي.
+Both need the `PLAY_SERVICE_ACCOUNT_JSON` repository secret and skip their Play steps without it. The secret holds the JSON key of a Google Cloud service account that:
+1. belongs to a project with the **Google Play Android Developer API** enabled, and
+2. is invited in the Play Console (**Users and permissions**) with **Release to testing tracks**, **Manage testing tracks** and **Manage store presence** for Bilal.
 
-5. 📿 **المسبحة الإلكترونية الذكية**
-   - عداد تسبيح تفاعلي بأشكال متموجة مع اهتزاز لمسي مريح.
-   - تنقل تلقائي بين أذكار ما بعد الصلاة (سبحان الله ×33، الحمد لله ×33، الله أكبر ×34).
-   - ويدجت مسبحة للشاشة الرئيسية للذكر السريع دون فتح التطبيق.
+## Before submitting
 
-6. 🔒 **خصوصية تامة وبدون إعلانات**
-   - لا يتطلب إنشاء حساب، لا يحتوي على أي إعلانات تجارية، ولا يشارك أي بيانات شخصية عن بُعد.
-
----
-
-## 🏷️ ASO Keyword Strategy (كلمات مفتاحية)
-`prayer times, quran audio, hadith offline, qibla compass, tasbih counter, adhan alarm, islamic companion, iqama reminders, ramadan calendar, athan times, مواقيت الصلاة, القرآن الكريم, الحديث الشريف, اتجاه القبلة, مسبحة إلكترونية, أذكار الصباح والمساء, تنبيهات الأذان, صلاتي`
-
----
-
-## 🚀 Release Notes (What's New in v1.5.43)
-
-### English:
-- **Material 3 Expressive Redesign**: Full integration of Material 3 Expressive components, fluid spring motion schemes, shape-morphing icons, and modern button groups across all 14 screens.
-- **Dual-Distribution Update Engine**: Fully integrated Google Play In-App Updates for Play Store users and direct GitHub APK update verification for sideloaded releases.
-- **Accessibility & TalkBack Upgrades**: 100% localized accessibility labels in English and Arabic for all stepper buttons, prayer rows, and navigation items.
-- **Extended RTL Support**: Comprehensive Right-To-Left layout mirroring for Arabic, Persian, Urdu, Kurdish, Hebrew, and Pashto.
-- **Network & Socket Hardening**: Optimized background resource lifecycle and connection safety guards.
-
-### العربية:
-- **تصميم Material 3 Expressive العصري**: تحديث شامل لكافة واجهات التطبيق وفق أحدث معايير التصميم مع تأثيرات حركية انسيابية وأشكال متغيرة ذكية.
-- **نظام تحديث مزدوج وذكي**: دعم التحديث التلقائي عبر متجر Google Play مع دعم التحديث المباشر لإصدارات GitHub.
-- **تعزيز إمكانية الوصول وTalkBack**: أوصاف صوتية مخصصة باللغتين العربية والإنجليزية لجميع الأزرار وعناصر التحكم.
-- **دعم لغات اليمين إلى اليسار (RTL)**: توافق كامل مع اللغات العربية، الفارسية، الأردية، الكردية، وغيرها.
-- **تحسين استقرار الشبكة والبطارية**: ترقية كفاءة الاتصال وتنبيهات الأذان والإقامة.
+- **Support development sheet:** the Play build (`bundlePlay`) leaves it out, along with its banking-app queries, because Google Play's payments policy generally requires Play Billing for payments to the developer. The GitHub APK keeps it.
+- **Testing requirement:** personal developer accounts created after November 2023 must run a closed test with at least 12 testers for 14 days before a new app can go to production.
+- **Contact email:** the Play Console requires a public support email for the listing.
