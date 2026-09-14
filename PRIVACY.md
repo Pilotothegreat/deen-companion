@@ -7,7 +7,7 @@ Bilal has no accounts, ads, analytics or crash reporting. Everything you set up 
 ## What stays on your device
 
 - Your location coordinates and city name, or the city you picked, used to calculate prayer times and the Qibla direction.
-- Your settings: calculation method, time adjustments, iqama times, notification and reminder choices, theme, language and text sizes.
+- Your settings: calculation method, time adjustments, iqama times, notification and reminder choices, theme and language.
 - Quran bookmarks, your last-read page, hadith favorites, your tasbih count, and today's athkar progress and streak.
 
 This data is stored with Android's DataStore and a local Room database. It is never uploaded, and it is excluded from Android cloud backups.

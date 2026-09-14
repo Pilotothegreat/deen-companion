@@ -18,7 +18,7 @@ A private, offline-first Islamic companion for Android, built with Jetpack Compo
 - **Tasbih.** The post-prayer 33/33/34 cycle or 99/100 goals, with haptic feedback.
 - **Accessibility.** Simple mode in one switch, text scale on top of the system's, contrast, reduced motion honoured everywhere and updated live, larger touch targets, and spoken Qibla guidance.
 - **Backup.** A copy of your settings, bookmarks and khatma written quietly once a week to the app's own storage, with the last three kept, offered first when you restore. Export to a file you keep as well. Nothing is uploaded anywhere; cloud backup stays off.
-- **Daily reading.** A verse of the day that opens in the mushaf, and a daily hadith or prophetic dua.
+- **Daily reading, on the home screen.** Widgets for a verse of the day that opens in the mushaf, and for a daily hadith or prophetic dua.
 - **Widgets.** Seven of them, each with four or five sizes that say more as you make them bigger — a 2x1 countdown through to the full day with iqama times. They resize on Samsung's grid, take the launcher's own corner radius, and carry a shape that changes with the prayer and a bar that fills as it approaches.
 - **Personalization.** Dynamic color, light/dark/system theme, pure black, a floating navigation bar on phones, and a per-app language with full right-to-left layout.
 

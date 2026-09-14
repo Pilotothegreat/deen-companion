@@ -14,15 +14,14 @@ ATHKAR
 • The right athkar suggested for the time of day
 
 QURAN
-• The 604-page Madinah mushaf in the Uthmanic Hafs script, with the Saheeh International translation
+• The 604-page Madinah mushaf in the King Fahd Complex's own text and script, set line for line like the print, with The Clear Quran translation
 • Search that ignores diacritics, bookmarks and continue reading
-• Ayah-by-ayah recitation by Mishary Alafasy, Mahmoud Khalil Al-Husary or Abdul Basit, with a sleep timer
-• A verse of the day that opens in the mushaf
+• Ayah-by-ayah recitation by Mishary Alafasy, Mahmoud Khalil Al-Husary or Abdul Basit, with repeat, speed and a sleep timer
+• Tap an ayah to hear it; press and hold for its translation, a bookmark, copy, share or repeat
 
 HADITH
 • Sahih al-Bukhari, Sahih Muslim, Jami' at-Tirmidhi, Sunan Abu Dawud, Sunan an-Nasa'i and Sunan Ibn Majah
 • A sample of each is included; download full collections when you want them
-• A daily hadith or prophetic dua
 
 WIDGETS
 • The next prayer with a live countdown

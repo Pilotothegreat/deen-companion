@@ -3,6 +3,7 @@ package com.pilotothegreat.deencompanion
 import android.Manifest
 import android.app.Application
 import android.graphics.Bitmap
+import android.os.PowerManager
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
@@ -76,6 +77,9 @@ class StoreScreenshotTest {
     private fun capture(prefix: String, labels: Labels) {
         val app = ApplicationProvider.getApplicationContext<Application>()
         shadowOf(app).grantPermissions(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+        // A phone already set up for the adhan, so Today leads with the next prayer rather than the card asking
+        // for the battery exemption: Robolectric reports every app as battery-optimised.
+        shadowOf(app.getSystemService(PowerManager::class.java)).setIgnoringBatteryOptimizations(app.packageName, true)
         runBlocking {
             GlobalContext.get().get<SettingsRepository>()
                 .setLocation(23.5880, 58.3829, labels.city, "Asia/Muscat", "OM", LocationSource.MANUAL)

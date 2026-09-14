@@ -25,18 +25,18 @@ SHOT_Y = 400
 CAPTIONS = {
     "en": [
         ("1-today", "Every prayer, on time", "A live countdown with adhan and iqama alerts"),
+        ("5-reader", "The mushaf, as it is printed", "Line for line, with the recitation a tap away"),
         ("3-athkar", "Athkar for every moment", "Morning, evening, after prayer and before sleep"),
         ("4-athkar-session", "Count with one tap", "With each dhikr's virtue and source"),
-        ("2-today-daily", "A verse and a hadith each day", "The verse opens right in the mushaf"),
-        ("5-reader", "The Madinah mushaf", "Uthmanic script, translation and recitation"),
+        ("2-today-daily", "The whole day at a glance", "Prayer times, the night's last third, athkar and Qibla"),
         ("6-hadith", "Six hadith collections", "Search, grades and favourites"),
     ],
     "ar": [
         ("1-today", "كل صلاة في وقتها", "عدّ تنازلي مباشر وتنبيهات للأذان والإقامة"),
+        ("5-reader", "المصحف كما يُطبع", "سطرًا بسطر، والتلاوة بلمسة"),
         ("3-athkar", "أذكار لكل وقت", "الصباح والمساء وبعد الصلاة وقبل النوم"),
         ("4-athkar-session", "عُدّ بلمسة واحدة", "مع فضل كل ذكر ومصدره"),
-        ("2-today-daily", "آية وحديث كل يوم", "وتفتح الآية في المصحف مباشرة"),
-        ("5-reader", "مصحف المدينة", "بالرسم العثماني مع الترجمة والتلاوة"),
+        ("2-today-daily", "يومك في لمحة", "مواقيت الصلاة وثلث الليل الأخير والأذكار والقبلة"),
         ("6-hadith", "الكتب الستة", "بحث ودرجات ومفضلة"),
     ],
     # The Qibla screen is left out: without a real compass sensor it only shows the "no compass" notice.
