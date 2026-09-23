@@ -549,17 +549,6 @@
     <string name="shortcut_tasbih_long">Open the tasbih</string>
 
     <!-- Onboarding -->
-    <string name="onboarding_welcome_title">Bilal</string>
-    <string name="onboarding_welcome_body">Prayer times, the mushaf, athkar and the Qibla. No account, no ads, and nothing about you leaves this phone unless you turn it on. Change the language any time in Settings.</string>
-    <string name="onboarding_location_title">Where you are</string>
-    <string name="onboarding_location_body">Prayer times and the Qibla are worked out for your position, on this phone. Location is used only while the app is open, never in the background. You can choose a city by hand instead.</string>
-    <string name="onboarding_alerts_title">Alerts that arrive</string>
-    <string name="onboarding_alerts_body">Android needs your permission to show prayer alerts, and a second one to deliver them on the minute rather than whenever it suits. If alerts still come late, Settings has a screen that shows exactly what on your phone is stopping them.</string>
-    <string name="onboarding_smart_title">Reacting to the day</string>
-    <string name="onboarding_smart_body">Bilal notices Jumu\'ah, Ramadan\'s nights, Arafah and the rest of the Islamic year, and offers the dua for the weather outside. Weather sends your location, rounded to about a kilometre, to Open-Meteo once an hour while the app is open. Turn it off in Settings whenever you like.</string>
-    <string name="onboarding_skip">Skip</string>
-    <string name="onboarding_next">Next</string>
-    <string name="onboarding_start">Start</string>
     <string name="iqama_waiting_body">Until the iqama for %1$s</string>
     <string name="adhan_sound_desc">Choose the sound and vibration for the call to prayer</string>
     <string name="adhan_sound_system">The phone\'s alarm sound</string>
@@ -593,15 +582,17 @@
     <string name="preview_inspiration_ref">Ash-Sharh 94:6</string>
     <string name="preview_moment_title">Friday</string>
     <string name="preview_moment_body">Read Surat al-Kahf, and send many blessings on the Prophet ﷺ.</string>
-    <string name="usage_switch">Count what I use</string>
-    <string name="usage_switch_desc_local">Counts which features you open, on this device only. Nothing is sent anywhere, and you can read and share the whole tally yourself.</string>
-    <string name="usage_switch_desc_shared">Counts which features you open and sends the totals once a day, over Wi-Fi. No text you type, no ayah you read, no location, and nothing that identifies you or your device.</string>
-    <string name="usage_show">What is counted</string>
-    <string name="usage_show_desc">Read the whole tally, and share it if you want to</string>
-    <string name="usage_summary">%1$s days used · %2$s opens · since %3$s</string>
-    <string name="usage_empty">Nothing counted yet.</string>
-    <string name="usage_share">Share this report</string>
     <string name="channel_updates">App updates</string>
     <string name="channel_updates_desc">A quiet note when a new version is published</string>
     <string name="update_notification_body">Version %1$s is ready to install</string>
+    <string name="setup_title">Welcome to Bilal</string>
+    <string name="setup_body">Three quick choices. You can change any of them later in Settings.</string>
+    <string name="setup_notifications">Prayer alerts</string>
+    <string name="setup_notifications_desc">An alert at each prayer time</string>
+    <string name="setup_location">Location</string>
+    <string name="setup_location_desc">Accurate prayer times and Qibla, worked out on this phone</string>
+    <string name="setup_usage">Share usage data</string>
+    <string name="setup_usage_desc">Anonymous counts of which features are opened, to help improve the app. Never what you read, type, or where you are.</string>
+    <string name="setup_done">Continue</string>
+    <string name="setup_allowed">Allowed</string>
 </resources>

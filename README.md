@@ -26,7 +26,7 @@ A private, offline-first Islamic companion for Android, built with Jetpack Compo
 
 ## Privacy
 
-No accounts, ads or crash reporting. Usage counting is a switch in Settings, off unless you turn it on, and this build is compiled without a collector address, so its counters never leave the device — Settings → Usage shows the whole tally. Location, settings, bookmarks and favorites stay on the device. [PRIVACY.md](PRIVACY.md) lists every network request the app can make.
+No accounts, ads or crash reporting. Anonymous usage counts, which help development, are asked for once at first run and are off unless you agree; this build is compiled without a collector address, so its counters never leave the device. Location, settings, bookmarks and favorites stay on the device. [PRIVACY.md](PRIVACY.md) lists every network request the app can make.
 
 ## Building
 
