@@ -27,6 +27,7 @@ import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
 import androidx.glance.color.DynamicThemeColorProviders
 import androidx.glance.layout.Alignment
+import androidx.glance.layout.ContentScale
 import androidx.glance.layout.Box
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
@@ -54,6 +55,15 @@ private val BrandColors = ColorProviders(light = DeenLightColors, dark = DeenDar
 internal val WidgetPadding = 14.dp
 
 /**
+ * The padding above and below the content: [WidgetPadding], or less on a widget one row tall, where
+ * 14dp top and bottom left too little of the height for a line of text.
+ */
+@Composable
+internal fun verticalPadding(): Dp = if (LocalSize.current.height < SHORT_WIDGET) 8.dp else WidgetPadding
+
+private val SHORT_WIDGET = 90.dp
+
+/**
  * A progress bar and the 6dp above it. Glance draws the platform's horizontal bar, which is 16dp tall
  * whatever it is given; budgeting 10dp for it pushed the last athkar meter off the bottom.
  */
@@ -66,7 +76,15 @@ internal fun BilalWidgetTheme(dynamic: Boolean, content: @Composable () -> Unit)
     GlanceTheme(colors = colors, content = content)
 }
 
-/** The rounded widget body. It's a tinted shape drawable, so corners are round on every Android version. */
+/**
+ * The rounded widget body: the shape drawn as an image under the content, tinted with the theme's
+ * colour and faded by [transparency].
+ *
+ * It used to be the box's background with a tint, and transparency did nothing: a tint is drawn
+ * SRC_ATOP, keeping the opacity of the white shape underneath, so a see-through colour only made the
+ * card paler. An image's own alpha fades the whole thing, and the colour stays a provider rather than
+ * one resolved colour, so the widget still follows the phone from light to dark.
+ */
 @Composable
 internal fun WidgetSurface(
     color: ColorProvider,
@@ -75,12 +93,6 @@ internal fun WidgetSurface(
     transparency: Float = 0f,
     content: @Composable () -> Unit,
 ) {
-    val context = LocalContext.current
-    val tint = if (transparency <= 0f) {
-        color
-    } else {
-        ColorProvider(color.getColor(context).copy(alpha = (1f - transparency).coerceIn(0.05f, 1f)))
-    }
     Box(
         modifier = GlanceModifier.fillMaxSize()
             .appWidgetBackground()
@@ -92,12 +104,18 @@ internal fun WidgetSurface(
                 } else {
                     GlanceModifier.cornerRadius(28.dp)
                 },
-            )
-            .background(ImageProvider(R.drawable.widget_shape), colorFilter = ColorFilter.tint(tint))
-            .then(modifier)
-            .padding(WidgetPadding),
-        content = content,
-    )
+            ),
+    ) {
+        Image(
+            provider = ImageProvider(R.drawable.widget_shape),
+            contentDescription = null,
+            modifier = GlanceModifier.fillMaxSize(),
+            contentScale = ContentScale.FillBounds,
+            colorFilter = ColorFilter.tint(color),
+            alpha = (1f - transparency).coerceIn(0f, 1f),
+        )
+        Box(GlanceModifier.fillMaxSize().then(modifier).padding(horizontal = WidgetPadding, vertical = verticalPadding()), content = content)
+    }
 }
 
 /**
@@ -137,7 +155,7 @@ internal class HeightBudget(total: Dp, private val fontScale: Float) {
 /** The budget of the widget being drawn: its height less the padding. Create it where it is spent. */
 @Composable
 internal fun rememberBudget(): HeightBudget =
-    HeightBudget(LocalSize.current.height - WidgetPadding * 2, LocalContext.current.resources.configuration.fontScale)
+    HeightBudget(LocalSize.current.height - verticalPadding() * 2, LocalContext.current.resources.configuration.fontScale)
 
 /**
  * The unfilled part of a progress bar: the card's own text colour, faint.

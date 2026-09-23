@@ -80,7 +80,7 @@ class QiblaWidget : GlanceAppWidget() {
     override val sizeMode: SizeMode = SizeMode.Exact
     override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(WidgetKind.QIBLA.previewSize))
 
-    override suspend fun provideGlance(context: Context, id: GlanceId) = provideContent(loadQibla(context, configOf(context, id)))
+    override suspend fun provideGlance(context: Context, id: GlanceId) = provideFresh(context, id, ::loadQibla)
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) = provideContent(loadQibla(context, WidgetConfig()))
 }
@@ -99,7 +99,10 @@ internal fun QiblaContent(state: QiblaWidgetState, config: WidgetConfig = Widget
     val budget = rememberBudget()
     // The degrees are the widget. The words under them go while they fit, the dial only where there is
     // width to spare: a dial that squeezes "294°" into "29…" has taken the place of what it illustrates.
-    budget.spend(budget.line(BEARING_SP))
+    // One row tall, the bearing shrinks to the height rather than being cut in half under its label.
+    val bearingSp = minOf(BEARING_SP, budget.left.value / budget.line(1f).value)
+    budget.spend(budget.line(bearingSp))
+    val showLabel = budget.takeLine(LABEL_SP)
     val showFromNorth = budget.takeLine(BODY_SP)
     val showDistance = budget.takeLine(BODY_SP)
     val dial = when {
@@ -114,8 +117,8 @@ internal fun QiblaContent(state: QiblaWidgetState, config: WidgetConfig = Widget
                 Spacer(GlanceModifier.width(12.dp))
             }
             Column(GlanceModifier.defaultWeight()) {
-                Text(state.label, style = textStyle(content, LABEL_SP.sp, FontWeight.Medium), maxLines = 1)
-                Text(state.degrees, style = textStyle(content, BEARING_SP.sp, FontWeight.Bold), maxLines = 1)
+                if (showLabel) Text(state.label, style = textStyle(content, LABEL_SP.sp, FontWeight.Medium), maxLines = 1)
+                Text(state.degrees, style = textStyle(content, bearingSp.sp, FontWeight.Bold), maxLines = 1)
                 if (showFromNorth) Text(state.fromNorth, style = textStyle(content, BODY_SP.sp), maxLines = 1)
                 if (showDistance) Text(state.distance, style = textStyle(content, BODY_SP.sp), maxLines = 1)
             }

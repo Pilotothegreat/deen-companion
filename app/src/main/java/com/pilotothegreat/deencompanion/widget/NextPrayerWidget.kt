@@ -113,7 +113,7 @@ class NextPrayerWidget : GlanceAppWidget() {
     override val sizeMode: SizeMode = SizeMode.Exact
     override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(WidgetKind.NEXT_PRAYER.previewSize))
 
-    override suspend fun provideGlance(context: Context, id: GlanceId) = provideContent(loadNextPrayer(context, configOf(context, id)))
+    override suspend fun provideGlance(context: Context, id: GlanceId) = provideFresh(context, id, ::loadNextPrayer)
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) = provideContent(loadNextPrayer(context, WidgetConfig()))
 
@@ -155,9 +155,10 @@ internal fun NextPrayerContent(state: NextPrayerState, config: WidgetConfig = Wi
             }
         } else if (budget.left < essentials) {
             // Too narrow for "Maghrib 2:59:59" on a line: the name small above a countdown as large as the height allows.
-            val showName = budget.takeLine(11f)
+            // The name only if a readable countdown still fits under it; the countdown is the widget.
+            val showName = budget.left >= budget.line(11f) + budget.line(14f) && budget.takeLine(11f)
             val fontScale = LocalContext.current.resources.configuration.fontScale
-            val countdownSp = (budget.left.value / (COUNTDOWN_LINE * fontScale)).coerceIn(12f, 20f)
+            val countdownSp = (budget.left.value / (COUNTDOWN_LINE * fontScale)).coerceIn(10f, 20f)
             Column(GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
                 if (showName) Text(state.name, style = textStyle(content, 11.sp, FontWeight.Bold), maxLines = 1)
                 Countdown(state.countdownTarget, countdownSp, state.dynamic)
@@ -166,9 +167,11 @@ internal fun NextPrayerContent(state: NextPrayerState, config: WidgetConfig = Wi
             // The card's three essentials, then the rest, most useful first, while it fits.
             budget.spend(essentials)
             val showAdhan = budget.takeLine(12f)
+            // The iqama before the day's strip: someone who turned it on is waiting for that time, and the
+            // strip took the room first, so a medium widget showed the five adhans and no iqama at all.
+            val showIqama = config.showIqama && state.iqama != null && budget.takeLine(12f)
             val showStrip = size.width >= NextPrayerWidget.STRIP_FROM &&
                 budget.take(STRIP_GAP + budget.line(11f) + budget.line(13f) + CELL_PADDING)
-            val showIqama = config.showIqama && state.iqama != null && budget.takeLine(12f)
             val showLabel = budget.takeLine(11f)
             Column(GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
                 Row(GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {

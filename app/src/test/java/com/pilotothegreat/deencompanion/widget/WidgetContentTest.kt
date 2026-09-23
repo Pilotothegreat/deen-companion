@@ -121,11 +121,28 @@ class WidgetContentTest {
     }
 
     @Test
-    fun narrowPrayerTimesLeaveIqamaOut() = runGlanceAppWidgetUnitTest {
+    fun aThreeCellListStillShowsIqama() = runGlanceAppWidgetUnitTest {
+        // The iqama used to need 250dp, the widget's own minimum; a launcher a few dp short hid it.
         setContext(context)
         setAppWidgetSize(DpSize(180.dp, 220.dp))
         provideComposable { BilalWidgetTheme(dynamic = false) { PrayerTimesContent(times) } }
         onNode(hasText("Isha")).assertExists()
+        onNode(hasText("3:55")).assertExists()
+    }
+
+    @Test
+    fun theStripShowsIqamaWhenItFits() = runGlanceAppWidgetUnitTest {
+        setContext(context)
+        setAppWidgetSize(DpSize(180.dp, 100.dp))
+        provideComposable { BilalWidgetTheme(dynamic = false) { PrayerTimesContent(times) } }
+        onNode(hasText("3:55")).assertExists()
+    }
+
+    @Test
+    fun iqamaTurnedOffStaysOff() = runGlanceAppWidgetUnitTest {
+        setContext(context)
+        setAppWidgetSize(DpSize(320.dp, 300.dp))
+        provideComposable { BilalWidgetTheme(dynamic = false) { PrayerTimesContent(times, WidgetConfig(showIqama = false)) } }
         onAllNodes(hasText("3:55")).assertCountEquals(0)
     }
 
@@ -133,7 +150,8 @@ class WidgetContentTest {
     fun wideShortPrayerTimesUseAOneLineHeader() = runGlanceAppWidgetUnitTest {
         setContext(context)
         setAppWidgetSize(DpSize(250.dp, 100.dp))
-        provideComposable { BilalWidgetTheme(dynamic = false) { PrayerTimesContent(times) } }
+        // With iqama on, the iqama line takes the room the header would have had.
+        provideComposable { BilalWidgetTheme(dynamic = false) { PrayerTimesContent(times, WidgetConfig(showIqama = false)) } }
         onNode(hasText("29 Rabi' I 1448 AH · Muscat, Oman")).assertExists()
     }
 

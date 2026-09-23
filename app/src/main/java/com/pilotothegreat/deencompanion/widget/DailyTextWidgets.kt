@@ -49,7 +49,7 @@ class VerseWidget : GlanceAppWidget() {
     override val sizeMode: SizeMode = SizeMode.Exact
     override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(WidgetKind.VERSE.previewSize))
 
-    override suspend fun provideGlance(context: Context, id: GlanceId) = provideContent(loadVerse(context, configOf(context, id)))
+    override suspend fun provideGlance(context: Context, id: GlanceId) = provideFresh(context, id, ::loadVerse)
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) = provideContent(loadVerse(context, WidgetConfig()))
 }
@@ -80,7 +80,7 @@ class InspirationWidget : GlanceAppWidget() {
     override val sizeMode: SizeMode = SizeMode.Exact
     override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(WidgetKind.INSPIRATION.previewSize))
 
-    override suspend fun provideGlance(context: Context, id: GlanceId) = provideContent(loadInspiration(context, configOf(context, id)))
+    override suspend fun provideGlance(context: Context, id: GlanceId) = provideFresh(context, id, ::loadInspiration)
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) = provideContent(loadInspiration(context, WidgetConfig()))
 }

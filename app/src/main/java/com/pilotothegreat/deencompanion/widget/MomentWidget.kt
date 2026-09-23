@@ -96,7 +96,7 @@ class MomentWidget : GlanceAppWidget() {
     override val sizeMode: SizeMode = SizeMode.Exact
     override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(WidgetKind.MOMENT.previewSize))
 
-    override suspend fun provideGlance(context: Context, id: GlanceId) = provideContent(loadMoment(context, configOf(context, id)))
+    override suspend fun provideGlance(context: Context, id: GlanceId) = provideFresh(context, id, ::loadMoment)
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) = provideContent(loadMoment(context, WidgetConfig()))
 }

@@ -94,7 +94,7 @@ class AthkarWidget : GlanceAppWidget() {
     override val sizeMode: SizeMode = SizeMode.Exact
     override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(WidgetKind.ATHKAR_NOW.previewSize))
 
-    override suspend fun provideGlance(context: Context, id: GlanceId) = provideContent(loadAthkar(context, configOf(context, id)))
+    override suspend fun provideGlance(context: Context, id: GlanceId) = provideFresh(context, id, ::loadAthkar)
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) = provideContent(loadAthkar(context, WidgetConfig()))
 }

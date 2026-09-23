@@ -104,7 +104,7 @@ object WidgetUpdater {
     /** Re-renders every placed widget (widgets that aren't on the home screen are skipped) and sets the next redraw. */
     suspend fun updateAll(context: Context) {
         WidgetKind.entries.map { it.widget() }.forEach { widget ->
-            runCatching { widget.updateAll(context) }
+            runCatching { widget.refreshAll(context) }
                 .onFailure { Timber.w(it, "%s update failed", widget.javaClass.simpleName) }
         }
         runCatching { scheduleRefresh(context) }.onFailure { Timber.w(it, "Couldn't schedule the widget refresh") }
@@ -112,7 +112,7 @@ object WidgetUpdater {
 
     /** Redraws only the next-prayer widget, whose bar is the one thing that moves between prayers, and books the next step. */
     internal suspend fun moveTheBar(context: Context) {
-        runCatching { NextPrayerWidget().updateAll(context) }.onFailure { Timber.w(it, "NextPrayerWidget update failed") }
+        runCatching { NextPrayerWidget().refreshAll(context) }.onFailure { Timber.w(it, "NextPrayerWidget update failed") }
         runCatching { scheduleRefresh(context) }.onFailure { Timber.w(it, "Couldn't schedule the widget refresh") }
     }
 

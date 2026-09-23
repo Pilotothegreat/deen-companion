@@ -86,13 +86,16 @@ class PrayerTimesWidget : GlanceAppWidget() {
     override val sizeMode: SizeMode = SizeMode.Exact
     override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(WidgetKind.PRAYER_TIMES.previewSize))
 
-    override suspend fun provideGlance(context: Context, id: GlanceId) = provideContent(loadPrayerTimes(context, configOf(context, id)))
+    override suspend fun provideGlance(context: Context, id: GlanceId) = provideFresh(context, id, ::loadPrayerTimes)
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) = provideContent(loadPrayerTimes(context, WidgetConfig()))
 
     internal companion object {
-        /** From this width a list has room for each prayer's iqama beside its adhan. */
-        val IQAMA_FROM = 250.dp
+        /**
+         * From this width a list has room for each prayer's iqama beside its adhan. It was 250dp — the
+         * widget's own minimum — so a launcher that measured a four-cell widget a few dp short hid it.
+         */
+        val IQAMA_FROM = 170.dp
 
         /** A strip cell narrower than this cannot hold "Maghrib"; the names then take a second row. */
         val NAMED_CELL = 44.dp
@@ -119,7 +122,7 @@ internal fun PrayerTimesContent(state: PrayerTimesState, config: WidgetConfig = 
                 showIqama = config.showIqama && size.width >= PrayerTimesWidget.IQAMA_FROM,
             )
         } else {
-            TimesStrip(state, budget, size.width)
+            TimesStrip(state, budget, size.width, showIqama = config.showIqama)
         }
     }
 }
@@ -166,24 +169,28 @@ private fun TimesList(state: PrayerTimesState, showPlace: Boolean, showIqama: Bo
 
 /** The five prayers across: under a one-line header when there is room, in two rows when it is narrow. */
 @Composable
-private fun TimesStrip(state: PrayerTimesState, budget: HeightBudget, width: Dp) {
+private fun TimesStrip(state: PrayerTimesState, budget: HeightBudget, width: Dp, showIqama: Boolean) {
     val colors = GlanceTheme.colors
     val named = (width - WidgetPadding * 2) / 5 >= PrayerTimesWidget.NAMED_CELL
     val namedCell = budget.line(NAME_SP) + budget.line(TIME_SP) + CELL_PADDING
+    val anyIqama = showIqama && state.rows.any { it.iqama != null }
     Column(GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
         when {
             named && budget.take(namedCell) -> {
+                // Iqama under each time before the header: the times are what the widget is for.
+                val iqama = anyIqama && budget.takeLine(IQAMA_SP)
                 if (budget.take(budget.line(HEADER_SP) + STRIP_GAP)) {
                     Text("${state.title} · ${state.place}", style = textStyle(colors.onSurfaceVariant, HEADER_SP.sp, FontWeight.Medium), maxLines = 1)
                     Spacer(GlanceModifier.height(STRIP_GAP))
                 }
-                Row(GlanceModifier.fillMaxWidth()) { state.rows.forEach { StripCell(it, named = true) } }
+                Row(GlanceModifier.fillMaxWidth()) { state.rows.forEach { StripCell(it, named = true, iqama = iqama) } }
             }
             !named && budget.take(namedCell * 2 + ROW_GAP) -> {
-                Row(GlanceModifier.fillMaxWidth()) { state.rows.take(3).forEach { StripCell(it, named = true) } }
+                val iqama = anyIqama && budget.take(budget.line(IQAMA_SP) * 2)
+                Row(GlanceModifier.fillMaxWidth()) { state.rows.take(3).forEach { StripCell(it, named = true, iqama = iqama) } }
                 Spacer(GlanceModifier.height(ROW_GAP))
                 Row(GlanceModifier.fillMaxWidth()) {
-                    state.rows.drop(3).forEach { StripCell(it, named = true) }
+                    state.rows.drop(3).forEach { StripCell(it, named = true, iqama = iqama) }
                     Spacer(GlanceModifier.defaultWeight())
                 }
             }
@@ -192,14 +199,16 @@ private fun TimesStrip(state: PrayerTimesState, budget: HeightBudget, width: Dp)
                 val cell = (width - WidgetPadding * 2) / 5
                 val fontScale = LocalContext.current.resources.configuration.fontScale
                 val timeSp = minOf(TIME_SP, cell.value / (TIME_EMS * fontScale))
-                Row(GlanceModifier.fillMaxWidth()) { state.rows.forEach { StripCell(it, named = false, timeSp) } }
+                budget.spend(budget.line(timeSp) + CELL_PADDING)
+                val iqama = anyIqama && budget.takeLine(IQAMA_SP)
+                Row(GlanceModifier.fillMaxWidth()) { state.rows.forEach { StripCell(it, named = false, timeSp, iqama) } }
             }
         }
     }
 }
 
 @Composable
-private fun RowScope.StripCell(row: TimesRow, named: Boolean, timeSp: Float = TIME_SP) {
+private fun RowScope.StripCell(row: TimesRow, named: Boolean, timeSp: Float = TIME_SP, iqama: Boolean = false) {
     val colors = GlanceTheme.colors
     val color = if (row.isNext) colors.onSecondaryContainer else colors.onSurface
     Column(
@@ -208,6 +217,14 @@ private fun RowScope.StripCell(row: TimesRow, named: Boolean, timeSp: Float = TI
     ) {
         if (named) Text(row.name, style = textStyle(color, NAME_SP.sp, align = TextAlign.Center), maxLines = 1)
         Text(row.time, style = textStyle(color, timeSp.sp, FontWeight.Bold, TextAlign.Center), maxLines = 1)
+        if (iqama) {
+            // An empty line where a prayer has no separate iqama, so the five cells stay one height.
+            Text(
+                row.iqama ?: " ",
+                style = textStyle(if (row.isNext) color else colors.onSurfaceVariant, IQAMA_SP.sp, align = TextAlign.Center),
+                maxLines = 1,
+            )
+        }
     }
 }
 
@@ -232,6 +249,7 @@ private const val ROW_SP = 13f
 private const val HEADER_SP = 12f
 private const val NAME_SP = 11f
 private const val TIME_SP = 14f
+private const val IQAMA_SP = 10f
 
 /** How many ems the widest short time, a bold "12:09", takes, with a little room to spare. */
 private const val TIME_EMS = 2.7f

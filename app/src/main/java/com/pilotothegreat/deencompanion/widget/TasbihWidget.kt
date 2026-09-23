@@ -69,7 +69,7 @@ class TasbihWidget : GlanceAppWidget() {
     override val sizeMode: SizeMode = SizeMode.Exact
     override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(WidgetKind.TASBIH.previewSize))
 
-    override suspend fun provideGlance(context: Context, id: GlanceId) = provideContent(loadTasbih(context, configOf(context, id)))
+    override suspend fun provideGlance(context: Context, id: GlanceId) = provideFresh(context, id, ::loadTasbih)
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) = provideContent(loadTasbih(context, WidgetConfig()))
 
@@ -88,7 +88,7 @@ internal suspend fun loadTasbih(context: Context, config: WidgetConfig): @Compos
 class TasbihIncrementAction : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
         WidgetDeps.tasbih.increment()
-        TasbihWidget().update(context, glanceId)
+        TasbihWidget().refresh(context, glanceId)
     }
 }
 
@@ -97,7 +97,7 @@ internal fun TasbihContent(state: TasbihWidgetState, config: WidgetConfig = Widg
     val colors = GlanceTheme.colors
     val content = colors.onSecondaryContainer
     val size = LocalSize.current
-    val inner = size.height - WidgetPadding * 2
+    val inner = size.height - verticalPadding() * 2
     val open = GlanceModifier.clickable(actionStartActivity(WidgetUpdater.openApp(LocalContext.current)))
     WidgetSurface(colors.secondaryContainer, open, transparency = config.transparency) {
         val budget = rememberBudget()
