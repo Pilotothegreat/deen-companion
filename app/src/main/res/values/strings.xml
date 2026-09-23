@@ -87,7 +87,6 @@
     <string name="permission_exact_title">Allow on-time alarms</string>
     <string name="permission_exact_body">Without this permission, Android may deliver prayer notifications a few minutes late.</string>
     <string name="update_available_short">A new version is available</string>
-    <string name="update_action">Update</string>
     <string name="daily_inspiration">Daily inspiration</string>
     <string name="verse_of_the_day">Verse of the day</string>
     <string name="qibla_summary">%1$s° from north · %2$s km to Makkah</string>
@@ -315,7 +314,6 @@
     <string name="notifications">Notifications</string>
     <string name="prayer_notifications">Prayer notifications</string>
     <string name="prayer_notifications_desc">A notification at each prayer that becomes a countdown to the iqama</string>
-    <string name="exact_alarms">On-time alarms</string>
     <string name="adhan_sound">Adhan sound</string>
     <string name="appearance">Appearance</string>
     <string name="theme">Theme</string>

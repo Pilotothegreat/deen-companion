@@ -104,7 +104,6 @@
     <string name="permission_exact_title">اسمح بالتنبيهات في وقتها</string>
     <string name="permission_exact_body">بدون هذا الإذن قد يؤخر أندرويد تنبيهات الصلاة بضع دقائق.</string>
     <string name="update_available_short">يتوفر إصدار جديد</string>
-    <string name="update_action">تحديث</string>
     <string name="daily_inspiration">إلهام اليوم</string>
     <string name="verse_of_the_day">آية اليوم</string>
     <string name="qibla_summary">%1$s° من الشمال · %2$s كم إلى مكة</string>
@@ -350,7 +349,6 @@
     <string name="notifications">التنبيهات</string>
     <string name="prayer_notifications">تنبيهات الصلاة</string>
     <string name="prayer_notifications_desc">إشعار عند كل صلاة يتحوّل إلى عدّ تنازلي حتى الإقامة</string>
-    <string name="exact_alarms">التنبيه في الوقت المحدد</string>
     <string name="adhan_sound">صوت الأذان</string>
     <string name="appearance">المظهر</string>
     <string name="theme">السمة</string>

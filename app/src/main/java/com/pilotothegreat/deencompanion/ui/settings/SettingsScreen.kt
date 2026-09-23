@@ -229,8 +229,6 @@ fun SettingsScreen(
         silenceAllowed = QuietDuringPrayer.isAllowed(context)
         onPauseOrDispose { }
     }
-    val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
-
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),

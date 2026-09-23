@@ -124,7 +124,8 @@ fun JumpSheet(quran: Quran, currentPage: Int, onJump: (Int) -> Unit, onDismiss: 
                     horizontalArrangement = Arrangement.spacedBy(Spacing.small),
                     verticalArrangement = Arrangement.spacedBy(Spacing.small),
                 ) {
-                    items((1..quran.pages.size).toList(), key = { it }) { page ->
+                    items(quran.pages.size, key = { it + 1 }) { index ->
+                        val page = index + 1
                         val selected = page == currentPage
                         Surface(
                             onClick = { onJump(page) },

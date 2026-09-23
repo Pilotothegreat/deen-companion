@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
@@ -47,7 +48,13 @@ import timber.log.Timber
 
 class DeenApplication : Application(), Configuration.Provider {
 
-    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    /**
+     * Background work for the life of the process. A failure in one job is logged, not rethrown: an
+     * uncaught exception here would take the whole app down over a widget redraw or a resync.
+     */
+    private val appScope = CoroutineScope(
+        SupervisorJob() + Dispatchers.Default + CoroutineExceptionHandler { _, e -> Timber.w(e, "Background job failed") },
+    )
     private val settings: SettingsRepository by inject()
     private val tasbih: TasbihRepository by inject()
     private val athkar: AthkarRepository by inject()
@@ -66,10 +73,7 @@ class DeenApplication : Application(), Configuration.Provider {
             androidContext(this@DeenApplication)
             modules(appModule)
         }
-        RescheduleWorker.enqueue(this)
-        KhatmaReminderWorker.enqueue(this)
-        AutoBackupWorker.enqueue(this)
-        UpdateCheckWorker.enqueue(this)
+        scheduleWork()
         countThisLaunch()
         syncLanguage()
         refreshWidgetsOnUnlock()
@@ -77,6 +81,17 @@ class DeenApplication : Application(), Configuration.Provider {
         keepChannelsLocalized()
         keepWidgetsInSync()
         warmTomorrow()
+    }
+
+    /**
+     * The periodic jobs, booked off the main thread: the first call initialises WorkManager, which
+     * opens its database, and that was a cold-start cost paid before the first frame.
+     */
+    private fun scheduleWork() = appScope.launch {
+        RescheduleWorker.enqueue(this@DeenApplication)
+        KhatmaReminderWorker.enqueue(this@DeenApplication)
+        AutoBackupWorker.enqueue(this@DeenApplication)
+        UpdateCheckWorker.enqueue(this@DeenApplication)
     }
 
     /**

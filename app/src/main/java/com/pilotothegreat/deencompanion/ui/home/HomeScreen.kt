@@ -48,6 +48,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -115,7 +116,11 @@ fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val content by viewModel.content.collectAsStateWithLifecycle()
-    val countdown by viewModel.countdown.collectAsStateWithLifecycle()
+    // Ticks every second. Read only inside the hero, so the second hand redraws one card rather than
+    // the whole of Today; the rest reads what changes once a prayer, through derivedStateOf.
+    val countdownState = viewModel.countdown.collectAsStateWithLifecycle()
+    val hasCountdown by remember { derivedStateOf { countdownState.value != null } }
+    val nextAdhan by remember { derivedStateOf { countdownState.value?.next } }
     val athkarNow by viewModel.athkarNow.collectAsStateWithLifecycle()
     val prayed by viewModel.prayedToday.collectAsStateWithLifecycle()
     val daysObserved by viewModel.daysObserved.collectAsStateWithLifecycle()
@@ -315,12 +320,14 @@ fun HomeScreen(
                         },
                     )
                 }
-                countdown?.let { cd -> item(key = "hero") { NextPrayerHero(cd, locale, springItem()) } }
+                if (hasCountdown) {
+                    item(key = "hero") { countdownState.value?.let { NextPrayerHero(it, locale, springItem()) } }
+                }
                 item(key = "times") {
                     Box(springItem()) {
                         PrayerTimesCard(
                             schedule = current.today,
-                            nextPrayer = countdown?.next?.takeIf { it.adhan.toLocalDate() == current.today.date }?.prayer,
+                            nextPrayer = nextAdhan?.takeIf { it.adhan.toLocalDate() == current.today.date }?.prayer,
                             muted = current.settings.mutedPrayers,
                             notificationsEnabled = current.settings.notificationsEnabled,
                             prayed = prayed,
