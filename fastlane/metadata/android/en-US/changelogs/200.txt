@@ -1,0 +1,7 @@
+Quran search that answers first. Type Ayat al-Kursi, 2:255, juz 30 or a surah's name and go straight there; plain text matches come after. Twenty more reciters to choose from.
+
+Widgets you can place anywhere. New Qibla, Khatma and Date widgets. Every widget now shrinks to a single row, transparency lets your wallpaper through, and iqama times appear as soon as you turn them on.
+
+A simpler first start: one card for prayer alerts, location and an optional, anonymous count of which features are used.
+
+Updates you notice: a new version pops up in the app, with its notes, and as a notification.

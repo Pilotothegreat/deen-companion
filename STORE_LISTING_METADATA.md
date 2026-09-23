@@ -8,7 +8,7 @@ Everything Google Play asks for, in one place. The listing text itself lives in 
 | --- | --- |
 | Package (Google Play) | `com.pilotothegreat.bilal`, a new listing |
 | Package (GitHub APK) | `com.pilotothegreat.deencompanion` |
-| Version | 2.1.0 (`versionCode` 199) |
+| Version | 2.2.0 (`versionCode` 200) |
 | Category | Books & Reference |
 | Tags | Prayer times, Quran, Islam |
 | Price | Free, no ads, no in-app purchases |
@@ -61,7 +61,7 @@ Sources are in `branding/` (the icon and mark) and `branding/store/` (the featur
 
 ## App signing
 
-Upload `bilal-2.1.0-play.aab`, built with `./gradlew bundlePlay`. It's the release build without the donation sheet, packaged as `com.pilotothegreat.bilal` and signed with the key in `~/Documents/bilal-signing/`, which becomes the Play **upload key**. When Play asks about app signing, choose **Use Google-generated key**.
+Upload `bilal-2.2.0-play.aab`, built with `./gradlew bundlePlay`. It's the release build without the donation sheet, packaged as `com.pilotothegreat.bilal` and signed with the key in `~/Documents/bilal-signing/`, which becomes the Play **upload key**. When Play asks about app signing, choose **Use Google-generated key**.
 
 The old Deen Companion listing (`com.pilotothegreat.deencompanion`) can't take updates, because its upload key (SHA1 `4A:55:35:8F:16:20:FB:FB:E6:DA:27:41:C2:06:4B:D5:60:28:F1:EA`) is lost. Its text can still be edited, so point its users to Bilal once the new app is live, then unpublish it. If that listing is ever needed again, `upload_certificate.pem` on the v1.7.0 release can register the new key there through an upload key reset.
 
