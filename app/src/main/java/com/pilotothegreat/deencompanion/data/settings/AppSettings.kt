@@ -91,7 +91,6 @@ data class SoundSettings(
 }
 
 data class QuranSettings(
-    val playbackSpeed: Float = 1f,
     val repeatMode: RepeatMode = RepeatMode.OFF,
     val repeatCount: Int = 3,
 )
@@ -151,6 +150,11 @@ data class AppSettings(
     val sounds: SoundSettings = SoundSettings(),
     val quran: QuranSettings = QuranSettings(),
     val accessibility: AccessibilitySettings = AccessibilitySettings(),
+    /**
+     * Whether the app may count what is used. Off in a fresh install, and off is the honest default:
+     * nothing is recorded until someone says yes in Settings.
+     */
+    val analyticsEnabled: Boolean = false,
     /** False until the first-run flow has been seen. */
     val onboardingCompleted: Boolean = false,
     /** The version whose "what's new" has already been shown. */

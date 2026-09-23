@@ -13,13 +13,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material.icons.rounded.BookmarkBorder
+import androidx.compose.material.icons.rounded.Bookmarks
 import androidx.compose.material.icons.rounded.BookmarkRemove
 import androidx.compose.material.icons.rounded.SearchOff
+import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.ListItemShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SecondaryTabRow
@@ -48,9 +51,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.core.quran.KhatmaProgress
+import com.pilotothegreat.deencompanion.core.quran.QuranDestination
 import com.pilotothegreat.deencompanion.data.quran.Bookmark
 import com.pilotothegreat.deencompanion.data.quran.Quran
 import com.pilotothegreat.deencompanion.data.quran.QuranSearchResults
+import com.pilotothegreat.deencompanion.data.quran.ResolvedDestination
 import com.pilotothegreat.deencompanion.data.quran.Revelation
 import com.pilotothegreat.deencompanion.data.quran.Surah
 import com.pilotothegreat.deencompanion.ui.common.Formatters
@@ -266,6 +271,20 @@ private fun SearchResults(results: QuranSearchResults?, quran: Quran, onOpenRead
                 contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
                 verticalArrangement = Arrangement.spacedBy(Spacing.small),
             ) {
+                // What the query named outright comes first: someone who typed "ayat al kursi" is not
+                // looking for a list of everywhere those words appear.
+                if (results.destinations.isNotEmpty()) {
+                    item { SectionHeader(stringResource(R.string.jump_to), Modifier.padding(start = 0.dp)) }
+                    itemsIndexed(results.destinations, key = { _, d -> "jump-${d.destination}" }) { index, found ->
+                        DestinationRow(
+                            found = found,
+                            quran = quran,
+                            locale = locale,
+                            shapes = ListItemDefaults.segmentedShapes(index, results.destinations.size),
+                            onOpenReader = onOpenReader,
+                        )
+                    }
+                }
                 if (results.surahs.isNotEmpty()) {
                     item { SectionHeader(stringResource(R.string.surahs), Modifier.padding(start = 0.dp)) }
                     itemsIndexed(results.surahs, key = { _, s -> "surah-${s.number}" }) { index, surah ->
@@ -318,6 +337,67 @@ private fun SearchResults(results: QuranSearchResults?, quran: Quran, onOpenRead
     }
 }
 
+/**
+ * One place the query named: a passage by its name, an ayah, a surah, a juz or a page.
+ *
+ * The line underneath says where it is, because "Ayat al-Kursi" is a name and "Al-Baqarah 2:255" is
+ * the place, and someone reading the list is choosing between places.
+ */
+@Composable
+private fun DestinationRow(
+    found: ResolvedDestination,
+    quran: Quran,
+    locale: Locale,
+    shapes: ListItemShapes,
+    onOpenReader: (ReaderKey) -> Unit,
+) {
+    val destination = found.destination
+    val verse = found.verse
+    val title = when (destination) {
+        is QuranDestination.Ayah -> destination.passage?.let { stringResource(it.label) }
+            ?: verseReference(quran.surah(destination.surah), destination.ayah, locale)
+        is QuranDestination.SurahStart -> surahName(quran.surah(destination.surah), locale)
+        is QuranDestination.Page -> stringResource(R.string.page_tab) + " " + Formatters.number(destination.number, locale)
+        is QuranDestination.Juz -> stringResource(R.string.juz_number, Formatters.number(destination.number, locale))
+    }
+    val subtitle = when (destination) {
+        is QuranDestination.Ayah -> {
+            val surah = quran.surah(destination.surah)
+            val passage = destination.passage
+            if (passage != null && !passage.isSingleAyah) {
+                "${surahName(surah, locale)} " + stringResource(
+                    R.string.ayah_range,
+                    Formatters.number(surah.number, locale),
+                    Formatters.number(passage.ayah, locale),
+                    Formatters.number(passage.lastAyah, locale),
+                )
+            } else {
+                verseReference(surah, destination.ayah, locale).takeIf { passage != null }
+                    ?: verse?.standaloneTranslation.orEmpty()
+            }
+        }
+        is QuranDestination.SurahStart -> surahDetails(quran.surah(destination.surah), locale)
+        is QuranDestination.Page, is QuranDestination.Juz ->
+            verse?.let { verseReference(quran.surah(it.surah), it.number, locale) }.orEmpty()
+    }
+    val icon = when (destination) {
+        is QuranDestination.Ayah -> if (destination.passage != null) Icons.Rounded.Star else Icons.AutoMirrored.Rounded.MenuBook
+        is QuranDestination.SurahStart -> Icons.AutoMirrored.Rounded.MenuBook
+        is QuranDestination.Page, is QuranDestination.Juz -> Icons.Rounded.Bookmarks
+    }
+    SegmentedListItem(
+        onClick = {
+            onOpenReader(ReaderKey(found.page, verse?.surah ?: 0, verse?.number ?: 0))
+        },
+        shapes = shapes,
+        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+        leadingContent = { Icon(icon, contentDescription = null) },
+        supportingContent = if (subtitle.isBlank()) null else {
+            { Text(subtitle, maxLines = 2, overflow = TextOverflow.Ellipsis) }
+        },
+    ) { Text(title, style = MaterialTheme.typography.titleMedium) }
+}
+
 private fun highlighted(text: String, range: IntRange?, style: SpanStyle): AnnotatedString = buildAnnotatedString {
     append(text)
     if (range != null) addStyle(style, range.first, range.last + 1)
@@ -328,7 +408,7 @@ internal fun surahName(surah: Surah, locale: Locale): String =
     if (locale.isArabic) stringResource(R.string.surah_title, surah.nameArabic) else surah.nameEnglish
 
 @Composable
-private fun surahDetails(surah: Surah, locale: Locale): String {
+internal fun surahDetails(surah: Surah, locale: Locale): String {
     val revelation = stringResource(if (surah.revelation == Revelation.MECCAN) R.string.meccan else R.string.medinan)
     val verses = pluralStringResource(R.plurals.verse_count, surah.verses.size, Formatters.number(surah.verses.size, locale))
     return "$revelation · $verses"

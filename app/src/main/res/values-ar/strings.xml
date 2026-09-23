@@ -121,7 +121,7 @@
     <string name="tasbih_dhikr_lailahaillallah">لا إله إلا الله</string>
 
     <!-- Quran -->
-    <string name="search_quran_hint">ابحث في السور والآيات</string>
+    <string name="search_quran_hint">آية الكرسي، ٢:٢٥٥، الجزء ٣٠، الصبر…</string>
     <string name="surahs">السور</string>
     <string name="ayahs">الآيات</string>
     <string name="bookmarks">العلامات</string>
@@ -143,6 +143,13 @@
     <string name="bookmark">علامة</string>
     <string name="remove_bookmark">إزالة العلامة</string>
     <string name="jump_to">الانتقال إلى</string>
+    <string name="passage_ayat_al_kursi">آية الكرسي</string>
+    <string name="passage_khawatim_al_baqarah">خواتيم سورة البقرة</string>
+    <string name="passage_ayat_an_nur">آية النور</string>
+    <string name="passage_ayat_ad_dayn">آية الدين</string>
+    <string name="passage_mu_awwidhatayn">المعوذتان</string>
+    <string name="passage_three_quls">المعوذات الثلاث</string>
+    <string name="ayah_range">%1$s:%2$s-%3$s</string>
     <string name="juz_tab">الأجزاء</string>
     <string name="page_tab">الصفحات</string>
     <string name="juz_number">الجزء %1$s</string>
@@ -154,8 +161,6 @@
     <string name="repeat_ayah">هذه الآية</string>
     <string name="repeat_range">من موضع البداية</string>
     <string name="repeat_surah">السورة كاملة</string>
-    <string name="playback_speed">السرعة</string>
-    <string name="speed_multiplier">%1$s×</string>
     <string name="retry">إعادة المحاولة</string>
     <string name="playback_error_offline">لا يوجد اتصال. الآيات المحفوظة ما زالت تعمل.</string>
     <string name="playback_error_missing">هذه الآية غير متوفرة لهذا القارئ. جرّب قارئًا آخر.</string>
@@ -169,6 +174,23 @@
     <string name="reciter_mishary">مشاري العفاسي</string>
     <string name="reciter_husary">محمود خليل الحصري</string>
     <string name="reciter_abdul_basit">عبد الباسط عبد الصمد</string>
+    <string name="reciter_minshawi">محمد صديق المنشاوي</string>
+    <string name="reciter_sudais">عبد الرحمن السديس</string>
+    <string name="reciter_shuraim">سعود الشريم</string>
+    <string name="reciter_ghamdi">سعد الغامدي</string>
+    <string name="reciter_hudhaify">علي الحذيفي</string>
+    <string name="reciter_muaiqly">ماهر المعيقلي</string>
+    <string name="reciter_shatri">أبو بكر الشاطري</string>
+    <string name="reciter_ayyub">محمد أيوب</string>
+    <string name="reciter_basfar">عبد الله بصفر</string>
+    <string name="reciter_dosari">ياسر الدوسري</string>
+    <string name="reciter_qatami">ناصر القطامي</string>
+    <string name="reciter_juhany">عبد الله عواد الجهني</string>
+    <string name="reciter_ali_jaber">علي جابر</string>
+    <string name="reciter_fares_abbad">فارس عباد</string>
+    <string name="reciter_jibreel">محمد جبريل</string>
+    <string name="reciter_hani_rifai">هاني الرفاعي</string>
+    <string name="reciter_tablawi">محمد الطبلاوي</string>
     <string name="sleep_timer">مؤقت النوم</string>
     <string name="timer_off">إيقاف</string>
 
@@ -381,6 +403,12 @@
     <string name="widget_prayer_times_desc">مواقيت اليوم مع إبراز الصلاة القادمة</string>
     <string name="widget_verse_desc">آية قصيرة لكل يوم</string>
     <string name="widget_athkar_desc">أذكار هذا الوقت وتقدمك فيها</string>
+    <string name="widget_qibla_desc">اتجاه الكعبة من مكانك، والمسافة إليها</string>
+    <string name="widget_qibla_from_north">من الشمال</string>
+    <string name="widget_qibla_distance">%1$s كم إلى مكة</string>
+    <string name="widget_khatma_desc">خطة قراءتك: ما بقي لليوم، وكم قطعت</string>
+    <string name="widget_date_title">التاريخ</string>
+    <string name="widget_date_desc">تاريخ اليوم الهجري ومعه الميلادي</string>
 
     <!-- Islamic occasions -->
     <string name="occasion_kahf">سورة الكهف</string>
@@ -601,4 +629,15 @@
     <string name="preview_inspiration_ref">الشرح ٥</string>
     <string name="preview_moment_title">الجمعة</string>
     <string name="preview_moment_body">اقرأ سورة الكهف، وأكثر من الصلاة على النبي ﷺ.</string>
+    <string name="usage_switch">احتساب ما أستخدمه</string>
+    <string name="usage_switch_desc_local">يحسب المزايا التي تفتحها على هذا الجهاز فقط، ولا يُرسل شيء إلى أي مكان، ويمكنك قراءة السجل كاملًا ومشاركته بنفسك.</string>
+    <string name="usage_switch_desc_shared">يحسب المزايا التي تفتحها ويرسل المجاميع مرة في اليوم عبر الواي فاي. بلا نصوص تكتبها، ولا آيات تقرؤها، ولا موقع، ولا ما يدل عليك أو على جهازك.</string>
+    <string name="usage_show">ما الذي يُحسب</string>
+    <string name="usage_show_desc">اقرأ السجل كاملًا، وشاركه إن شئت</string>
+    <string name="usage_summary">%1$s يومًا · %2$s فتحة · منذ %3$s</string>
+    <string name="usage_empty">لم يُحسب شيء بعد.</string>
+    <string name="usage_share">مشاركة التقرير</string>
+    <string name="channel_updates">تحديثات التطبيق</string>
+    <string name="channel_updates_desc">تنبيه هادئ عند صدور إصدار جديد</string>
+    <string name="update_notification_body">الإصدار %1$s جاهز للتثبيت</string>
 </resources>

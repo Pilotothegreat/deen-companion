@@ -1,5 +1,7 @@
 package com.pilotothegreat.deencompanion.ui.quran
 
+import com.pilotothegreat.deencompanion.core.analytics.UsageEvent
+import com.pilotothegreat.deencompanion.data.analytics.Analytics
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pilotothegreat.deencompanion.core.quran.KhatmaProgress
@@ -43,7 +45,15 @@ class QuranViewModel(
         .debounce(250)
         .map { it.trim() }
         .distinctUntilChanged()
-        .mapLatest { if (it.isEmpty()) null else repository.search(it) }
+        .mapLatest {
+            if (it.isEmpty()) return@mapLatest null
+            Analytics.record(UsageEvent.QURAN_SEARCHED)
+            repository.search(it).also { results ->
+                // Counted apart from the plain search: whether people name what they are after is
+                // the question the smarter search field was built to answer.
+                if (results.destinations.isNotEmpty()) Analytics.record(UsageEvent.QURAN_SEARCH_JUMPED)
+            }
+        }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     val bookmarks: StateFlow<List<Bookmark>> =
@@ -60,6 +70,7 @@ class QuranViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     fun startKhatma(days: Int, fromPage: Int) {
+        Analytics.record(UsageEvent.KHATMA_STARTED)
         viewModelScope.launch { khatma.start(days, fromPage, LocalDate.now()) }
     }
 

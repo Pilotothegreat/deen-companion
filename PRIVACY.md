@@ -1,8 +1,8 @@
 # Privacy Policy for Bilal
 
-Last updated: September 12, 2026
+Last updated: September 19, 2026
 
-Bilal has no accounts, ads, analytics or crash reporting. Everything you set up in the app stays on your device. This page lists exactly what the app stores and every network request it can make.
+Bilal has no accounts, ads or crash reporting, and no analytics unless you turn them on. Everything you set up in the app stays on your device. This page lists exactly what the app stores and every network request it can make.
 
 ## What stays on your device
 
@@ -11,6 +11,21 @@ Bilal has no accounts, ads, analytics or crash reporting. Everything you set up 
 - Quran bookmarks, your last-read page, hadith favorites, your tasbih count, and today's athkar progress and streak.
 
 This data is stored with Android's DataStore and a local Room database. It is never uploaded, and it is excluded from Android cloud backups.
+
+## Counting what is used
+
+Settings has a switch called **Count what I use**. It is off in a new install, and while it is off the app records nothing at all.
+
+Turned on, the app keeps a counter per day for each of a fixed list of things — the screens you open, a recitation played, a search made, an athkar session finished, a widget configured. It is a list of names and numbers, and that is the whole of it:
+
+- **No text.** Not what you search for, not an ayah you read, bookmarked or shared, not a note.
+- **No location**, not even a country beyond the language your phone is set to.
+- **No identifier.** No account, no device id, no advertising id, nothing random kept to recognise this phone again. Two reports from one phone cannot be told apart from two reports from two phones.
+- **No times.** A counter says "seven today", never when.
+
+You can read the whole tally yourself — **Settings → Usage → What is counted** shows every counter, and shares the exact report if you want to keep it or send it on. Turning the switch off deletes what was counted. Counters older than 90 days are deleted anyway.
+
+Whether the totals are sent anywhere at all depends on the build. The open-source build is compiled with no collector address, so nothing is uploaded however the switch is set. A build that was given one sends the day's totals, described above, once a day over Wi-Fi and never on a low battery.
 
 ## Network requests
 
@@ -23,7 +38,8 @@ The app works offline for prayer times, city search, the Quran text, athkar, the
 | Nearby earthquakes | earthquake.usgs.gov | While the app is open, at most once an hour, and never while battery saver is on | Your IP address. The feed is the same worldwide list for everyone; the filtering by distance happens on your device, so the service is never told where you are |
 | Quran recitation | everyayah.com | When you play a recitation | Your IP address and the ayah requested |
 | Full hadith collections | cdn.jsdelivr.net | Only when you tap Download | Your IP address |
-| Update check | api.github.com (sideloaded installs) or Google Play (Play Store installs) | At most once a day, or when you tap the version in Settings | Your IP address |
+| Update check | api.github.com (sideloaded installs) or Google Play (Play Store installs) | Up to four times a day while the app is open, once a day in the background, or when you tap the version in Settings | Your IP address |
+| Usage totals | Only a build configured with a collector, and only with **Count what I use** turned on | Once a day, on Wi-Fi | The counters and build described above, and your IP address |
 
 Weather is the only feature that sends anything about where you are. The coordinates are blunted to about a kilometre before they leave the device, which is enough to know whether it is raining over you and not enough to place a house. Under battery saver the request is not made at all, and the rest of the app carries on without it.
 
@@ -54,7 +70,7 @@ The optional "Support development" sheet can open Omani banking apps (Bank Musca
 
 ## Children
 
-The app collects no personal data from anyone, including children.
+The app collects no personal data from anyone, including children. The usage counters described above contain nothing personal and are off unless turned on.
 
 ## Changes
 

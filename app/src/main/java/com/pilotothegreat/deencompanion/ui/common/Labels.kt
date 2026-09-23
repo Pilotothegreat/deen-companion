@@ -100,10 +100,6 @@ object Formatters {
 
     fun number(value: Int, locale: Locale): String = Numerals.format(value, locale)
 
-    /** One decimal place at most, in the locale's digits: "1", "1.5", "0.75". */
-    fun decimal(value: Float, locale: Locale): String =
-        Numerals.localize(java.math.BigDecimal(value.toDouble()).setScale(2, java.math.RoundingMode.HALF_UP).stripTrailingZeros().toPlainString(), locale)
-
     /** A date such as "14 Mar", for an expiry the reader needs to recognise at a glance. */
     fun date(epochMillis: Long, zone: java.time.ZoneId, locale: Locale): String =
         pattern("d MMM", locale).format(java.time.Instant.ofEpochMilli(epochMillis).atZone(zone))

@@ -178,7 +178,14 @@ internal fun WidgetConfigScreen(
     var saving by remember { mutableStateOf(false) }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text(stringResource(R.string.widget_config)) }) },
+        topBar = {
+            // The launcher opens this on top of the home screen with no other clue to what is being
+            // configured, and "Widget" was true of all ten of them.
+            TopAppBar(
+                title = { Text(stringResource(kind.label)) },
+                subtitle = { Text(stringResource(R.string.widget_config)) },
+            )
+        },
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
         val current = config
@@ -231,6 +238,7 @@ private fun OptionRows(kind: WidgetKind, config: WidgetConfig, onChange: (Widget
             val choices = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) listOf(null, true, false) else listOf(null, false)
             SegmentedListItem(
                 shapes = shapes,
+                colors = optionRowColors(),
                 leadingContent = { OptionBadge(Icons.Rounded.Palette, MaterialShapes.Cookie9Sided.toShape()) },
                 supportingContent = {
                     ConnectedChoice(
@@ -256,6 +264,7 @@ private fun OptionRows(kind: WidgetKind, config: WidgetConfig, onChange: (Widget
             val slider = rememberSliderState(config.transparency, (MAX_TRANSPARENCY * 10).roundToInt() - 1, 0f..MAX_TRANSPARENCY)
             SegmentedListItem(
                 shapes = shapes,
+                colors = optionRowColors(),
                 leadingContent = { OptionBadge(Icons.Rounded.Opacity, MaterialShapes.Clover4Leaf.toShape()) },
                 trailingContent = {
                     Text(
@@ -278,6 +287,7 @@ private fun OptionRows(kind: WidgetKind, config: WidgetConfig, onChange: (Widget
                 checked = config.showIqama,
                 onCheckedChange = { onChange(config.copy(showIqama = it)) },
                 shapes = shapes,
+                colors = optionRowColors(),
                 leadingContent = { OptionBadge(Icons.Rounded.Schedule, MaterialShapes.Sunny.toShape()) },
                 trailingContent = { Switch(checked = config.showIqama, onCheckedChange = null) },
             ) { Text(stringResource(R.string.widget_config_iqama)) }
@@ -285,6 +295,7 @@ private fun OptionRows(kind: WidgetKind, config: WidgetConfig, onChange: (Widget
         if (WidgetOption.ATHKAR in kind.options) add { shapes ->
             SegmentedListItem(
                 shapes = shapes,
+                colors = optionRowColors(),
                 leadingContent = { OptionBadge(Icons.Rounded.AutoAwesome, MaterialShapes.Flower.toShape()) },
                 supportingContent = {
                     ConnectedChoice(
@@ -311,6 +322,18 @@ private fun OptionRows(kind: WidgetKind, config: WidgetConfig, onChange: (Widget
         rows.forEachIndexed { index, row -> row(ListItemDefaults.segmentedShapes(index, rows.size)) }
     }
 }
+
+/**
+ * One surface for every option row, selected or not.
+ *
+ * A row carrying a switch is a selectable row, which M3 tints when it is on, and next to the plain
+ * rows above it that read as one row of four being highlighted for no reason.
+ */
+@Composable
+private fun optionRowColors() = ListItemDefaults.colors(
+    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+    selectedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+)
 
 @Composable
 private fun OptionBadge(icon: ImageVector, shape: Shape) {

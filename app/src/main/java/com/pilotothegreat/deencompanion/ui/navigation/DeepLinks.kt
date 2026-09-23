@@ -23,6 +23,9 @@ object DeepLinks {
      */
     const val QURAN = "quran"
 
+    /** Where the version row is, which is where a notification about a release should land. */
+    const val SETTINGS = "settings"
+
     fun athkar(context: Context, categoryId: String): Intent = open(context, ATHKAR + categoryId)
 
     fun reader(context: Context, page: Int, surah: Int = 0, ayah: Int = 0): Intent =
@@ -41,6 +44,7 @@ object DeepLinks {
                 QIBLA -> QiblaKey
                 TASBIH -> AthkarKey
                 QURAN -> QuranKey
+                SETTINGS -> SettingsKey
                 else -> null
             }
             else -> null

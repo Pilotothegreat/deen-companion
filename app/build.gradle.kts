@@ -43,6 +43,15 @@ android {
         base.archivesName = "bilal-$versionName"
         // The donation sheet opens banking apps; the Google Play build leaves it out (see the play build type).
         buildConfigField("boolean", "SUPPORT_SHEET", "true")
+
+        // Where anonymous usage reports are sent, for builds that have somewhere to send them.
+        // Empty — the default, and what an open-source build compiles with — means the app counts
+        // locally and posts nothing, however the switch in Settings is set.
+        buildConfigField(
+            "String",
+            "ANALYTICS_ENDPOINT",
+            "\"${project.findProperty("bilal.analyticsEndpoint") ?: ""}\"",
+        )
     }
 
     signingConfigs {

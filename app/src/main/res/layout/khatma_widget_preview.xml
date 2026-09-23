@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The widget picker's picture of the khatma widget. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:gravity="center_vertical"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        style="@style/WidgetPreviewLabel"
+        android:text="@string/khatma" />
+
+    <TextView
+        style="@style/WidgetPreviewTitle"
+        android:text="@string/preview_khatma_due" />
+
+    <TextView
+        style="@style/WidgetPreviewLabel"
+        android:textStyle="normal"
+        android:text="@string/preview_khatma_progress" />
+
+</LinearLayout>

@@ -134,6 +134,9 @@ internal fun QuoteContent(state: QuoteState, config: WidgetConfig = WidgetConfig
     val translationLines = if (withTranslation) ((budget.left - GAP) / budget.line(TRANSLATION_SP)).toInt().coerceIn(1, 4) else 0
     WidgetSurface(colors.widgetBackground, GlanceModifier.clickable(actionStartActivity(state.open)), transparency = config.transparency) {
         Column(GlanceModifier.fillMaxSize()) {
+            // A short text sits in the middle of the card rather than at the top with a hole under it;
+            // where the text fills the card these two weights collapse and nothing moves.
+            Spacer(GlanceModifier.defaultWeight())
             if (showLabel) {
                 Text(state.label, style = textStyle(colors.primary, LABEL_SP.sp, FontWeight.Medium), maxLines = 1)
                 Spacer(GlanceModifier.height(GAP))
@@ -149,8 +152,8 @@ internal fun QuoteContent(state: QuoteState, config: WidgetConfig = WidgetConfig
                 Spacer(GlanceModifier.height(GAP))
                 Text(state.translation, GlanceModifier.fillMaxWidth(), textStyle(colors.onSurfaceVariant, TRANSLATION_SP.sp), maxLines = translationLines)
             }
+            Spacer(GlanceModifier.defaultWeight())
             if (showSource) {
-                Spacer(GlanceModifier.defaultWeight())
                 Text(
                     state.source,
                     GlanceModifier.fillMaxWidth(),

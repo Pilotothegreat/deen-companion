@@ -33,6 +33,19 @@ internal object WidgetArt {
         drawGroup(canvas, vector.root, whitePaint())
     }
 
+    /**
+     * A Material icon turned [degrees] clockwise about its centre.
+     *
+     * Glance has no rotation modifier, and a widget cannot read the compass anyway: the qibla arrow
+     * is drawn once, at the bearing from true north, and stays where it was drawn.
+     */
+    fun rotatedIcon(vector: ImageVector, degrees: Float, sizePx: Int): Bitmap = createBitmap(sizePx, sizePx).also { bitmap ->
+        val canvas = Canvas(bitmap)
+        canvas.rotate(degrees, sizePx / 2f, sizePx / 2f)
+        canvas.scale(sizePx / vector.viewportWidth, sizePx / vector.viewportHeight)
+        drawGroup(canvas, vector.root, whitePaint())
+    }
+
     private fun drawGroup(canvas: Canvas, group: VectorGroup, paint: Paint) {
         canvas.save()
         canvas.translate(group.translationX + group.pivotX, group.translationY + group.pivotY)

@@ -79,7 +79,9 @@ internal data class AthkarWidgetState(
                     )
                 },
                 fraction = progress.fraction(category),
-                meters = listOf(AthkarIds.MORNING, AthkarIds.EVENING).mapNotNull { id ->
+                // Not the category already named above: the widget showed "Evening" twice, once as the
+                // heading and once as a meter under it.
+                meters = listOf(AthkarIds.MORNING, AthkarIds.EVENING).filterNot { it == category.id }.mapNotNull { id ->
                     library.category(id)?.let { AthkarMeter(it.title(locale), progress.fraction(it)) }
                 },
             )
@@ -140,7 +142,7 @@ internal fun AthkarContent(state: AthkarWidgetState, config: WidgetConfig = Widg
                     progress = state.fraction,
                     modifier = GlanceModifier.fillMaxWidth(),
                     color = colors.tertiary,
-                    backgroundColor = colors.surfaceVariant,
+                    backgroundColor = trackColor(content),
                 )
             }
             meters.forEach { meter ->
@@ -151,7 +153,7 @@ internal fun AthkarContent(state: AthkarWidgetState, config: WidgetConfig = Widg
                     progress = meter.fraction,
                     modifier = GlanceModifier.fillMaxWidth(),
                     color = colors.tertiary,
-                    backgroundColor = colors.surfaceVariant,
+                    backgroundColor = trackColor(content),
                 )
             }
         }

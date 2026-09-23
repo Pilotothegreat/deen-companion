@@ -148,15 +148,17 @@ private fun TimesList(state: PrayerTimesState, showPlace: Boolean, showIqama: Bo
                     textStyle(color, ROW_SP.sp, if (next) FontWeight.Bold else FontWeight.Normal),
                     maxLines = 1,
                 )
+                // The adhan first and the iqama after it, as a mosque's board reads: printed the other
+                // way round the row said "5:01  4:36", two times running backwards.
+                Text(row.time, style = textStyle(color, ROW_SP.sp, FontWeight.Bold), maxLines = 1)
                 if (showIqama && row.iqama != null) {
                     Text(
                         row.iqama,
-                        GlanceModifier.padding(end = 10.dp),
+                        GlanceModifier.padding(start = 10.dp),
                         textStyle(if (next) color else colors.onSurfaceVariant, 11.sp),
                         maxLines = 1,
                     )
                 }
-                Text(row.time, style = textStyle(color, ROW_SP.sp, FontWeight.Bold), maxLines = 1)
             }
         }
     }
@@ -201,12 +203,20 @@ private fun RowScope.StripCell(row: TimesRow, named: Boolean, timeSp: Float = TI
     val colors = GlanceTheme.colors
     val color = if (row.isNext) colors.onSecondaryContainer else colors.onSurface
     Column(
-        modifier = GlanceModifier.defaultWeight().then(pill(row.isNext)).padding(vertical = CELL_PADDING / 2),
+        modifier = GlanceModifier.defaultWeight().then(cell(row.isNext)).padding(vertical = CELL_PADDING / 2),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         if (named) Text(row.name, style = textStyle(color, NAME_SP.sp, align = TextAlign.Center), maxLines = 1)
         Text(row.time, style = textStyle(color, timeSp.sp, FontWeight.Bold, TextAlign.Center), maxLines = 1)
     }
+}
+
+/** One cell of the strip of five, which is about as tall as it is wide. */
+@Composable
+private fun cell(selected: Boolean): GlanceModifier = if (selected) {
+    GlanceModifier.background(ImageProvider(R.drawable.widget_cell), colorFilter = ColorFilter.tint(GlanceTheme.colors.secondaryContainer))
+} else {
+    GlanceModifier
 }
 
 @Composable

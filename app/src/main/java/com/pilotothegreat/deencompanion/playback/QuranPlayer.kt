@@ -49,7 +49,6 @@ data class PlaybackState(
     val repeatCount: Int = 3,
     /** How many times the repeating unit has already come round. */
     val repeatsDone: Int = 0,
-    val speed: Float = 1f,
 ) {
     val isActive: Boolean get() = surah > 0
 }
@@ -85,20 +84,17 @@ class QuranPlayer(
     private data class PlaybackPrefs(
         val mode: RepeatMode = RepeatMode.OFF,
         val count: Int = 3,
-        val speed: Float = 1f,
         val continuous: Boolean = true,
     )
 
     init {
         scope.launch {
             settings.settings
-                .map { PlaybackPrefs(it.quran.repeatMode, it.quran.repeatCount, it.quran.playbackSpeed, true) }
+                .map { PlaybackPrefs(it.quran.repeatMode, it.quran.repeatCount, true) }
                 .distinctUntilChanged()
                 .collect { new ->
-                    val speedChanged = new.speed != prefs.speed
                     prefs = new
-                    _state.update { it.copy(repeatMode = new.mode, repeatCount = new.count, speed = new.speed) }
-                    if (speedChanged && _state.value.isActive) withController { it.setPlaybackSpeed(new.speed) }
+                    _state.update { it.copy(repeatMode = new.mode, repeatCount = new.count) }
                 }
         }
     }
@@ -137,7 +133,6 @@ class QuranPlayer(
                 .build()
         }
         player.setMediaItems(items, (fromAyah - 1).coerceIn(0, items.lastIndex), 0L)
-        player.setPlaybackSpeed(prefs.speed)
         player.prepare()
         if (start) player.play()
         _state.update {
@@ -173,9 +168,39 @@ class QuranPlayer(
         }
     }
 
-    fun next() = withController { if (it.hasNextMediaItem()) it.seekToNextMediaItem() }
+    /**
+     * The ayah after this one, and at the end of a surah the first ayah of the next.
+     *
+     * The recitation itself runs on into the next surah when it reaches the end, so a button that
+     * went dead at the last ayah was the odd one out; it also kept its place in a repeat it had just
+     * been asked to leave.
+     */
+    fun next() = withController { player ->
+        clearRepeats()
+        if (player.hasNextMediaItem()) player.seekToNextMediaItem() else stepSurah(+1)
+    }
 
-    fun previous() = withController { if (it.hasPreviousMediaItem()) it.seekToPreviousMediaItem() }
+    /** The ayah before this one, and at the head of a surah the last ayah of the one before. */
+    fun previous() = withController { player ->
+        clearRepeats()
+        if (player.hasPreviousMediaItem()) player.seekToPreviousMediaItem() else stepSurah(-1)
+    }
+
+    /** Crosses into the neighbouring surah, playing or paused exactly as the player already was. */
+    private fun stepSurah(direction: Int) {
+        val number = (current?.number ?: return) + direction
+        if (number !in 1..114) return
+        val playing = _state.value.isPlaying
+        scope.launch {
+            val surah = quran.quran().surah(number)
+            play(surah, if (direction > 0) 1 else surah.verses.size, _state.value.reciter, start = playing)
+        }
+    }
+
+    private fun clearRepeats() {
+        repeatsDone = 0
+        _state.update { it.copy(repeatsDone = 0) }
+    }
 
     fun stop() = withController { player ->
         player.stop()
@@ -183,7 +208,7 @@ class QuranPlayer(
         sendSleepTimer(0L)
         current = null
         repeatsDone = 0
-        _state.update { PlaybackState(reciter = it.reciter, repeatMode = prefs.mode, repeatCount = prefs.count, speed = prefs.speed) }
+        _state.update { PlaybackState(reciter = it.reciter, repeatMode = prefs.mode, repeatCount = prefs.count) }
     }
 
     /** Pauses after [minutes]; 0 cancels the timer. */

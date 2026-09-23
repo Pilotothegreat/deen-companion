@@ -16,7 +16,12 @@ import com.pilotothegreat.deencompanion.core.prayer.DaySchedule
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
 import com.pilotothegreat.deencompanion.core.prayer.PrayerConfig
 import com.pilotothegreat.deencompanion.data.athkar.AthkarRepository
+import com.pilotothegreat.deencompanion.core.analytics.UsageEvent
+import com.pilotothegreat.deencompanion.data.analytics.Analytics
+import com.pilotothegreat.deencompanion.data.analytics.AnalyticsRepository
+import com.pilotothegreat.deencompanion.data.analytics.UsageUploadWorker
 import com.pilotothegreat.deencompanion.data.backup.AutoBackupWorker
+import com.pilotothegreat.deencompanion.data.update.UpdateCheckWorker
 import com.pilotothegreat.deencompanion.data.settings.AppLanguage
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
 import com.pilotothegreat.deencompanion.data.settings.SoundSettings
@@ -34,6 +39,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
@@ -63,12 +69,31 @@ class DeenApplication : Application(), Configuration.Provider {
         RescheduleWorker.enqueue(this)
         KhatmaReminderWorker.enqueue(this)
         AutoBackupWorker.enqueue(this)
+        UpdateCheckWorker.enqueue(this)
+        countThisLaunch()
         syncLanguage()
         refreshWidgetsOnUnlock()
         keepAlarmsInSync()
         keepChannelsLocalized()
         keepWidgetsInSync()
         warmTomorrow()
+    }
+
+    /**
+     * One launch counted, the old counters dropped, and the report scheduled or cancelled to match
+     * the switch in Settings.
+     *
+     * The switch is the whole of the policy: turned off, the table is emptied, the periodic upload is
+     * cancelled and nothing is counted until it is turned back on.
+     */
+    private fun countThisLaunch() = appScope.launch {
+        val analytics = get<AnalyticsRepository>()
+        Analytics.record(UsageEvent.APP_OPENED)
+        analytics.prune()
+        analytics.enabled.collect { on ->
+            if (on && analytics.hasCollector) UsageUploadWorker.enqueue(this@DeenApplication)
+            else UsageUploadWorker.cancel(this@DeenApplication)
+        }
     }
 
     /**

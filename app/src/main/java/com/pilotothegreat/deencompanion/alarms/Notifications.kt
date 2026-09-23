@@ -56,6 +56,7 @@ object Notifications {
     const val CHANNEL_IQAMA = "iqama"
     const val CHANNEL_ATHKAR = "athkar"
     const val CHANNEL_KHATMA = "khatma"
+    const val CHANNEL_UPDATES = "updates"
     private const val LEGACY_CHANNEL = "prayer_times"
 
     /** Creates or renames the channels in [languageTag]; call on start and when the language changes. */
@@ -73,6 +74,8 @@ object Notifications {
                     .apply { description = res.getString(R.string.channel_athkar_desc) },
                 NotificationChannel(CHANNEL_KHATMA, res.getString(R.string.channel_khatma), NotificationManager.IMPORTANCE_LOW)
                     .apply { description = res.getString(R.string.channel_khatma_desc) },
+                NotificationChannel(CHANNEL_UPDATES, res.getString(R.string.channel_updates), NotificationManager.IMPORTANCE_LOW)
+                    .apply { description = res.getString(R.string.channel_updates_desc) },
             ),
         )
     }
@@ -135,8 +138,38 @@ object Notifications {
         }
     }
 
+    /**
+     * A new version is out. Low importance and sent once per release: it is a message, not an alarm,
+     * and it exists because a sideloaded copy has nothing else to tell it.
+     */
+    fun showUpdate(context: Context, languageTag: String, version: String) {
+        if (!canPost(context)) return
+        val res = AppLanguage.localizedContext(context, languageTag)
+        val open = PendingIntent.getActivity(
+            context,
+            UPDATE_REQUEST,
+            DeepLinks.screen(context, DeepLinks.SETTINGS),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        val notification = NotificationCompat.Builder(context, CHANNEL_UPDATES)
+            .setSmallIcon(R.drawable.notification)
+            .setContentTitle(res.getString(R.string.update_available_short))
+            .setContentText(res.getString(R.string.update_notification_body, version))
+            .setContentIntent(open)
+            .setAutoCancel(true)
+            .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)
+            .build()
+        try {
+            NotificationManagerCompat.from(context).notify(UPDATE_NOTIFICATION, notification)
+        } catch (_: SecurityException) {
+            // Permission revoked between the check and the post.
+        }
+    }
+
     private const val KHATMA_REQUEST = 900
     private const val KHATMA_NOTIFICATION = 901
+    private const val UPDATE_REQUEST = 910
+    private const val UPDATE_NOTIFICATION = 911
 
     /** The reader can switch a channel off in system settings, and the app cannot switch it back. */
     fun isAdhanChannelBlocked(context: Context): Boolean {

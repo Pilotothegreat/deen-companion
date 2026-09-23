@@ -15,6 +15,7 @@ import com.pilotothegreat.deencompanion.alarms.launchAsync
 import com.pilotothegreat.deencompanion.core.prayer.DaySchedule
 import com.pilotothegreat.deencompanion.data.athkar.AthkarRepository
 import com.pilotothegreat.deencompanion.data.moment.MomentRepository
+import com.pilotothegreat.deencompanion.data.quran.KhatmaRepository
 import com.pilotothegreat.deencompanion.data.quran.QuranRepository
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
 import com.pilotothegreat.deencompanion.data.tasbih.TasbihRepository
@@ -29,6 +30,7 @@ internal object WidgetDeps : KoinComponent {
     val athkar: AthkarRepository by inject()
     val quran: QuranRepository by inject()
     val moments: MomentRepository by inject()
+    val khatma: KhatmaRepository by inject()
 }
 
 // The first three receivers keep their original class names so widgets placed before the update stay put.
@@ -60,6 +62,18 @@ class MomentWidgetProvider : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = MomentWidget()
 }
 
+class QiblaWidgetProvider : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = QiblaWidget()
+}
+
+class KhatmaWidgetProvider : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = KhatmaWidget()
+}
+
+class DateWidgetProvider : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = DateWidget()
+}
+
 /** Redraws the widgets: all of them at a prayer or midnight, and only the next-prayer bar in between. */
 class WidgetRefreshReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -82,6 +96,9 @@ object WidgetUpdater {
         AthkarWidgetProvider::class,
         TasbihWidgetProvider::class,
         MomentWidgetProvider::class,
+        QiblaWidgetProvider::class,
+        KhatmaWidgetProvider::class,
+        DateWidgetProvider::class,
     )
 
     /** Re-renders every placed widget (widgets that aren't on the home screen are skipped) and sets the next redraw. */

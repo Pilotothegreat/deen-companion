@@ -11,6 +11,8 @@ import androidx.compose.material.icons.rounded.WbSunny
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import com.pilotothegreat.deencompanion.core.analytics.UsageEvent
+import com.pilotothegreat.deencompanion.data.analytics.Analytics
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.ui.common.AthkarIcon
 import kotlinx.serialization.Serializable
@@ -50,6 +52,27 @@ enum class TopLevel(
  */
 class Navigator(val backStack: NavBackStack<NavKey>) {
 
+    /**
+     * Which screens were opened, counted in the one place every screen is opened from.
+     *
+     * Instrumenting each screen instead would mean twenty call sites, nineteen of which stay right
+     * and one of which is forgotten the next time a screen is added.
+     */
+    private fun countScreen(key: NavKey) {
+        val event = when (key) {
+            HomeKey -> UsageEvent.SCREEN_TODAY
+            QuranKey -> UsageEvent.SCREEN_QURAN
+            HadithKey -> UsageEvent.SCREEN_HADITH
+            AthkarKey -> UsageEvent.SCREEN_ATHKAR
+            QiblaKey -> UsageEvent.SCREEN_QIBLA
+            SettingsKey -> UsageEvent.SCREEN_SETTINGS
+            is ReaderKey -> UsageEvent.SCREEN_READER
+            is AthkarSessionKey -> UsageEvent.ATHKAR_SESSION_STARTED
+            else -> return
+        }
+        Analytics.record(event)
+    }
+
     val currentTab: TopLevel
         get() = backStack.lastOrNull { key -> TopLevel.entries.any { it.key == key } }
             ?.let { key -> TopLevel.entries.first { it.key == key } }
@@ -60,12 +83,14 @@ class Navigator(val backStack: NavBackStack<NavKey>) {
 
     fun selectTab(tab: TopLevel) {
         if (backStack.lastOrNull() == tab.key) return
+        countScreen(tab.key)
         backStack.clear()
         backStack.add(HomeKey)
         if (tab != TopLevel.HOME) backStack.add(tab.key)
     }
 
     fun navigate(key: NavKey) {
+        countScreen(key)
         backStack.add(key)
     }
 
