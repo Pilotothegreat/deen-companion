@@ -619,7 +619,7 @@
     <string name="preview_moment_title">الجمعة</string>
     <string name="preview_moment_body">اقرأ سورة الكهف، وأكثر من الصلاة على النبي ﷺ.</string>
     <string name="channel_updates">تحديثات التطبيق</string>
-    <string name="channel_updates_desc">تنبيه هادئ عند صدور إصدار جديد</string>
+    <string name="channel_updates_desc">تنبيه عند صدور إصدار جديد</string>
     <string name="update_notification_body">الإصدار %1$s جاهز للتثبيت</string>
     <string name="setup_title">أهلًا بك في بلال</string>
     <string name="setup_body">ثلاثة اختيارات سريعة، ويمكنك تغيير أيٍّ منها لاحقًا من الإعدادات.</string>
@@ -631,4 +631,5 @@
     <string name="setup_usage_desc">أعداد مجهولة الهوية للميزات التي تُفتح، لتحسين التطبيق. لا يُرسل ما تقرؤه أو تكتبه ولا مكانك أبدًا.</string>
     <string name="setup_done">متابعة</string>
     <string name="setup_allowed">مسموح</string>
+    <string name="update_notification_generic">اضغط لترى الجديد وتحدّث</string>
 </resources>

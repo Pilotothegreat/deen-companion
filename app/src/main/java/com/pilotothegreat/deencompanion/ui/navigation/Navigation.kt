@@ -26,6 +26,9 @@ import kotlinx.serialization.Serializable
 @Serializable data object ReliabilityKey : NavKey
 @Serializable data object AthkarKey : NavKey
 
+/** Not a screen: asks the shell to show the update dialog over whatever is open. */
+@Serializable data object UpdateKey : NavKey
+
 /** One athkar category, counted item by item. */
 @Serializable data class AthkarSessionKey(val categoryId: String) : NavKey
 

@@ -1,6 +1,5 @@
 package com.pilotothegreat.deencompanion.ui.home
 
-import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pilotothegreat.deencompanion.core.analytics.UsageEvent
@@ -66,10 +65,7 @@ data class AthkarNow(val category: AthkarCategory, val progress: DayProgress)
 sealed interface HomeEvent {
     data object LocationUnavailable : HomeEvent
     data object LocationPermissionMissing : HomeEvent
-    /**
-     * [insistent] is set once an update has been waiting long enough, or is important enough, that
-     * the note stays on screen until it is answered instead of sliding away by itself.
-     */
+    /** An update worth a pop-up; [insistent] once it has waited long enough or matters enough. */
     data class UpdateAvailable(val insistent: Boolean) : HomeEvent
 }
 
@@ -222,5 +218,4 @@ class HomeViewModel(
         viewModelScope.launch { moments.dismiss(moment) }
     }
 
-    fun updateIntent(): Intent = updates.updateIntent()
 }

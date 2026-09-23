@@ -23,8 +23,10 @@ object DeepLinks {
      */
     const val QURAN = "quran"
 
-    /** Where the version row is, which is where a notification about a release should land. */
     const val SETTINGS = "settings"
+
+    /** The update dialog itself, which is where a notification about a release should land. */
+    const val UPDATE = "update"
 
     fun athkar(context: Context, categoryId: String): Intent = open(context, ATHKAR + categoryId)
 
@@ -45,6 +47,7 @@ object DeepLinks {
                 TASBIH -> AthkarKey
                 QURAN -> QuranKey
                 SETTINGS -> SettingsKey
+                UPDATE -> UpdateKey
                 else -> null
             }
             else -> null

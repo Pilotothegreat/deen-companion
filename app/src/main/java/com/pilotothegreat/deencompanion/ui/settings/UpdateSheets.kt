@@ -20,6 +20,13 @@ import androidx.compose.ui.unit.dp
 import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.data.update.InstallState
+import com.pilotothegreat.deencompanion.data.update.UpdateChecker
+import com.pilotothegreat.deencompanion.ui.common.startSafely
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 /**
  * What the update will change, before it is downloaded.
@@ -96,3 +103,35 @@ fun WhatsNewSheet(version: String, notes: String, onDismiss: () -> Unit) {
         }
     }
 }
+
+/**
+ * The update dialog with everything it needs to act: Play's in-place flow for a Play install, the
+ * in-app download for a sideloaded one, and the web page only when neither can do it. Shared by the
+ * version row in Settings and the pop-up the app shows on launch or from the notification.
+ */
+@Composable
+fun UpdatePrompt(available: UpdateChecker.State.Available, viewModel: SettingsViewModel, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val install by viewModel.install.collectAsStateWithLifecycle()
+    val playUpdate = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
+        viewModel.completePlayUpdate()
+    }
+    UpdateDialog(
+        version = available.version,
+        notes = available.notes,
+        install = install,
+        canInstall = viewModel.canInstallUpdates() && available.apkUrl != null,
+        onUpdate = { viewModel.downloadAndInstall(available) },
+        onOpenPage = {
+            onDismiss()
+            if (viewModel.isPlayInstall) {
+                // Play updates in place; only if it has nothing on offer is anyone sent to the listing.
+                viewModel.startPlayUpdate(playUpdate) { context.startSafely(viewModel.updateIntent()) }
+            } else {
+                context.startSafely(viewModel.updateIntent())
+            }
+        },
+        onDismiss = onDismiss,
+    )
+}
+

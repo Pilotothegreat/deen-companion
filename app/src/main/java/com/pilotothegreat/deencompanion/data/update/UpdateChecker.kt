@@ -58,6 +58,10 @@ class UpdateChecker(private val context: Context, private val settings: Settings
     @Volatile private var priority = 0
     @Volatile private var stalenessDays = 0
 
+    /** The version code Play has on offer, so a Play update can be told apart from the last one. */
+    @Volatile var playVersionCode = 0
+        private set
+
     val lastCheckedAt = settings.lastUpdateCheckedAt
 
     val isPlayInstall: Boolean by lazy {
@@ -89,6 +93,7 @@ class UpdateChecker(private val context: Context, private val settings: Settings
                 settings.saveUpdateCheck(now, "")
                 priority = runCatching { info.updatePriority() }.getOrDefault(0)
                 stalenessDays = runCatching { info.clientVersionStalenessDays() ?: 0 }.getOrDefault(0)
+                playVersionCode = runCatching { info.availableVersionCode() }.getOrDefault(0)
                 if (info.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) State.Available(null) else State.UpToDate
             } else {
                 val release = JSONObject(Http.getText(RELEASES_API, headers = mapOf("Accept" to "application/vnd.github+json")))

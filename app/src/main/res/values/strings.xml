@@ -583,7 +583,7 @@
     <string name="preview_moment_title">Friday</string>
     <string name="preview_moment_body">Read Surat al-Kahf, and send many blessings on the Prophet ﷺ.</string>
     <string name="channel_updates">App updates</string>
-    <string name="channel_updates_desc">A quiet note when a new version is published</string>
+    <string name="channel_updates_desc">A note when a new version is published</string>
     <string name="update_notification_body">Version %1$s is ready to install</string>
     <string name="setup_title">Welcome to Bilal</string>
     <string name="setup_body">Three quick choices. You can change any of them later in Settings.</string>
@@ -595,4 +595,5 @@
     <string name="setup_usage_desc">Anonymous counts of which features are opened, to help improve the app. Never what you read, type, or where you are.</string>
     <string name="setup_done">Continue</string>
     <string name="setup_allowed">Allowed</string>
+    <string name="update_notification_generic">Tap to see what changed and update</string>
 </resources>

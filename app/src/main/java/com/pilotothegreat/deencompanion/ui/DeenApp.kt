@@ -49,6 +49,9 @@ import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.BuildConfig
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.ui.settings.WhatsNewSheet
+import com.pilotothegreat.deencompanion.ui.settings.UpdatePrompt
+import com.pilotothegreat.deencompanion.data.update.UpdateChecker
+import com.pilotothegreat.deencompanion.ui.navigation.UpdateKey
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.getValue
@@ -124,13 +127,27 @@ fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpe
             onDismiss = { showWhatsNew = false },
         )
     }
+    // The update pop-up, over whatever is open: raised by Today when an update has earned it, and by
+    // the update notification.
+    var showUpdate by rememberSaveable { mutableStateOf(false) }
+    val updateState by settingsViewModel.updateState.collectAsStateWithLifecycle()
+    (updateState as? UpdateChecker.State.Available)?.takeIf { showUpdate && !setup }?.let { available ->
+        UpdatePrompt(available, settingsViewModel, onDismiss = { showUpdate = false })
+    }
+
     val backStack = rememberNavBackStack(HomeKey)
     val navigator = remember(backStack) { Navigator(backStack) }
     LaunchedEffect(destination) {
-        destination?.let {
-            navigator.open(it)
-            onDestinationOpened()
+        when (destination) {
+            null -> return@LaunchedEffect
+            UpdateKey -> {
+                // The notification's check may be a day old; look again so the dialog has the notes.
+                if (updateState !is UpdateChecker.State.Available) settingsViewModel.checkForUpdates()
+                showUpdate = true
+            }
+            else -> navigator.open(destination)
         }
+        onDestinationOpened()
     }
     // "Choose a city" during first run lands on the picker rather than dropping someone on Today
     // beside the very prompt they just answered.
@@ -194,6 +211,7 @@ fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpe
                                 onOpenAthkar = { navigator.navigate(AthkarSessionKey(it)) },
                                 onOpenReliability = { navigator.navigate(ReliabilityKey) },
                                 onOpenReader = navigator::navigate,
+                                onUpdateAvailable = { showUpdate = true },
                             )
                         }
                         entry<QuranKey>(metadata = tabMotion) { QuranScreen(onOpenReader = navigator::navigate) }

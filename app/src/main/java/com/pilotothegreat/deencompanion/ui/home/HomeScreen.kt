@@ -39,10 +39,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -113,6 +111,7 @@ fun HomeScreen(
     onOpenAthkar: (String) -> Unit,
     onOpenReader: (ReaderKey) -> Unit,
     onOpenReliability: () -> Unit,
+    onUpdateAvailable: () -> Unit = {},
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val content by viewModel.content.collectAsStateWithLifecycle()
@@ -153,17 +152,7 @@ fun HomeScreen(
                 HomeEvent.LocationPermissionMissing -> scope.launch {
                     snackbar.showSnackbar(resources.getString(R.string.location_permission_needed))
                 }
-                is HomeEvent.UpdateAvailable -> scope.launch {
-                    val result = snackbar.showSnackbar(
-                        message = resources.getString(R.string.update_available_short),
-                        actionLabel = resources.getString(R.string.update_action),
-                        // An update that has been waiting a fortnight stays on screen until it is
-                        // answered; a fresh one slides away as it always did.
-                        duration = if (event.insistent) SnackbarDuration.Indefinite else SnackbarDuration.Long,
-                        withDismissAction = event.insistent,
-                    )
-                    if (result == SnackbarResult.ActionPerformed) context.startSafely(viewModel.updateIntent())
-                }
+                is HomeEvent.UpdateAvailable -> onUpdateAvailable()
             }
         }
     }

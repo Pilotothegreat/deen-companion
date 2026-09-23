@@ -213,9 +213,6 @@ fun SettingsScreen(
     var showIqama by rememberSaveable { mutableStateOf(false) }
     var showRestore by rememberSaveable { mutableStateOf(false) }
     var showSounds by rememberSaveable { mutableStateOf(false) }
-    val playUpdate = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
-        viewModel.completePlayUpdate()
-    }
     var pickingFor by rememberSaveable { mutableStateOf<Prayer?>(null) }
     val pickSound = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val prayer = pickingFor ?: return@rememberLauncherForActivityResult
@@ -224,7 +221,6 @@ fun SettingsScreen(
         val uri = result.data?.getParcelableExtra<android.net.Uri>(android.media.RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
         viewModel.setAdhanSound(prayer, uri?.toString() ?: SoundSettings.SILENT)
     }
-    val install by viewModel.install.collectAsStateWithLifecycle()
     var exactAllowed by remember { mutableStateOf(viewModel.canScheduleExactAlarms()) }
     // Both are granted in Android's own settings, so both are read again on the way back from there.
     var silenceAllowed by remember { mutableStateOf(QuietDuringPrayer.isAllowed(context)) }
@@ -638,24 +634,7 @@ fun SettingsScreen(
     }
 
     (updateState as? UpdateChecker.State.Available)?.takeIf { showUpdate }?.let { available ->
-        UpdateDialog(
-            version = available.version,
-            notes = available.notes,
-            install = install,
-            canInstall = viewModel.canInstallUpdates() && available.apkUrl != null,
-            onUpdate = { viewModel.downloadAndInstall(available) },
-            onOpenPage = {
-                showUpdate = false
-                if (viewModel.isPlayInstall) {
-                    // Play updates in place; only if it has nothing on offer do we send anyone out
-                    // to the listing.
-                    viewModel.startPlayUpdate(playUpdate) { context.startSafely(viewModel.updateIntent()) }
-                } else {
-                    context.startSafely(viewModel.updateIntent())
-                }
-            },
-            onDismiss = { showUpdate = false },
-        )
+        UpdatePrompt(available, viewModel, onDismiss = { showUpdate = false })
     }
     if (showSounds) {
         AdhanSoundSheet(
