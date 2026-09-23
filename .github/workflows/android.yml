@@ -29,6 +29,10 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        # Only platform-tools: the action's default also asks for "tools", which the runner's
+        # command-line tools 16.0 no longer have, and the step fails. Gradle fetches the rest.
+        with:
+          packages: platform-tools
 
       - name: Restore release keystore
         if: env.RELEASE_KEYSTORE_BASE64 != ''
