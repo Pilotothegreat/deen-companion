@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Widget picker preview for the athkar widget before Android 15. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:gravity="center_vertical"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView style="@style/WidgetPreviewLabel" android:text="@string/athkar_now" />
+
+    <TextView style="@style/WidgetPreviewTitle" android:text="@string/athkar" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="@string/preview_athkar_count"
+        android:textColor="@color/widget_text_secondary"
+        android:textSize="12sp" />
+
+</LinearLayout>

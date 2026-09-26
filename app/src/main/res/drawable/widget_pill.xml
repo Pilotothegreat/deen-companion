@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The pill behind the next prayer's row, white so Glance can tint it.
+
+  Inset a little so a highlighted row sits inside the card rather than against its edges.
+-->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:insetLeft="3dp"
+    android:insetRight="3dp">
+    <shape>
+        <solid android:color="#FFFFFFFF" />
+        <corners android:radius="999dp" />
+    </shape>
+</inset>

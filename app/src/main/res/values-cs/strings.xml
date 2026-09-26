@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name">Traffic Light</string>
-    <string name="today">Dnes</string>
-    <string name="grant">Grant</string>
-    <string name="settings">Nastavení</string>
-    <string name="notifications">Oznámení</string>
-</resources>

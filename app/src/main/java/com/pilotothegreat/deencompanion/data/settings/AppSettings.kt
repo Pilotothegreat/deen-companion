@@ -1,0 +1,210 @@
+package com.pilotothegreat.deencompanion.data.settings
+
+import com.pilotothegreat.deencompanion.core.prayer.AsrSchool
+import com.pilotothegreat.deencompanion.core.prayer.CalculationMethod
+import com.pilotothegreat.deencompanion.core.prayer.HighLatitudeMode
+import com.pilotothegreat.deencompanion.core.prayer.IqamaRule
+import androidx.annotation.StringRes
+import com.pilotothegreat.deencompanion.R
+import com.pilotothegreat.deencompanion.core.prayer.Prayer
+import com.pilotothegreat.deencompanion.core.prayer.PrayerConfig
+import com.pilotothegreat.deencompanion.core.quran.RepeatMode
+import com.pilotothegreat.deencompanion.core.travel.TravelState
+import com.pilotothegreat.deencompanion.data.quran.Reciter
+import java.time.LocalTime
+import java.time.ZoneId
+
+enum class ThemeMode { SYSTEM, LIGHT, DARK }
+
+/** Where the saved location came from. Enum names are persisted in settings; do not rename. */
+enum class LocationSource {
+    /** Nothing saved yet; the app uses [Defaults]. */
+    DEFAULT,
+    DEVICE,
+
+    /** No longer produced; kept so a value saved before 1.9.0 still reads back. */
+    IP,
+    /** Picked from the city list; automatic updates leave it alone. */
+    MANUAL,
+}
+
+data class SavedLocation(
+    val latitude: Double,
+    val longitude: Double,
+    val cityName: String?,
+    val timezoneId: String,
+    /** ISO 3166 alpha-2 country, used to pick the calculation method automatically. */
+    val countryCode: String?,
+    /** Epoch millis of the last successful lookup; 0 when never refreshed. */
+    val updatedAt: Long,
+    /** True until a location has been saved; prayer times then use [Defaults]. */
+    val isDefault: Boolean,
+    val source: LocationSource,
+)
+
+data class IqamaSetting(
+    val fixed: Boolean,
+    val offsetMinutes: Int,
+    val fixedTime: LocalTime,
+) {
+    val rule: IqamaRule get() = if (fixed) IqamaRule.Fixed(fixedTime) else IqamaRule.Offset(offsetMinutes)
+}
+
+/**
+ * How the app follows the day and the world: the Islamic year, the weather, travel, eclipses and nearby
+ * earthquakes. They are simply on. 2.1 removed the switch that turned them all off: nobody wants the dua
+ * for rain without the dua for wind, and the one request that says where you are already sends a place
+ * blunted to a kilometre, and never under battery saver.
+ */
+data class SmartSettings(
+    /** The Islamic day turns over at Maghrib, as it does in the calendar itself. */
+    val hijriDayStartsAtMaghrib: Boolean = true,
+    /** Distance from home past which travel is suspected. */
+    val safarKm: Int = Defaults.SAFAR_KM,
+    /** Where home is, for measuring travel against; null until one is anchored. */
+    val homeLatitude: Double? = null,
+    val homeLongitude: Double? = null,
+    /** What the reader last told the app about travelling, which outranks any guess. */
+    val travelState: TravelState = TravelState.HOME,
+) {
+    val hasHome: Boolean get() = homeLatitude != null && homeLongitude != null
+
+    val isTravelling: Boolean get() = travelState == TravelState.CONFIRMED
+}
+
+/** What each prayer sounds like, and what arrives before it. */
+data class SoundSettings(
+    /** Per prayer: a muezzin id, [SYSTEM_SOUND], [SILENT], or a content URI the user picked. */
+    val adhan: Map<Prayer, String> = emptyMap(),
+    /** Minutes before the adhan for the early reminder; 0 turns it off. */
+    val preReminderMinutes: Int = 0,
+    val preReminderPrayers: Set<Prayer> = Prayer.obligatory.toSet(),
+    /** Minutes of silence from iqama; 0 turns it off. */
+    val silenceMinutes: Int = 0,
+) {
+    fun adhanFor(prayer: Prayer): String = adhan[prayer] ?: SYSTEM_SOUND
+
+    companion object {
+        const val SYSTEM_SOUND = "system"
+        const val SILENT = "silent"
+    }
+}
+
+data class QuranSettings(
+    val repeatMode: RepeatMode = RepeatMode.OFF,
+    val repeatCount: Int = 3,
+)
+
+enum class ContrastMode(@get:StringRes val labelRes: Int) {
+    SYSTEM(R.string.contrast_system),
+    MEDIUM(R.string.contrast_medium),
+    HIGH(R.string.contrast_high),
+}
+
+enum class ReduceMotion(@get:StringRes val labelRes: Int) {
+    SYSTEM(R.string.motion_system),
+    ON(R.string.motion_on),
+    OFF(R.string.motion_off),
+}
+
+/** Everything that makes the app usable for people the default design leaves behind. */
+data class AccessibilitySettings(
+    /** Bigger text, one card at a time, larger targets, no decorative motion. */
+    val simpleMode: Boolean = false,
+    /** Multiplies the system font scale, for people who want more than the system slider gives. */
+    val textScale: Float = 1f,
+    val contrast: ContrastMode = ContrastMode.SYSTEM,
+    val reduceMotion: ReduceMotion = ReduceMotion.SYSTEM,
+    val haptics: Boolean = true,
+    val largeTouchTargets: Boolean = false,
+)
+
+data class AppSettings(
+    val location: SavedLocation,
+    /** The method picked in settings; also the fallback while [methodAuto] has no country to go on. */
+    val method: CalculationMethod,
+    val methodAuto: Boolean,
+    val asrSchool: AsrSchool,
+    val highLatitude: HighLatitudeMode,
+    /** Minutes added to each computed time to match the local mosque. */
+    val adjustments: Map<Prayer, Int>,
+    val iqama: Map<Prayer, IqamaSetting>,
+    val hijriAdjustment: Int,
+    val notificationsEnabled: Boolean,
+    val mutedPrayers: Set<Prayer>,
+    val themeMode: ThemeMode,
+    val dynamicColor: Boolean,
+    val pureBlack: Boolean,
+    val reciter: Reciter,
+    /** Last Quran page opened (1..604), or 0 if none. */
+    val lastReadPage: Int,
+    /** Where the last athkar session was left, as "categoryId:index"; empty if none. */
+    val athkarPlace: String = "",
+    /** Moment ids sent away, each stamped "id@epochDay". */
+    val dismissedMoments: Set<String>,
+    /** BCP 47 tag of the UI language, or [AppLanguage.SYSTEM]. */
+    val appLanguage: String,
+    /** Morning and evening athkar reminders, after Fajr and Asr. */
+    val athkarReminders: Boolean,
+    val smart: SmartSettings = SmartSettings(),
+    val sounds: SoundSettings = SoundSettings(),
+    val quran: QuranSettings = QuranSettings(),
+    val accessibility: AccessibilitySettings = AccessibilitySettings(),
+    /**
+     * Whether the app may count what is used. Off in a fresh install, and off is the honest default:
+     * nothing is recorded until someone says yes in Settings.
+     */
+    val analyticsEnabled: Boolean = false,
+    /** False until the first-run flow has been seen. */
+    val onboardingCompleted: Boolean = false,
+    /** The version whose "what's new" has already been shown. */
+    val lastSeenVersionCode: Int = 0,
+) {
+    val zone: ZoneId
+        get() = runCatching { ZoneId.of(location.timezoneId) }.getOrElse { ZoneId.systemDefault() }
+
+    /** The method actually used for prayer times. */
+    val effectiveMethod: CalculationMethod
+        get() = location.countryCode?.takeIf { methodAuto }?.let(CalculationMethod::forCountry) ?: method
+
+    val prayerConfig: PrayerConfig
+        get() = PrayerConfig(
+            latitude = location.latitude,
+            longitude = location.longitude,
+            zone = zone,
+            method = effectiveMethod,
+            asrSchool = asrSchool,
+            iqama = iqama.mapValues { it.value.rule },
+            highLatitude = highLatitude,
+            adjustments = adjustments,
+        )
+}
+
+/** Defaults target the app's primary audience in Oman. */
+object Defaults {
+    const val LATITUDE = 23.5880
+    const val LONGITUDE = 58.3829
+    const val TIMEZONE = "Asia/Muscat"
+    const val COUNTRY = "OM"
+    val METHOD = CalculationMethod.OMAN
+    val HIJRI_ADJUSTMENT_RANGE = -2..2
+    val IQAMA_OFFSET_RANGE = 0..60
+    val ADJUSTMENT_RANGE = -30..30
+    const val ATHKAR_FONT_SIZE = 26
+    val ATHKAR_FONT_RANGE = 20..40
+    /** Roughly the classical four burud; adjustable because scholars differ. */
+    const val SAFAR_KM = 80
+    val SAFAR_RANGE = 60..120
+    const val TRANSLATION = "clearquran"
+    val PRE_REMINDER_CHOICES = listOf(0, 5, 10, 15, 20, 30)
+    val SILENCE_CHOICES = listOf(0, 10, 15, 20, 30)
+    val TEXT_SCALE_RANGE = 0.9f..1.6f
+
+    val iqama: Map<Prayer, IqamaSetting> = mapOf(
+        Prayer.FAJR to IqamaSetting(fixed = false, offsetMinutes = 25, fixedTime = LocalTime.of(5, 15)),
+        Prayer.DHUHR to IqamaSetting(fixed = false, offsetMinutes = 25, fixedTime = LocalTime.of(12, 50)),
+        Prayer.ASR to IqamaSetting(fixed = false, offsetMinutes = 20, fixedTime = LocalTime.of(15, 45)),
+        Prayer.MAGHRIB to IqamaSetting(fixed = false, offsetMinutes = 10, fixedTime = LocalTime.of(18, 45)),
+        Prayer.ISHA to IqamaSetting(fixed = false, offsetMinutes = 20, fixedTime = LocalTime.of(20, 15)),
+    )
+}
