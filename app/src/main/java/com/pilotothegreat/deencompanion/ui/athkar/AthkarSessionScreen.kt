@@ -28,6 +28,7 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Abc
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.RestartAlt
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -76,11 +77,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.ui.common.rememberHaptics
 import com.pilotothegreat.deencompanion.R
+import com.pilotothegreat.deencompanion.core.athkar.AthkarIds
 import com.pilotothegreat.deencompanion.core.athkar.AthkarItem
 import com.pilotothegreat.deencompanion.ui.common.Formatters
 import com.pilotothegreat.deencompanion.ui.common.currentLocale
 import com.pilotothegreat.deencompanion.ui.common.isArabic
 import com.pilotothegreat.deencompanion.ui.components.LoadingBox
+import com.pilotothegreat.deencompanion.ui.components.RollingNumber
 import com.pilotothegreat.deencompanion.ui.navigation.AthkarSessionKey
 import com.pilotothegreat.deencompanion.ui.theme.Amiri
 import com.pilotothegreat.deencompanion.ui.theme.animatedPolygonShape
@@ -97,6 +100,7 @@ import java.util.Locale
 fun AthkarSessionScreen(
     key: AthkarSessionKey,
     onBack: () -> Unit,
+    onEdit: () -> Unit = {},
     viewModel: AthkarSessionViewModel = koinViewModel { parametersOf(key) },
 ) {
     val state by viewModel.session.collectAsStateWithLifecycle()
@@ -119,7 +123,7 @@ fun AthkarSessionScreen(
             ?: items.size
     }
     val pager = rememberPagerState(initialPage = firstOpen) { items.size + 1 }
-    LaunchedEffect(pager, category.id) {
+    LaunchedEffect(pager, items) {
         snapshotFlow { pager.settledPage }.collect { if (it < items.size) viewModel.onPage(it) }
     }
     var confirmReset by rememberSaveable { mutableStateOf(false) }
@@ -158,11 +162,21 @@ fun AthkarSessionScreen(
                     }
                 },
                 actions = {
-                    IconToggleButton(checked = showTranslation, onCheckedChange = { showTranslation = it }) {
-                        Icon(Icons.Rounded.Translate, contentDescription = stringResource(R.string.athkar_show_translation))
+                    // A list the reader wrote has no translation to show, and is theirs to change.
+                    if (items.any { it.translation.isNotBlank() }) {
+                        IconToggleButton(checked = showTranslation, onCheckedChange = { showTranslation = it }) {
+                            Icon(Icons.Rounded.Translate, contentDescription = stringResource(R.string.athkar_show_translation))
+                        }
                     }
-                    IconToggleButton(checked = showTransliteration, onCheckedChange = { showTransliteration = it }) {
-                        Icon(Icons.Rounded.Abc, contentDescription = stringResource(R.string.athkar_show_transliteration))
+                    if (items.any { it.transliteration.isNotBlank() }) {
+                        IconToggleButton(checked = showTransliteration, onCheckedChange = { showTransliteration = it }) {
+                            Icon(Icons.Rounded.Abc, contentDescription = stringResource(R.string.athkar_show_transliteration))
+                        }
+                    }
+                    if (AthkarIds.isCustom(category.id)) {
+                        IconButton(onClick = onEdit) {
+                            Icon(Icons.Rounded.Edit, contentDescription = stringResource(R.string.athkar_edit_list))
+                        }
                     }
                     IconButton(onClick = { confirmReset = true }) {
                         Icon(Icons.Rounded.RestartAlt, contentDescription = stringResource(R.string.athkar_reset))
@@ -221,6 +235,7 @@ fun AthkarSessionScreen(
             text = { Text(stringResource(R.string.athkar_reset_confirm)) },
             confirmButton = {
                 TextButton(onClick = {
+                    haptics.reject()
                     viewModel.reset()
                     confirmReset = false
                 }) { Text(stringResource(R.string.athkar_reset)) }
@@ -344,8 +359,9 @@ private fun CounterButton(count: Int, target: Int, locale: Locale, onCount: () -
                         Icon(Icons.Rounded.Check, contentDescription = null, tint = MaterialTheme.colorScheme.onTertiary, modifier = Modifier.size(44.dp))
                     } else {
                         // Counts down the repetitions left, like beads still to be passed.
-                        Text(
-                            Formatters.number(target - count, locale),
+                        RollingNumber(
+                            target - count,
+                            locale,
                             style = MaterialTheme.typography.displaySmallEmphasized,
                             color = MaterialTheme.colorScheme.onPrimary,
                         )

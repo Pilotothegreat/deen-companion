@@ -13,6 +13,10 @@ import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.pilotothegreat.deencompanion.core.athkar.AthkarCategory
+import com.pilotothegreat.deencompanion.core.athkar.AthkarIds
+import com.pilotothegreat.deencompanion.core.athkar.AthkarItem
+import com.pilotothegreat.deencompanion.data.athkar.AthkarRepository
 import com.pilotothegreat.deencompanion.data.db.AppDatabase
 import com.pilotothegreat.deencompanion.data.db.BookmarkEntity
 import com.pilotothegreat.deencompanion.data.db.ReadingPlanEntity
@@ -55,6 +59,23 @@ class BackupRepositoryTest {
     private val adjustment = intPreferencesKey("hijri_adjustment")
     private val notifications = booleanPreferencesKey("notifications_enabled")
     private val muted = stringSetPreferencesKey("muted_prayers")
+
+    @Test fun theReadersOwnAthkarTravelWithTheBackup() = runTest {
+        val from = store("athkar-from")
+        val mine = AthkarCategory(
+            id = AthkarIds.newCustom(),
+            titleEnglish = "بعد الجمعة",
+            titleArabic = "بعد الجمعة",
+            items = listOf(AthkarItem("a", "أستغفر الله", "", "", 100, noteEnglish = "بعد الصلاة", noteArabic = "بعد الصلاة")),
+        )
+        AthkarRepository({ "" }, from).saveCustom(mine)
+
+        val json = BackupRepository(from, db.bookmarkDao(), db.readingPlanDao()).export()
+        val to = store("athkar-to")
+        assertNull(BackupRepository(to, db.bookmarkDao(), db.readingPlanDao()).restore(json))
+
+        assertEquals(listOf(mine), AthkarRepository({ "" }, to).custom.first())
+    }
 
     @Test fun everythingComesBackExactlyAsItWent() = runTest {
         val from = store("from")

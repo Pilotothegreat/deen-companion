@@ -1,5 +1,8 @@
 package com.pilotothegreat.deencompanion.ui.home
 
+import com.pilotothegreat.deencompanion.ui.common.rememberHaptics
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.scaleIn
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.animateColorAsState
@@ -195,6 +198,7 @@ fun PrayerTimesCard(
     onTogglePrayed: (Prayer, Boolean) -> Unit,
 ) {
     val context = LocalContext.current
+    val haptics = rememberHaptics()
     val rowCount = Prayer.entries.size + 1
     val defaultColors = ListItemDefaults.segmentedColors()
     Column(verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
@@ -222,12 +226,20 @@ fun PrayerTimesCard(
                     // shows, and the only place it can be corrected.
                     if (prayer.isObligatory) {
                         val done = prayer in prayed
-                        IconToggleButton(checked = done, onCheckedChange = { onTogglePrayed(prayer, it) }) {
-                            Icon(
-                                imageVector = if (done) Icons.Rounded.CheckCircle else prayer.icon,
-                                contentDescription = stringResource(if (done) R.string.unmark_prayed else R.string.mark_prayed, name),
-                                tint = if (done) MaterialTheme.colorScheme.primary else LocalContentColor.current,
-                            )
+                        IconToggleButton(
+                            checked = done,
+                            onCheckedChange = {
+                                haptics.toggle(it)
+                                onTogglePrayed(prayer, it)
+                            },
+                        ) {
+                            SwapIcon(done) { on ->
+                                Icon(
+                                    imageVector = if (on) Icons.Rounded.CheckCircle else prayer.icon,
+                                    contentDescription = stringResource(if (on) R.string.unmark_prayed else R.string.mark_prayed, name),
+                                    tint = if (on) MaterialTheme.colorScheme.primary else LocalContentColor.current,
+                                )
+                            }
                         }
                     } else {
                         Icon(prayer.icon, contentDescription = null)
@@ -244,11 +256,19 @@ fun PrayerTimesCard(
                         )
                         if (prayer.isObligatory && notificationsEnabled) {
                             val isMuted = prayer in muted
-                            IconToggleButton(checked = !isMuted, onCheckedChange = { onToggleMute(prayer, !it) }) {
-                                Icon(
-                                    imageVector = if (isMuted) Icons.Rounded.NotificationsOff else Icons.Rounded.Notifications,
-                                    contentDescription = stringResource(if (isMuted) R.string.unmute_prayer else R.string.mute_prayer, name),
-                                )
+                            IconToggleButton(
+                                checked = !isMuted,
+                                onCheckedChange = {
+                                    haptics.toggle(it)
+                                    onToggleMute(prayer, !it)
+                                },
+                            ) {
+                                SwapIcon(isMuted) { off ->
+                                    Icon(
+                                        imageVector = if (off) Icons.Rounded.NotificationsOff else Icons.Rounded.Notifications,
+                                        contentDescription = stringResource(if (off) R.string.unmute_prayer else R.string.mute_prayer, name),
+                                    )
+                                }
                             }
                         }
                     }
@@ -468,3 +488,15 @@ private val MomentKind.icon: ImageVector
         MomentKind.PLAN -> Icons.AutoMirrored.Rounded.MenuBook
         MomentKind.MAINTENANCE -> Icons.Rounded.Build
     }
+
+/** An icon that changes with a small pop, the new one growing in as the old one shrinks away. */
+@Composable
+private fun SwapIcon(state: Boolean, content: @Composable (Boolean) -> Unit) {
+    val spatial = MaterialTheme.motionScheme.fastSpatialSpec<Float>()
+    val effects = MaterialTheme.motionScheme.fastEffectsSpec<Float>()
+    AnimatedContent(
+        targetState = state,
+        transitionSpec = { (scaleIn(spatial, initialScale = 0.6f) + fadeIn(effects)) togetherWith (scaleOut(effects, targetScale = 0.6f) + fadeOut(effects)) },
+        label = "swapIcon",
+    ) { content(it) }
+}

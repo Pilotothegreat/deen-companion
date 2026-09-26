@@ -244,7 +244,7 @@ private fun CardLabel(label: String, icon: ImageVector, selected: Boolean, modif
 }
 
 @Composable
-private fun cardModifier(selected: Boolean, role: Role, onClick: () -> Unit): Modifier {
+internal fun cardModifier(selected: Boolean, role: Role, onClick: () -> Unit): Modifier {
     val haptics = rememberHaptics()
     val container = if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainerHighest
     val press = {
@@ -264,10 +264,10 @@ private fun cardModifier(selected: Boolean, role: Role, onClick: () -> Unit): Mo
 }
 
 /** How a card moves when chosen; read while drawing, so only the drawing is redone each frame. */
-private class CardMotion(val corner: () -> Float, val turn: () -> Float, val shape: () -> Float)
+internal class CardMotion(val corner: () -> Float, val turn: () -> Float, val shape: () -> Float)
 
 @Composable
-private fun cardMotion(
+internal fun cardMotion(
     selected: Boolean,
     restTurn: Float,
     chosenTurn: Float,
@@ -281,7 +281,7 @@ private fun cardMotion(
     return CardMotion({ corner }, { turn }, { shape })
 }
 
-private fun DrawScope.drawShape(polygon: RoundedPolygon, centre: Offset, sizePx: Float, degrees: Float, color: Color) {
+internal fun DrawScope.drawShape(polygon: RoundedPolygon, centre: Offset, sizePx: Float, degrees: Float, color: Color) {
     val path = polygon.toComposePath(Size(sizePx, sizePx))
     translate(centre.x - sizePx / 2, centre.y - sizePx / 2) {
         rotate(degrees, pivot = Offset(sizePx / 2, sizePx / 2)) { drawPath(path, color) }

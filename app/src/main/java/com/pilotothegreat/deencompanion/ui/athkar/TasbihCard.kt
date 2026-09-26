@@ -51,6 +51,7 @@ import com.pilotothegreat.deencompanion.core.tasbih.TasbihEngine
 import com.pilotothegreat.deencompanion.core.tasbih.TasbihState
 import com.pilotothegreat.deencompanion.ui.common.Formatters
 import com.pilotothegreat.deencompanion.ui.common.labelRes
+import com.pilotothegreat.deencompanion.ui.components.RollingNumber
 import com.pilotothegreat.deencompanion.ui.theme.animatedPolygonShape
 import java.util.Locale
 
@@ -131,8 +132,9 @@ fun TasbihCard(
                     contentAlignment = Alignment.Center,
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            Formatters.number(state.count, locale),
+                        RollingNumber(
+                            state.count,
+                            locale,
                             style = MaterialTheme.typography.displayMediumEmphasized,
                             color = MaterialTheme.colorScheme.onPrimary,
                         )

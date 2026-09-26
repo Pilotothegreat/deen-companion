@@ -5,6 +5,7 @@ import com.pilotothegreat.deencompanion.core.prayer.PrayerSchedule
 import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.util.Locale
+import java.util.UUID
 import kotlin.math.min
 
 data class AthkarItem(
@@ -52,8 +53,13 @@ data class AthkarGroup(
     fun title(locale: Locale): String = if (locale.language == "ar") titleArabic else titleEnglish
 }
 
-data class AthkarLibrary(val core: List<AthkarCategory>, val groups: List<AthkarGroup>) {
-    val all: List<AthkarCategory> = core + groups.flatMap { it.categories }
+/** The bundled athkar, plus the lists the reader wrote for themselves in [custom]. */
+data class AthkarLibrary(
+    val core: List<AthkarCategory>,
+    val groups: List<AthkarGroup>,
+    val custom: List<AthkarCategory> = emptyList(),
+) {
+    val all: List<AthkarCategory> = core + groups.flatMap { it.categories } + custom
 
     fun category(id: String): AthkarCategory? = all.firstOrNull { it.id == id }
 }
@@ -64,6 +70,13 @@ object AthkarIds {
     const val AFTER_PRAYER = "after-prayer"
     const val WAKING = "waking"
     const val SLEEP = "sleep"
+
+    /** Lists the reader made are kept apart from the bundled ids by this prefix. */
+    private const val CUSTOM_PREFIX = "custom-"
+
+    fun isCustom(id: String): Boolean = id.startsWith(CUSTOM_PREFIX)
+
+    fun newCustom(): String = CUSTOM_PREFIX + UUID.randomUUID()
 }
 
 /** How many times each item has been said on [date], per category. */

@@ -8,6 +8,7 @@ import androidx.compose.material.icons.automirrored.rounded.LibraryBooks
 import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.material.icons.rounded.WbSunny
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
@@ -29,6 +30,9 @@ import kotlinx.serialization.Serializable
 /** One athkar category, counted item by item. */
 @Serializable data class AthkarSessionKey(val categoryId: String) : NavKey
 
+/** Writes a list of the reader's own athkar: a new one when [categoryId] is null. */
+@Serializable data class AthkarEditorKey(val categoryId: String? = null) : NavKey
+
 /** Opens the mushaf at [page]; [surah]/[ayah] (when non-zero) mark the ayah to highlight. */
 @Serializable data class ReaderKey(val page: Int, val surah: Int = 0, val ayah: Int = 0) : NavKey
 
@@ -47,10 +51,16 @@ enum class TopLevel(
 }
 
 /**
- * Back stack rules: Home is always the root, each other tab sits directly on top of it, and
- * detail screens stack above their tab. Back from a tab therefore returns Home.
+ * Back stack rules: each tab keeps a stack of its own, so leaving a tab and coming back finds it as
+ * it was left: the same screen, scrolled to the same place. Home is always the root under the tab
+ * on screen, so back from a tab's first screen returns Home.
+ *
+ * Until 2.2 there was one stack, cleared on every tab switch, and each tab started over each time.
  */
-class Navigator(val backStack: NavBackStack<NavKey>) {
+class Navigator(
+    private val stacks: Map<TopLevel, NavBackStack<NavKey>>,
+    private val tab: MutableState<TopLevel>,
+) {
 
     /**
      * Which screens were opened, counted in the one place every screen is opened from.
@@ -73,39 +83,47 @@ class Navigator(val backStack: NavBackStack<NavKey>) {
         Analytics.record(event)
     }
 
-    val currentTab: TopLevel
-        get() = backStack.lastOrNull { key -> TopLevel.entries.any { it.key == key } }
-            ?.let { key -> TopLevel.entries.first { it.key == key } }
-            ?: TopLevel.HOME
+    val currentTab: TopLevel get() = tab.value
 
-    val isOnTopLevel: Boolean
-        get() = TopLevel.entries.any { it.key == backStack.lastOrNull() }
+    private val stack: NavBackStack<NavKey> get() = stacks.getValue(tab.value)
 
+    /** What is on screen, bottom to top: Home, then the current tab's own stack above it. */
+    val visible: List<NavKey> get() = if (tab.value == TopLevel.HOME) stack else listOf(HomeKey) + stack
+
+    val isOnTopLevel: Boolean get() = stack.size == 1
+
+    /** Switches to [tab] as it was left; choosing the tab already shown returns it to its first screen. */
     fun selectTab(tab: TopLevel) {
-        if (backStack.lastOrNull() == tab.key) return
-        countScreen(tab.key)
-        backStack.clear()
-        backStack.add(HomeKey)
-        if (tab != TopLevel.HOME) backStack.add(tab.key)
+        if (tab == this.tab.value) {
+            popToRoot(stack)
+            return
+        }
+        countScreen(stacks.getValue(tab).last())
+        this.tab.value = tab
     }
 
     fun navigate(key: NavKey) {
         countScreen(key)
-        backStack.add(key)
+        stack.add(key)
     }
 
-    /** Opens [key] on top of the tab it belongs to, e.g. from a notification or widget. */
+    /** Opens [key] fresh on top of the tab it belongs to, e.g. from a notification or widget. */
     fun open(key: NavKey) {
-        val tab = when (key) {
-            is AthkarSessionKey -> TopLevel.ATHKAR
+        val target = when (key) {
+            is AthkarSessionKey, is AthkarEditorKey -> TopLevel.ATHKAR
             is ReaderKey -> TopLevel.QURAN
             else -> TopLevel.entries.firstOrNull { it.key == key } ?: TopLevel.HOME
         }
-        selectTab(tab)
-        if (TopLevel.entries.none { it.key == key }) navigate(key)
+        tab.value = target
+        popToRoot(stack)
+        if (TopLevel.entries.none { it.key == key }) navigate(key) else countScreen(key)
     }
 
     fun back() {
-        if (backStack.size > 1) backStack.removeAt(backStack.lastIndex)
+        if (stack.size > 1) stack.removeAt(stack.lastIndex) else if (tab.value != TopLevel.HOME) tab.value = TopLevel.HOME
+    }
+
+    private fun popToRoot(stack: NavBackStack<NavKey>) {
+        while (stack.size > 1) stack.removeAt(stack.lastIndex)
     }
 }

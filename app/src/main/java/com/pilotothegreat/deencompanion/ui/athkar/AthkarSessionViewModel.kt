@@ -10,13 +10,15 @@ import com.pilotothegreat.deencompanion.data.athkar.AthkarRepository
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
 import com.pilotothegreat.deencompanion.ui.navigation.AthkarSessionKey
 import java.time.LocalDate
+import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -39,15 +41,22 @@ class AthkarSessionViewModel(
     private val settings: SettingsRepository,
 ) : ViewModel() {
 
+    /** Progress as tapped, shown before it is saved, so the number moves under the finger. */
+    private val tapped = MutableStateFlow<DayProgress?>(null)
+    private val writing = AtomicInteger()
+
     val session: StateFlow<AthkarSession?> = combine(
-        flow { emit(athkar.library().category(key.categoryId)) },
+        // Live, so an edited list is counted as it now reads.
+        athkar.libraryFlow.map { it.category(key.categoryId) },
         athkar.progress,
         settings.settings,
-    ) { category, progress, s ->
+        tapped,
+    ) { category, saved, s, mine ->
         category?.let {
+            val today = LocalDate.now(s.zone)
             AthkarSession(
                 category = it,
-                progress = progress.on(LocalDate.now(s.zone)),
+                progress = mine?.takeIf { writing.get() > 0 && it.date == today } ?: saved.on(today),
                 resumeAt = s.athkarPlace.takeIf { place -> place.substringBefore(':') == key.categoryId }
                     ?.substringAfter(':')
                     ?.toIntOrNull()
@@ -60,14 +69,26 @@ class AthkarSessionViewModel(
     val events: SharedFlow<SessionEvent> = _events.asSharedFlow()
 
     fun count(index: Int) {
+        val current = session.value ?: return
+        val item = current.category.items.getOrNull(index) ?: return
+        // Counted here first with the same rule the repository applies; its writes are serial,
+        // so what it saves arrives at the same numbers.
+        val before = tapped.value?.takeIf { writing.get() > 0 } ?: current.progress
+        if (before.isDone(current.category, item)) return
+        val updated = before.increment(current.category.id, item)
         Analytics.record(UsageEvent.ATHKAR_COUNTED)
-        viewModelScope.launch {
-            val current = session.value ?: return@launch
-            val item = current.category.items.getOrNull(index) ?: return@launch
-            val updated = athkar.increment(current.category, item, today()) ?: return@launch
-            if (!updated.isDone(current.category, item)) return@launch
+        writing.incrementAndGet()
+        tapped.value = updated
+        if (updated.isDone(current.category, item)) {
             if (updated.isComplete(current.category)) Analytics.record(UsageEvent.ATHKAR_SESSION_FINISHED)
-            _events.emit(if (updated.isComplete(current.category)) SessionEvent.CategoryCompleted else SessionEvent.ItemCompleted(index))
+            _events.tryEmit(if (updated.isComplete(current.category)) SessionEvent.CategoryCompleted else SessionEvent.ItemCompleted(index))
+        }
+        viewModelScope.launch {
+            try {
+                athkar.increment(current.category, item, before.date)
+            } finally {
+                writing.decrementAndGet()
+            }
         }
     }
 

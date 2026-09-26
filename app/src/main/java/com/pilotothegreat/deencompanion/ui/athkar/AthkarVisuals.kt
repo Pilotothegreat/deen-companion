@@ -2,6 +2,7 @@ package com.pilotothegreat.deencompanion.ui.athkar
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Bedtime
+import androidx.compose.material.icons.rounded.Bookmark
 import androidx.compose.material.icons.rounded.Cloud
 import androidx.compose.material.icons.rounded.Groups
 import androidx.compose.material.icons.rounded.Healing
@@ -21,7 +22,7 @@ import com.pilotothegreat.deencompanion.core.athkar.AthkarIds
 import com.pilotothegreat.deencompanion.ui.common.AthkarIcon
 
 /** Icon for a core category, or for an everyday one by its group. */
-fun athkarIcon(categoryId: String, groupId: String? = null): ImageVector = when (categoryId) {
+fun athkarIcon(categoryId: String, groupId: String? = null): ImageVector = if (AthkarIds.isCustom(categoryId)) Icons.Rounded.Bookmark else when (categoryId) {
     AthkarIds.MORNING -> Icons.Rounded.WbSunny
     AthkarIds.EVENING -> Icons.Rounded.NightsStay
     AthkarIds.AFTER_PRAYER -> Icons.Rounded.Mosque

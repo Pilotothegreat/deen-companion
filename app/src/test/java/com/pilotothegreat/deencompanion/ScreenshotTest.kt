@@ -5,13 +5,17 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasScrollAction
+import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipe
 import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeUp
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -105,6 +109,7 @@ class ScreenshotTest {
         goBack(labels)
         scrollDown()
         shoot("$prefix-09-athkar-scrolled")
+        writeOwnList(prefix, labels)
 
         tab(labels.today)
         scrollUntilText(labels.qibla)
@@ -116,6 +121,10 @@ class ScreenshotTest {
         compose.onAllNodesWithContentDescription(labels.settings).onFirst().performClick()
         settle()
         shoot("$prefix-11-settings")
+        repeat(3) { nudgeDown() }
+        shoot("$prefix-11a-settings-notifications")
+        repeat(3) { nudgeDown() }
+        shoot("$prefix-11b-settings-appearance")
         scrollDown()
         shoot("$prefix-12-settings-scrolled")
         scrollDown()
@@ -124,6 +133,47 @@ class ScreenshotTest {
         // System back leaves Settings and brings the navigation bar back.
         compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
         waitForText(labels.hadith)
+    }
+
+    /** Writes a list of one's own, counts it, and opens it again to edit. */
+    private fun writeOwnList(prefix: String, labels: Labels) {
+        val title = if (prefix == "ar") "بعد الجمعة" else "After Jumu'ah"
+        scrollUntilText(string(R.string.athkar_new_list), up = true)
+        shoot("$prefix-09a-athkar-mine-empty")
+        compose.onAllNodesWithText(string(R.string.athkar_new_list)).onFirst().performClick()
+        waitForText(string(R.string.athkar_list_title))
+        shoot("$prefix-09b-athkar-editor-new")
+        val fields = compose.onAllNodes(hasSetTextAction())
+        fields[0].performTextInput(title)
+        fields[1].performTextInput("أَسْتَغْفِرُ اللهَ وَأَتُوبُ إِلَيْهِ")
+        fields[2].performTextInput(if (prefix == "ar") "بعد صلاة الجمعة" else "After the Friday prayer")
+        fields[3].performTextReplacement("100")
+        compose.onAllNodesWithText(string(R.string.athkar_add_dhikr)).onFirst().performClick()
+        settle()
+        compose.onAllNodes(hasSetTextAction())[4].performTextInput("اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ")
+        settle()
+        shoot("$prefix-09c-athkar-editor-filled")
+        compose.onAllNodesWithText(string(R.string.save)).onFirst().performClick()
+        waitForText(labels.hadith)
+        scrollUntilText(title, up = true)
+        shoot("$prefix-09d-athkar-mine")
+        compose.onAllNodesWithText(title).onFirst().performClick()
+        waitForDescription(string(R.string.athkar_count_action))
+        compose.onAllNodesWithContentDescription(string(R.string.athkar_count_action)).onFirst().performClick()
+        settle()
+        shoot("$prefix-09e-athkar-mine-session")
+        compose.onAllNodesWithContentDescription(string(R.string.athkar_edit_list)).onFirst().performClick()
+        waitForText(string(R.string.athkar_edit_list))
+        shoot("$prefix-09f-athkar-editor-edit")
+        // Nothing changed, so back leaves without asking, and back again returns to the tab.
+        compose.onAllNodesWithContentDescription(labels.back).onFirst().performClick()
+        waitForDescription(string(R.string.athkar_count_action))
+        goBack(labels)
+        // Each tab keeps its place: away to the Quran and back, the list is still in view.
+        tab(labels.quran)
+        tab(labels.athkar)
+        waitForText(title)
+        shoot("$prefix-09g-athkar-kept-its-place")
     }
 
     /** Taps the top bar's back arrow and waits for the navigation bar to return. */
@@ -143,6 +193,18 @@ class ScreenshotTest {
         settle()
     }
 
+    private fun scrollUp() {
+        compose.onAllNodes(hasScrollAction()).onFirst().performTouchInput { swipeDown() }
+        settle()
+    }
+
+    private fun nudgeDown() {
+        compose.onAllNodes(hasScrollAction()).onFirst().performTouchInput {
+            swipe(center, center.copy(y = center.y - height / 4f), durationMillis = 600)
+        }
+        settle()
+    }
+
     private fun scrollDown() {
         compose.onAllNodes(hasScrollAction()).onFirst().performTouchInput { swipeUp() }
         settle()
@@ -152,10 +214,12 @@ class ScreenshotTest {
      * Swipes until [text] is composed. performScrollToNode would wait for layout frames that never
      * come while the test clock is paused.
      */
-    private fun scrollUntilText(text: String) {
-        repeat(8) {
+    private fun scrollUntilText(text: String, up: Boolean = false) {
+        if (up) repeat(4) { scrollUp() }
+        repeat(if (up) 12 else 8) {
             if (compose.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()) return
-            scrollDown()
+            // From the top, short steps: a full swipe flings past a section that is one screen down.
+            if (up) nudgeDown() else scrollDown()
         }
         error("\"$text\" not found after scrolling")
     }

@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberDecoratedNavEntries
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
@@ -56,12 +57,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.setValue
 import com.pilotothegreat.deencompanion.data.settings.AppSettings
 import com.pilotothegreat.deencompanion.ui.athkar.AthkarScreen
+import com.pilotothegreat.deencompanion.ui.athkar.AthkarEditorScreen
 import com.pilotothegreat.deencompanion.ui.athkar.AthkarSessionScreen
 import com.pilotothegreat.deencompanion.ui.hadith.HadithBookScreen
 import com.pilotothegreat.deencompanion.ui.hadith.HadithScreen
 import com.pilotothegreat.deencompanion.ui.home.HomeScreen
 import com.pilotothegreat.deencompanion.ui.location.LocationPickerScreen
 import com.pilotothegreat.deencompanion.ui.theme.LocalAccessibility
+import com.pilotothegreat.deencompanion.ui.navigation.AthkarEditorKey
 import com.pilotothegreat.deencompanion.ui.navigation.AthkarKey
 import com.pilotothegreat.deencompanion.ui.navigation.AthkarSessionKey
 import com.pilotothegreat.deencompanion.ui.navigation.FloatingBarClearance
@@ -125,8 +128,10 @@ fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpe
             onDismiss = { showWhatsNew = false },
         )
     }
-    val backStack = rememberNavBackStack(HomeKey)
-    val navigator = remember(backStack) { Navigator(backStack) }
+    // A stack per tab, each saved across process death like the single one it replaces.
+    val stacks = TopLevel.entries.associateWith { rememberNavBackStack(it.key) }
+    val currentTab = rememberSaveable { mutableStateOf(TopLevel.HOME) }
+    val navigator = remember(currentTab) { Navigator(stacks, currentTab) }
     LaunchedEffect(destination) {
         destination?.let {
             navigator.open(it)
@@ -151,7 +156,7 @@ fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpe
     val railType = if (!compact && onTopLevel) adaptive else NavigationSuiteType.None
     val barScroll = FloatingToolbarDefaults.exitAlwaysScrollBehavior(exitDirection = FloatingToolbarExitDirection.Bottom)
     // Every screen change, including coming back to a tab, starts with the bar showing.
-    LaunchedEffect(backStack.lastOrNull()) { barScroll.state.offset = 0f }
+    LaunchedEffect(navigator.visible.last()) { barScroll.state.offset = 0f }
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     // Navigation is the one place the app kept moving in Simple mode: the theme swaps the motion
     // scheme, but a transition spec is read once when the entry is declared, so it never noticed.
@@ -176,17 +181,7 @@ fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpe
     ) {
         CompositionLocalProvider(LocalBottomBarPadding provides if (floatingBar) FloatingBarClearance else 0.dp) {
             Box(Modifier.fillMaxSize().nestedScroll(barScroll)) {
-                NavDisplay(
-                    backStack = backStack,
-                    onBack = navigator::back,
-                    entryDecorators = listOf(
-                        rememberSaveableStateHolderNavEntryDecorator(),
-                        rememberViewModelStoreNavEntryDecorator(),
-                    ),
-                    transitionSpec = { sharedAxis(forward = true, rtl = rtl, still = stillMotion) },
-                    popTransitionSpec = { sharedAxis(forward = false, rtl = rtl, still = stillMotion) },
-                    predictivePopTransitionSpec = { _ -> predictiveBack(still = stillMotion) },
-                    entryProvider = entryProvider {
+                val entryProvider = entryProvider {
                         entry<HomeKey>(metadata = tabMotion) {
                             HomeScreen(
                                 onOpenSettings = { navigator.navigate(SettingsKey) },
@@ -200,9 +195,17 @@ fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpe
                         entry<QuranKey>(metadata = tabMotion) { QuranScreen(onOpenReader = navigator::navigate) }
                         entry<ReaderKey> { key -> ReaderScreen(key, onBack = navigator::back) }
                         entry<AthkarKey>(metadata = tabMotion) {
-                            AthkarScreen(onOpenCategory = { navigator.navigate(AthkarSessionKey(it)) })
+                            AthkarScreen(
+                                onOpenCategory = { navigator.navigate(AthkarSessionKey(it)) },
+                                onEditList = { navigator.navigate(AthkarEditorKey(it)) },
+                            )
                         }
-                        entry<AthkarSessionKey> { key -> AthkarSessionScreen(key, onBack = navigator::back) }
+                        entry<AthkarSessionKey> { key ->
+                            AthkarSessionScreen(key, onBack = navigator::back, onEdit = { navigator.navigate(AthkarEditorKey(key.categoryId)) })
+                        }
+                        entry<AthkarEditorKey> { key ->
+                            AthkarEditorScreen(key, onBack = navigator::back, onDeleted = { navigator.open(AthkarKey) })
+                        }
                         entry<HadithKey>(metadata = tabMotion) {
                             HadithScreen(onOpenBook = { navigator.navigate(HadithBookKey(it)) })
                         }
@@ -221,7 +224,26 @@ fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpe
                             val viewModel: SettingsViewModel = koinViewModel()
                             ReliabilityScreen(canScheduleExact = viewModel.canScheduleExactAlarms(), onBack = navigator::back)
                         }
-                    },
+                    }
+                // Each stack is decorated on its own, so a tab that is not on screen keeps its
+                // screens' saved state and view models until it is shown again.
+                val entries = stacks.mapValues { (_, stack) ->
+                    rememberDecoratedNavEntries(
+                        backStack = stack,
+                        entryDecorators = listOf(
+                            rememberSaveableStateHolderNavEntryDecorator(),
+                            rememberViewModelStoreNavEntryDecorator(),
+                        ),
+                        entryProvider = entryProvider,
+                    )
+                }
+                val home = entries.getValue(TopLevel.HOME)
+                NavDisplay(
+                    entries = if (navigator.currentTab == TopLevel.HOME) home else home.take(1) + entries.getValue(navigator.currentTab),
+                    onBack = navigator::back,
+                    transitionSpec = { sharedAxis(forward = true, rtl = rtl, still = stillMotion) },
+                    popTransitionSpec = { sharedAxis(forward = false, rtl = rtl, still = stillMotion) },
+                    predictivePopTransitionSpec = { _ -> predictiveBack(still = stillMotion) },
                 )
                 AnimatedVisibility(
                     visible = floatingBar,
@@ -243,7 +265,8 @@ fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpe
 }
 
 /**
- * Switching tabs fades through: the old tab fades out, the new one fades and grows in.
+ * Switching tabs fades through: the old tab fades out, the new one fades and grows in. The new tab
+ * starts at once rather than after the old one has gone; waiting made every tab a beat late.
  *
  * Nothing here reads the motion scheme, because a transition spec is read once when the entry is
  * declared. Reduce-motion is honoured by [still] instead, which the navigator swaps in wholesale —
@@ -251,8 +274,8 @@ fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpe
  * every screen in Simple mode.
  */
 private val TabTransition: Map<String, Any> = NavDisplay.transitionSpec {
-    (fadeIn(tween(durationMillis = 210, delayMillis = 90)) + scaleIn(tween(durationMillis = 210, delayMillis = 90), initialScale = 0.96f)) togetherWith
-        fadeOut(tween(durationMillis = 90))
+    (fadeIn(tween(durationMillis = 180, delayMillis = 30)) + scaleIn(spring(stiffness = Spring.StiffnessMedium), initialScale = 0.97f)) togetherWith
+        fadeOut(tween(durationMillis = 70))
 }
 
 /** The same, with the movement taken out: a plain cross-fade, short enough not to be a wait. */
@@ -264,9 +287,9 @@ private val StillTabTransition: Map<String, Any> = NavDisplay.transitionSpec {
 private fun sharedAxis(forward: Boolean, rtl: Boolean, still: Boolean): ContentTransform {
     if (still) return still()
     val direction = (if (forward) 1 else -1) * (if (rtl) -1 else 1)
-    val slide = spring<IntOffset>(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
-    return (slideInHorizontally(slide) { direction * it / 5 } + fadeIn(tween(durationMillis = 210, delayMillis = 60))) togetherWith
-        (slideOutHorizontally(slide) { -direction * it / 5 } + fadeOut(tween(durationMillis = 90)))
+    val slide = spring<IntOffset>(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium)
+    return (slideInHorizontally(slide) { direction * it / 5 } + fadeIn(tween(durationMillis = 180, delayMillis = 30))) togetherWith
+        (slideOutHorizontally(slide) { -direction * it / 5 } + fadeOut(tween(durationMillis = 80)))
 }
 
 /** While swiping back, the leaving screen shrinks away and the previous one fades in. */

@@ -27,15 +27,17 @@ import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
 import com.pilotothegreat.deencompanion.data.settings.SoundSettings
 import com.pilotothegreat.deencompanion.data.tasbih.TasbihRepository
 import com.pilotothegreat.deencompanion.di.appModule
+import com.pilotothegreat.deencompanion.widget.WidgetKind
 import com.pilotothegreat.deencompanion.widget.WidgetUpdater
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -47,7 +49,14 @@ import timber.log.Timber
 
 class DeenApplication : Application(), Configuration.Provider {
 
-    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    /**
+     * Background upkeep: alarms, widgets, channels. A failure in one of these is logged rather than
+     * thrown, because an uncaught exception on this scope takes the whole process down with it,
+     * over work the reader never asked to see.
+     */
+    private val appScope = CoroutineScope(
+        SupervisorJob() + Dispatchers.Default + CoroutineExceptionHandler { _, error -> Timber.e(error, "Background upkeep failed") },
+    )
     private val settings: SettingsRepository by inject()
     private val tasbih: TasbihRepository by inject()
     private val athkar: AthkarRepository by inject()
@@ -175,10 +184,18 @@ class DeenApplication : Application(), Configuration.Provider {
     @OptIn(FlowPreview::class)
     private fun keepWidgetsInSync() {
         appScope.launch {
-            combine(settings.settings, tasbih.state, athkar.progress) { s, t, p -> Triple(s, t, p) }
+            settings.settings
                 .distinctUntilChanged()
                 .debounce(500)
                 .collectLatest { WidgetUpdater.updateAll(this@DeenApplication) }
+        }
+        // A count moves one widget each, so a run of taps redraws that one rather than all ten. The
+        // first value is skipped: the settings above have just drawn everything.
+        appScope.launch {
+            tasbih.state.drop(1).debounce(500).collectLatest { WidgetUpdater.update(this@DeenApplication, WidgetKind.TASBIH) }
+        }
+        appScope.launch {
+            athkar.progress.drop(1).debounce(500).collectLatest { WidgetUpdater.update(this@DeenApplication, WidgetKind.ATHKAR_NOW) }
         }
         // The widget picker's previews are in the app's language and colours, so they follow both.
         appScope.launch {

@@ -20,6 +20,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.addJsonObject
+import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.int
@@ -27,10 +29,14 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
 import java.time.LocalDate
 
-/** The bundled athkar (assets/athkar.json) plus today's progress and the streak, kept in DataStore. */
+/**
+ * The bundled athkar (assets/athkar.json), the reader's own lists, and today's progress and the
+ * streak, all but the first kept in DataStore (and so carried by backups without further work).
+ */
 class AthkarRepository(
     private val readJson: () -> String,
     private val dataStore: DataStore<Preferences>,
@@ -42,6 +48,29 @@ class AthkarRepository(
 
     suspend fun library(): AthkarLibrary = cached ?: mutex.withLock {
         cached ?: withContext(Dispatchers.IO) { parse(readJson()) }.also { cached = it }
+    }
+
+    /** The lists the reader wrote, in the order they were made. */
+    val custom: Flow<List<AthkarCategory>> = dataStore.data.map { decodeCustom(it[CUSTOM]) }.distinctUntilChanged()
+
+    /** [library] with the reader's lists in it, so a list appears everywhere the moment it is saved. */
+    val libraryFlow: Flow<AthkarLibrary> = custom.map { library().copy(custom = it) }
+
+    /** Adds [category], or replaces the list with its id. */
+    suspend fun saveCustom(category: AthkarCategory) {
+        dataStore.edit { prefs ->
+            val lists = decodeCustom(prefs[CUSTOM])
+            val index = lists.indexOfFirst { it.id == category.id }
+            prefs[CUSTOM] = encodeCustom(if (index < 0) lists + category else lists.toMutableList().apply { set(index, category) })
+        }
+    }
+
+    /** Removes a list, and what was counted of it today. */
+    suspend fun deleteCustom(id: String) {
+        dataStore.edit { prefs ->
+            prefs[CUSTOM] = encodeCustom(decodeCustom(prefs[CUSTOM]).filterNot { it.id == id })
+            prefs[PROGRESS]?.let { prefs[PROGRESS] = encode(decode(it).reset(id)) }
+        }
     }
 
     /** The last saved progress; call [DayProgress.on] with today's date before reading it. */
@@ -85,6 +114,7 @@ class AthkarRepository(
         private val PROGRESS = stringPreferencesKey("athkar_progress")
         private val STREAK_DAYS = intPreferencesKey("athkar_streak_days")
         private val STREAK_LAST = stringPreferencesKey("athkar_streak_last")
+        private val CUSTOM = stringPreferencesKey("athkar_custom")
 
         fun parse(json: String): AthkarLibrary {
             val root = Json.parseToJsonElement(json).jsonObject
@@ -134,6 +164,61 @@ class AthkarRepository(
                 }
             }
         }.toString()
+
+        /**
+         * A list the reader wrote has one title and, per dhikr, its text, a note and a count. The
+         * title fills both languages' slots so the rest of the app never has to ask which it is.
+         */
+        internal fun encodeCustom(lists: List<AthkarCategory>): String = buildJsonArray {
+            lists.forEach { list ->
+                addJsonObject {
+                    put("id", list.id)
+                    put("title", list.titleArabic.ifBlank { list.titleEnglish })
+                    putJsonArray("items") {
+                        list.items.forEach { item ->
+                            addJsonObject {
+                                put("id", item.id)
+                                put("text", item.arabic)
+                                put("note", item.noteArabic.ifBlank { item.noteEnglish })
+                                put("count", item.count)
+                            }
+                        }
+                    }
+                }
+            }
+        }.toString()
+
+        /** Unreadable data counts as no lists; a list that cannot be read is skipped, not the rest. */
+        internal fun decodeCustom(value: String?): List<AthkarCategory> {
+            val array = value?.let { runCatching { Json.parseToJsonElement(it).jsonArray }.getOrNull() } ?: return emptyList()
+            return array.mapNotNull { element ->
+                runCatching {
+                    val list = element.jsonObject
+                    val title = list.text("title")
+                    AthkarCategory(
+                        id = list.text("id"),
+                        titleEnglish = title,
+                        titleArabic = title,
+                        items = list.getValue("items").jsonArray.map { entry ->
+                            val item = entry.jsonObject
+                            val note = item.text("note")
+                            AthkarItem(
+                                id = item.text("id"),
+                                arabic = item.text("text"),
+                                translation = "",
+                                transliteration = "",
+                                count = item.getValue("count").jsonPrimitive.int.coerceIn(1, MAX_COUNT),
+                                noteEnglish = note,
+                                noteArabic = note,
+                            )
+                        },
+                    )
+                }.getOrNull()?.takeIf { AthkarIds.isCustom(it.id) }
+            }
+        }
+
+        /** The most repetitions one dhikr in a list can ask for. */
+        const val MAX_COUNT = 999
 
         /** Unreadable or missing data counts as no progress. */
         internal fun decode(value: String?): DayProgress = runCatching {

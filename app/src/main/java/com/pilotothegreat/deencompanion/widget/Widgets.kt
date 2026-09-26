@@ -110,6 +110,12 @@ object WidgetUpdater {
         runCatching { scheduleRefresh(context) }.onFailure { Timber.w(it, "Couldn't schedule the widget refresh") }
     }
 
+    /** Redraws the placed widgets of one [kind], for a change only that kind shows. */
+    internal suspend fun update(context: Context, kind: WidgetKind) {
+        val widget = kind.widget()
+        runCatching { widget.updateAll(context) }.onFailure { Timber.w(it, "%s update failed", widget.javaClass.simpleName) }
+    }
+
     /** Redraws only the next-prayer widget, whose bar is the one thing that moves between prayers, and books the next step. */
     internal suspend fun moveTheBar(context: Context) {
         runCatching { NextPrayerWidget().updateAll(context) }.onFailure { Timber.w(it, "NextPrayerWidget update failed") }

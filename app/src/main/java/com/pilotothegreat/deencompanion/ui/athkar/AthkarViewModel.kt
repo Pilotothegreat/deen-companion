@@ -8,6 +8,7 @@ import com.pilotothegreat.deencompanion.core.athkar.AthkarSchedule
 import com.pilotothegreat.deencompanion.core.athkar.DayProgress
 import com.pilotothegreat.deencompanion.core.prayer.DaySchedule
 import com.pilotothegreat.deencompanion.core.tasbih.Dhikr
+import com.pilotothegreat.deencompanion.core.tasbih.TasbihEngine
 import com.pilotothegreat.deencompanion.core.tasbih.TasbihState
 import com.pilotothegreat.deencompanion.core.text.ArabicText
 import com.pilotothegreat.deencompanion.data.athkar.AthkarRepository
@@ -34,6 +35,7 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.ZonedDateTime
+import java.util.concurrent.atomic.AtomicInteger
 
 data class AthkarHome(
     val library: AthkarLibrary,
@@ -65,10 +67,9 @@ class AthkarViewModel(
     }
 
     val state: StateFlow<AthkarHome?> =
-        combine(settings.settings, athkar.progress, athkar.streak, moments.suggestedAthkar) { s, progress, streak, suggested ->
+        combine(settings.settings, athkar.progress, athkar.streak, moments.suggestedAthkar, athkar.libraryFlow) { s, progress, streak, suggested, library ->
             val now = ZonedDateTime.now(s.zone)
             val today = now.toLocalDate()
-            val library = athkar.library()
             AthkarHome(library, progress.on(today), streak.current(today), library.category(suggested) ?: library.core.first())
         }
             .flowOn(Dispatchers.Default)
@@ -78,11 +79,11 @@ class AthkarViewModel(
     val query: StateFlow<String> = _query.asStateFlow()
 
     /** Categories whose title or text matches the search, in Arabic or English. */
-    val results: StateFlow<List<AthkarCategory>> = _query.debounce(150)
-        .mapLatest { query ->
+    val results: StateFlow<List<AthkarCategory>> = combine(_query.debounce(150), athkar.libraryFlow, ::Pair)
+        .mapLatest { (query, library) ->
             val folded = ArabicText.normalize(query.trim())
             if (folded.isEmpty()) return@mapLatest emptyList()
-            athkar.library().all.filter { category ->
+            library.all.filter { category ->
                 ArabicText.normalize(category.titleEnglish).contains(folded) ||
                     ArabicText.normalize(category.titleArabic).contains(folded) ||
                     category.items.any {
@@ -93,8 +94,16 @@ class AthkarViewModel(
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    /**
+     * The count as tapped, shown before it is saved. A tap used to wait for the write to disk to
+     * come back before the number moved, which is a beat behind the haptic under the finger.
+     */
+    private val tapped = MutableStateFlow<TasbihState?>(null)
+    private val writing = AtomicInteger()
+
     val tasbihState: StateFlow<TasbihState> =
-        tasbih.state.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TasbihState())
+        combine(tasbih.state, tapped) { saved, mine -> if (writing.get() > 0 && mine != null) mine else saved }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TasbihState())
 
     private val _events = MutableSharedFlow<AthkarEvent>(extraBufferCapacity = 4)
     val events: SharedFlow<AthkarEvent> = _events.asSharedFlow()
@@ -104,8 +113,20 @@ class AthkarViewModel(
     }
 
     fun incrementTasbih() {
+        // The same rules the repository applies, run here first; its writes are serial, so the
+        // saved count arrives at the same number.
+        // Two taps inside one frame must not both start from the same number.
+        val base = tapped.value?.takeIf { writing.get() > 0 } ?: tasbihState.value
+        val step = TasbihEngine.increment(base)
+        writing.incrementAndGet()
+        tapped.value = step.state
+        if (step.roundCompleted) _events.tryEmit(AthkarEvent.RoundCompleted)
         viewModelScope.launch {
-            if (tasbih.increment().roundCompleted) _events.emit(AthkarEvent.RoundCompleted)
+            try {
+                tasbih.increment()
+            } finally {
+                writing.decrementAndGet()
+            }
         }
     }
 

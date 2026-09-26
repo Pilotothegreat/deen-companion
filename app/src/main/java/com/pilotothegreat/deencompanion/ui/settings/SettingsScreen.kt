@@ -23,6 +23,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material.icons.automirrored.rounded.OpenInNew
+import androidx.compose.material.icons.automirrored.rounded.VolumeOff
+import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.rounded.Abc
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Accessibility
@@ -63,6 +65,7 @@ import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.NightsStay
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.NotificationsActive
+import androidx.compose.material.icons.rounded.NotificationsOff
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Policy
 import androidx.compose.material.icons.rounded.QueryStats
@@ -151,6 +154,7 @@ import com.pilotothegreat.deencompanion.ui.common.nameRes
 import com.pilotothegreat.deencompanion.ui.common.startSafely
 import com.pilotothegreat.deencompanion.ui.components.ChoiceDialog
 import com.pilotothegreat.deencompanion.ui.components.ConnectedChoice
+import com.pilotothegreat.deencompanion.ui.common.rememberHaptics
 import com.pilotothegreat.deencompanion.ui.components.MorphBadge
 import com.pilotothegreat.deencompanion.ui.components.SectionHeader
 import com.pilotothegreat.deencompanion.ui.location.locationStatus
@@ -168,7 +172,6 @@ private typealias SettingsRow = @Composable (ListItemShapes) -> Unit
 
 private sealed interface SettingsDialog {
     data object Method : SettingsDialog
-    data object Asr : SettingsDialog
     data object HighLatitude : SettingsDialog
     data object FineTune : SettingsDialog
     data object ReciterChoice : SettingsDialog
@@ -278,8 +281,14 @@ fun SettingsScreen(
                             ) { dialog = SettingsDialog.Method }
                         },
                         { shapes ->
-                            NavRow(shapes, Icons.Rounded.Brightness5, stringResource(R.string.asr_juristic_method), stringResource(s.asrSchool.labelRes)) {
-                                dialog = SettingsDialog.Asr
+                            // Two answers, shown as what they mean rather than named behind a dialog.
+                            PictureRow(shapes, Icons.Rounded.Brightness5, stringResource(R.string.asr_juristic_method), stringResource(s.asrSchool.labelRes)) {
+                                PictureChoice(
+                                    options = AsrSchool.entries,
+                                    selected = s.asrSchool,
+                                    onSelect = viewModel::setAsrSchool,
+                                    label = { stringResource(if (it == AsrSchool.HANAFI) R.string.asr_hanafi else R.string.asr_standard_short) },
+                                ) { school, chosen -> AsrPicture(school, chosen) }
                             }
                         },
                         { shapes ->
@@ -322,17 +331,15 @@ fun SettingsScreen(
                         ) { showSounds = true }
                     }
                     add { shapes ->
-                        ContentRow(shapes, Icons.Rounded.Schedule, stringResource(R.string.pre_reminder)) {
-                            ConnectedChoice(
+                        PictureRow(shapes, Icons.Rounded.Schedule, stringResource(R.string.pre_reminder)) {
+                            PictureChoice(
                                 options = Defaults.PRE_REMINDER_CHOICES,
                                 selected = s.sounds.preReminderMinutes,
                                 onSelect = viewModel::setPreReminder,
-                                label = {
-                                    if (it == 0) stringResource(R.string.pre_reminder_off)
-                                    else pluralStringResource(R.plurals.minutes, it, Formatters.number(it, locale))
-                                },
-                                modifier = Modifier.padding(top = Spacing.small),
-                            )
+                                label = { minutesLabel(it, locale) },
+                            ) { minutes, chosen ->
+                                MinutesPicture(minutes, if (minutes == 0) Icons.Rounded.NotificationsOff else Icons.Rounded.NotificationsActive, chosen)
+                            }
                         }
                     }
                     // Which prayers it applies to only matters once it is on, and asking before
@@ -362,25 +369,24 @@ fun SettingsScreen(
                         }
                     }
                     add { shapes ->
-                        ContentRow(shapes, Icons.Rounded.DoNotDisturbOn, stringResource(R.string.silence_during_prayer)) {
+                        PictureRow(
+                            shapes, Icons.Rounded.DoNotDisturbOn, stringResource(R.string.silence_during_prayer),
+                            stringResource(if (silenceAllowed) R.string.silence_during_prayer_desc else R.string.silence_needs_permission),
+                        ) {
                             Column(verticalArrangement = Arrangement.spacedBy(Spacing.hair)) {
-                                Text(
-                                    if (silenceAllowed) stringResource(R.string.silence_during_prayer_desc)
-                                    else stringResource(R.string.silence_needs_permission),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
                                 if (silenceAllowed) {
-                                    ConnectedChoice(
+                                    PictureChoice(
                                         options = Defaults.SILENCE_CHOICES,
                                         selected = s.sounds.silenceMinutes,
                                         onSelect = viewModel::setSilenceMinutes,
-                                        label = {
-                                            if (it == 0) stringResource(R.string.pre_reminder_off)
-                                            else pluralStringResource(R.plurals.minutes, it, Formatters.number(it, locale))
-                                        },
-                                        modifier = Modifier.padding(top = Spacing.small),
-                                    )
+                                        label = { minutesLabel(it, locale) },
+                                    ) { minutes, chosen ->
+                                        MinutesPicture(
+                                            minutes,
+                                            if (minutes == 0) Icons.AutoMirrored.Rounded.VolumeUp else Icons.AutoMirrored.Rounded.VolumeOff,
+                                            chosen,
+                                        )
+                                    }
                                 } else {
                                     // Durations it could not honour were offered here, and choosing one threw the reader
                                     // into Android's settings without a word. Now the row says what it needs and asks.
@@ -439,25 +445,24 @@ fun SettingsScreen(
                             }
                         },
                         { shapes ->
-                            ContentRow(shapes, Icons.Rounded.Language, stringResource(R.string.language)) {
-                                ConnectedChoice(
+                            // Each language written in itself, set out like the theme above it.
+                            PictureRow(shapes, Icons.Rounded.Language, stringResource(R.string.language)) {
+                                PictureChoice(
                                     options = listOf(AppLanguage.SYSTEM) + AppLanguage.supported,
                                     selected = s.appLanguage,
                                     onSelect = viewModel::setLanguage,
                                     label = { languageLabel(it) },
-                                    modifier = Modifier.padding(top = Spacing.small),
-                                )
+                                ) { tag, chosen -> LanguagePicture(tag, chosen) }
                             }
                         },
                         { shapes ->
-                            ContentRow(shapes, Icons.Rounded.FormatSize, stringResource(R.string.text_scale)) {
-                                ConnectedChoice(
+                            PictureRow(shapes, Icons.Rounded.FormatSize, stringResource(R.string.text_scale)) {
+                                PictureChoice(
                                     options = TEXT_SCALES,
                                     selected = TEXT_SCALES.minByOrNull { kotlin.math.abs(it - s.accessibility.textScale) } ?: 1f,
                                     onSelect = viewModel::setTextScale,
                                     label = { stringResource(it.labelRes) },
-                                    modifier = Modifier.padding(top = Spacing.small),
-                                )
+                                ) { scale, chosen -> TextSizePicture(scale, chosen) }
                             }
                         },
                         { shapes ->
@@ -614,14 +619,6 @@ fun SettingsScreen(
             onReset = viewModel::resetAdjustments,
             onDismiss = { dialog = null },
         )
-        SettingsDialog.Asr -> ChoiceDialog(
-            title = stringResource(R.string.asr_juristic_method),
-            options = AsrSchool.entries,
-            selected = s.asrSchool,
-            label = { stringResource(it.labelRes) },
-            onSelect = viewModel::setAsrSchool,
-            onDismiss = { dialog = null },
-        )
         SettingsDialog.ReciterChoice -> ChoiceDialog(
             title = stringResource(R.string.reciter),
             options = Reciter.entries,
@@ -762,9 +759,13 @@ private fun SwitchRow(
     onCheckedChange: (Boolean) -> Unit,
 ) {
     val interaction = remember { MutableInteractionSource() }
+    val haptics = rememberHaptics()
     SegmentedListItem(
         checked = checked,
-        onCheckedChange = onCheckedChange,
+        onCheckedChange = {
+            haptics.toggle(it)
+            onCheckedChange(it)
+        },
         shapes = shapes,
         // A row that is on fills with the badge's usual colour, so its badge takes the primary one.
         leadingContent = {
@@ -790,6 +791,35 @@ private fun ContentRow(shapes: ListItemShapes, icon: ImageVector, title: String,
         supportingContent = content,
     ) { Text(title) }
 }
+
+/**
+ * A row whose answer is a [PictureChoice]: its name and badge above, the cards across the full
+ * width below, where a list item's supporting slot would have squeezed them beside the badge.
+ */
+@Composable
+private fun PictureRow(shapes: ListItemShapes, icon: ImageVector, title: String, caption: String? = null, content: @Composable () -> Unit) {
+    val interaction = remember { MutableInteractionSource() }
+    // The list rows' own colour and spacing, so it reads as one of them rather than a card among them.
+    Surface(shape = shapes.shape, color = ListItemDefaults.segmentedColors().containerColor) {
+        Column(
+            Modifier.fillMaxWidth().padding(horizontal = Spacing.large, vertical = Spacing.medium),
+            verticalArrangement = Arrangement.spacedBy(Spacing.medium),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                MorphBadge(icon, interaction)
+                Column(Modifier.weight(1f)) {
+                    Text(title, style = MaterialTheme.typography.bodyLarge)
+                    caption?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                }
+            }
+            content()
+        }
+    }
+}
+
+@Composable
+private fun minutesLabel(minutes: Int, locale: Locale): String =
+    if (minutes == 0) stringResource(R.string.pre_reminder_off) else stringResource(R.string.minutes_short, Formatters.number(minutes, locale))
 
 @Composable
 private fun OpenIcon() = Icon(Icons.AutoMirrored.Rounded.OpenInNew, contentDescription = null)

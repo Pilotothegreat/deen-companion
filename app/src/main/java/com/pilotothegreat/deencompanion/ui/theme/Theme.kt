@@ -24,16 +24,22 @@ fun DeenTheme(
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
-    val base = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        darkTheme -> DeenDarkColors
-        else -> DeenLightColors
-    }
+    val configuration = LocalConfiguration.current
     val resolved = Accessibility.from(accessibility, rememberSystemReducedMotion())
-    val withContrast = if (resolved.highContrast) base.withHigherContrast(darkTheme) else base
-    val colors = if (darkTheme && pureBlack) withContrast.withPureBlackSurfaces() else withContrast
-    val arabic = LocalConfiguration.current.locales[0].language == "ar"
+    // Kept until something it depends on changes. Built afresh, the scheme was a new object on every
+    // settings write (the reading position among them), and everything that reads a colour, the
+    // mushaf's laid-out lines included, took it for a new theme.
+    val colors = remember(context, configuration, darkTheme, dynamicColor, pureBlack, resolved.highContrast) {
+        val base = when {
+            dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
+                if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            darkTheme -> DeenDarkColors
+            else -> DeenLightColors
+        }
+        val withContrast = if (resolved.highContrast) base.withHigherContrast(darkTheme) else base
+        if (darkTheme && pureBlack) withContrast.withPureBlackSurfaces() else withContrast
+    }
+    val arabic = configuration.locales[0].language == "ar"
     // The reader's own scale multiplies the system's, for people who want more than its slider gives.
     val typography = remember(arabic, resolved.textScale) { deenTypography(arabic).scaledBy(resolved.textScale) }
 

@@ -50,6 +50,8 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -116,7 +118,10 @@ fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val content by viewModel.content.collectAsStateWithLifecycle()
-    val countdown by viewModel.countdown.collectAsStateWithLifecycle()
+    // Held as a State and read only where it is shown: it ticks every second, and read up here it
+    // rebuilt the whole screen with it, system-service checks and all.
+    val countdown = viewModel.countdown.collectAsStateWithLifecycle()
+    val hasCountdown by remember { derivedStateOf { countdown.value != null } }
     val athkarNow by viewModel.athkarNow.collectAsStateWithLifecycle()
     val prayed by viewModel.prayedToday.collectAsStateWithLifecycle()
     val daysObserved by viewModel.daysObserved.collectAsStateWithLifecycle()
@@ -129,8 +134,10 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
 
     var permissions by remember { mutableStateOf(PermissionStatus.of(context)) }
+    var reliabilityProblem by remember { mutableStateOf(false) }
     LifecycleResumeEffect(Unit) {
         permissions = PermissionStatus.of(context)
+        reliabilityProblem = hasReliabilityProblem(context, permissions.exactAlarms)
         viewModel.onResume()
         onPauseOrDispose { }
     }
@@ -289,9 +296,7 @@ fun HomeScreen(
                     // channel, a manufacturer's own killer — has no single action to offer, so it
                     // points at the screen that explains each one. Checked here rather than
                     // re-derived, since ReliabilityScreen already knows the whole list.
-                    if (isEmpty() && current.settings.notificationsEnabled &&
-                        hasReliabilityProblem(context, permissions.exactAlarms)
-                    ) {
+                    if (isEmpty() && current.settings.notificationsEnabled && reliabilityProblem) {
                         add {
                             PermissionCard(
                                 icon = Icons.Rounded.NotificationsActive,
@@ -326,12 +331,14 @@ fun HomeScreen(
                         },
                     )
                 }
-                countdown?.let { cd -> item(key = "hero") { NextPrayerHero(cd, locale, springItem()) } }
+                if (hasCountdown) {
+                    item(key = "hero") { countdown.value?.let { NextPrayerHero(it, locale, springItem()) } }
+                }
                 item(key = "times") {
                     Box(springItem()) {
                         PrayerTimesCard(
                             schedule = current.today,
-                            nextPrayer = countdown?.next?.takeIf { it.adhan.toLocalDate() == current.today.date }?.prayer,
+                            nextPrayer = nextPrayer(countdown, current.today.date),
                             muted = current.settings.mutedPrayers,
                             notificationsEnabled = current.settings.notificationsEnabled,
                             prayed = prayed,
@@ -396,4 +403,13 @@ private fun LazyItemScope.springItem(): Modifier {
         placementSpec = motion.defaultSpatialSpec(),
         fadeOutSpec = motion.fastEffectsSpec(),
     )
+}
+
+/** Which of today's prayers is next, read so that only a change of prayer, not each second, recomposes. */
+@Composable
+private fun nextPrayer(countdown: State<Countdown?>, today: LocalDate): Prayer? {
+    val next by remember(today) {
+        derivedStateOf { countdown.value?.next?.takeIf { it.adhan.toLocalDate() == today }?.prayer }
+    }
+    return next
 }

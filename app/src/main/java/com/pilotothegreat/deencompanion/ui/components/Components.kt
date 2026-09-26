@@ -1,5 +1,17 @@
 package com.pilotothegreat.deencompanion.ui.components
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,9 +46,14 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.pilotothegreat.deencompanion.ui.common.Formatters
 import com.pilotothegreat.deencompanion.ui.theme.Spacing
+import com.pilotothegreat.deencompanion.ui.theme.rememberReducedMotion
+import java.util.Locale
 import com.pilotothegreat.deencompanion.R
 
 @Composable
@@ -164,4 +181,29 @@ fun ShapeBadge(
             Text(text, style = MaterialTheme.typography.labelLargeEmphasized)
         }
     }
+}
+
+/**
+ * A count that rolls to its next value: the new number rises in as a count grows and drops in as it
+ * falls, so a tap is seen to move something. Under reduce-motion it simply changes.
+ */
+@Composable
+fun RollingNumber(value: Int, locale: Locale, style: TextStyle, color: Color, modifier: Modifier = Modifier) {
+    val still = rememberReducedMotion()
+    AnimatedContent(
+        targetState = value,
+        transitionSpec = {
+            if (still) {
+                EnterTransition.None togetherWith ExitTransition.None
+            } else {
+                val direction = if (targetState > initialState) 1 else -1
+                val slide = spring<IntOffset>(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMedium)
+                (slideInVertically(slide) { direction * it / 2 } + fadeIn(tween(120))) togetherWith
+                    (slideOutVertically(slide) { -direction * it / 2 } + fadeOut(tween(90))) using SizeTransform(clip = false)
+            }
+        },
+        contentAlignment = Alignment.Center,
+        label = "rollingNumber",
+        modifier = modifier,
+    ) { Text(Formatters.number(it, locale), style = style, color = color) }
 }

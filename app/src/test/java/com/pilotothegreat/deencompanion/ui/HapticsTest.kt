@@ -28,8 +28,14 @@ class HapticsTest {
         haptics.tick()
         haptics.confirm()
         haptics.click()
+        haptics.toggle(true)
+        haptics.toggle(false)
+        haptics.reject()
         assertEquals(
-            listOf(HapticFeedbackType.SegmentTick, HapticFeedbackType.Confirm, HapticFeedbackType.ContextClick),
+            listOf(
+                HapticFeedbackType.SegmentTick, HapticFeedbackType.Confirm, HapticFeedbackType.ContextClick,
+                HapticFeedbackType.ToggleOn, HapticFeedbackType.ToggleOff, HapticFeedbackType.Reject,
+            ),
             recorder.performed,
         )
     }
@@ -40,6 +46,8 @@ class HapticsTest {
         haptics.tick()
         haptics.confirm()
         haptics.click()
+        haptics.toggle(true)
+        haptics.reject()
         haptics.perform(HapticFeedbackType.LongPress)
         assertEquals(emptyList<HapticFeedbackType>(), recorder.performed)
     }

@@ -1,7 +1,15 @@
 package com.pilotothegreat.deencompanion.ui.athkar
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -64,13 +72,18 @@ import com.pilotothegreat.deencompanion.ui.components.LoadingBox
 import com.pilotothegreat.deencompanion.ui.components.SearchField
 import com.pilotothegreat.deencompanion.ui.components.SectionHeader
 import com.pilotothegreat.deencompanion.ui.navigation.LocalBottomBarPadding
+import com.pilotothegreat.deencompanion.ui.theme.animatedPolygonShape
 import com.pilotothegreat.deencompanion.ui.theme.pressScale
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.util.Locale
 
 @Composable
-fun AthkarScreen(onOpenCategory: (String) -> Unit, viewModel: AthkarViewModel = koinViewModel()) {
+fun AthkarScreen(
+    onOpenCategory: (String) -> Unit,
+    onEditList: (String?) -> Unit = {},
+    viewModel: AthkarViewModel = koinViewModel(),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val query by viewModel.query.collectAsStateWithLifecycle()
     val results by viewModel.results.collectAsStateWithLifecycle()
@@ -129,6 +142,18 @@ fun AthkarScreen(onOpenCategory: (String) -> Unit, viewModel: AthkarViewModel = 
                 NowCard(home.suggested, home.progress, home.streak, locale, onOpen = { onOpenCategory(home.suggested.id) })
             }
             item(key = "core") { CoreGrid(home.library.core, home.progress, locale, onOpenCategory) }
+            item(key = "mine") {
+                MyAthkar(
+                    lists = home.library.custom,
+                    progress = home.progress,
+                    locale = locale,
+                    onOpen = onOpenCategory,
+                    onNew = {
+                        haptics.click()
+                        onEditList(null)
+                    },
+                )
+            }
             item(key = "tasbih") {
                 TasbihCard(
                     state = tasbih,
@@ -137,7 +162,10 @@ fun AthkarScreen(onOpenCategory: (String) -> Unit, viewModel: AthkarViewModel = 
                         haptics.tick()
                         viewModel.incrementTasbih()
                     },
-                    onReset = viewModel::resetTasbih,
+                    onReset = {
+                        haptics.reject()
+                        viewModel.resetTasbih()
+                    },
                     onTargetChange = viewModel::setTasbihTarget,
                     onDhikrChange = viewModel::setDhikr,
                 )
@@ -243,6 +271,12 @@ private fun CoreTile(category: AthkarCategory, progress: DayProgress, locale: Lo
     val (container, content) = athkarColors(category.id, MaterialTheme.colorScheme)
     val fraction by animateFloatAsState(progress.fraction(category), MaterialTheme.motionScheme.slowSpatialSpec(), label = "tile")
     val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    // The badge answers a press too, turning to a rounder shape while the card is held.
+    val badge = animatedPolygonShape(
+        target = if (pressed) MaterialShapes.Circle else athkarShape(category.id),
+        spec = MaterialTheme.motionScheme.fastSpatialSpec(),
+    )
     Card(
         onClick = onClick,
         interactionSource = interaction,
@@ -253,7 +287,7 @@ private fun CoreTile(category: AthkarCategory, progress: DayProgress, locale: Lo
         Column(Modifier.padding(Spacing.large), verticalArrangement = Arrangement.spacedBy(Spacing.medium)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Surface(
-                    shape = athkarShape(category.id).toShape(),
+                    shape = badge,
                     color = content,
                     contentColor = container,
                     modifier = Modifier.size(44.dp),
@@ -263,9 +297,7 @@ private fun CoreTile(category: AthkarCategory, progress: DayProgress, locale: Lo
                     }
                 }
                 Spacer(Modifier.weight(1f))
-                if (progress.isComplete(category)) {
-                    Icon(Icons.Rounded.CheckCircle, contentDescription = stringResource(R.string.athkar_done))
-                }
+                DoneMark(progress.isComplete(category))
             }
             Text(category.title(locale), style = MaterialTheme.typography.titleMediumEmphasized)
             // The default track matches some tile colors, so it's tinted from the tile's content instead.
@@ -305,12 +337,72 @@ private fun CategoryList(
                 supportingContent = {
                     Text(pluralStringResource(R.plurals.athkar_items, category.items.size, Formatters.number(category.items.size, locale)))
                 },
-                trailingContent = {
-                    if (progress.isComplete(category)) {
-                        Icon(Icons.Rounded.CheckCircle, contentDescription = stringResource(R.string.athkar_done))
-                    }
-                },
+                trailingContent = { DoneMark(progress.isComplete(category)) },
             ) { Text(category.title(locale)) }
         }
+    }
+}
+
+/**
+ * The reader's own lists, under the bundled ones they sit beside. With none yet the section is a
+ * single row that says what one is; the list itself is edited from inside it.
+ */
+@Composable
+private fun MyAthkar(
+    lists: List<AthkarCategory>,
+    progress: DayProgress,
+    locale: Locale,
+    onOpen: (String) -> Unit,
+    onNew: () -> Unit,
+) {
+    Column {
+        SectionHeader(stringResource(R.string.athkar_mine), Modifier.padding(start = Spacing.hair).semantics { heading() })
+        Column(verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
+            val rows = lists.size + 1
+            lists.forEachIndexed { index, list ->
+                SegmentedListItem(
+                    onClick = { onOpen(list.id) },
+                    shapes = ListItemDefaults.segmentedShapes(index, rows),
+                    leadingContent = { Icon(athkarIcon(list.id), contentDescription = null) },
+                    supportingContent = {
+                        Text(pluralStringResource(R.plurals.athkar_items, list.items.size, Formatters.number(list.items.size, locale)))
+                    },
+                    trailingContent = { DoneMark(progress.isComplete(list)) },
+                ) { Text(list.title(locale)) }
+            }
+            SegmentedListItem(
+                onClick = onNew,
+                shapes = ListItemDefaults.segmentedShapes(lists.size, rows),
+                leadingContent = {
+                    Surface(
+                        shape = MaterialShapes.Cookie6Sided.toShape(),
+                        color = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(32.dp),
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(Icons.Rounded.Add, contentDescription = null, modifier = Modifier.size(20.dp))
+                        }
+                    }
+                },
+                supportingContent = if (lists.isEmpty()) {
+                    { Text(stringResource(R.string.athkar_new_list_desc)) }
+                } else {
+                    null
+                },
+            ) { Text(stringResource(R.string.athkar_new_list)) }
+        }
+    }
+}
+
+/** The check a finished list earns, springing in rather than appearing. */
+@Composable
+private fun DoneMark(done: Boolean) {
+    AnimatedVisibility(
+        visible = done,
+        enter = scaleIn(MaterialTheme.motionScheme.fastSpatialSpec(), initialScale = 0.4f) + fadeIn(MaterialTheme.motionScheme.fastEffectsSpec()),
+        exit = scaleOut(MaterialTheme.motionScheme.fastEffectsSpec()) + fadeOut(MaterialTheme.motionScheme.fastEffectsSpec()),
+    ) {
+        Icon(Icons.Rounded.CheckCircle, contentDescription = stringResource(R.string.athkar_done))
     }
 }

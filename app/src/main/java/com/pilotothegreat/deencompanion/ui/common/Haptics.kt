@@ -38,4 +38,10 @@ class Haptics internal constructor(
 
     /** A press that opens something. */
     fun click() = perform(HapticFeedbackType.ContextClick)
+
+    /** A switch flipped: a firmer tap for on than for off, the way the system's own switches feel. */
+    fun toggle(on: Boolean) = perform(if (on) HapticFeedbackType.ToggleOn else HapticFeedbackType.ToggleOff)
+
+    /** Something taken away: a reset, a deletion. */
+    fun reject() = perform(HapticFeedbackType.Reject)
 }
