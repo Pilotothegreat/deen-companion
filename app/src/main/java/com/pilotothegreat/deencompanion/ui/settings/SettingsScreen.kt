@@ -37,6 +37,7 @@ import com.pilotothegreat.deencompanion.data.settings.ReduceMotion
 import androidx.compose.material.icons.rounded.DeleteSweep
 import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material.icons.rounded.Save
+import androidx.compose.material.icons.rounded.Visibility
 import com.pilotothegreat.deencompanion.data.backup.BackupRepository
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Groups
@@ -64,6 +65,7 @@ import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Policy
+import androidx.compose.material.icons.rounded.QueryStats
 import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material.icons.rounded.Repeat
 import androidx.compose.material.icons.rounded.Schedule
@@ -211,6 +213,7 @@ fun SettingsScreen(
     var showUpdate by rememberSaveable { mutableStateOf(false) }
     var showIqama by rememberSaveable { mutableStateOf(false) }
     var showRestore by rememberSaveable { mutableStateOf(false) }
+    var showUsage by rememberSaveable { mutableStateOf(false) }
     var showSounds by rememberSaveable { mutableStateOf(false) }
     val playUpdate = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
         viewModel.completePlayUpdate()
@@ -469,9 +472,32 @@ fun SettingsScreen(
             }
 
             item(key = "data") {
+                val counting by viewModel.analyticsEnabled.collectAsStateWithLifecycle()
                 SettingsGroup(
                     stringResource(R.string.general),
                     listOf(
+                        // Counting what is used sits with backup and reset rather than in a group of
+                        // its own: it is about this app's data, and the menu is short on purpose.
+                        { shapes ->
+                            SwitchRow(
+                                shapes, Icons.Rounded.QueryStats, stringResource(R.string.usage_switch),
+                                stringResource(
+                                    if (viewModel.analyticsHasCollector) R.string.usage_switch_desc_shared
+                                    else R.string.usage_switch_desc_local,
+                                ),
+                                counting,
+                                viewModel::setAnalytics,
+                            )
+                        },
+                        { shapes ->
+                            NavRow(
+                                shapes, Icons.Rounded.Visibility, stringResource(R.string.usage_show),
+                                stringResource(R.string.usage_show_desc),
+                            ) {
+                                viewModel.loadUsageReport()
+                                showUsage = true
+                            }
+                        },
                         { shapes ->
                             NavRow(
                                 shapes, Icons.Rounded.Save, stringResource(R.string.backup_export),
@@ -624,6 +650,11 @@ fun SettingsScreen(
         )
         null -> Unit
     }
+    if (showUsage) {
+        val report by viewModel.usageReport.collectAsStateWithLifecycle()
+        UsageSheet(report = report, onDismiss = { showUsage = false })
+    }
+
     (updateState as? UpdateChecker.State.Available)?.takeIf { showUpdate }?.let { available ->
         UpdateDialog(
             version = available.version,

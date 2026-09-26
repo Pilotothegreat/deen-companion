@@ -80,7 +80,8 @@ class WidgetRenderTest {
             title = "Evening",
             status = "3 of 24",
             fraction = 0.125f,
-            meters = listOf(AthkarMeter("Morning", 1f), AthkarMeter("Evening athkar", 0.125f)),
+            // The category in the heading is not repeated as a meter, so an evening widget offers the morning.
+            meters = listOf(AthkarMeter("Morning", 1f)),
         )
         // 100×60 is the smallest any of these can be resized to.
         listOf(DpSize(200.dp, 180.dp), DpSize(180.dp, 90.dp), DpSize(100.dp, 60.dp)).forEach { shoot("athkar", it) { AthkarContent(athkar) } }
@@ -90,6 +91,41 @@ class WidgetRenderTest {
         listOf(DpSize(250.dp, 120.dp), DpSize(180.dp, 70.dp), DpSize(100.dp, 60.dp)).forEach { shoot("moment", it) { MomentContent(moment) } }
         val verse = QuoteState(false, "Verse of the day", "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا", "For indeed, with hardship will be ease", "Ash-Sharh 94:5", Intent())
         listOf(DpSize(250.dp, 180.dp), DpSize(180.dp, 100.dp), DpSize(100.dp, 60.dp)).forEach { shoot("verse", it) { QuoteContent(verse) } }
+    }
+
+    @Test fun theNewOnes() {
+        val qibla = QiblaWidgetState(false, "Qibla", 294.3f, "294°", "from north", "2,158 km to Makkah")
+        listOf(DpSize(250.dp, 110.dp), DpSize(250.dp, 180.dp), DpSize(180.dp, 90.dp), DpSize(100.dp, 60.dp))
+            .forEach { shoot("qibla", it) { QiblaContent(qibla) } }
+        val khatma = KhatmaWidgetState(
+            dynamic = false,
+            label = "Khatma",
+            headline = "3 pages to read today",
+            detail = "128 of 604 pages · 24 days left",
+            fraction = 0.21f,
+            hasPlan = true,
+            open = Intent(),
+        )
+        listOf(DpSize(250.dp, 110.dp), DpSize(180.dp, 90.dp), DpSize(100.dp, 60.dp)).forEach { shoot("khatma", it) { KhatmaContent(khatma) } }
+        // No plan yet: the same widget offers to begin one, and has no bar to show.
+        shoot("khatma-empty", DpSize(250.dp, 110.dp)) {
+            KhatmaContent(khatma.copy(headline = "Start a khatma", detail = "Read the whole mushaf by a date you choose", hasPlan = false))
+        }
+        val date = DateWidgetState(false, "29 Rabi' I 1448 AH", "Thursday", "18 September 2026")
+        listOf(DpSize(180.dp, 110.dp), DpSize(250.dp, 110.dp), DpSize(100.dp, 60.dp)).forEach { shoot("date", it) { DateContent(date) } }
+    }
+
+    /**
+     * The qibla arrow at the four quarters: north up, east right, south down, west left.
+     *
+     * A bearing is the whole point of that widget, and an arrow drawn a quarter turn out is worse than
+     * no arrow at all. Only a picture says which way it points.
+     */
+    @Test fun theQiblaArrowPointsWhereItIsTold() {
+        listOf(0f, 90f, 180f, 270f).forEach { degrees ->
+            val state = QiblaWidgetState(false, "Qibla", degrees, "${degrees.toInt()}°", "from north", "2,158 km to Makkah")
+            shoot("qibla-at-${degrees.toInt()}", DpSize(250.dp, 150.dp)) { QiblaContent(state) }
+        }
     }
 
     /** Right to left, Arabic-Indic digits and the dark scheme: where a pill or a badge lands on the wrong side. */
@@ -122,6 +158,12 @@ class WidgetRenderTest {
             ),
         )
         listOf(DpSize(320.dp, 300.dp), DpSize(320.dp, 150.dp), DpSize(180.dp, 60.dp)).forEach { shoot("ar-prayer-times", it) { PrayerTimesContent(table) } }
+        val qibla = QiblaWidgetState(false, "القبلة", 294.3f, "٢٩٤°", "من الشمال", "٢٬١٥٨ كم إلى مكة")
+        shoot("ar-qibla", DpSize(250.dp, 110.dp)) { QiblaContent(qibla) }
+        val khatma = KhatmaWidgetState(false, "الختمة", "٣ صفحات لليوم", "١٢٨ من ٦٠٤ صفحة · بقي ٢٤ يومًا", 0.21f, true, Intent())
+        shoot("ar-khatma", DpSize(250.dp, 110.dp)) { KhatmaContent(khatma) }
+        val date = DateWidgetState(false, "٢٩ ربيع الأول ١٤٤٨ هـ", "الخميس", "١٨ سبتمبر ٢٠٢٦")
+        shoot("ar-date", DpSize(250.dp, 110.dp)) { DateContent(date) }
     }
 
     @OptIn(ExperimentalGlanceRemoteViewsApi::class)

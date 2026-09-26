@@ -105,7 +105,7 @@
     <string name="tasbih_dhikr_lailahaillallah">La ilaha illa Allah</string>
 
     <!-- Quran -->
-    <string name="search_quran_hint">Search surahs and ayahs</string>
+    <string name="search_quran_hint">Ayat al-Kursi, 2:255, juz 30, patience…</string>
     <string name="surahs">Surahs</string>
     <string name="ayahs">Ayahs</string>
     <string name="bookmarks">Bookmarks</string>
@@ -123,6 +123,13 @@
     <string name="bookmark">Bookmark</string>
     <string name="remove_bookmark">Remove bookmark</string>
     <string name="jump_to">Jump to</string>
+    <string name="passage_ayat_al_kursi">Ayat al-Kursi</string>
+    <string name="passage_khawatim_al_baqarah">The last two ayahs of Al-Baqarah</string>
+    <string name="passage_ayat_an_nur">The Verse of Light</string>
+    <string name="passage_ayat_ad_dayn">The Verse of Debt</string>
+    <string name="passage_mu_awwidhatayn">Al-Mu\'awwidhatayn</string>
+    <string name="passage_three_quls">The three Quls</string>
+    <string name="ayah_range">%1$s:%2$s-%3$s</string>
     <string name="juz_tab">Juz</string>
     <string name="page_tab">Page</string>
     <string name="juz_number">Juz %1$s</string>
@@ -134,8 +141,6 @@
     <string name="repeat_ayah">This ayah</string>
     <string name="repeat_range">From where I started</string>
     <string name="repeat_surah">The whole surah</string>
-    <string name="playback_speed">Speed</string>
-    <string name="speed_multiplier">%1$s×</string>
     <string name="retry">Retry</string>
     <string name="playback_error_offline">No connection. Ayahs already downloaded still play.</string>
     <string name="playback_error_missing">This reciter doesn\'t have that ayah. Try another reciter.</string>
@@ -149,6 +154,23 @@
     <string name="reciter_mishary">Mishary Alafasy</string>
     <string name="reciter_husary">Mahmoud Khalil Al-Husary</string>
     <string name="reciter_abdul_basit">Abdul Basit Abdul Samad</string>
+    <string name="reciter_minshawi">Mohamed Siddiq El-Minshawi</string>
+    <string name="reciter_sudais">Abdul Rahman Al-Sudais</string>
+    <string name="reciter_shuraim">Saud Al-Shuraim</string>
+    <string name="reciter_ghamdi">Saad Al-Ghamdi</string>
+    <string name="reciter_hudhaify">Ali Al-Hudhaify</string>
+    <string name="reciter_muaiqly">Maher Al-Muaiqly</string>
+    <string name="reciter_shatri">Abu Bakr Al-Shatri</string>
+    <string name="reciter_ayyub">Muhammad Ayyub</string>
+    <string name="reciter_basfar">Abdullah Basfar</string>
+    <string name="reciter_dosari">Yasser Al-Dosari</string>
+    <string name="reciter_qatami">Nasser Al-Qatami</string>
+    <string name="reciter_juhany">Abdullah Awad Al-Juhany</string>
+    <string name="reciter_ali_jaber">Ali Jaber</string>
+    <string name="reciter_fares_abbad">Fares Abbad</string>
+    <string name="reciter_jibreel">Muhammad Jibreel</string>
+    <string name="reciter_hani_rifai">Hani Ar-Rifai</string>
+    <string name="reciter_tablawi">Mohamed Al-Tablawi</string>
     <string name="sleep_timer">Sleep timer</string>
     <string name="timer_off">Off</string>
 
@@ -349,6 +371,12 @@
     <string name="widget_prayer_times_desc">Today\'s prayer times with the next one highlighted</string>
     <string name="widget_verse_desc">A short ayah for each day</string>
     <string name="widget_athkar_desc">The athkar for this time of day and your progress</string>
+    <string name="widget_qibla_desc">The direction of the Kaaba from where you are, and how far away it is</string>
+    <string name="widget_qibla_from_north">from north</string>
+    <string name="widget_qibla_distance">%1$s km to Makkah</string>
+    <string name="widget_khatma_desc">Your reading plan: what today still asks for, and how far you have come</string>
+    <string name="widget_date_title">Date</string>
+    <string name="widget_date_desc">Today in the Hijri calendar, with the Gregorian date beneath it</string>
 
     <!-- Islamic occasions -->
     <string name="occasion_kahf">Surah al-Kahf</string>
@@ -565,4 +593,15 @@
     <string name="preview_inspiration_ref">Ash-Sharh 94:6</string>
     <string name="preview_moment_title">Friday</string>
     <string name="preview_moment_body">Read Surat al-Kahf, and send many blessings on the Prophet ﷺ.</string>
+    <string name="usage_switch">Count what I use</string>
+    <string name="usage_switch_desc_local">Counts which features you open, on this device only. Nothing is sent anywhere, and you can read and share the whole tally yourself.</string>
+    <string name="usage_switch_desc_shared">Counts which features you open and sends the totals once a day, over Wi-Fi. No text you type, no ayah you read, no location, and nothing that identifies you or your device.</string>
+    <string name="usage_show">What is counted</string>
+    <string name="usage_show_desc">Read the whole tally, and share it if you want to</string>
+    <string name="usage_summary">%1$s days used · %2$s opens · since %3$s</string>
+    <string name="usage_empty">Nothing counted yet.</string>
+    <string name="usage_share">Share this report</string>
+    <string name="channel_updates">App updates</string>
+    <string name="channel_updates_desc">A quiet note when a new version is published</string>
+    <string name="update_notification_body">Version %1$s is ready to install</string>
 </resources>

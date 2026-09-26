@@ -34,6 +34,28 @@ object Http {
         }
     }
 
+    /**
+     * Posts [body] as JSON and throws on anything but a 2xx. Nothing in this app reads the response,
+     * so it is not returned: a collector that answers with a page of HTML is still a success.
+     */
+    suspend fun postJson(url: String, body: String, timeoutMs: Int = 15_000) = withContext(Dispatchers.IO) {
+        val connection = (URL(url).openConnection() as HttpURLConnection).apply {
+            requestMethod = "POST"
+            connectTimeout = timeoutMs
+            readTimeout = timeoutMs
+            doOutput = true
+            setRequestProperty("User-Agent", userAgent)
+            setRequestProperty("Content-Type", "application/json; charset=utf-8")
+        }
+        try {
+            connection.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
+            val code = connection.responseCode
+            if (code !in 200..299) throw IOException("HTTP $code from $url")
+        } finally {
+            connection.disconnect()
+        }
+    }
+
     /** The response parsed as a JSON object. */
     suspend fun getJson(url: String, timeoutMs: Int = 15_000, headers: Map<String, String> = emptyMap()): JSONObject =
         JSONObject(getText(url, timeoutMs, headers))

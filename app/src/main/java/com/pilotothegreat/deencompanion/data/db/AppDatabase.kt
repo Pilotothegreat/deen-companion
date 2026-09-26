@@ -65,6 +65,22 @@ data class FavoriteHadithEntity(
     val addedAt: Long,
 )
 
+/**
+ * One day's count of one thing that happened, and the whole of what the app records about use.
+ *
+ * A counter per day per event, never a row per action: there is no time, no order and nothing that
+ * could reconstruct a session. Rows older than the retention window are deleted, so the table stays
+ * a few hundred rows however long the app is kept.
+ */
+@Entity(tableName = "UsageCounter", primaryKeys = ["day", "event"])
+data class UsageCounterEntity(
+    /** ISO date in the device's own zone. */
+    val day: String,
+    /** [com.pilotothegreat.deencompanion.core.analytics.UsageEvent.id]. */
+    val event: String,
+    val count: Int,
+)
+
 @Dao
 interface BookmarkDao {
     @Query("SELECT * FROM BookmarkedVerse ORDER BY timestamp DESC")
@@ -202,12 +218,39 @@ interface ReadingPlanDao {
     suspend fun clear()
 }
 
+@Dao
+interface UsageDao {
+    /** One statement, so two threads counting the same event on the same day cannot lose a count. */
+    @Query("INSERT INTO UsageCounter (day, event, count) VALUES (:day, :event, 1) " +
+        "ON CONFLICT(day, event) DO UPDATE SET count = count + 1")
+    suspend fun increment(day: String, event: String)
+
+    @Query("SELECT * FROM UsageCounter WHERE day >= :since ORDER BY day, event")
+    suspend fun since(since: String): List<UsageCounterEntity>
+
+    @Query("SELECT COUNT(DISTINCT day) FROM UsageCounter")
+    suspend fun daysActive(): Int
+
+    @Query("SELECT MIN(day) FROM UsageCounter")
+    suspend fun firstDay(): String?
+
+    @Query("SELECT COALESCE(SUM(count), 0) FROM UsageCounter WHERE event = :event")
+    suspend fun total(event: String): Int
+
+    @Query("DELETE FROM UsageCounter WHERE day < :before")
+    suspend fun deleteBefore(before: String)
+
+    @Query("DELETE FROM UsageCounter")
+    suspend fun clear()
+}
+
 @Database(
     entities = [
         BookmarkEntity::class, HadithBookEntity::class, HadithEntity::class, FavoriteHadithEntity::class,
         NaturalEventEntity::class, PrayerLogEntity::class, ReadingPlanEntity::class,
+        UsageCounterEntity::class,
     ],
-    version = 8,
+    version = 9,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -216,13 +259,14 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun naturalEventDao(): NaturalEventDao
     abstract fun prayerLogDao(): PrayerLogDao
     abstract fun readingPlanDao(): ReadingPlanDao
+    abstract fun usageDao(): UsageDao
 
     companion object {
         private const val NAME = "database"
 
         fun build(context: Context): AppDatabase =
             Room.databaseBuilder(context, AppDatabase::class.java, NAME)
-                .addMigrations(MIGRATION_6_7, MIGRATION_7_8)
+                .addMigrations(MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9)
                 .fallbackToDestructiveMigrationFrom(true, 1, 2, 3, 4, 5)
                 .fallbackToDestructiveMigrationOnDowngrade(true)
                 .build()
@@ -297,6 +341,16 @@ val MIGRATION_7_8 = object : Migration(7, 8) {
             "CREATE TABLE IF NOT EXISTS `ReadingPlan` (`id` INTEGER NOT NULL, `startedOn` TEXT NOT NULL, " +
                 "`targetDays` INTEGER NOT NULL, `startPage` INTEGER NOT NULL, `lastPage` INTEGER NOT NULL, " +
                 "`updatedAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        )
+    }
+}
+
+/** v9: the usage counters. Nothing existing is touched, and the table starts empty. */
+val MIGRATION_8_9 = object : Migration(8, 9) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `UsageCounter` (`day` TEXT NOT NULL, `event` TEXT NOT NULL, " +
+                "`count` INTEGER NOT NULL, PRIMARY KEY(`day`, `event`))",
         )
     }
 }

@@ -52,6 +52,21 @@ object Numerals {
         for (c in text) append(if (c in '0'..'9') '٠' + (c - '0') else c)
     }
 
+    /**
+     * Arabic-Indic and Extended Arabic-Indic digits written as 0-9.
+     *
+     * Someone searching in Arabic types ٢:٢٥٥, and a reference is a number before it is a word.
+     */
+    fun toAscii(text: String): String = buildString(text.length) {
+        for (c in text) append(
+            when (c) {
+                in '٠'..'٩' -> '0' + (c - '٠')
+                in '۰'..'۹' -> '0' + (c - '۰')
+                else -> c
+            },
+        )
+    }
+
     /** Uses the locale's own digits (e.g. Arabic-Indic for ar-OM), as the platform formats times. */
     fun localize(text: String, locale: Locale): String {
         val zero = DecimalFormatSymbols.getInstance(locale).zeroDigit

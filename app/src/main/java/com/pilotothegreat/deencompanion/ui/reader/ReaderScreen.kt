@@ -165,7 +165,6 @@ fun ReaderScreen(
                     onNext = viewModel::next,
                     onStop = viewModel::stop,
                     onRepeat = viewModel::cycleRepeat,
-                    onSpeed = viewModel::cycleSpeed,
                     onReciter = { choosingReciter = true },
                     onBackToRecitation = { scope.launch { pagerState.animateScrollToPage(recitedPage) } },
                 )

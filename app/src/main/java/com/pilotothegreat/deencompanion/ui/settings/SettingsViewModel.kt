@@ -5,17 +5,21 @@ import android.content.Intent
 import android.net.Uri
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
-import com.pilotothegreat.deencompanion.R
-import com.pilotothegreat.deencompanion.data.backup.AutoBackups
-import com.pilotothegreat.deencompanion.data.backup.BackupRepository
-import com.pilotothegreat.deencompanion.data.backup.RestoreError
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.alarms.PrayerAlarmScheduler
+import com.pilotothegreat.deencompanion.core.analytics.UsageEvent
+import com.pilotothegreat.deencompanion.core.analytics.UsageReport
 import com.pilotothegreat.deencompanion.core.prayer.AsrSchool
 import com.pilotothegreat.deencompanion.core.prayer.CalculationMethod
 import com.pilotothegreat.deencompanion.core.prayer.HighLatitudeMode
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
+import com.pilotothegreat.deencompanion.data.analytics.Analytics
+import com.pilotothegreat.deencompanion.data.analytics.AnalyticsRepository
+import com.pilotothegreat.deencompanion.data.backup.AutoBackups
+import com.pilotothegreat.deencompanion.data.backup.BackupRepository
+import com.pilotothegreat.deencompanion.data.backup.RestoreError
 import com.pilotothegreat.deencompanion.data.location.LocationRepository
 import com.pilotothegreat.deencompanion.data.quran.KhatmaRepository
 import com.pilotothegreat.deencompanion.data.quran.QuranRepository
@@ -25,8 +29,8 @@ import com.pilotothegreat.deencompanion.data.quran.TranslationInfo
 import com.pilotothegreat.deencompanion.data.settings.AppLanguage
 import com.pilotothegreat.deencompanion.data.settings.AppSettings
 import com.pilotothegreat.deencompanion.data.settings.ContrastMode
-import com.pilotothegreat.deencompanion.data.settings.ReduceMotion
 import com.pilotothegreat.deencompanion.data.settings.IqamaSetting
+import com.pilotothegreat.deencompanion.data.settings.ReduceMotion
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
 import com.pilotothegreat.deencompanion.data.settings.ThemeMode
 import com.pilotothegreat.deencompanion.data.update.ApkInstaller
@@ -36,12 +40,12 @@ import com.pilotothegreat.deencompanion.playback.AudioCache
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -63,7 +67,30 @@ class SettingsViewModel(
     private val khatma: KhatmaRepository,
     private val backup: BackupRepository,
     private val installer: ApkInstaller,
+    private val analytics: AnalyticsRepository,
 ) : ViewModel() {
+
+    /** Whether the app is counting what is used, and what it has counted so far. */
+    val analyticsEnabled: StateFlow<Boolean> = analytics.enabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+
+    /** True only in a build that was given a collector; otherwise the tally never leaves the device. */
+    val analyticsHasCollector: Boolean get() = analytics.hasCollector
+
+    private val _usageReport = MutableStateFlow<UsageReport?>(null)
+    val usageReport: StateFlow<UsageReport?> = _usageReport.asStateFlow()
+
+    /**
+     * Turning it off empties the table as well as stopping the counting: a switch that leaves the
+     * history behind has not been turned off, it has been paused.
+     */
+    fun setAnalytics(enabled: Boolean) = launch {
+        repository.setAnalyticsEnabled(enabled)
+        if (!enabled) analytics.clear()
+    }
+
+    /** Loads what has been counted, for the sheet that shows it. */
+    fun loadUsageReport() = launch { _usageReport.value = analytics.report() }
 
     val quranCredits: StateFlow<QuranCredits?> = flow { quran.quran().let { emit(QuranCredits(it.textSource, it.translation, it.edition)) } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
@@ -103,6 +130,7 @@ private val _backupMessage = MutableStateFlow<Int?>(null)
     }
 
     fun exportBackup(destination: Uri) = launch {
+        Analytics.record(UsageEvent.BACKUP_EXPORTED)
         val message = withContext(Dispatchers.IO) {
             runCatching {
                 context.contentResolver.openOutputStream(destination)?.use { it.write(backup.export().toByteArray()) }
@@ -126,6 +154,7 @@ private val _backupMessage = MutableStateFlow<Int?>(null)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     fun restoreAutoBackup(path: String) = launch {
+        Analytics.record(UsageEvent.BACKUP_RESTORED)
         val message = withContext(Dispatchers.IO) {
             val json = runCatching { java.io.File(path).readText() }.getOrNull()
             when {
@@ -193,6 +222,7 @@ private val _backupMessage = MutableStateFlow<Int?>(null)
      * opens the system installer. A download that does not match is deleted without being offered.
      */
     fun downloadAndInstall(available: UpdateChecker.State.Available) = launch {
+        Analytics.record(UsageEvent.UPDATE_STARTED)
         val url = available.apkUrl
         val sha = available.apkSha256
         if (url == null || sha == null) {
@@ -240,13 +270,17 @@ private val _backupMessage = MutableStateFlow<Int?>(null)
 
     fun setHijriAdjustment(days: Int) = launch { repository.setHijriAdjustment(days) }
     fun setNotificationsEnabled(enabled: Boolean) = launch { repository.setNotificationsEnabled(enabled) }
-    fun setTheme(mode: ThemeMode, dynamicColor: Boolean) = launch { repository.setTheme(mode, dynamicColor) }
+    fun setTheme(mode: ThemeMode, dynamicColor: Boolean) = launch {
+        Analytics.record(UsageEvent.THEME_CHANGED)
+        repository.setTheme(mode, dynamicColor)
+    }
 
     fun setPureBlack(on: Boolean) = launch { repository.setPureBlack(on) }
     fun setReciter(reciter: Reciter) = launch { repository.setReciter(reciter) }
     fun setAthkarReminders(enabled: Boolean) = launch { repository.setAthkarReminders(enabled) }
 
     fun setLanguage(tag: String) = launch {
+        Analytics.record(UsageEvent.LANGUAGE_CHANGED)
         repository.setAppLanguage(tag)
         AppLanguage.apply(tag)
         location.relocalizeCity()

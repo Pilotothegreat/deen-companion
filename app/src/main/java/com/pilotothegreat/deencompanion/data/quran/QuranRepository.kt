@@ -1,6 +1,9 @@
 package com.pilotothegreat.deencompanion.data.quran
 
 import android.content.Context
+import com.pilotothegreat.deencompanion.core.quran.QuranDestination
+import com.pilotothegreat.deencompanion.core.quran.QuranQuery
+import com.pilotothegreat.deencompanion.core.quran.SurahNames
 import com.pilotothegreat.deencompanion.core.text.ArabicText
 import com.pilotothegreat.deencompanion.data.db.BookmarkDao
 import com.pilotothegreat.deencompanion.data.db.BookmarkEntity
@@ -57,9 +60,24 @@ data class Bookmark(val surah: Int, val ayah: Int, val surahName: String, val cr
 
 data class VerseMatch(val verse: Verse, val arabicMatch: IntRange?, val translationMatch: IntRange?)
 
-data class QuranSearchResults(val surahs: List<Surah>, val verses: List<VerseMatch>) {
-    val isEmpty: Boolean get() = surahs.isEmpty() && verses.isEmpty()
+/**
+ * What a query found, in the order it is worth showing.
+ *
+ * [destinations] are the places the query named outright — Ayat al-Kursi, 2:255, juz 30 — and go first,
+ * because someone who names a place has already found what they were looking for. The text search runs
+ * all the same and its results follow, with the ones matching the Arabic ahead of the ones matching only
+ * the translation.
+ */
+data class QuranSearchResults(
+    val destinations: List<ResolvedDestination>,
+    val surahs: List<Surah>,
+    val verses: List<VerseMatch>,
+) {
+    val isEmpty: Boolean get() = destinations.isEmpty() && surahs.isEmpty() && verses.isEmpty()
 }
+
+/** A [QuranDestination] with the page it opens at worked out. */
+data class ResolvedDestination(val destination: QuranDestination, val page: Int, val verse: Verse?)
 
 class Quran internal constructor(
     val surahs: List<Surah>,
@@ -95,6 +113,9 @@ class QuranRepository(private val context: Context, private val bookmarkDao: Boo
     private companion object {
         /** Below this, a query searches surah names only. */
         const val MIN_VERSE_QUERY = 2
+
+        /** Below this, a word is too short to be anyone's idea of a surah's name. */
+        const val MIN_NAME_QUERY = 3
     }
 
     private val lock = Mutex()
@@ -127,38 +148,84 @@ class QuranRepository(private val context: Context, private val bookmarkDao: Boo
         }
     }
 
-    /** Matches surah names and verse text or translation, ignoring diacritics and case. */
+    /**
+     * What the query names, and what it matches.
+     *
+     * The query is read first — a passage by name, a reference, a juz or a page — and only then looked
+     * for in the text, so "ayat al kursi" opens 2:255 instead of finding nothing: those words are the
+     * ayah's name, not its words.
+     */
     suspend fun search(query: String, limit: Int = 100): QuranSearchResults = withContext(Dispatchers.Default) {
-        val normalized = ArabicText.normalize(query).trim()
-        if (normalized.isEmpty()) return@withContext QuranSearchResults(emptyList(), emptyList())
         val quran = quran()
+        val parsed = QuranQuery.parse(
+            raw = query,
+            verseCount = { surah -> quran.surahs.getOrNull(surah - 1)?.verses?.size ?: 0 },
+            surahNamed = { name -> surahNamed(quran, name) },
+        )
+        val destinations = parsed.destinations.mapNotNull { resolve(quran, it) }
 
+        val normalized = ArabicText.normalize(parsed.text).trim()
+        if (normalized.isEmpty()) return@withContext QuranSearchResults(destinations, emptyList(), emptyList())
+
+        val named = destinations.mapNotNull { (it.destination as? QuranDestination.SurahStart)?.surah }.toSet()
         val surahs = quran.surahs.filter {
-            it.nameEnglish.contains(normalized, ignoreCase = true) || ArabicText.normalize(it.nameArabic).contains(normalized)
+            it.number !in named &&
+                (it.nameEnglish.contains(normalized, ignoreCase = true) || ArabicText.normalize(it.nameArabic).contains(normalized))
         }
         // One letter is a reasonable way to look for a surah and a hopeless way to look through six
         // thousand ayahs, which would match nearly all of them and take a moment doing it.
-        if (normalized.length < MIN_VERSE_QUERY) return@withContext QuranSearchResults(surahs, emptyList())
+        if (normalized.length < MIN_VERSE_QUERY) return@withContext QuranSearchResults(destinations, surahs, emptyList())
 
         val index = searchIndex ?: quran.surahs.flatMap { s -> s.verses.map { ArabicText.normalize(it.text) } }
             .also { searchIndex = it }
-        val verses = ArrayList<VerseMatch>()
+        val arabic = ArrayList<VerseMatch>()
+        val translated = ArrayList<VerseMatch>()
         var i = 0
         for (surah in quran.surahs) {
             for (verse in surah.verses) {
                 val arabicHit = index[i++].contains(normalized)
                 val translationHit = !arabicHit && verse.translation.contains(normalized, ignoreCase = true)
-                if (arabicHit || translationHit) {
-                    verses += VerseMatch(
-                        verse = verse,
-                        arabicMatch = if (arabicHit) ArabicText.findMatch(verse.text, query) else null,
-                        translationMatch = if (translationHit) ArabicText.findMatch(verse.translation, query) else null,
-                    )
-                    if (verses.size >= limit) return@withContext QuranSearchResults(surahs, verses)
+                if (arabicHit) {
+                    arabic += VerseMatch(verse, ArabicText.findMatch(verse.text, parsed.text), null)
+                } else if (translationHit) {
+                    translated += VerseMatch(verse, null, ArabicText.findMatch(verse.translation, parsed.text))
+                }
+                if (arabic.size + translated.size >= limit) {
+                    return@withContext QuranSearchResults(destinations, surahs, arabic + translated)
                 }
             }
         }
-        QuranSearchResults(surahs, verses)
+        QuranSearchResults(destinations, surahs, arabic + translated)
+    }
+
+    /** The surah a name belongs to: its transliteration, its Arabic name, or a spelling people use. */
+    private fun surahNamed(quran: Quran, name: String): Int? {
+        val folded = QuranQuery.fold(name).replace(" ", "")
+        if (folded.length < MIN_NAME_QUERY) return null
+        SurahNames.ALIASES[folded]?.let { return it }
+        return quran.surahs.firstOrNull { surah ->
+            val english = QuranQuery.fold(surah.nameEnglish).replace(" ", "")
+            val arabic = QuranQuery.fold(surah.nameArabic).replace(" ", "")
+            folded == english || folded == arabic ||
+                folded == english.removeArticle() || folded == arabic.removePrefix("ال")
+        }?.number
+    }
+
+    /** "al baqarah" and "baqarah" are the same surah; so are "an nas" and "nas". */
+    private fun String.removeArticle(): String =
+        listOf("al", "ash", "adh", "ath", "ad", "an", "ar", "as", "at", "az").firstNotNullOfOrNull { article ->
+            removePrefix(article).takeIf { it.length != length }
+        } ?: this
+
+    private fun resolve(quran: Quran, destination: QuranDestination): ResolvedDestination? = when (destination) {
+        is QuranDestination.Ayah -> quran.verse(destination.surah, destination.ayah)
+            ?.let { ResolvedDestination(destination, quran.pageOf(destination.surah, destination.ayah), it) }
+        is QuranDestination.SurahStart -> quran.surahs.getOrNull(destination.surah - 1)
+            ?.let { ResolvedDestination(destination, quran.pageOf(it.number, 1), it.verses.first()) }
+        is QuranDestination.Page -> quran.pages.getOrNull(destination.number - 1)
+            ?.let { ResolvedDestination(destination, it.number, it.verses.firstOrNull()) }
+        is QuranDestination.Juz -> quran.pages.firstOrNull { it.juz == destination.number }
+            ?.let { ResolvedDestination(destination, it.number, it.verses.firstOrNull()) }
     }
 
     /**

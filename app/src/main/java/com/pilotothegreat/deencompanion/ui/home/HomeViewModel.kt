@@ -3,6 +3,7 @@ package com.pilotothegreat.deencompanion.ui.home
 import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pilotothegreat.deencompanion.core.analytics.UsageEvent
 import com.pilotothegreat.deencompanion.core.athkar.AthkarCategory
 import com.pilotothegreat.deencompanion.core.athkar.AthkarSchedule
 import com.pilotothegreat.deencompanion.core.athkar.DayProgress
@@ -16,6 +17,7 @@ import com.pilotothegreat.deencompanion.core.text.DailyVerse
 import com.pilotothegreat.deencompanion.core.text.Inspiration
 import com.pilotothegreat.deencompanion.core.text.Inspirations
 import com.pilotothegreat.deencompanion.core.time.Ticker
+import com.pilotothegreat.deencompanion.data.analytics.Analytics
 import com.pilotothegreat.deencompanion.data.athkar.AthkarRepository
 import com.pilotothegreat.deencompanion.data.location.LocationRepository
 import com.pilotothegreat.deencompanion.data.moment.MomentRepository
@@ -26,7 +28,12 @@ import com.pilotothegreat.deencompanion.data.quran.Verse
 import com.pilotothegreat.deencompanion.data.settings.AppSettings
 import com.pilotothegreat.deencompanion.data.settings.LocationSource
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
+import com.pilotothegreat.deencompanion.core.update.UpdateUrgency
 import com.pilotothegreat.deencompanion.data.update.UpdateChecker
+import java.time.Duration
+import java.time.LocalDate
+import java.time.ZonedDateTime
+import java.time.chrono.HijrahDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,16 +44,12 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.Duration
-import java.time.LocalDate
-import java.time.ZonedDateTime
-import java.time.chrono.HijrahDate
 
 /** Content that changes only with settings or the date. */
 data class HomeContent(
@@ -63,7 +66,11 @@ data class AthkarNow(val category: AthkarCategory, val progress: DayProgress)
 sealed interface HomeEvent {
     data object LocationUnavailable : HomeEvent
     data object LocationPermissionMissing : HomeEvent
-    data object UpdateAvailable : HomeEvent
+    /**
+     * [insistent] is set once an update has been waiting long enough, or is important enough, that
+     * the note stays on screen until it is answered instead of sliding away by itself.
+     */
+    data class UpdateAvailable(val insistent: Boolean) : HomeEvent
 }
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
@@ -100,6 +107,7 @@ class HomeViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 
     fun setPrayed(prayer: Prayer, prayed: Boolean) {
+        if (prayed) Analytics.record(UsageEvent.PRAYER_MARKED)
         viewModelScope.launch {
             val date = LocalDate.now(settings.current().zone)
             if (prayed) prayerLog.record(prayer, date, System.currentTimeMillis()) else prayerLog.undo(prayer, date)
@@ -151,10 +159,7 @@ class HomeViewModel(
             location.onAppOpened()
             moments.onAppOpened()
         }
-        viewModelScope.launch {
-            updates.check()
-            if (updates.state.value is UpdateChecker.State.Available) _events.emit(HomeEvent.UpdateAvailable)
-        }
+        viewModelScope.launch { offerUpdate() }
     }
 
     /** Picks up travel and weather since the app was last in front (both throttled). */
@@ -162,7 +167,28 @@ class HomeViewModel(
         viewModelScope.launch {
             location.onAppOpened()
             moments.onAppOpened()
+            offerUpdate()
         }
+    }
+
+    /** Whether this launch has already said something about the update; it says it once. */
+    private var offeredThisLaunch = false
+
+    /**
+     * Checks for an update and says so as loudly as it has earned.
+     *
+     * A Play update that has already downloaded is finished here rather than waiting for the app to
+     * be killed, which on a phone that keeps it open for weeks may be never.
+     */
+    private suspend fun offerUpdate() {
+        updates.check()
+        if (updates.completeDownloadedPlayUpdate()) return
+        if (offeredThisLaunch) return
+        val urgency = updates.urgencyForLaunch()
+        if (urgency == UpdateUrgency.QUIET) return
+        offeredThisLaunch = true
+        Analytics.record(UsageEvent.UPDATE_OFFERED)
+        _events.emit(HomeEvent.UpdateAvailable(insistent = urgency.promptsOnLaunch))
     }
 
     fun setTravelling(travelling: Boolean) {
@@ -170,6 +196,7 @@ class HomeViewModel(
     }
 
     fun refreshLocation() {
+        Analytics.record(UsageEvent.REFRESH_PRESSED)
         if (_isRefreshing.value) return
         viewModelScope.launch {
             // A manually chosen city stays put; pull-to-refresh only redraws.

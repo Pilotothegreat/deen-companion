@@ -9,6 +9,13 @@
     <string name="preview_verse" translatable="false">فَإِنَّ مَعَ الْعُسْرِ يُسْرًا</string>
     <string name="preview_verse_ref" translatable="false">94:5</string>
     <string name="preview_athkar_count" translatable="false">7 / 26</string>
+    <string name="preview_qibla_bearing" translatable="false">294° from north</string>
+    <string name="preview_qibla_distance" translatable="false">2,158 km to Makkah</string>
+    <string name="preview_khatma_due" translatable="false">3 pages to read today</string>
+    <string name="preview_khatma_progress" translatable="false">128 of 604 pages · 24 days left</string>
+    <string name="preview_date_weekday" translatable="false">Thursday</string>
+    <string name="preview_date_hijri" translatable="false">29 Rabi\' I 1448 AH</string>
+    <string name="preview_date_gregorian" translatable="false">18 September 2026</string>
 
     <style name="WidgetPreviewLabel">
         <item name="android:layout_width">match_parent</item>

@@ -152,8 +152,6 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
     // Quran
 
-    suspend fun setPlaybackSpeed(speed: Float) = edit { it[Keys.PLAYBACK_SPEED] = speed.coerceIn(0.5f, 2f) }
-
     /**
      * Records a dismissal as "id@epochDay", so a card sent away today comes back tomorrow while a
      * permanent dismissal can be recognised by its own id. Entries older than a week are dropped
@@ -183,7 +181,11 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
     suspend fun setLargeTouchTargets(on: Boolean) = edit { it[Keys.LARGE_TARGETS] = on }
 
+    /** Counting what is used, which is off until someone turns it on. */
+    suspend fun setAnalyticsEnabled(enabled: Boolean) = edit { it[Keys.ANALYTICS_ENABLED] = enabled }
+
     // First run and what's new
+
     suspend fun setOnboardingCompleted(done: Boolean) = edit { it[Keys.ONBOARDING_DONE] = done }
 
     suspend fun setLastSeenVersionCode(code: Int) = edit { it[Keys.LAST_SEEN_VERSION] = code }
@@ -192,6 +194,20 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     suspend fun lastUpdateCheck(): Pair<Long, String> = dataStore.data.first().let {
         (it[Keys.UPDATE_CHECKED_AT] ?: 0L) to (it[Keys.UPDATE_LATEST] ?: "")
     }
+
+    /** When the version now waiting was first seen; 0 once it is installed or gone. */
+    suspend fun updateAvailableSince(): Long = dataStore.data.first()[Keys.UPDATE_AVAILABLE_SINCE] ?: 0L
+
+    suspend fun setUpdateAvailableSince(at: Long) = edit { it[Keys.UPDATE_AVAILABLE_SINCE] = at }
+
+    suspend fun updatePromptedAt(): Long = dataStore.data.first()[Keys.UPDATE_PROMPTED_AT] ?: 0L
+
+    suspend fun setUpdatePromptedAt(at: Long) = edit { it[Keys.UPDATE_PROMPTED_AT] = at }
+
+    /** The release already announced by notification; "" until one has been. */
+    suspend fun notifiedUpdateVersion(): String = dataStore.data.first()[Keys.UPDATE_NOTIFIED_VERSION] ?: ""
+
+    suspend fun setNotifiedUpdateVersion(version: String) = edit { it[Keys.UPDATE_NOTIFIED_VERSION] = version }
 
     val lastUpdateCheckedAt: Flow<Long> =
         dataStore.data.map { it[Keys.UPDATE_CHECKED_AT] ?: 0L }.distinctUntilChanged()
@@ -247,6 +263,11 @@ internal object Keys {
     val ATHKAR_PLACE = stringPreferencesKey("athkar_last_place")
     val UPDATE_CHECKED_AT = longPreferencesKey("github_check_timestamp")
     val UPDATE_LATEST = stringPreferencesKey("github_check_latest_version")
+
+    /** When the waiting version was first seen, and when the reader was last told about it. */
+    val UPDATE_AVAILABLE_SINCE = longPreferencesKey("update_available_since")
+    val UPDATE_PROMPTED_AT = longPreferencesKey("update_prompted_at")
+    val UPDATE_NOTIFIED_VERSION = stringPreferencesKey("update_notified_version")
     val LANGUAGE_MIGRATED = booleanPreferencesKey("language_migrated")
     val LANGUAGE = stringPreferencesKey("app_language")
     val COUNTRY_CODE = stringPreferencesKey("country_code")
@@ -263,7 +284,6 @@ internal object Keys {
     val SILENCE_MINUTES = intPreferencesKey("silence_during_prayer_minutes")
 
     // Quran
-    val PLAYBACK_SPEED = floatPreferencesKey("quran_playback_speed")
     val REPEAT_MODE = stringPreferencesKey("quran_repeat_mode")
     val REPEAT_COUNT = intPreferencesKey("quran_repeat_count")
 
@@ -276,6 +296,7 @@ internal object Keys {
     val LARGE_TARGETS = booleanPreferencesKey("large_touch_targets")
 
     // First run and what's new
+    val ANALYTICS_ENABLED = booleanPreferencesKey("analytics_enabled")
     val ONBOARDING_DONE = booleanPreferencesKey("onboarding_completed")
     val LAST_SEEN_VERSION = intPreferencesKey("last_seen_version_code")
 }
@@ -349,7 +370,6 @@ internal fun Preferences.toAppSettings(): AppSettings = AppSettings(
         silenceMinutes = this[Keys.SILENCE_MINUTES] ?: 0,
     ),
     quran = QuranSettings(
-        playbackSpeed = (this[Keys.PLAYBACK_SPEED] ?: 1f).coerceIn(0.5f, 2f),
         repeatMode = enumOrNull<RepeatMode>(this[Keys.REPEAT_MODE]) ?: RepeatMode.OFF,
         repeatCount = (this[Keys.REPEAT_COUNT] ?: 3).coerceIn(1, 20),
     ),
@@ -361,6 +381,7 @@ internal fun Preferences.toAppSettings(): AppSettings = AppSettings(
         haptics = this[Keys.HAPTICS] ?: true,
         largeTouchTargets = this[Keys.LARGE_TARGETS] ?: false,
     ),
+    analyticsEnabled = this[Keys.ANALYTICS_ENABLED] ?: false,
     onboardingCompleted = this[Keys.ONBOARDING_DONE] ?: false,
     lastSeenVersionCode = this[Keys.LAST_SEEN_VERSION] ?: 0,
 )

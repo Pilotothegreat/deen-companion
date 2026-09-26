@@ -153,11 +153,14 @@ fun HomeScreen(
                 HomeEvent.LocationPermissionMissing -> scope.launch {
                     snackbar.showSnackbar(resources.getString(R.string.location_permission_needed))
                 }
-                HomeEvent.UpdateAvailable -> scope.launch {
+                is HomeEvent.UpdateAvailable -> scope.launch {
                     val result = snackbar.showSnackbar(
                         message = resources.getString(R.string.update_available_short),
                         actionLabel = resources.getString(R.string.update_action),
-                        duration = SnackbarDuration.Long,
+                        // An update that has been waiting a fortnight stays on screen until it is
+                        // answered; a fresh one slides away as it always did.
+                        duration = if (event.insistent) SnackbarDuration.Indefinite else SnackbarDuration.Long,
+                        withDismissAction = event.insistent,
                     )
                     if (result == SnackbarResult.ActionPerformed) context.startSafely(viewModel.updateIntent())
                 }

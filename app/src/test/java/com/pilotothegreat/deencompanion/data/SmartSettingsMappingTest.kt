@@ -34,7 +34,6 @@ class SmartSettingsMappingTest {
         assertEquals(0, settings.sounds.silenceMinutes)
 
         assertEquals(RepeatMode.OFF, settings.quran.repeatMode)
-        assertEquals(1f, settings.quran.playbackSpeed, 0.001f)
 
         assertFalse(settings.accessibility.simpleMode)
         assertEquals(ContrastMode.SYSTEM, settings.accessibility.contrast)
@@ -52,7 +51,6 @@ class SmartSettingsMappingTest {
             intPreferencesKey("pre_reminder_minutes") to 15,
             stringSetPreferencesKey("pre_reminder_prayers") to setOf("Fajr", "Maghrib"),
             intPreferencesKey("silence_during_prayer_minutes") to 20,
-            floatPreferencesKey("quran_playback_speed") to 1.5f,
             stringPreferencesKey("quran_repeat_mode") to "AYAH",
             intPreferencesKey("quran_repeat_count") to 7,
             booleanPreferencesKey("simple_mode") to true,
@@ -73,7 +71,6 @@ class SmartSettingsMappingTest {
         assertEquals(setOf(Prayer.FAJR, Prayer.MAGHRIB), settings.sounds.preReminderPrayers)
         assertEquals(20, settings.sounds.silenceMinutes)
 
-        assertEquals(1.5f, settings.quran.playbackSpeed, 0.001f)
         assertEquals(RepeatMode.AYAH, settings.quran.repeatMode)
         assertEquals(7, settings.quran.repeatCount)
 
@@ -89,13 +86,11 @@ class SmartSettingsMappingTest {
     @Test fun outOfRangeValuesAreClamped() {
         val settings = preferencesOf(
             intPreferencesKey("safar_km") to 5,
-            floatPreferencesKey("quran_playback_speed") to 9f,
             floatPreferencesKey("text_scale") to 4f,
             intPreferencesKey("quran_repeat_count") to 0,
         ).toAppSettings()
 
         assertEquals(Defaults.SAFAR_RANGE.first, settings.smart.safarKm)
-        assertEquals(2f, settings.quran.playbackSpeed, 0.001f)
         assertEquals(Defaults.TEXT_SCALE_RANGE.endInclusive, settings.accessibility.textScale, 0.001f)
         assertEquals(1, settings.quran.repeatCount)
     }

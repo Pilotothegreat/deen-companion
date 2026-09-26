@@ -1,5 +1,7 @@
 package com.pilotothegreat.deencompanion.ui.reader
 
+import com.pilotothegreat.deencompanion.core.analytics.UsageEvent
+import com.pilotothegreat.deencompanion.data.analytics.Analytics
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pilotothegreat.deencompanion.core.prayer.DaySchedule
@@ -28,7 +30,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlin.math.abs
 
 class ReaderViewModel(
     private val args: ReaderKey,
@@ -77,6 +78,7 @@ class ReaderViewModel(
     private var saveJob: Job? = null
 
     fun onPageSettled(page: Int) {
+        Analytics.record(UsageEvent.READER_PAGE_TURNED)
         saveJob?.cancel()
         saveJob = viewModelScope.launch {
             delay(500)
@@ -87,6 +89,7 @@ class ReaderViewModel(
     }
 
     fun setBookmark(verse: Verse, bookmarked: Boolean) {
+        if (bookmarked) Analytics.record(UsageEvent.AYAH_BOOKMARKED)
         viewModelScope.launch { repository.setBookmark(verse, bookmarked) }
     }
 
@@ -96,12 +99,14 @@ class ReaderViewModel(
      */
     fun cue(verse: Verse) {
         val quran = quran.value ?: return
+        Analytics.record(UsageEvent.RECITATION_PLAYED)
         player.cue(quran.surah(verse.surah), verse.number, reciter.value)
     }
 
     /** From the long-press menu: recite this ayah over and over, for memorising. */
     fun repeatAyah(verse: Verse) {
         val quran = quran.value ?: return
+        Analytics.record(UsageEvent.AYAH_REPEATED)
         viewModelScope.launch { settings.setRepeat(RepeatMode.AYAH, player.state.value.repeatCount) }
         player.play(quran.surah(verse.surah), verse.number, reciter.value)
     }
@@ -123,14 +128,8 @@ class ReaderViewModel(
         viewModelScope.launch { settings.setRepeat(next, state.repeatCount) }
     }
 
-    /** One button, no menu: 1×, 1.25×, 1.5×, 0.75×, and round again. */
-    fun cycleSpeed() {
-        val current = player.state.value.speed
-        val index = SPEEDS.indexOfFirst { abs(it - current) < 0.01f }
-        viewModelScope.launch { settings.setPlaybackSpeed(SPEEDS[(index + 1) % SPEEDS.size]) }
-    }
-
     fun setReciter(reciter: Reciter) {
+        Analytics.record(UsageEvent.RECITER_CHANGED)
         viewModelScope.launch {
             settings.setReciter(reciter)
             if (player.state.value.isActive) player.changeReciter(reciter)
@@ -146,9 +145,5 @@ class ReaderViewModel(
         val state = player.state.value
         if (!state.isActive) return
         player.play(quran.surah(state.surah), state.ayah.coerceAtLeast(1), state.reciter)
-    }
-
-    private companion object {
-        val SPEEDS = listOf(1f, 1.25f, 1.5f, 0.75f)
     }
 }

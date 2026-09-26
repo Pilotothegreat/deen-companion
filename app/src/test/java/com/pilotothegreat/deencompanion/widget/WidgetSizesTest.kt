@@ -23,7 +23,7 @@ class WidgetSizesTest {
 
     @Test fun everyDeclaredWidgetIsAKindTheConfigurationScreenKnows() {
         val manifest = File("src/main/AndroidManifest.xml").readText()
-        assertEquals("seven widgets, seven receivers", 7, WidgetKind.entries.map { it.receiver }.toSet().size)
+        assertEquals("every widget has a receiver of its own", WidgetKind.entries.size, WidgetKind.entries.map { it.receiver }.toSet().size)
         WidgetKind.entries.forEach { kind ->
             assertTrue("${kind.receiver.simpleName} is declared in the manifest", ".widget.${kind.receiver.simpleName}\"" in manifest)
             assertEquals(kind, WidgetKind.ofProvider(kind.receiver.name))
@@ -40,7 +40,7 @@ class WidgetSizesTest {
 
     @Test fun everyProviderCanBeResizedBothWaysStretchedForTabletsAndPreviewed() {
         val providers = File("src/main/res/xml").listFiles().orEmpty().filter { "widget" in it.name }
-        assertEquals("there are seven widget providers to check", 7, providers.size)
+        assertEquals("every widget has a provider to check", WidgetKind.entries.size, providers.size)
         providers.forEach { file ->
             val xml = file.readText()
             assertTrue("${file.name} declares a minimum resize", "minResizeWidth" in xml && "minResizeHeight" in xml)
@@ -49,6 +49,39 @@ class WidgetSizesTest {
             assertTrue("${file.name} can be configured", "android:configure" in xml)
             assertTrue("${file.name} has a picture in the widget picker", "android:previewLayout" in xml)
         }
+    }
+
+    /**
+     * What the picker shows and what the launcher places have to be the same widget.
+     *
+     * A provider that asks for two cells and declares the width of four gets one size from an Android 12
+     * launcher and another from anything older, and the widget that arrives is not the one in the picture.
+     */
+    @Test fun everyProviderAsksForTheSizeItSaysItWants() {
+        File("src/main/res/xml").listFiles().orEmpty().filter { "widget" in it.name }.forEach { file ->
+            val xml = file.readText()
+            val cells = { name: String -> Regex("""android:$name="(\d+)"""").find(xml)!!.groupValues[1].toInt() }
+            val dp = { name: String -> Regex("""android:$name="(\d+)dp"""").find(xml)!!.groupValues[1].toInt() }
+            assertEquals("${file.name}'s width matches its cells", 70 * cells("targetCellWidth") - 30, dp("minWidth"))
+            assertEquals("${file.name}'s height matches its cells", 70 * cells("targetCellHeight") - 30, dp("minHeight"))
+        }
+    }
+
+    /** The picker's live preview is drawn at [WidgetKind.previewSize], which is the size it will be placed at. */
+    @Test fun thePreviewIsDrawnAtTheSizeTheWidgetIsPlacedAt() {
+        WidgetKind.entries.forEach { kind ->
+            val xml = File("src/main/res/xml/${providerResource(kind)}.xml").readText()
+            val dp = { name: String -> Regex("""android:$name="(\d+)dp"""").find(xml)!!.groupValues[1].toInt() }
+            assertEquals("${kind.name} is previewed at the width it is placed at", dp("minWidth"), kind.previewSize.width.value.toInt())
+            assertEquals("${kind.name} is previewed at the height it is placed at", dp("minHeight"), kind.previewSize.height.value.toInt())
+        }
+    }
+
+    /** The appwidget-provider the manifest points this widget's receiver at. */
+    private fun providerResource(kind: WidgetKind): String {
+        val manifest = File("src/main/AndroidManifest.xml").readText()
+        val receiver = manifest.substringAfter(".widget.${kind.receiver.simpleName}\"")
+        return receiver.substringAfter("@xml/").substringBefore("\"")
     }
 
     @Test fun noPreviewLayoutKeepsItsTextOnlyForTheEditor() {

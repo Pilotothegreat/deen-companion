@@ -6,9 +6,11 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.pilotothegreat.deencompanion.core.analytics.UsageEvent
 import com.pilotothegreat.deencompanion.core.tasbih.Dhikr
 import com.pilotothegreat.deencompanion.core.tasbih.TasbihEngine
 import com.pilotothegreat.deencompanion.core.tasbih.TasbihState
+import com.pilotothegreat.deencompanion.data.analytics.Analytics
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -19,6 +21,7 @@ class TasbihRepository(private val dataStore: DataStore<Preferences>) {
     val state: Flow<TasbihState> = dataStore.data.map { it.toTasbih() }.distinctUntilChanged()
 
     suspend fun increment(): TasbihEngine.Step {
+        Analytics.record(UsageEvent.TASBIH_COUNTED)
         lateinit var step: TasbihEngine.Step
         dataStore.edit {
             step = TasbihEngine.increment(it.toTasbih())

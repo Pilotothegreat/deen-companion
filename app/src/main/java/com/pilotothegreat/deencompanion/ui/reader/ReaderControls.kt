@@ -4,11 +4,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Bookmark
 import androidx.compose.material.icons.rounded.BookmarkBorder
@@ -27,6 +30,7 @@ import androidx.compose.material.icons.rounded.SkipNext
 import androidx.compose.material.icons.rounded.SkipPrevious
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.FilledIconToggleButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -44,10 +48,13 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pilotothegreat.deencompanion.R
@@ -62,6 +69,7 @@ import com.pilotothegreat.deencompanion.ui.common.Labelled
 import com.pilotothegreat.deencompanion.ui.common.SystemIntents
 import com.pilotothegreat.deencompanion.ui.common.copyToClipboard
 import com.pilotothegreat.deencompanion.ui.common.currentLocale
+import com.pilotothegreat.deencompanion.ui.common.isArabic
 import com.pilotothegreat.deencompanion.ui.common.startSafely
 import com.pilotothegreat.deencompanion.ui.quran.verseReference
 import com.pilotothegreat.deencompanion.ui.theme.Spacing
@@ -72,9 +80,9 @@ private val SLEEP_OPTIONS = listOf(0, 10, 15, 30, 60)
 /**
  * The recitation bar, docked at the foot of the reader the way Quran for Android docks its audio bar.
  *
- * Everything it does is on its face: previous and next ayah around a large play button whose shape
- * morphs with its state, and repeat and speed as single buttons that step through their values and
- * show where they are. The reciter is a chip that opens a short sheet. There is no menu.
+ * Everything it does is on its face, in one row: repeat, the ayah before, a large play button whose
+ * shape morphs with its state, the ayah after, and stop. The reciter is a chip that opens a short
+ * sheet. There is no menu, and no speed — a recitation is not read faster than it was recited.
  */
 @Composable
 fun PlayerBar(
@@ -87,7 +95,6 @@ fun PlayerBar(
     onNext: () -> Unit,
     onStop: () -> Unit,
     onRepeat: () -> Unit,
-    onSpeed: () -> Unit,
     onReciter: () -> Unit,
     onBackToRecitation: () -> Unit,
     modifier: Modifier = Modifier,
@@ -124,13 +131,13 @@ fun PlayerBar(
                 )
             }
             Row(
-                Modifier.fillMaxWidth().padding(horizontal = Spacing.small),
+                Modifier.fillMaxWidth().padding(horizontal = Spacing.large, vertical = Spacing.small),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceEvenly,
+                horizontalArrangement = Arrangement.spacedBy(Spacing.small, Alignment.CenterHorizontally),
             ) {
                 val repeatLabel = stringResource(R.string.repeat) + ": " + stringResource(state.repeatMode.label)
                 Labelled(repeatLabel) {
-                    IconButton(onClick = onRepeat) {
+                    IconButton(onClick = onRepeat, modifier = Modifier.size(IconButtonDefaults.smallContainerSize())) {
                         Icon(
                             when (state.repeatMode) {
                                 RepeatMode.OFF -> Icons.Rounded.Repeat
@@ -142,55 +149,75 @@ fun PlayerBar(
                         )
                     }
                 }
-                IconButton(onClick = onPrevious) {
-                    Icon(Icons.Rounded.SkipPrevious, contentDescription = stringResource(R.string.previous_ayah))
-                }
+                Spacer(Modifier.weight(1f))
+                // Reading is right to left here, so the ayah before is on the right and its arrow points
+                // that way. Skip-previous and skip-next are each other's mirror, so the pair is swapped
+                // rather than flipped: a mirrored glyph is a drawing of the wrong button.
+                val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+                SkipButton(
+                    icon = if (rtl) Icons.Rounded.SkipNext else Icons.Rounded.SkipPrevious,
+                    label = stringResource(R.string.previous_ayah),
+                    onClick = onPrevious,
+                )
                 FilledIconToggleButton(
                     checked = state.isPlaying,
                     onCheckedChange = { onTogglePlay() },
                     shapes = IconButtonDefaults.toggleableShapes(),
-                    modifier = Modifier.size(64.dp),
+                    modifier = Modifier.size(IconButtonDefaults.largeContainerSize()),
                 ) {
                     if (state.isBuffering) {
-                        LoadingIndicator(Modifier.size(32.dp))
+                        LoadingIndicator(Modifier.size(IconButtonDefaults.largeIconSize))
                     } else {
                         Icon(
                             if (state.isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
                             contentDescription = stringResource(R.string.play_pause),
-                            modifier = Modifier.size(32.dp),
+                            modifier = Modifier.size(IconButtonDefaults.largeIconSize),
                         )
                     }
                 }
-                IconButton(onClick = onNext) {
-                    Icon(Icons.Rounded.SkipNext, contentDescription = stringResource(R.string.next_ayah))
-                }
-                val speedLabel = stringResource(R.string.speed_multiplier, Formatters.decimal(state.speed, locale))
-                Labelled(stringResource(R.string.playback_speed)) {
-                    TextButton(onClick = onSpeed) { Text(speedLabel) }
+                SkipButton(
+                    icon = if (rtl) Icons.Rounded.SkipPrevious else Icons.Rounded.SkipNext,
+                    label = stringResource(R.string.next_ayah),
+                    onClick = onNext,
+                )
+                Spacer(Modifier.weight(1f))
+                val stopLabel = stringResource(R.string.stop_playback)
+                Labelled(stopLabel) {
+                    IconButton(onClick = onStop, modifier = Modifier.size(IconButtonDefaults.smallContainerSize())) {
+                        Icon(Icons.Rounded.Close, contentDescription = stopLabel)
+                    }
                 }
             }
-            Row(
-                Modifier.fillMaxWidth().padding(horizontal = Spacing.small),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                if (awayFromRecitation) {
-                    TextButton(onClick = onBackToRecitation) {
-                        Icon(Icons.Rounded.MyLocation, contentDescription = null, Modifier.size(18.dp))
-                        Text(stringResource(R.string.back_to_recitation), modifier = Modifier.padding(start = Spacing.small))
-                    }
-                }
-                Row(Modifier.weight(1f), horizontalArrangement = Arrangement.End) {
-                    TextButton(onClick = onStop) {
-                        Icon(Icons.Rounded.Close, contentDescription = null, Modifier.size(18.dp))
-                        Text(stringResource(R.string.stop_playback), modifier = Modifier.padding(start = Spacing.small))
-                    }
+            if (awayFromRecitation) {
+                TextButton(onClick = onBackToRecitation, modifier = Modifier.padding(start = Spacing.small)) {
+                    Icon(Icons.Rounded.MyLocation, contentDescription = null, Modifier.size(18.dp))
+                    Text(stringResource(R.string.back_to_recitation), modifier = Modifier.padding(start = Spacing.small))
                 }
             }
         }
     }
 }
 
-/** The player's occasional choices: who recites, when to stop, and the downloaded recitations. */
+/** One ayah back or on: the size M3 gives the controls that flank a large play button. */
+@Composable
+private fun SkipButton(icon: ImageVector, label: String, onClick: () -> Unit) {
+    Labelled(label) {
+        FilledTonalIconButton(
+            onClick = onClick,
+            shapes = IconButtonDefaults.shapes(),
+            modifier = Modifier.size(IconButtonDefaults.mediumContainerSize()),
+        ) {
+            Icon(icon, contentDescription = label, modifier = Modifier.size(IconButtonDefaults.mediumIconSize))
+        }
+    }
+}
+
+/**
+ * The player's occasional choices: who recites, when to stop, and the downloaded recitations.
+ *
+ * The sheet scrolls, because the reciters are now a list of twenty rather than three, and a sleep
+ * timer pushed off the bottom of the screen is a setting that does not exist.
+ */
 @Composable
 fun ReciterSheet(
     state: PlaybackState,
@@ -201,7 +228,11 @@ fun ReciterSheet(
 ) {
     val locale = currentLocale()
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(Modifier.padding(start = Spacing.large, end = Spacing.large, bottom = Spacing.xxlarge)) {
+        Column(
+            Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(start = Spacing.large, end = Spacing.large, bottom = Spacing.xxlarge),
+        ) {
             Text(
                 stringResource(R.string.reciter),
                 style = MaterialTheme.typography.titleMedium,
@@ -245,7 +276,13 @@ fun ReciterSheet(
     }
 }
 
-/** What a long press on an ayah opens: its meaning, and what can be done with it. */
+/**
+ * What a long press on an ayah opens: its meaning, and what can be done with it.
+ *
+ * The ayah comes in the language the app is being read in — the Arabic on an Arabic app, the
+ * translation on an English one. The page behind the sheet already carries the Arabic, and printing
+ * both pushed the bookmark, repeat, copy and share rows off the bottom of a phone screen.
+ */
 @Composable
 fun AyahMenu(
     verse: Verse,
@@ -272,15 +309,17 @@ fun AyahMenu(
             verticalArrangement = Arrangement.spacedBy(Spacing.medium),
         ) {
             Text(reference, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-            Text(
-                verse.text,
-                fontFamily = UthmanicHafs,
-                fontSize = 24.sp,
-                lineHeight = 46.sp,
-                style = MaterialTheme.typography.bodyLarge.copy(textDirection = TextDirection.Rtl),
-                modifier = Modifier.fillMaxWidth(),
-            )
-            if (verse.translation.isNotBlank()) {
+            // An ayah with no translation falls back to the Arabic: a sheet with nothing in it is worse.
+            if (locale.isArabic || verse.translation.isBlank()) {
+                Text(
+                    verse.text,
+                    fontFamily = UthmanicHafs,
+                    fontSize = 24.sp,
+                    lineHeight = 46.sp,
+                    style = MaterialTheme.typography.bodyLarge.copy(textDirection = TextDirection.Rtl),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            } else {
                 Text(verse.standaloneTranslation, style = MaterialTheme.typography.bodyLarge)
                 Text(translation.attribution, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }

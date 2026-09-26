@@ -2,11 +2,14 @@ package com.pilotothegreat.deencompanion.ui.athkar
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.pilotothegreat.deencompanion.core.analytics.UsageEvent
 import com.pilotothegreat.deencompanion.core.athkar.AthkarCategory
 import com.pilotothegreat.deencompanion.core.athkar.DayProgress
+import com.pilotothegreat.deencompanion.data.analytics.Analytics
 import com.pilotothegreat.deencompanion.data.athkar.AthkarRepository
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
 import com.pilotothegreat.deencompanion.ui.navigation.AthkarSessionKey
+import java.time.LocalDate
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -16,7 +19,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 data class AthkarSession(
     val category: AthkarCategory,
@@ -58,11 +60,13 @@ class AthkarSessionViewModel(
     val events: SharedFlow<SessionEvent> = _events.asSharedFlow()
 
     fun count(index: Int) {
+        Analytics.record(UsageEvent.ATHKAR_COUNTED)
         viewModelScope.launch {
             val current = session.value ?: return@launch
             val item = current.category.items.getOrNull(index) ?: return@launch
             val updated = athkar.increment(current.category, item, today()) ?: return@launch
             if (!updated.isDone(current.category, item)) return@launch
+            if (updated.isComplete(current.category)) Analytics.record(UsageEvent.ATHKAR_SESSION_FINISHED)
             _events.emit(if (updated.isComplete(current.category)) SessionEvent.CategoryCompleted else SessionEvent.ItemCompleted(index))
         }
     }

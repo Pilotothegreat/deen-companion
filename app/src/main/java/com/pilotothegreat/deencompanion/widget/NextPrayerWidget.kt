@@ -183,7 +183,7 @@ internal fun NextPrayerContent(state: NextPrayerState, config: WidgetConfig = Wi
                             progress = state.elapsed,
                             modifier = GlanceModifier.fillMaxWidth(),
                             color = colors.primary,
-                            backgroundColor = colors.surfaceVariant,
+                            backgroundColor = trackColor(content),
                         )
                     }
                     // Each prayer has its own shape, the same language as the Today card.
@@ -208,7 +208,7 @@ private fun TimeStrip(cells: List<TimeCell>, content: ColorProvider) {
     Row(GlanceModifier.fillMaxWidth()) {
         cells.forEach { cell ->
             val pill = if (cell.isNext) {
-                GlanceModifier.background(ImageProvider(R.drawable.widget_pill), colorFilter = ColorFilter.tint(colors.primary))
+                GlanceModifier.background(ImageProvider(R.drawable.widget_cell), colorFilter = ColorFilter.tint(colors.primary))
             } else {
                 GlanceModifier
             }

@@ -139,6 +139,18 @@ internal class HeightBudget(total: Dp, private val fontScale: Float) {
 internal fun rememberBudget(): HeightBudget =
     HeightBudget(LocalSize.current.height - WidgetPadding * 2, LocalContext.current.resources.configuration.fontScale)
 
+/**
+ * The unfilled part of a progress bar: the card's own text colour, faint.
+ *
+ * surfaceVariant was a colour from another part of the palette, and on a green or blue card it landed
+ * as a brown stain rather than the rest of the bar.
+ */
+@Composable
+internal fun trackColor(content: ColorProvider): ColorProvider =
+    ColorProvider(content.getColor(LocalContext.current).copy(alpha = TRACK_ALPHA))
+
+private const val TRACK_ALPHA = 0.24f
+
 internal fun textStyle(
     color: ColorProvider,
     size: TextUnit,
