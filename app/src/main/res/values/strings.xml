@@ -183,7 +183,6 @@
     </plurals>
     <string name="sample_hadiths">Sample of %1$s hadiths</string>
     <string name="download_collection">Download full collection</string>
-    <string name="not_downloaded">Not downloaded</string>
     <string name="cancel_download">Cancel download</string>
     <string name="download_failed">Couldn\'t download %1$s. Check your connection.</string>
     <string name="downloads_note">Full collections are downloaded only when you ask, from jsDelivr (a few MB each).</string>
@@ -552,7 +551,7 @@
     <string name="update_open_page">Open the release page</string>
     <string name="later">Later</string>
     <string name="whats_new_in">What\'s new in %1$s</string>
-    <string name="whats_new_body">The Khatma widget shows today\'s page count even at its smallest size, instead of a cut-off sentence.\n\nLong athkar such as Ayat al-Kursi now fade at the bottom of the card when there is more to scroll.</string>
+    <string name="whats_new_body">Prayer times in Oman now match the Ministry of Endowments\' tables: Dhuhr and Maghrib were a minute late on most days.\n\nNo more battery-optimisation alert. Prayer alerts arrive without it, and the card only appears for a problem you can fix.\n\nToday dims the prayers that have passed, so the ones still ahead stand out. The Hadith list is tidier, and the credits read in Arabic.\n\nSupport Bilal through GitHub Sponsors.</string>
 
     <!-- Shortcuts and the tile -->
     <string name="tile_next_prayer">Next prayer</string>
@@ -577,6 +576,8 @@
     <string name="reliability_summary_problem">Something on this phone is delaying or silencing your alerts</string>
     <string name="reading">Reading</string>
     <string name="credits">Credits</string>
+    <string name="credit_kfgqpc">King Fahd Glorious Quran Printing Complex — Uthmanic Hafs (QPC)</string>
+    <string name="credit_itani">Talal Itani</string>
     <string name="credits_desc">%1$s · %2$s, translated by %3$s</string>
     <string name="text_scale_default">Default</string>
     <string name="text_scale_large">Large</string>

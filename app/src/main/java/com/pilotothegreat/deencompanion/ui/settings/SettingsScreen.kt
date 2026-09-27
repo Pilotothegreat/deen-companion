@@ -1,7 +1,5 @@
 package com.pilotothegreat.deencompanion.ui.settings
 
-import android.Manifest
-import android.os.Build
 import android.text.format.DateFormat
 import androidx.annotation.StringRes
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -25,40 +23,23 @@ import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material.icons.automirrored.rounded.OpenInNew
 import androidx.compose.material.icons.automirrored.rounded.VolumeOff
 import androidx.compose.material.icons.automirrored.rounded.VolumeUp
-import androidx.compose.material.icons.rounded.Abc
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Accessibility
-import androidx.compose.material.icons.rounded.Animation
-import androidx.compose.material.icons.rounded.Contrast
 import androidx.compose.material.icons.rounded.FormatSize
-import androidx.compose.material.icons.rounded.TouchApp
-import androidx.compose.material.icons.rounded.Vibration
 import com.pilotothegreat.deencompanion.ui.theme.Spacing
-import com.pilotothegreat.deencompanion.data.settings.ContrastMode
-import com.pilotothegreat.deencompanion.data.settings.ReduceMotion
 import androidx.compose.material.icons.rounded.DeleteSweep
 import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material.icons.rounded.Save
-import androidx.compose.material.icons.rounded.Visibility
 import com.pilotothegreat.deencompanion.data.backup.BackupRepository
-import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Groups
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material.icons.rounded.Alarm
 import androidx.compose.material.icons.rounded.AppSettingsAlt
-import androidx.compose.material.icons.rounded.BatteryAlert
 import androidx.compose.material.icons.rounded.Brightness5
 import androidx.compose.material.icons.rounded.Calculate
 import androidx.compose.material.icons.rounded.CalendarMonth
-import androidx.compose.material.icons.rounded.Cloud
-import androidx.compose.material.icons.rounded.CloudDownload
-import androidx.compose.material.icons.rounded.Code
-import androidx.compose.material.icons.rounded.ColorLens
-import androidx.compose.material.icons.rounded.DarkMode
-import androidx.compose.material.icons.rounded.Flight
 import androidx.compose.material.icons.rounded.DoNotDisturbOn
 import androidx.compose.material.icons.rounded.Favorite
-import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.LocationOn
@@ -66,19 +47,13 @@ import androidx.compose.material.icons.rounded.NightsStay
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.NotificationsOff
-import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Policy
 import androidx.compose.material.icons.rounded.QueryStats
-import androidx.compose.material.icons.rounded.Public
-import androidx.compose.material.icons.rounded.Repeat
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.RecordVoiceOver
 import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material.icons.rounded.SystemUpdate
-import androidx.compose.material.icons.rounded.Translate
-import androidx.compose.material.icons.rounded.VolunteerActivism
 import androidx.compose.material.icons.rounded.Tune
-import androidx.compose.material.icons.rounded.WbTwilight
 import androidx.compose.material.icons.rounded.VolumeUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
@@ -109,8 +84,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -122,7 +97,6 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.pilotothegreat.deencompanion.BuildConfig
@@ -142,13 +116,11 @@ import com.pilotothegreat.deencompanion.data.settings.Defaults
 import androidx.core.net.toUri
 import com.pilotothegreat.deencompanion.data.settings.IqamaSetting
 import com.pilotothegreat.deencompanion.data.settings.SoundSettings
-import com.pilotothegreat.deencompanion.data.settings.ThemeMode
 import com.pilotothegreat.deencompanion.data.update.UpdateChecker
 import com.pilotothegreat.deencompanion.ui.common.Formatters
 import com.pilotothegreat.deencompanion.ui.common.SystemIntents
 import com.pilotothegreat.deencompanion.ui.common.currentLocale
 import com.pilotothegreat.deencompanion.ui.common.icon
-import com.pilotothegreat.deencompanion.ui.common.isArabic
 import com.pilotothegreat.deencompanion.ui.common.labelRes
 import com.pilotothegreat.deencompanion.ui.common.nameRes
 import com.pilotothegreat.deencompanion.ui.common.startSafely
@@ -157,8 +129,6 @@ import com.pilotothegreat.deencompanion.ui.components.ConnectedChoice
 import com.pilotothegreat.deencompanion.ui.common.rememberHaptics
 import com.pilotothegreat.deencompanion.ui.components.MorphBadge
 import com.pilotothegreat.deencompanion.ui.components.SectionHeader
-import com.pilotothegreat.deencompanion.ui.location.locationStatus
-import com.pilotothegreat.deencompanion.ui.theme.Amiri
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDate
 import java.time.LocalTime
@@ -400,7 +370,7 @@ fun SettingsScreen(
                     }
                     add { shapes ->
                         NavRow(
-                            shapes, Icons.Rounded.BatteryAlert, stringResource(R.string.reliability),
+                            shapes, Icons.Rounded.NotificationsActive, stringResource(R.string.reliability),
                             stringResource(if (exactAllowed) R.string.reliability_summary_ok else R.string.reliability_summary_problem),
                         ) { onOpenReliability() }
                     }
@@ -545,7 +515,14 @@ fun SettingsScreen(
                             @Composable { shapes: ListItemShapes ->
                                 NavRow(
                                     shapes, Icons.AutoMirrored.Rounded.MenuBook, stringResource(R.string.credits),
-                                    stringResource(R.string.credits_desc, c.text.name, c.translation.name, c.translation.translator),
+                                    // The Complex and the translator by the names the app's language gives them;
+                                    // the data files carry them in English only.
+                                    stringResource(
+                                        R.string.credits_desc,
+                                        if (c.text.name.startsWith("King Fahd")) stringResource(R.string.credit_kfgqpc) else c.text.name,
+                                        c.translation.name,
+                                        if (c.translation.translator == "Talal Itani") stringResource(R.string.credit_itani) else c.translation.translator,
+                                    ),
                                     trailing = { OpenIcon() },
                                 ) { context.startSafely(SystemIntents.url(c.text.source)) }
                             }

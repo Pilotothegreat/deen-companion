@@ -204,6 +204,9 @@ fun PrayerTimesCard(
     Column(verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
         Prayer.entries.forEachIndexed { index, prayer ->
             val isNext = prayer == nextPrayer
+            // Gone for today, so it steps back and the eye goes to what is still to come. Only while
+            // today's next prayer is known: after Isha nothing is dimmed rather than everything.
+            val isPast = nextPrayer != null && prayer.ordinal < nextPrayer.ordinal
             val name = stringResource(prayer.nameRes)
             val adhan = schedule.adhan.getValue(prayer)
             val iqama = schedule.iqama[prayer]?.takeIf { it != adhan }
@@ -217,6 +220,8 @@ fun PrayerTimesCard(
                 shapes = ListItemDefaults.segmentedShapes(index, rowCount),
                 colors = if (isNext) {
                     ListItemDefaults.segmentedColors(containerColor = container, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
+                } else if (isPast) {
+                    ListItemDefaults.segmentedColors(containerColor = container, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
                 } else {
                     ListItemDefaults.segmentedColors(containerColor = container)
                 },

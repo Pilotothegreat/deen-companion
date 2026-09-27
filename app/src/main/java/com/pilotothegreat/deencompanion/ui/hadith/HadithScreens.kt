@@ -156,7 +156,8 @@ private fun BookList(
                             downloading -> LinearWavyProgressIndicator(Modifier.fillMaxWidth())
                             book.isComplete ->
                                 Text(pluralStringResource(R.plurals.hadith_count, book.hadithCount, Formatters.number(book.hadithCount, locale)))
-                            book.hadithCount == 0 -> Text(stringResource(R.string.not_downloaded))
+                            // Nothing stored yet: the download button beside it already says so.
+                            book.hadithCount == 0 -> Unit
                             else -> Text(stringResource(R.string.sample_hadiths, Formatters.number(book.hadithCount, locale)))
                         }
                     }
