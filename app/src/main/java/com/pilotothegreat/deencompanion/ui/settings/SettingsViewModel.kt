@@ -10,7 +10,6 @@ import androidx.lifecycle.viewModelScope
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.alarms.PrayerAlarmScheduler
 import com.pilotothegreat.deencompanion.core.analytics.UsageEvent
-import com.pilotothegreat.deencompanion.core.analytics.UsageReport
 import com.pilotothegreat.deencompanion.core.prayer.AsrSchool
 import com.pilotothegreat.deencompanion.core.prayer.CalculationMethod
 import com.pilotothegreat.deencompanion.core.prayer.HighLatitudeMode
@@ -74,12 +73,6 @@ class SettingsViewModel(
     val analyticsEnabled: StateFlow<Boolean> = analytics.enabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
-    /** True only in a build that was given a collector; otherwise the tally never leaves the device. */
-    val analyticsHasCollector: Boolean get() = analytics.hasCollector
-
-    private val _usageReport = MutableStateFlow<UsageReport?>(null)
-    val usageReport: StateFlow<UsageReport?> = _usageReport.asStateFlow()
-
     /**
      * Turning it off empties the table as well as stopping the counting: a switch that leaves the
      * history behind has not been turned off, it has been paused.
@@ -88,9 +81,6 @@ class SettingsViewModel(
         repository.setAnalyticsEnabled(enabled)
         if (!enabled) analytics.clear()
     }
-
-    /** Loads what has been counted, for the sheet that shows it. */
-    fun loadUsageReport() = launch { _usageReport.value = analytics.report() }
 
     val quranCredits: StateFlow<QuranCredits?> = flow { quran.quran().let { emit(QuranCredits(it.textSource, it.translation, it.edition)) } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)

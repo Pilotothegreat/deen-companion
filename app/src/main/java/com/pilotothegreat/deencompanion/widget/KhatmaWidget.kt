@@ -94,7 +94,7 @@ class KhatmaWidget : GlanceAppWidget() {
     override val sizeMode: SizeMode = SizeMode.Exact
     override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(WidgetKind.KHATMA.previewSize))
 
-    override suspend fun provideGlance(context: Context, id: GlanceId) = provideContent(loadKhatma(context, configOf(context, id)))
+    override suspend fun provideGlance(context: Context, id: GlanceId) = provideFresh(context, id, ::loadKhatma)
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) = provideContent(loadKhatma(context, WidgetConfig()))
 }
@@ -117,12 +117,14 @@ internal fun KhatmaContent(state: KhatmaWidgetState, config: WidgetConfig = Widg
     val showBar = state.hasPlan && budget.take(WidgetBar)
     val detailLines = (if (budget.takeLine(BODY_SP)) 1 else 0) + if (budget.takeLine(BODY_SP)) 1 else 0
     val showLabel = budget.takeLine(LABEL_SP)
+    // A second line for a long headline only when the height has one left; otherwise it was cut in half.
+    val headlineLines = if (budget.takeLine(headlineSp)) 2 else 1
     WidgetSurface(colors.primaryContainer, open, transparency = config.transparency) {
         Column(GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
             Row(GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Column(GlanceModifier.defaultWeight()) {
                     if (showLabel) Text(state.label, style = textStyle(content, LABEL_SP.sp, FontWeight.Medium), maxLines = 1)
-                    Text(state.headline, style = textStyle(content, headlineSp.sp, FontWeight.Bold), maxLines = 2)
+                    Text(state.headline, style = textStyle(content, headlineSp.sp, FontWeight.Bold), maxLines = headlineLines)
                     // Two lines where there is room: "Read the whole mushaf by a d…" is not an offer.
                     if (detailLines > 0) Text(state.detail, style = textStyle(content, BODY_SP.sp), maxLines = detailLines)
                 }

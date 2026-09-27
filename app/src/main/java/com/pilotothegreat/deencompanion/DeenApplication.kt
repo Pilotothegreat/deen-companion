@@ -50,12 +50,11 @@ import timber.log.Timber
 class DeenApplication : Application(), Configuration.Provider {
 
     /**
-     * Background upkeep: alarms, widgets, channels. A failure in one of these is logged rather than
-     * thrown, because an uncaught exception on this scope takes the whole process down with it,
-     * over work the reader never asked to see.
+     * Background work for the life of the process. A failure in one job is logged, not rethrown: an
+     * uncaught exception here would take the whole app down over a widget redraw or a resync.
      */
     private val appScope = CoroutineScope(
-        SupervisorJob() + Dispatchers.Default + CoroutineExceptionHandler { _, error -> Timber.e(error, "Background upkeep failed") },
+        SupervisorJob() + Dispatchers.Default + CoroutineExceptionHandler { _, e -> Timber.w(e, "Background job failed") },
     )
     private val settings: SettingsRepository by inject()
     private val tasbih: TasbihRepository by inject()
@@ -75,10 +74,7 @@ class DeenApplication : Application(), Configuration.Provider {
             androidContext(this@DeenApplication)
             modules(appModule)
         }
-        RescheduleWorker.enqueue(this)
-        KhatmaReminderWorker.enqueue(this)
-        AutoBackupWorker.enqueue(this)
-        UpdateCheckWorker.enqueue(this)
+        scheduleWork()
         countThisLaunch()
         syncLanguage()
         refreshWidgetsOnUnlock()
@@ -86,6 +82,17 @@ class DeenApplication : Application(), Configuration.Provider {
         keepChannelsLocalized()
         keepWidgetsInSync()
         warmTomorrow()
+    }
+
+    /**
+     * The periodic jobs, booked off the main thread: the first call initialises WorkManager, which
+     * opens its database, and that was a cold-start cost paid before the first frame.
+     */
+    private fun scheduleWork() = appScope.launch {
+        RescheduleWorker.enqueue(this@DeenApplication)
+        KhatmaReminderWorker.enqueue(this@DeenApplication)
+        AutoBackupWorker.enqueue(this@DeenApplication)
+        UpdateCheckWorker.enqueue(this@DeenApplication)
     }
 
     /**

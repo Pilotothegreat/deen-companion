@@ -56,14 +56,18 @@ object Notifications {
     const val CHANNEL_IQAMA = "iqama"
     const val CHANNEL_ATHKAR = "athkar"
     const val CHANNEL_KHATMA = "khatma"
-    const val CHANNEL_UPDATES = "updates"
+    const val CHANNEL_UPDATES = "updates_v2"
     private const val LEGACY_CHANNEL = "prayer_times"
+
+    /** Low importance, so it never showed; a channel's importance cannot be raised after the fact. */
+    private const val LEGACY_UPDATES_CHANNEL = "updates"
 
     /** Creates or renames the channels in [languageTag]; call on start and when the language changes. */
     fun createChannels(context: Context, languageTag: String) {
         val res = AppLanguage.localizedContext(context, languageTag)
         val manager = context.getSystemService(NotificationManager::class.java) ?: return
         manager.deleteNotificationChannel(LEGACY_CHANNEL)
+        manager.deleteNotificationChannel(LEGACY_UPDATES_CHANNEL)
         manager.createNotificationChannels(
             listOf(
                 NotificationChannel(CHANNEL_ADHAN, res.getString(R.string.channel_adhan), NotificationManager.IMPORTANCE_HIGH)
@@ -74,7 +78,7 @@ object Notifications {
                     .apply { description = res.getString(R.string.channel_athkar_desc) },
                 NotificationChannel(CHANNEL_KHATMA, res.getString(R.string.channel_khatma), NotificationManager.IMPORTANCE_LOW)
                     .apply { description = res.getString(R.string.channel_khatma_desc) },
-                NotificationChannel(CHANNEL_UPDATES, res.getString(R.string.channel_updates), NotificationManager.IMPORTANCE_LOW)
+                NotificationChannel(CHANNEL_UPDATES, res.getString(R.string.channel_updates), NotificationManager.IMPORTANCE_HIGH)
                     .apply { description = res.getString(R.string.channel_updates_desc) },
             ),
         )
@@ -139,22 +143,23 @@ object Notifications {
     }
 
     /**
-     * A new version is out. Low importance and sent once per release: it is a message, not an alarm,
-     * and it exists because a sideloaded copy has nothing else to tell it.
+     * A new version is out. It pops up, once per release, and a tap opens the update dialog with the
+     * release notes and the button that installs it.
      */
-    fun showUpdate(context: Context, languageTag: String, version: String) {
+    fun showUpdate(context: Context, languageTag: String, version: String?) {
         if (!canPost(context)) return
         val res = AppLanguage.localizedContext(context, languageTag)
         val open = PendingIntent.getActivity(
             context,
             UPDATE_REQUEST,
-            DeepLinks.screen(context, DeepLinks.SETTINGS),
+            DeepLinks.screen(context, DeepLinks.UPDATE),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         val notification = NotificationCompat.Builder(context, CHANNEL_UPDATES)
             .setSmallIcon(R.drawable.notification)
             .setContentTitle(res.getString(R.string.update_available_short))
-            .setContentText(res.getString(R.string.update_notification_body, version))
+            .setContentText(version?.let { res.getString(R.string.update_notification_body, it) } ?: res.getString(R.string.update_notification_generic))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(open)
             .setAutoCancel(true)
             .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)

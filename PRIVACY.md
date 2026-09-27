@@ -23,7 +23,7 @@ Turned on, the app keeps a counter per day for each of a fixed list of things �
 - **No identifier.** No account, no device id, no advertising id, nothing random kept to recognise this phone again. Two reports from one phone cannot be told apart from two reports from two phones.
 - **No times.** A counter says "seven today", never when.
 
-You can read the whole tally yourself — **Settings → Usage → What is counted** shows every counter, and shares the exact report if you want to keep it or send it on. Turning the switch off deletes what was counted. Counters older than 90 days are deleted anyway.
+The app asks once, on first run, alongside its permissions, and the answer starts as no. **Settings → General → Share usage data** turns it off again at any time, and turning it off deletes what was counted. Counters older than 90 days are deleted anyway.
 
 Whether the totals are sent anywhere at all depends on the build. The open-source build is compiled with no collector address, so nothing is uploaded however the switch is set. A build that was given one sends the day's totals, described above, once a day over Wi-Fi and never on a low battery.
 
@@ -39,7 +39,7 @@ The app works offline for prayer times, city search, the Quran text, athkar, the
 | Quran recitation | everyayah.com | When you play a recitation | Your IP address and the ayah requested |
 | Full hadith collections | cdn.jsdelivr.net | Only when you tap Download | Your IP address |
 | Update check | api.github.com (sideloaded installs) or Google Play (Play Store installs) | Up to four times a day while the app is open, once a day in the background, or when you tap the version in Settings | Your IP address |
-| Usage totals | Only a build configured with a collector, and only with **Count what I use** turned on | Once a day, on Wi-Fi | The counters and build described above, and your IP address |
+| Usage totals | Only a build configured with a collector, and only with **Share usage data** turned on | Once a day, on Wi-Fi | The counters and build described above, and your IP address |
 
 Weather is the only feature that sends anything about where you are. The coordinates are blunted to about a kilometre before they leave the device, which is enough to know whether it is raining over you and not enough to place a house. Under battery saver the request is not made at all, and the rest of the app carries on without it.
 

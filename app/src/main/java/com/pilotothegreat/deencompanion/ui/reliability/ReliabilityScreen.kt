@@ -75,7 +75,7 @@ fun ReliabilityScreen(canScheduleExact: Boolean, onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
         ) {
             item { SectionHeader(stringResource(R.string.reliability_intro), Modifier.padding(start = 0.dp)) }
-            itemsIndexed(items) { index, item ->
+            itemsIndexed(items, key = { _, item -> item.check }) { index, item ->
                 SegmentedListItem(
                     onClick = { context.startSafely(intentFor(context, item.check)) },
                     shapes = ListItemDefaults.segmentedShapes(index, items.size),

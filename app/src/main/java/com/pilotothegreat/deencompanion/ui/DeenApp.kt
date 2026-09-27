@@ -50,6 +50,9 @@ import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.BuildConfig
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.ui.settings.WhatsNewSheet
+import com.pilotothegreat.deencompanion.ui.settings.UpdatePrompt
+import com.pilotothegreat.deencompanion.data.update.UpdateChecker
+import com.pilotothegreat.deencompanion.ui.navigation.UpdateKey
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.getValue
@@ -75,7 +78,7 @@ import com.pilotothegreat.deencompanion.ui.navigation.HomeKey
 import com.pilotothegreat.deencompanion.ui.navigation.LocalBottomBarPadding
 import com.pilotothegreat.deencompanion.ui.navigation.LocationKey
 import com.pilotothegreat.deencompanion.ui.navigation.Navigator
-import com.pilotothegreat.deencompanion.ui.onboarding.OnboardingScreen
+import com.pilotothegreat.deencompanion.ui.onboarding.SetupSheet
 import com.pilotothegreat.deencompanion.ui.navigation.QiblaKey
 import com.pilotothegreat.deencompanion.ui.navigation.QuranKey
 import com.pilotothegreat.deencompanion.ui.navigation.ReaderKey
@@ -95,29 +98,28 @@ import org.koin.androidx.compose.koinViewModel
  */
 @Composable
 fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpened: () -> Unit = {}) {
-    // First run, before anything else — including the what's-new sheet, which has nothing to say to
-    // someone who has never had an older version. Someone upgrading has already made these choices,
-    // and a saved location is the proof: showing them a welcome tour would be the update
-    // introducing itself as a stranger.
-    var onboarding by rememberSaveable(settings.onboardingCompleted) {
+    // First run: a single sheet over Today asking for what the app needs, rather than a tour in
+    // front of it. Someone upgrading has already made these choices, and a saved location is the
+    // proof: asking them again would be the update introducing itself as a stranger.
+    var setup by rememberSaveable(settings.onboardingCompleted) {
         mutableStateOf(!settings.onboardingCompleted && settings.location.isDefault)
     }
     var openCityPicker by rememberSaveable { mutableStateOf(false) }
-    if (onboarding) {
-        val onboardingViewModel: SettingsViewModel = koinViewModel()
-        fun finish(withCityPicker: Boolean) {
-            onboardingViewModel.completeOnboarding()
+    if (setup) {
+        val setupViewModel: SettingsViewModel = koinViewModel()
+        fun finish(shareUsage: Boolean, withCityPicker: Boolean) {
+            setupViewModel.setAnalytics(shareUsage)
+            setupViewModel.completeOnboarding()
             openCityPicker = withCityPicker
-            onboarding = false
+            setup = false
         }
-        OnboardingScreen(onOpenLocation = { finish(true) }, onFinish = { finish(false) })
-        return
+        SetupSheet(onChooseCity = { finish(shareUsage = false, withCityPicker = true) }, onDone = { finish(it, withCityPicker = false) })
     }
 
     // Once, on the first launch of a new version. A changelog that keeps reappearing is an advert.
     val versionCode = BuildConfig.VERSION_CODE
     var showWhatsNew by rememberSaveable(versionCode) {
-        mutableStateOf(settings.lastSeenVersionCode in 1 until versionCode)
+        mutableStateOf(!setup && settings.lastSeenVersionCode in 1 until versionCode)
     }
     val settingsViewModel: SettingsViewModel = koinViewModel()
     LaunchedEffect(versionCode) { settingsViewModel.markVersionSeen(versionCode) }
@@ -128,15 +130,29 @@ fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpe
             onDismiss = { showWhatsNew = false },
         )
     }
+    // The update pop-up, over whatever is open: raised by Today when an update has earned it, and by
+    // the update notification.
+    var showUpdate by rememberSaveable { mutableStateOf(false) }
+    val updateState by settingsViewModel.updateState.collectAsStateWithLifecycle()
+    (updateState as? UpdateChecker.State.Available)?.takeIf { showUpdate && !setup }?.let { available ->
+        UpdatePrompt(available, settingsViewModel, onDismiss = { showUpdate = false })
+    }
+
     // A stack per tab, each saved across process death like the single one it replaces.
     val stacks = TopLevel.entries.associateWith { rememberNavBackStack(it.key) }
     val currentTab = rememberSaveable { mutableStateOf(TopLevel.HOME) }
     val navigator = remember(currentTab) { Navigator(stacks, currentTab) }
     LaunchedEffect(destination) {
-        destination?.let {
-            navigator.open(it)
-            onDestinationOpened()
+        when (destination) {
+            null -> return@LaunchedEffect
+            UpdateKey -> {
+                // The notification's check may be a day old; look again so the dialog has the notes.
+                if (updateState !is UpdateChecker.State.Available) settingsViewModel.checkForUpdates()
+                showUpdate = true
+            }
+            else -> navigator.open(destination)
         }
+        onDestinationOpened()
     }
     // "Choose a city" during first run lands on the picker rather than dropping someone on Today
     // beside the very prompt they just answered.
@@ -190,6 +206,7 @@ fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpe
                                 onOpenAthkar = { navigator.navigate(AthkarSessionKey(it)) },
                                 onOpenReliability = { navigator.navigate(ReliabilityKey) },
                                 onOpenReader = navigator::navigate,
+                                onUpdateAvailable = { showUpdate = true },
                             )
                         }
                         entry<QuranKey>(metadata = tabMotion) { QuranScreen(onOpenReader = navigator::navigate) }

@@ -72,6 +72,35 @@ class WidgetRenderTest {
     @Test fun thePrayerTimes() = listOf(DpSize(320.dp, 300.dp), DpSize(250.dp, 220.dp), DpSize(320.dp, 150.dp), DpSize(250.dp, 100.dp), DpSize(180.dp, 130.dp), DpSize(180.dp, 60.dp))
         .forEach { shoot("prayer-times", it) { PrayerTimesContent(times) } }
 
+    /**
+     * One row tall, which every widget can now be resized to (a row is 40dp by Android's own formula),
+     * and two columns wide. Each has to keep its point at that size, not a crop of its larger self.
+     */
+    @Test fun oneRowTall() {
+        val sizes = listOf(DpSize(110.dp, 40.dp), DpSize(180.dp, 50.dp), DpSize(250.dp, 50.dp))
+        sizes.forEach { shoot("row-next-prayer", it) { NextPrayerContent(nextPrayer) } }
+        sizes.forEach { shoot("row-prayer-times", it) { PrayerTimesContent(times) } }
+        sizes.forEach { shoot("row-athkar", it) { AthkarContent(AthkarWidgetState(false, "Now", "evening", "Evening", "3 of 24", 0.125f, emptyList())) } }
+        sizes.forEach { shoot("row-tasbih", it) { TasbihContent(TasbihWidgetState(false, "Subhan Allah", "12", "of 33", "Count dhikr")) } }
+        sizes.forEach { shoot("row-moment", it) { MomentContent(MomentWidgetState(false, "Iftar in an hour", "Maghrib at 6:20 PM", hasMoment = true, athkarCategory = null)) } }
+        sizes.forEach { shoot("row-qibla", it) { QiblaContent(QiblaWidgetState(false, "Qibla", 294.3f, "294°", "from north", "2,158 km to Makkah")) } }
+        sizes.forEach { shoot("row-date", it) { DateContent(DateWidgetState(false, "29 Rabi' I 1448 AH", "Thursday", "18 September 2026")) } }
+        sizes.forEach { shoot("row-verse", it) { QuoteContent(QuoteState(false, "Verse of the day", "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا", "For indeed, with hardship will be ease", "Ash-Sharh 94:5", Intent())) } }
+        sizes.forEach {
+            shoot("row-khatma", it) {
+                KhatmaContent(KhatmaWidgetState(false, "Khatma", "3 pages to read today", "128 of 604 pages", 0.21f, hasPlan = true, open = Intent()))
+            }
+        }
+    }
+
+    /** Half see-through, over the test's wallpaper colour, which has to show through the card. */
+    @Test fun transparent() {
+        shoot("transparent-next-prayer", DpSize(250.dp, 180.dp)) { NextPrayerContent(nextPrayer, WidgetConfig(transparency = 0.5f)) }
+        shoot("transparent-prayer-times", DpSize(250.dp, 220.dp)) { PrayerTimesContent(times, WidgetConfig(transparency = 0.5f)) }
+        shoot("clear-prayer-times", DpSize(250.dp, 220.dp)) { PrayerTimesContent(times, WidgetConfig(transparency = 1f)) }
+        shoot("iqama-prayer-times", DpSize(180.dp, 100.dp)) { PrayerTimesContent(times) }
+    }
+
     @Test fun theOthers() {
         val athkar = AthkarWidgetState(
             dynamic = false,
@@ -83,7 +112,7 @@ class WidgetRenderTest {
             // The category in the heading is not repeated as a meter, so an evening widget offers the morning.
             meters = listOf(AthkarMeter("Morning", 1f)),
         )
-        // 100×60 is the smallest any of these can be resized to.
+        // 100×40 is the smallest any of these can be resized to; oneRowTall covers the single row.
         listOf(DpSize(200.dp, 180.dp), DpSize(180.dp, 90.dp), DpSize(100.dp, 60.dp)).forEach { shoot("athkar", it) { AthkarContent(athkar) } }
         val tasbih = TasbihWidgetState(false, "Subhan Allah", "12", "of 33", "Count dhikr")
         listOf(DpSize(200.dp, 110.dp), DpSize(120.dp, 120.dp), DpSize(120.dp, 70.dp), DpSize(100.dp, 60.dp)).forEach { shoot("tasbih", it) { TasbihContent(tasbih) } }

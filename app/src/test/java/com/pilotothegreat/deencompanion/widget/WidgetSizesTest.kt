@@ -52,6 +52,20 @@ class WidgetSizesTest {
     }
 
     /**
+     * Every widget shrinks to one row and two columns. By Android's 70n - 30 formula a row is 40dp and two
+     * columns 110dp; the old 60dp and 180dp minimums held widgets at two rows and three columns however
+     * much empty space there was around them.
+     */
+    @Test fun everyWidgetShrinksToOneRowAndTwoColumns() {
+        File("src/main/res/xml").listFiles().orEmpty().filter { "widget" in it.name }.forEach { file ->
+            val xml = file.readText()
+            val dp = { name: String -> Regex("""android:$name="(\d+)dp"""").find(xml)!!.groupValues[1].toInt() }
+            assertTrue("${file.name} shrinks to one row", dp("minResizeHeight") <= 40)
+            assertTrue("${file.name} shrinks to two columns", dp("minResizeWidth") <= 110)
+        }
+    }
+
+    /**
      * What the picker shows and what the launcher places have to be the same widget.
      *
      * A provider that asks for two cells and declares the width of four gets one size from an Android 12

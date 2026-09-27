@@ -67,7 +67,7 @@ class DateWidget : GlanceAppWidget() {
     override val sizeMode: SizeMode = SizeMode.Exact
     override val previewSizeMode: PreviewSizeMode = SizeMode.Responsive(setOf(WidgetKind.DATE.previewSize))
 
-    override suspend fun provideGlance(context: Context, id: GlanceId) = provideContent(loadDate(context, configOf(context, id)))
+    override suspend fun provideGlance(context: Context, id: GlanceId) = provideFresh(context, id, ::loadDate)
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) = provideContent(loadDate(context, WidgetConfig()))
 }

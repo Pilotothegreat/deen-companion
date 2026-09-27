@@ -104,7 +104,6 @@
     <string name="permission_exact_title">اسمح بالتنبيهات في وقتها</string>
     <string name="permission_exact_body">بدون هذا الإذن قد يؤخر أندرويد تنبيهات الصلاة بضع دقائق.</string>
     <string name="update_available_short">يتوفر إصدار جديد</string>
-    <string name="update_action">تحديث</string>
     <string name="daily_inspiration">إلهام اليوم</string>
     <string name="verse_of_the_day">آية اليوم</string>
     <string name="qibla_summary">%1$s° من الشمال · %2$s كم إلى مكة</string>
@@ -373,7 +372,6 @@
     <string name="notifications">التنبيهات</string>
     <string name="prayer_notifications">تنبيهات الصلاة</string>
     <string name="prayer_notifications_desc">إشعار عند كل صلاة يتحوّل إلى عدّ تنازلي حتى الإقامة</string>
-    <string name="exact_alarms">التنبيه في الوقت المحدد</string>
     <string name="adhan_sound">صوت الأذان</string>
     <string name="appearance">المظهر</string>
     <string name="theme">السمة</string>
@@ -590,7 +588,7 @@
     <string name="update_open_page">فتح صفحة الإصدار</string>
     <string name="later">لاحقًا</string>
     <string name="whats_new_in">الجديد في %1$s</string>
-    <string name="whats_new_body">القرآن كما يُطبع. صار النص نص مجمع الملك فهد نفسه وبخطّه، فزالت النقاط الشاردة داخل الكلمات. الصفحات كلها بحجم واحد، وسطورها الخمسة عشر موزّعة على الصفحة وممدودة بالكشيدة (ـ) كما في المصحف المطبوع. اسحب لتقليب الصفحة، واضغط على الآية فيظهر شريط التلاوة عندها، واضغط عليها مطوّلًا لترجمتها وحفظها في العلامات ونسخها ومشاركتها وتكرارها.\n\nأدوات تواكب الوقت: شريط الصلاة القادمة يتقدّم بين الصلوات، وكل أداة ترتّب نفسها على المساحة التي تُعطاها، فلم تعد العشاء تسقط من أسفل الأدوات المكدّسة. وإعدادات الأداة تفتح على ما فيها، وتعرضها حيّة وأنت تغيّرها، ولا تعرض إلا ما يخصّها.\n\nإعدادات أقل، وكل منها مكتمل: أُزيلت أوقات النوازل، والاقتراحات الذكية، وحجم التلاوة المحفوظة، وحجم الخط العربي. وصار المظهر اختيارًا واحدًا، مع خيار OLED بجانب «تلقائي».\n\n«اليوم» أهدأ: أُزيلت البطاقات اليومية وبطاقة الموقع، واضغط على المكان تحت التاريخ لتغييره. والبوصلة تدور وتستقر وتثبت على القبلة كبوصلة حقيقية.</string>
+    <string name="whats_new_body">بحث في القرآن يجيب أولًا: اكتب آية الكرسي أو ٢:٢٥٥ أو الجزء ٣٠ أو اسم السورة فتنتقل إليها مباشرة، وتأتي مطابقات النص بعدها. وعشرون قارئًا جديدًا للاختيار.\n\nأدوات تضعها حيث شئت: أدوات جديدة للقبلة والختمة والتاريخ. وكل أداة تصغر الآن إلى صف واحد، والشفافية تُظهر خلفيتك فعلًا، وأوقات الإقامة تظهر بمجرد تفعيلها.\n\nبداية أبسط: بطاقة واحدة لتنبيهات الصلاة والموقع، ولإحصاء اختياري مجهول الهوية للميزات المستخدمة.\n\nتحديثات لا تفوتك: يظهر الإصدار الجديد في نافذة داخل التطبيق مع ملاحظاته، وفي إشعار.</string>
 
     <!-- Shortcuts and the tile -->
     <string name="tile_next_prayer">الصلاة القادمة</string>
@@ -604,17 +602,6 @@
     <string name="shortcut_tasbih_long">فتح المسبحة</string>
 
     <!-- Onboarding -->
-    <string name="onboarding_welcome_title">بلال</string>
-    <string name="onboarding_welcome_body">مواقيت الصلاة والمصحف والأذكار والقبلة. بلا حساب ولا إعلانات، ولا يغادر شيء عنك هذا الهاتف إلا بإذنك. ويمكنك تغيير اللغة من الإعدادات.</string>
-    <string name="onboarding_location_title">موقعك</string>
-    <string name="onboarding_location_body">تُحسب المواقيت والقبلة لموقعك داخل الهاتف، ويُستخدم الموقع والتطبيق مفتوح فقط ولا يُستخدم في الخلفية. ويمكنك اختيار المدينة يدويًا.</string>
-    <string name="onboarding_alerts_title">تنبيهات تصل</string>
-    <string name="onboarding_alerts_body">يحتاج أندرويد إذنك لعرض تنبيهات الصلاة، وإذنًا آخر لتصل في وقتها بالدقيقة. وإن تأخرت ففي الإعدادات شاشة تبيّن ما يمنعها في هاتفك.</string>
-    <string name="onboarding_smart_title">تفاعل مع يومك</string>
-    <string name="onboarding_smart_body">يعرف بلال الجمعة وليالي رمضان وعرفة وسائر السنة الهجرية، ويعرض دعاء الطقس. والطقس يُرسل موقعك مقرّبًا إلى نحو كيلومتر إلى Open-Meteo مرة كل ساعة والتطبيق مفتوح، ويمكنك إيقافه متى شئت.</string>
-    <string name="onboarding_skip">تخطّي</string>
-    <string name="onboarding_next">التالي</string>
-    <string name="onboarding_start">ابدأ</string>
     <string name="iqama_waiting_body">حتى إقامة %1$s</string>
     <string name="adhan_sound_desc">اختر صوت الأذان واهتزازه</string>
     <string name="adhan_sound_system">صوت المنبّه في الهاتف</string>
@@ -652,15 +639,18 @@
     <string name="preview_inspiration_ref">الشرح ٥</string>
     <string name="preview_moment_title">الجمعة</string>
     <string name="preview_moment_body">اقرأ سورة الكهف، وأكثر من الصلاة على النبي ﷺ.</string>
-    <string name="usage_switch">احتساب ما أستخدمه</string>
-    <string name="usage_switch_desc_local">يحسب المزايا التي تفتحها على هذا الجهاز فقط، ولا يُرسل شيء إلى أي مكان، ويمكنك قراءة السجل كاملًا ومشاركته بنفسك.</string>
-    <string name="usage_switch_desc_shared">يحسب المزايا التي تفتحها ويرسل المجاميع مرة في اليوم عبر الواي فاي. بلا نصوص تكتبها، ولا آيات تقرؤها، ولا موقع، ولا ما يدل عليك أو على جهازك.</string>
-    <string name="usage_show">ما الذي يُحسب</string>
-    <string name="usage_show_desc">اقرأ السجل كاملًا، وشاركه إن شئت</string>
-    <string name="usage_summary">%1$s يومًا · %2$s فتحة · منذ %3$s</string>
-    <string name="usage_empty">لم يُحسب شيء بعد.</string>
-    <string name="usage_share">مشاركة التقرير</string>
     <string name="channel_updates">تحديثات التطبيق</string>
-    <string name="channel_updates_desc">تنبيه هادئ عند صدور إصدار جديد</string>
+    <string name="channel_updates_desc">تنبيه عند صدور إصدار جديد</string>
     <string name="update_notification_body">الإصدار %1$s جاهز للتثبيت</string>
+    <string name="setup_title">أهلًا بك في بلال</string>
+    <string name="setup_body">ثلاثة اختيارات سريعة، ويمكنك تغيير أيٍّ منها لاحقًا من الإعدادات.</string>
+    <string name="setup_notifications">تنبيهات الصلاة</string>
+    <string name="setup_notifications_desc">تنبيه عند دخول وقت كل صلاة</string>
+    <string name="setup_location">الموقع</string>
+    <string name="setup_location_desc">مواقيت وقبلة دقيقة، تُحسب داخل هاتفك</string>
+    <string name="setup_usage">مشاركة بيانات الاستخدام</string>
+    <string name="setup_usage_desc">أعداد مجهولة الهوية للميزات التي تُفتح، لتحسين التطبيق. لا يُرسل ما تقرؤه أو تكتبه ولا مكانك أبدًا.</string>
+    <string name="setup_done">متابعة</string>
+    <string name="setup_allowed">مسموح</string>
+    <string name="update_notification_generic">اضغط لترى الجديد وتحدّث</string>
 </resources>

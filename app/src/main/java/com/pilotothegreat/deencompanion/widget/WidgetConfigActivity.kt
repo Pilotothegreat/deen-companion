@@ -157,7 +157,7 @@ class WidgetConfigActivity : ComponentActivity() {
         updateAppWidgetState(this, PreferencesGlanceStateDefinition, id) { preferences ->
             preferences.toMutablePreferences().apply { WidgetConfig.write(this, config) }
         }
-        kind.widget().update(this, id)
+        kind.widget().refresh(this, id)
     }.onFailure { Timber.w(it, "Couldn't save the widget's settings") }.isSuccess
 }
 
@@ -390,4 +390,4 @@ private class PictureFrame(context: Context) : FrameLayout(context) {
     override fun onInterceptTouchEvent(event: MotionEvent): Boolean = true
 }
 
-private const val MAX_TRANSPARENCY = 0.9f
+private const val MAX_TRANSPARENCY = 1f

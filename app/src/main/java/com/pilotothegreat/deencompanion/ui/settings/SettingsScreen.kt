@@ -216,11 +216,7 @@ fun SettingsScreen(
     var showUpdate by rememberSaveable { mutableStateOf(false) }
     var showIqama by rememberSaveable { mutableStateOf(false) }
     var showRestore by rememberSaveable { mutableStateOf(false) }
-    var showUsage by rememberSaveable { mutableStateOf(false) }
     var showSounds by rememberSaveable { mutableStateOf(false) }
-    val playUpdate = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
-        viewModel.completePlayUpdate()
-    }
     var pickingFor by rememberSaveable { mutableStateOf<Prayer?>(null) }
     val pickSound = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val prayer = pickingFor ?: return@rememberLauncherForActivityResult
@@ -229,7 +225,6 @@ fun SettingsScreen(
         val uri = result.data?.getParcelableExtra<android.net.Uri>(android.media.RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
         viewModel.setAdhanSound(prayer, uri?.toString() ?: SoundSettings.SILENT)
     }
-    val install by viewModel.install.collectAsStateWithLifecycle()
     var exactAllowed by remember { mutableStateOf(viewModel.canScheduleExactAlarms()) }
     // Both are granted in Android's own settings, so both are read again on the way back from there.
     var silenceAllowed by remember { mutableStateOf(QuietDuringPrayer.isAllowed(context)) }
@@ -238,8 +233,6 @@ fun SettingsScreen(
         silenceAllowed = QuietDuringPrayer.isAllowed(context)
         onPauseOrDispose { }
     }
-    val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
-
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -481,27 +474,15 @@ fun SettingsScreen(
                 SettingsGroup(
                     stringResource(R.string.general),
                     listOf(
-                        // Counting what is used sits with backup and reset rather than in a group of
-                        // its own: it is about this app's data, and the menu is short on purpose.
+                        // The one analytics control a user needs: withdrawing the consent given at
+                        // first run. What is counted is for the developer, not a feature to browse.
                         { shapes ->
                             SwitchRow(
-                                shapes, Icons.Rounded.QueryStats, stringResource(R.string.usage_switch),
-                                stringResource(
-                                    if (viewModel.analyticsHasCollector) R.string.usage_switch_desc_shared
-                                    else R.string.usage_switch_desc_local,
-                                ),
+                                shapes, Icons.Rounded.QueryStats, stringResource(R.string.setup_usage),
+                                stringResource(R.string.setup_usage_desc),
                                 counting,
                                 viewModel::setAnalytics,
                             )
-                        },
-                        { shapes ->
-                            NavRow(
-                                shapes, Icons.Rounded.Visibility, stringResource(R.string.usage_show),
-                                stringResource(R.string.usage_show_desc),
-                            ) {
-                                viewModel.loadUsageReport()
-                                showUsage = true
-                            }
                         },
                         { shapes ->
                             NavRow(
@@ -647,30 +628,9 @@ fun SettingsScreen(
         )
         null -> Unit
     }
-    if (showUsage) {
-        val report by viewModel.usageReport.collectAsStateWithLifecycle()
-        UsageSheet(report = report, onDismiss = { showUsage = false })
-    }
 
     (updateState as? UpdateChecker.State.Available)?.takeIf { showUpdate }?.let { available ->
-        UpdateDialog(
-            version = available.version,
-            notes = available.notes,
-            install = install,
-            canInstall = viewModel.canInstallUpdates() && available.apkUrl != null,
-            onUpdate = { viewModel.downloadAndInstall(available) },
-            onOpenPage = {
-                showUpdate = false
-                if (viewModel.isPlayInstall) {
-                    // Play updates in place; only if it has nothing on offer do we send anyone out
-                    // to the listing.
-                    viewModel.startPlayUpdate(playUpdate) { context.startSafely(viewModel.updateIntent()) }
-                } else {
-                    context.startSafely(viewModel.updateIntent())
-                }
-            },
-            onDismiss = { showUpdate = false },
-        )
+        UpdatePrompt(available, viewModel, onDismiss = { showUpdate = false })
     }
     if (showSounds) {
         AdhanSoundSheet(

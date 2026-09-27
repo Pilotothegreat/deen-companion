@@ -39,10 +39,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -50,7 +48,6 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -115,13 +112,15 @@ fun HomeScreen(
     onOpenAthkar: (String) -> Unit,
     onOpenReader: (ReaderKey) -> Unit,
     onOpenReliability: () -> Unit,
+    onUpdateAvailable: () -> Unit = {},
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val content by viewModel.content.collectAsStateWithLifecycle()
-    // Held as a State and read only where it is shown: it ticks every second, and read up here it
-    // rebuilt the whole screen with it, system-service checks and all.
-    val countdown = viewModel.countdown.collectAsStateWithLifecycle()
-    val hasCountdown by remember { derivedStateOf { countdown.value != null } }
+    // Ticks every second. Read only inside the hero, so the second hand redraws one card rather than
+    // the whole of Today; the rest reads what changes once a prayer, through derivedStateOf.
+    val countdownState = viewModel.countdown.collectAsStateWithLifecycle()
+    val hasCountdown by remember { derivedStateOf { countdownState.value != null } }
+    val nextAdhan by remember { derivedStateOf { countdownState.value?.next } }
     val athkarNow by viewModel.athkarNow.collectAsStateWithLifecycle()
     val prayed by viewModel.prayedToday.collectAsStateWithLifecycle()
     val daysObserved by viewModel.daysObserved.collectAsStateWithLifecycle()
@@ -160,17 +159,7 @@ fun HomeScreen(
                 HomeEvent.LocationPermissionMissing -> scope.launch {
                     snackbar.showSnackbar(resources.getString(R.string.location_permission_needed))
                 }
-                is HomeEvent.UpdateAvailable -> scope.launch {
-                    val result = snackbar.showSnackbar(
-                        message = resources.getString(R.string.update_available_short),
-                        actionLabel = resources.getString(R.string.update_action),
-                        // An update that has been waiting a fortnight stays on screen until it is
-                        // answered; a fresh one slides away as it always did.
-                        duration = if (event.insistent) SnackbarDuration.Indefinite else SnackbarDuration.Long,
-                        withDismissAction = event.insistent,
-                    )
-                    if (result == SnackbarResult.ActionPerformed) context.startSafely(viewModel.updateIntent())
-                }
+                is HomeEvent.UpdateAvailable -> onUpdateAvailable()
             }
         }
     }
@@ -332,13 +321,13 @@ fun HomeScreen(
                     )
                 }
                 if (hasCountdown) {
-                    item(key = "hero") { countdown.value?.let { NextPrayerHero(it, locale, springItem()) } }
+                    item(key = "hero") { countdownState.value?.let { NextPrayerHero(it, locale, springItem()) } }
                 }
                 item(key = "times") {
                     Box(springItem()) {
                         PrayerTimesCard(
                             schedule = current.today,
-                            nextPrayer = nextPrayer(countdown, current.today.date),
+                            nextPrayer = nextAdhan?.takeIf { it.adhan.toLocalDate() == current.today.date }?.prayer,
                             muted = current.settings.mutedPrayers,
                             notificationsEnabled = current.settings.notificationsEnabled,
                             prayed = prayed,
@@ -403,13 +392,4 @@ private fun LazyItemScope.springItem(): Modifier {
         placementSpec = motion.defaultSpatialSpec(),
         fadeOutSpec = motion.fastEffectsSpec(),
     )
-}
-
-/** Which of today's prayers is next, read so that only a change of prayer, not each second, recomposes. */
-@Composable
-private fun nextPrayer(countdown: State<Countdown?>, today: LocalDate): Prayer? {
-    val next by remember(today) {
-        derivedStateOf { countdown.value?.next?.takeIf { it.adhan.toLocalDate() == today }?.prayer }
-    }
-    return next
 }
