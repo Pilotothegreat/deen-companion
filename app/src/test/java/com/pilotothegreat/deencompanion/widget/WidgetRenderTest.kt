@@ -88,7 +88,7 @@ class WidgetRenderTest {
         sizes.forEach { shoot("row-verse", it) { QuoteContent(QuoteState(false, "Verse of the day", "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا", "For indeed, with hardship will be ease", "Ash-Sharh 94:5", Intent())) } }
         sizes.forEach {
             shoot("row-khatma", it) {
-                KhatmaContent(KhatmaWidgetState(false, "Khatma", "3 pages to read today", "128 of 604 pages", 0.21f, hasPlan = true, open = Intent()))
+                KhatmaContent(KhatmaWidgetState(false, "Khatma", "3 pages to read today", "128 of 604 pages", 0.21f, hasPlan = true, open = Intent(), shortHeadline = "3 pages"))
             }
         }
     }
@@ -134,6 +134,7 @@ class WidgetRenderTest {
             fraction = 0.21f,
             hasPlan = true,
             open = Intent(),
+            shortHeadline = "3 pages",
         )
         listOf(DpSize(250.dp, 110.dp), DpSize(180.dp, 90.dp), DpSize(100.dp, 60.dp)).forEach { shoot("khatma", it) { KhatmaContent(khatma) } }
         // No plan yet: the same widget offers to begin one, and has no bar to show.
@@ -189,7 +190,7 @@ class WidgetRenderTest {
         listOf(DpSize(320.dp, 300.dp), DpSize(320.dp, 150.dp), DpSize(180.dp, 60.dp)).forEach { shoot("ar-prayer-times", it) { PrayerTimesContent(table) } }
         val qibla = QiblaWidgetState(false, "القبلة", 294.3f, "٢٩٤°", "من الشمال", "٢٬١٥٨ كم إلى مكة")
         shoot("ar-qibla", DpSize(250.dp, 110.dp)) { QiblaContent(qibla) }
-        val khatma = KhatmaWidgetState(false, "الختمة", "٣ صفحات لليوم", "١٢٨ من ٦٠٤ صفحة · بقي ٢٤ يومًا", 0.21f, true, Intent())
+        val khatma = KhatmaWidgetState(false, "الختمة", "٣ صفحات لليوم", "١٢٨ من ٦٠٤ صفحة · بقي ٢٤ يومًا", 0.21f, true, Intent(), "٣ صفحات")
         shoot("ar-khatma", DpSize(250.dp, 110.dp)) { KhatmaContent(khatma) }
         val date = DateWidgetState(false, "٢٩ ربيع الأول ١٤٤٨ هـ", "الخميس", "١٨ سبتمبر ٢٠٢٦")
         shoot("ar-date", DpSize(250.dp, 110.dp)) { DateContent(date) }

@@ -48,6 +48,8 @@ internal data class KhatmaWidgetState(
     /** False when no khatma is running: no bar, and the tap goes to the Quran rather than a page. */
     val hasPlan: Boolean,
     val open: Intent,
+    /** The same in a word or two, for a widget too narrow for the sentence: "3 pages t…" said nothing. */
+    val shortHeadline: String = headline,
 ) {
     companion object {
         suspend fun load(context: Context): KhatmaWidgetState {
@@ -73,6 +75,11 @@ internal data class KhatmaWidgetState(
                     progress.isComplete -> res.getString(R.string.khatma_complete)
                     progress.isOnTrack -> res.getString(R.string.khatma_on_track, number(progress.pagesPerDay))
                     else -> res.resources.getQuantityString(R.plurals.khatma_pages_due, progress.pagesDueToday, number(progress.pagesDueToday))
+                },
+                shortHeadline = when {
+                    progress.isComplete -> res.getString(R.string.khatma_complete)
+                    progress.isOnTrack -> res.getString(R.string.done)
+                    else -> res.resources.getQuantityString(R.plurals.pages, progress.pagesDueToday, number(progress.pagesDueToday))
                 },
                 detail = res.getString(
                     R.string.khatma_progress,
@@ -124,7 +131,10 @@ internal fun KhatmaContent(state: KhatmaWidgetState, config: WidgetConfig = Widg
             Row(GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Column(GlanceModifier.defaultWeight()) {
                     if (showLabel) Text(state.label, style = textStyle(content, LABEL_SP.sp, FontWeight.Medium), maxLines = 1)
-                    Text(state.headline, style = textStyle(content, headlineSp.sp, FontWeight.Bold), maxLines = headlineLines)
+                    // The room beside the badge, not the widget's width: at 180dp the badge left the text 130.
+                    val textWidth = if (width >= BADGE_FROM) width - 50.dp else width
+                    val headline = if (headlineLines == 1 && textWidth < SHORT_BELOW) state.shortHeadline else state.headline
+                    Text(headline, style = textStyle(content, headlineSp.sp, FontWeight.Bold), maxLines = headlineLines)
                     // Two lines where there is room: "Read the whole mushaf by a d…" is not an offer.
                     if (detailLines > 0) Text(state.detail, style = textStyle(content, BODY_SP.sp), maxLines = detailLines)
                 }
@@ -145,6 +155,9 @@ internal fun KhatmaContent(state: KhatmaWidgetState, config: WidgetConfig = Widg
         }
     }
 }
+
+/** With less room for text than this, one line holds a count but not the sentence around it. */
+private val SHORT_BELOW = 190.dp
 
 private const val LABEL_SP = 11f
 private const val BODY_SP = 12f

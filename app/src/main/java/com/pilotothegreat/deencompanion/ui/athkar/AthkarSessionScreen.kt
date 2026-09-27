@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -27,8 +28,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Abc
 import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.RestartAlt
 import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.RestartAlt
 import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -58,6 +59,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -74,26 +76,26 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.pilotothegreat.deencompanion.ui.theme.Spacing
-import com.pilotothegreat.deencompanion.ui.common.rememberHaptics
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.core.athkar.AthkarIds
 import com.pilotothegreat.deencompanion.core.athkar.AthkarItem
 import com.pilotothegreat.deencompanion.ui.common.Formatters
 import com.pilotothegreat.deencompanion.ui.common.currentLocale
 import com.pilotothegreat.deencompanion.ui.common.isArabic
+import com.pilotothegreat.deencompanion.ui.common.rememberHaptics
 import com.pilotothegreat.deencompanion.ui.components.LoadingBox
 import com.pilotothegreat.deencompanion.ui.components.RollingNumber
 import com.pilotothegreat.deencompanion.ui.navigation.AthkarSessionKey
 import com.pilotothegreat.deencompanion.ui.theme.Amiri
+import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.ui.theme.animatedPolygonShape
 import com.pilotothegreat.deencompanion.ui.theme.rememberReducedMotion
+import java.util.Locale
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
-import java.util.Locale
 
 /** One athkar list: a page per dhikr, counted with a big button or by tapping the card. */
 @Composable
@@ -258,11 +260,11 @@ private fun DhikrPage(
     val done = count >= item.count
     val countLabel = stringResource(R.string.athkar_count_action)
     var showDetails by rememberSaveable(item.id) { mutableStateOf(false) }
+    val cardColor = if (done) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainerLow
+    val scroll = rememberScrollState()
     Card(
         shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(
-            containerColor = if (done) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainerLow,
-        ),
+        colors = CardDefaults.cardColors(containerColor = cardColor),
         modifier = Modifier
             .fillMaxSize()
             .clickable(onClick = onCount)
@@ -271,7 +273,7 @@ private fun DhikrPage(
         // Short athkar sit in the middle of the card; long ones scroll.
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Column(
-                Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(Spacing.xlarge),
+                Modifier.fillMaxWidth().verticalScroll(scroll).padding(Spacing.xlarge),
                 verticalArrangement = Arrangement.spacedBy(Spacing.large),
             ) {
                 item.note(locale)?.let { note ->
@@ -316,6 +318,16 @@ private fun DhikrPage(
                         }
                     }
                 }
+            }
+            // A long dhikr ran into the card's edge with nothing to say it went on; the fade does.
+            if (scroll.canScrollForward) {
+                Box(
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .background(Brush.verticalGradient(listOf(cardColor.copy(alpha = 0f), cardColor))),
+                )
             }
         }
     }
