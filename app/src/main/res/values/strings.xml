@@ -557,7 +557,7 @@
     <string name="update_open_page">Open the release page</string>
     <string name="later">Later</string>
     <string name="whats_new_in">What\'s new in %1$s</string>
-    <string name="whats_new_body">My athkar: make lists of your own under the ones that come with the app. Give each dhikr a note and a count, reorder them, and count them in the same session screen. Backups carry them.\n\nSettings you can see: language, text size, Asr time, the reminder before prayer and silence during prayer are now picture cards.\n\nA quicker feel: counts move the moment you tap, each tab keeps its place when you come back, and the app opens without a blank screen.</string>
+    <string name="whats_new_body">A Juz tab in the Quran, next to Surahs and Bookmarks: every juz with the page and ayah it starts at.\n\nPlay from here: long-press an ayah and recite from it on.\n\nFixes: the reminder-before-adhan choices no longer run off the screen, the city on Today is no longer cut off, and the ayah menu opens fully so Share is always in reach.</string>
 
     <!-- Shortcuts and the tile -->
     <string name="tile_next_prayer">Next prayer</string>

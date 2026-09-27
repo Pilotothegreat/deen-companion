@@ -1,0 +1,5 @@
+A Juz tab in the Quran, next to Surahs and Bookmarks: every juz with the page and ayah it starts at.
+
+Play from here: long-press an ayah and recite from it on.
+
+Fixes: the reminder-before-adhan choices no longer run off the screen, the city on Today is no longer cut off, and the ayah menu opens fully so Share is always in reach.
