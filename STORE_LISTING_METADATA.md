@@ -80,6 +80,6 @@ Both need the `PLAY_SERVICE_ACCOUNT_JSON` repository secret and skip their Play 
 
 ## Before submitting
 
-- **Support development sheet:** the Play build (`bundlePlay`) leaves it out, along with its banking-app queries, because Google Play's payments policy generally requires Play Billing for payments to the developer. The GitHub APK keeps it.
+- **Support development:** the Play build (`bundlePlay`) links straight to GitHub Sponsors rather than opening the sheet, as a donation link that gives nothing in return. The GitHub APK opens the sheet, which points to the same page.
 - **Testing requirement:** personal developer accounts created after November 2023 must run a closed test with at least 12 testers for 14 days before a new app can go to production.
 - **Contact email:** the Play Console requires a public support email for the listing.

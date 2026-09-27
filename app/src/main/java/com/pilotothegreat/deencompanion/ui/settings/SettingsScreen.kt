@@ -165,7 +165,6 @@ import java.time.LocalTime
 import java.util.Locale
 
 private const val REPOSITORY_URL = "https://github.com/Pilotothegreat/deen-companion"
-private const val SPONSORS_URL = "https://github.com/sponsors/Pilotothegreat"
 private const val PRIVACY_URL = "https://github.com/Pilotothegreat/deen-companion/blob/main/PRIVACY.md"
 
 private typealias SettingsRow = @Composable (ListItemShapes) -> Unit

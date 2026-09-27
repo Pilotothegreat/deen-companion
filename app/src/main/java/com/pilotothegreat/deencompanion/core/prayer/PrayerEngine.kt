@@ -40,8 +40,13 @@ private class CustomMethod(
  * so Adhan's own rules (Moonsighting seasonal adjustments, Singapore rounding) stay intact.
  */
 enum class CalculationMethod(private val preset: AdhanMethod?, private val custom: CustomMethod? = null) {
-    /** Oman Ministry of Endowments: 18°/18° with precautionary minutes, matching mara.gov.om tables. */
-    OMAN(null, CustomMethod(18.0, 18.0, PrayerAdjustments(dhuhr = 6, asr = 5, maghrib = 6))),
+    /**
+     * Oman Ministry of Endowments: 18°/18° with five precautionary minutes on Dhuhr, Asr and Maghrib.
+     * Fitted to the ministry's own 2026 tables (mara.gov.om) for Muscat, Salalah and Sohar, 1,095 days:
+     * +5 matches them exactly on most days and within a minute on all but one. It was +6 on Dhuhr and
+     * Maghrib, which put both a minute after the ministry's time on most days of the year.
+     */
+    OMAN(null, CustomMethod(18.0, 18.0, PrayerAdjustments(dhuhr = 5, asr = 5, maghrib = 5))),
     MWL(AdhanMethod.MUSLIM_WORLD_LEAGUE),
     ISNA(AdhanMethod.NORTH_AMERICA),
     EGYPT(AdhanMethod.EGYPTIAN),

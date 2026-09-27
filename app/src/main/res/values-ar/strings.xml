@@ -17,7 +17,6 @@
     <string name="open_settings">فتح الإعدادات</string>
     <string name="clear_search">مسح البحث</string>
     <string name="copy">نسخ</string>
-    <string name="copied">تم النسخ</string>
     <string name="share">مشاركة</string>
     <string name="decrease">إنقاص</string>
     <string name="increase">زيادة</string>
@@ -402,9 +401,7 @@
     <string name="support_title">ادعم تطبيق بلال</string>
     <string name="support_body">أنا مطور مستقل وطالب جامعي. التطبيق مجاني بالكامل، وإن نفعك ففكّر في دعم تطويره ليستمر.</string>
     <string name="palestine_note">جزء من كل تبرع يذهب لدعم القضية الفلسطينية.</string>
-    <string name="bank_transfer_phone_pay">تحويل بنكي / الدفع برقم الهاتف</string>
-    <string name="payment_tap_hint">المس للنسخ · يعمل مع بنك مسقط وعمان نت وغيرها</string>
-    <string name="open_bank_app_label">افتح تطبيق البنك</string>
+    <string name="sponsors_desc">بالبطاقة، مرة واحدة أو شهريًا</string>
 
     <!-- Notifications -->
     <string name="channel_adhan">الأذان</string>
@@ -519,8 +516,6 @@
     <string name="reliability_notifications_body">بدونه يحجب أندرويد كل تنبيه قبل عرضه.</string>
     <string name="reliability_exact">المنبهات الدقيقة</string>
     <string name="reliability_exact_body">بدونها قد يتأخر التنبيه دقائق، ووقت الصلاة لا يحتمل ذلك.</string>
-    <string name="reliability_battery">توفير البطارية</string>
-    <string name="reliability_battery_body">استثنِ بلال حتى لا يؤجّل أندرويد المنبه حتى فتح الهاتف.</string>
     <string name="reliability_channel">إشعارات الأذان</string>
     <string name="reliability_channel_body">فئة الأذان معطّلة في إعدادات النظام، ولا يمكن للتطبيق إعادتها.</string>
     <string name="reliability_manufacturer">مدير البطارية في هاتفك</string>

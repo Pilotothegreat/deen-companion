@@ -17,16 +17,6 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
-    <!-- Lets the optional "Support development" sheet offer installed Omani banking apps. -->
-    <queries>
-        <package android:name="com.ducont.muscatbank" />
-        <package android:name="app.banking.bankmuscat" />
-        <package android:name="om.nbo.nbo" />
-        <package android:name="com.bankdhofar.mobilebanking" />
-        <package android:name="com.BankSoharMB" />
-        <package android:name="com.oab.mobile" />
-        <package android:name="com.ahlibank" />
-    </queries>
 
     <application
         android:name=".DeenApplication"

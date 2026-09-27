@@ -64,10 +64,6 @@ No personal information beyond what any web request carries (such as your IP add
 | Do Not Disturb access | Only if you turn on "silence during prayer". The app asks at that moment and never otherwise. |
 | Foreground media playback | Keep recitation playing with media controls when the app is in the background. |
 
-## Banking apps
-
-The optional "Support development" sheet can open Omani banking apps (Bank Muscat, bm Wallet, NBO, Bank Dhofar, Sohar International, Oman Arab Bank, Ahli Bank) if they are installed. The app only checks whether they are installed so it can show a button. It never sees any financial information.
-
 ## Children
 
 The app collects no personal data from anyone, including children. The usage counters described above contain nothing personal and are off unless turned on.

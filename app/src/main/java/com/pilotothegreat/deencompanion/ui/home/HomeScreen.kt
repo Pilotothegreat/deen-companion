@@ -283,10 +283,8 @@ fun HomeScreen(
                             )
                         }
                     }
-                    // Everything else that can silence an alert — battery optimisation, a blocked
-                    // channel, a manufacturer's own killer — has no single action to offer, so it
-                    // points at the screen that explains each one. Checked here rather than
-                    // re-derived, since ReliabilityScreen already knows the whole list.
+                    // A blocked adhan channel has no single action to offer, so it points at the
+                    // screen that explains it. Only a problem the app can see raises this card.
                     if (isEmpty() && current.settings.notificationsEnabled && reliabilityProblem) {
                         add {
                             PermissionCard(

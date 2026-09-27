@@ -14,9 +14,6 @@ enum class ReliabilityCheck {
     /** Without it an alarm can drift by many minutes, which for a prayer time is a wrong time. */
     EXACT_ALARMS,
 
-    /** Doze and app standby can hold an alarm until the phone is next unlocked. */
-    BATTERY_OPTIMISATION,
-
     /** The reader turned the channel off in system settings; the app cannot turn it back on. */
     CHANNEL_BLOCKED,
 

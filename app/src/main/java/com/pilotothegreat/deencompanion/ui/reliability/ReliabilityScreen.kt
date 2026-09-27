@@ -2,7 +2,6 @@ package com.pilotothegreat.deencompanion.ui.reliability
 
 import android.content.Context
 import android.os.Build
-import android.os.PowerManager
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -93,26 +92,26 @@ fun ReliabilityScreen(canScheduleExact: Boolean, onBack: () -> Unit) {
     }
 }
 
-/** True when something is actually wrong, which is the only time Today shows a card about it. */
+/**
+ * True when something is actually wrong, which is the only time Today shows a card about it.
+ *
+ * Only what the app can see counts. The manufacturer check is never satisfied on a Samsung or a
+ * Xiaomi, because nothing reports it, and counting it put a card on Today that no answer removed.
+ */
 fun hasReliabilityProblem(context: Context, canScheduleExact: Boolean): Boolean =
-    checks(context, canScheduleExact).any { !it.satisfied }
+    checks(context, canScheduleExact).any { !it.satisfied && it.check != ReliabilityCheck.MANUFACTURER_RESTRICTION }
 
 private fun checks(context: Context, canScheduleExact: Boolean): List<ReliabilityItem> = listOf(
     ReliabilityItem(ReliabilityCheck.NOTIFICATION_PERMISSION, AppNotifications.canPost(context)),
     ReliabilityItem(ReliabilityCheck.EXACT_ALARMS, canScheduleExact),
-    ReliabilityItem(ReliabilityCheck.BATTERY_OPTIMISATION, isExemptFromBatteryOptimisation(context)),
     ReliabilityItem(ReliabilityCheck.CHANNEL_BLOCKED, !AppNotifications.isAdhanChannelBlocked(context)),
     // Nothing reports this, so it is never marked satisfied on a phone known to need the step.
     ReliabilityItem(ReliabilityCheck.MANUFACTURER_RESTRICTION, !OemGuidance.needsExtraStep(Build.MANUFACTURER)),
 )
 
-private fun isExemptFromBatteryOptimisation(context: Context): Boolean =
-    context.getSystemService(PowerManager::class.java)?.isIgnoringBatteryOptimizations(context.packageName) ?: true
-
 private fun intentFor(context: Context, check: ReliabilityCheck) = when (check) {
     ReliabilityCheck.NOTIFICATION_PERMISSION -> SystemIntents.appNotifications(context)
     ReliabilityCheck.EXACT_ALARMS -> SystemIntents.exactAlarms(context)
-    ReliabilityCheck.BATTERY_OPTIMISATION -> SystemIntents.batteryOptimisation()
     ReliabilityCheck.CHANNEL_BLOCKED -> SystemIntents.channel(context, AppNotifications.CHANNEL_ADHAN)
     ReliabilityCheck.MANUFACTURER_RESTRICTION -> SystemIntents.appDetails(context)
 }
@@ -121,7 +120,6 @@ private val ReliabilityCheck.icon: ImageVector
     get() = when (this) {
         ReliabilityCheck.NOTIFICATION_PERMISSION, ReliabilityCheck.CHANNEL_BLOCKED -> Icons.Rounded.Notifications
         ReliabilityCheck.EXACT_ALARMS -> Icons.Rounded.Alarm
-        ReliabilityCheck.BATTERY_OPTIMISATION -> Icons.Rounded.BatteryAlert
         ReliabilityCheck.MANUFACTURER_RESTRICTION -> Icons.Rounded.PhoneAndroid
     }
 
@@ -129,7 +127,6 @@ private val ReliabilityCheck.title: Int
     get() = when (this) {
         ReliabilityCheck.NOTIFICATION_PERMISSION -> R.string.reliability_notifications
         ReliabilityCheck.EXACT_ALARMS -> R.string.reliability_exact
-        ReliabilityCheck.BATTERY_OPTIMISATION -> R.string.reliability_battery
         ReliabilityCheck.CHANNEL_BLOCKED -> R.string.reliability_channel
         ReliabilityCheck.MANUFACTURER_RESTRICTION -> R.string.reliability_manufacturer
     }
@@ -138,7 +135,6 @@ private val ReliabilityCheck.body: Int
     get() = when (this) {
         ReliabilityCheck.NOTIFICATION_PERMISSION -> R.string.reliability_notifications_body
         ReliabilityCheck.EXACT_ALARMS -> R.string.reliability_exact_body
-        ReliabilityCheck.BATTERY_OPTIMISATION -> R.string.reliability_battery_body
         ReliabilityCheck.CHANNEL_BLOCKED -> R.string.reliability_channel_body
         ReliabilityCheck.MANUFACTURER_RESTRICTION -> oemBody(OemGuidance.forManufacturer(Build.MANUFACTURER))
     }

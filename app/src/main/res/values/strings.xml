@@ -17,7 +17,6 @@
     <string name="open_settings">Open settings</string>
     <string name="clear_search">Clear search</string>
     <string name="copy">Copy</string>
-    <string name="copied">Copied</string>
     <string name="share">Share</string>
     <string name="decrease">Decrease</string>
     <string name="increase">Increase</string>
@@ -370,9 +369,7 @@
     <string name="support_title">Support Bilal</string>
     <string name="support_body">I\'m an independent developer and university student. The app is completely free; if it benefits you, please consider supporting its development so it can continue.</string>
     <string name="palestine_note">Part of every donation goes to support the Palestinian cause.</string>
-    <string name="bank_transfer_phone_pay">Bank transfer / pay by phone number</string>
-    <string name="payment_tap_hint">Tap to copy · works with Bank Muscat, OmanNet and others</string>
-    <string name="open_bank_app_label">Open your bank app</string>
+    <string name="sponsors_desc">By card, once or monthly</string>
 
     <!-- Notifications -->
     <string name="channel_adhan">Adhan</string>
@@ -487,8 +484,6 @@
     <string name="reliability_notifications_body">Without it Android drops every alert before it is shown.</string>
     <string name="reliability_exact">Exact alarms</string>
     <string name="reliability_exact_body">Without it an alert can drift by many minutes, and a prayer time that drifts is a wrong time.</string>
-    <string name="reliability_battery">Battery optimisation</string>
-    <string name="reliability_battery_body">Exempt Bilal so Android does not hold an alarm until the phone is next unlocked.</string>
     <string name="reliability_channel">Adhan notifications</string>
     <string name="reliability_channel_body">The adhan category is switched off in system settings. Only you can switch it back on.</string>
     <string name="reliability_manufacturer">Your phone\'s battery manager</string>

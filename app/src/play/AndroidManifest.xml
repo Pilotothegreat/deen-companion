@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The Google Play build has no donation sheet, so it doesn't need to see the banking apps it opens. -->
+<!-- The Google Play build links out to GitHub Sponsors rather than opening the donation sheet. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
-    <queries tools:node="removeAll" />
 
     <!-- Play updates through Play. An app on Play has no business installing packages, and CI
          asserts this permission is absent from the bundle. -->
