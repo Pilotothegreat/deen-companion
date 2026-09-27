@@ -178,7 +178,9 @@ fun HomeScreen(
                 },
                 subtitle = {
                     if (current != null) {
-                        val city = current.settings.location.cityName ?: stringResource(R.string.default_location)
+                        // The city alone: "(default)" pushed it past the width and was cut off, and the
+                        // card just below already asks to use the real location.
+                        val city = current.settings.location.cityName ?: stringResource(R.string.default_city)
                         // Where the times are for, and pressed to change it: the location card at the bottom
                         // of Today said the same thing a long scroll away.
                         LocationChip("${gregorianDate(locale, current.today.date)} · $city", onOpenLocation)

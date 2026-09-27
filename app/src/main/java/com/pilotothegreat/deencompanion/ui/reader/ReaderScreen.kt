@@ -246,6 +246,7 @@ fun ReaderScreen(
             surah = loaded.surah(verse.surah),
             translation = loaded.translation,
             bookmarked = bookmarked,
+            onPlay = { viewModel.playFrom(verse) },
             onRepeat = { viewModel.repeatAyah(verse) },
             onBookmark = { viewModel.setBookmark(verse, !bookmarked) },
             onDismiss = { menuFor = null },

@@ -48,14 +48,14 @@ class ScreenshotTest {
     @Config(sdk = [30], qualifiers = "en-w400dp-h880dp-xxhdpi")
     fun englishLight() = walkThrough(
         "en",
-        Labels("Today", "Quran", "Athkar", "Hadith", "Qibla", "Settings", "Back", "Al-Fatihah", "Sahih al-Bukhari", "Morning", "Continue"),
+        Labels("Today", "Quran", "Athkar", "Hadith", "Qibla", "Settings", "Back", "Al-Fatihah", "Sahih al-Bukhari", "Morning", "Continue", "Juz", "Surahs"),
     )
 
     @Test
     @Config(sdk = [30], qualifiers = "ar-w400dp-h880dp-night-xxhdpi")
     fun arabicDark() = walkThrough(
         "ar",
-        Labels("اليوم", "القرآن", "الأذكار", "الحديث", "القبلة", "الإعدادات", "رجوع", "سورة الفاتحة", "صحيح البخاري", "أذكار الصباح", "متابعة"),
+        Labels("اليوم", "القرآن", "الأذكار", "الحديث", "القبلة", "الإعدادات", "رجوع", "سورة الفاتحة", "صحيح البخاري", "أذكار الصباح", "متابعة", "الأجزاء", "السور"),
     )
 
     private data class Labels(
@@ -70,6 +70,8 @@ class ScreenshotTest {
         val firstHadithBook: String,
         val morning: String,
         val setupDone: String,
+        val juzTab: String,
+        val surahsTab: String,
     )
 
     private fun walkThrough(prefix: String, labels: Labels) {
@@ -86,6 +88,17 @@ class ScreenshotTest {
         tab(labels.quran)
         waitForText(labels.firstSurah)
         shoot("$prefix-03-quran")
+        // A tab inside a screen redraws only when the clock runs on its own; the stepped clock left it
+        // on the first tab.
+        compose.mainClock.autoAdvance = true
+        compose.onAllNodesWithText(labels.juzTab).onFirst().performClick()
+        compose.waitForIdle()
+        compose.mainClock.autoAdvance = false
+        shoot("$prefix-03b-quran-juz")
+        compose.mainClock.autoAdvance = true
+        compose.onAllNodesWithText(labels.surahsTab).onFirst().performClick()
+        compose.waitForIdle()
+        compose.mainClock.autoAdvance = false
         compose.onAllNodesWithText(labels.firstSurah).onFirst().performClick()
         settle(3_000)
         shoot("$prefix-04-reader")

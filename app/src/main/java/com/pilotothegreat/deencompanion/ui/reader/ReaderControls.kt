@@ -40,6 +40,7 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Surface
@@ -281,7 +282,7 @@ fun ReciterSheet(
  *
  * The ayah comes in the language the app is being read in — the Arabic on an Arabic app, the
  * translation on an English one. The page behind the sheet already carries the Arabic, and printing
- * both pushed the bookmark, repeat, copy and share rows off the bottom of a phone screen.
+ * both pushed the play, bookmark, repeat, copy and share rows off the bottom of a phone screen.
  */
 @Composable
 fun AyahMenu(
@@ -289,6 +290,7 @@ fun AyahMenu(
     surah: Surah,
     translation: TranslationInfo,
     bookmarked: Boolean,
+    onPlay: () -> Unit,
     onRepeat: () -> Unit,
     onBookmark: () -> Unit,
     onDismiss: () -> Unit,
@@ -303,7 +305,8 @@ fun AyahMenu(
         if (verse.translation.isNotBlank()) append('\n').append(translation.attribution)
     }
 
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    // Opened to its own height: half open, the share row sat below the fold.
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
         Column(
             Modifier.padding(start = Spacing.xxlarge, end = Spacing.xxlarge, bottom = Spacing.xxlarge),
             verticalArrangement = Arrangement.spacedBy(Spacing.medium),
@@ -331,6 +334,10 @@ fun AyahMenu(
                 )
             }
             val actions = listOf(
+                Triple(Icons.Rounded.PlayArrow, stringResource(R.string.play_from_here)) {
+                    onPlay()
+                    onDismiss()
+                },
                 Triple(
                     if (bookmarked) Icons.Rounded.Bookmark else Icons.Rounded.BookmarkBorder,
                     stringResource(if (bookmarked) R.string.remove_bookmark else R.string.bookmark),

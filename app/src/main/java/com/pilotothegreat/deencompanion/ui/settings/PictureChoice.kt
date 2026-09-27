@@ -1,7 +1,6 @@
 package com.pilotothegreat.deencompanion.ui.settings
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,14 +10,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Smartphone
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -29,7 +26,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
@@ -43,7 +39,7 @@ import com.pilotothegreat.deencompanion.ui.theme.Spacing
  * picture of what it means, and the chosen card rounding its corners and turning and growing its
  * picture. It stands in for rows of segmented buttons, which said the same thing in words alone.
  *
- * Up to [FITS] options share the width; more scroll, and the chosen one is brought into view.
+ * Up to [FITS] options share the width; more wrap into even rows.
  */
 @Composable
 internal fun <T> PictureChoice(
@@ -54,21 +50,16 @@ internal fun <T> PictureChoice(
     modifier: Modifier = Modifier,
     picture: @Composable (option: T, chosen: Boolean) -> Unit,
 ) {
-    if (options.size <= FITS) {
-        Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
-            options.forEach { option ->
-                PictureCard(option == selected, label(option), { onSelect(option) }, Modifier.weight(1f)) { picture(option, option == selected) }
-            }
-        }
-    } else {
-        val scroll = rememberScrollState()
-        val step = with(LocalDensity.current) { (SCROLLING_WIDTH + Spacing.small).roundToPx() }
-        val index = options.indexOf(selected).coerceAtLeast(0)
-        // maxValue is a key so this runs again once the row is measured and can scroll.
-        LaunchedEffect(index, scroll.maxValue) { scroll.animateScrollTo((step * (index - 1)).coerceIn(0, scroll.maxValue)) }
-        Row(modifier.fillMaxWidth().horizontalScroll(scroll), horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
-            options.forEach { option ->
-                PictureCard(option == selected, label(option), { onSelect(option) }, Modifier.width(SCROLLING_WIDTH)) { picture(option, option == selected) }
+    // More than fit on a line wrap into even rows, as the theme picker's own grid does. A row that
+    // scrolled cut its last card through the middle of its label, which read as broken.
+    val rows = (options.size + FITS - 1) / FITS
+    val perRow = (options.size + rows - 1) / rows
+    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
+        options.chunked(perRow).forEach { line ->
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
+                line.forEach { option ->
+                    PictureCard(option == selected, label(option), { onSelect(option) }, Modifier.weight(1f)) { picture(option, option == selected) }
+                }
             }
         }
     }
@@ -174,7 +165,6 @@ internal fun MinutesPicture(minutes: Int, icon: ImageVector, chosen: Boolean) {
 
 /** Beyond this many options, cards keep their width and the row scrolls. */
 private const val FITS = 4
-private val SCROLLING_WIDTH = 84.dp
 
 /** The rest size [cardMotion] reports for a shape; the picture is scaled by the ratio to it. */
 private const val REST_SHAPE = 42f

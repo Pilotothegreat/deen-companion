@@ -34,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -66,6 +67,7 @@ import com.pilotothegreat.deencompanion.ui.components.LoadingBox
 import com.pilotothegreat.deencompanion.ui.components.SearchField
 import com.pilotothegreat.deencompanion.ui.components.SectionHeader
 import com.pilotothegreat.deencompanion.ui.components.ShapeBadge
+import com.pilotothegreat.deencompanion.data.quran.MushafLayout
 import com.pilotothegreat.deencompanion.ui.navigation.LocalBottomBarPadding
 import com.pilotothegreat.deencompanion.ui.navigation.ReaderKey
 import com.pilotothegreat.deencompanion.ui.theme.UthmanicHafs
@@ -101,10 +103,12 @@ fun QuranScreen(onOpenReader: (ReaderKey) -> Unit, viewModel: QuranViewModel = k
             }
             SecondaryTabRow(selectedTabIndex = tab) {
                 Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.surahs)) })
-                Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.bookmarks)) })
+                Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.juz_tab)) })
+                Tab(selected = tab == 2, onClick = { tab = 2 }, text = { Text(stringResource(R.string.bookmarks)) })
             }
             when (tab) {
                 0 -> SurahList(loaded, lastReadPage, khatma, onOpenReader, viewModel::cancelKhatma) { startingKhatma = true }
+                1 -> JuzList(loaded, onOpenReader)
                 else -> BookmarkList(bookmarks, loaded, onOpenReader, viewModel::removeBookmark)
             }
         }
@@ -182,6 +186,34 @@ private fun SurahList(
                 },
             ) {
                 Text(surahName(surah, locale), style = MaterialTheme.typography.titleMedium)
+            }
+        }
+    }
+}
+
+/**
+ * The thirty ajza, each with where it begins, as a printed mushaf's index and Quran for Android's
+ * Juz' tab list them: many read by the juz, and finding one meant searching for it by name.
+ */
+@Composable
+private fun JuzList(quran: Quran, onOpenReader: (ReaderKey) -> Unit) {
+    val locale = currentLocale()
+    val starts = remember { MushafLayout.juzStarts.let { s -> (0 until s.size / 2).map { s[it * 2] to s[it * 2 + 1] } } }
+    LazyColumn(
+        contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = Spacing.medium, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
+        verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+    ) {
+        itemsIndexed(starts, key = { index, _ -> index }) { index, (surah, ayah) ->
+            val page = quran.pageOf(surah, ayah)
+            SegmentedListItem(
+                onClick = { onOpenReader(ReaderKey(page)) },
+                shapes = ListItemDefaults.segmentedShapes(index, starts.size),
+                leadingContent = { ShapeBadge(Formatters.number(index + 1, locale)) },
+                supportingContent = {
+                    Text(stringResource(R.string.page_of_surah, Formatters.number(page, locale), verseReference(quran.surah(surah), ayah, locale)))
+                },
+            ) {
+                Text(stringResource(R.string.juz_number, Formatters.number(index + 1, locale)), style = MaterialTheme.typography.titleMedium)
             }
         }
     }

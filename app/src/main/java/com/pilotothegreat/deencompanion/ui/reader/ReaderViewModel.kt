@@ -103,6 +103,18 @@ class ReaderViewModel(
         player.cue(quran.surah(verse.surah), verse.number, reciter.value)
     }
 
+    /**
+     * From the long-press menu: recite from this ayah on. A one-ayah repeat left from memorising is
+     * lifted first, or "play from here" would recite this ayah alone, over and over.
+     */
+    fun playFrom(verse: Verse) {
+        val quran = quran.value ?: return
+        Analytics.record(UsageEvent.RECITATION_PLAYED)
+        val state = player.state.value
+        if (state.repeatMode == RepeatMode.AYAH) viewModelScope.launch { settings.setRepeat(RepeatMode.OFF, state.repeatCount) }
+        player.play(quran.surah(verse.surah), verse.number, reciter.value)
+    }
+
     /** From the long-press menu: recite this ayah over and over, for memorising. */
     fun repeatAyah(verse: Verse) {
         val quran = quran.value ?: return

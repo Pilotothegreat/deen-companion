@@ -23,6 +23,7 @@
     <string name="increase">زيادة</string>
     <string name="no_results">لا توجد نتائج</string>
     <string name="default_location">مسقط، عُمان (افتراضي)</string>
+    <string name="default_city">مسقط، عُمان</string>
     <string name="refresh_location">تحديث الموقع</string>
     <string name="location_unavailable">تعذّر تحديد موقعك. فعّل خدمة الموقع أو حاول مجددًا في مكان مفتوح.</string>
     <string name="location_permission_needed">اسمح بالوصول إلى الموقع لاستخدام موقعك الحالي.</string>
@@ -628,6 +629,7 @@
         <item quantity="many">%1$s يومًا في آخر ثلاثين</item>
         <item quantity="other">%1$s يوم في آخر ثلاثين</item>
     </plurals>
+    <string name="play_from_here">استمع من هنا</string>
     <string name="repeat_this_ayah">كرّر هذه الآية</string>
     <string name="clear_downloaded_recitations">حذف التلاوات المحفوظة</string>
     <string name="back_to_recitation">العودة إلى موضع التلاوة</string>
