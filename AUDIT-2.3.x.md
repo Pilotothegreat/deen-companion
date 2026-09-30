@@ -4,7 +4,7 @@ September 2026, on branch `m3-expressive-refresh`.
 
 What was checked:
 - Compiler warnings and `lintDebug`.
-- The full unit and render suite: 345 tests.
+- The full unit and render suite: 346 tests.
 - Every screenshot from the English-light and Arabic-dark walkthroughs.
 - A code review of every package. Each reported finding was re-checked against the source before it was listed here.
 
@@ -55,10 +55,10 @@ What was checked:
   - the search field's two-way sync.
 - The Qibla marker at a ~270° bearing does not cover the west letter. The letters turn with the dial, like a real compass face.
 
-## Open, for you to decide
-- **Athkar editor and process death (medium).** An unsaved draft lives only in the ViewModel. If Android kills the app in the background mid-edit, the typing is lost. Fix: save the draft through `SavedStateHandle`.
-- **Makkah method in Ramadan.** The +30-minute Isha uses the Umm al-Qura calendar date and ignores the Hijri adjustment setting. That matches how the Umm al-Qura timetable is defined, but it can disagree for one day with the Hijri date the app shows if you have set an adjustment.
-- **Reader position (low).** The last page is saved after a 500 ms pause. If the app is killed inside that half-second, the page turn is lost.
+## Fixed after review
+- **Athkar editor and process death.** The draft is now kept in `SavedStateHandle`, so a list half-written when Android reclaims the app in the background is still there on return.
+- **Makkah method in Ramadan.** The +30-minute Isha now uses the same Hijri date the app shows, including your Hijri adjustment. Covered by `DayScheduleTest.ramadanIshaFollowsTheHijriAdjustment`.
+- **Reader position.** A page still inside the 500 ms save pause is saved at once when the reader leaves the screen.
 
 ## Features that established apps have and Bilal doesn't (not built, by design)
 Compared with Quran for Android and the mainstream prayer apps:

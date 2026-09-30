@@ -80,5 +80,5 @@ val appModule = module {
     viewModelOf(::LocationViewModel)
     viewModelOf(::AthkarViewModel)
     viewModel { params -> AthkarSessionViewModel(params.get(), get(), get()) }
-    viewModel { params -> AthkarEditorViewModel(params.get(), get()) }
+    viewModel { params -> AthkarEditorViewModel(params.get(), get(), get()) }
 }

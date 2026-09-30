@@ -32,6 +32,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalResources
@@ -101,6 +103,7 @@ fun ReaderScreen(
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.settledPage }.collect { viewModel.onPageSettled(it + 1) }
     }
+    LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.savePendingPage() }
 
     // The recitation turns the page only for someone still on the page it was reading. 2.0 turned back
     // at every ayah, so a reader who swiped ahead during a recitation was thrown back a few seconds later.

@@ -177,6 +177,7 @@ data class AppSettings(
             iqama = iqama.mapValues { it.value.rule },
             highLatitude = highLatitude,
             adjustments = adjustments,
+            hijriAdjustment = hijriAdjustment,
         )
 }
 

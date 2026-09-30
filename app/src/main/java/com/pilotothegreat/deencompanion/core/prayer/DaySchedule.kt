@@ -1,9 +1,11 @@
 package com.pilotothegreat.deencompanion.core.prayer
 
+import com.pilotothegreat.deencompanion.core.calendar.HijriCalendar
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.temporal.ChronoField
 
 enum class Prayer {
     FAJR, SUNRISE, DHUHR, ASR, MAGHRIB, ISHA;
@@ -36,6 +38,11 @@ data class PrayerConfig(
     val highLatitude: HighLatitudeMode = HighLatitudeMode.AUTO,
     /** Minutes added to each computed time to match the local mosque. */
     val adjustments: Map<Prayer, Int> = emptyMap(),
+    /**
+     * The reader's Hijri correction, so Ramadan's longer Isha (Makkah method) starts and ends on the
+     * same day as the Ramadan the app shows, not a day apart from it.
+     */
+    val hijriAdjustment: Int = 0,
 )
 
 data class PrayerSchedule(
@@ -89,6 +96,7 @@ object DaySchedule {
         val times = PrayerEngine.calculate(
             date, config.latitude, config.longitude, config.zone, config.method, config.asrSchool,
             config.highLatitude, config.adjustments,
+            hijriMonth = HijriCalendar.date(date, config.hijriAdjustment)?.get(ChronoField.MONTH_OF_YEAR),
         )
         val adhan = times.adhan
         val iqama = buildMap {
