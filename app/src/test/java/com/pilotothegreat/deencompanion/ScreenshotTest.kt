@@ -132,7 +132,9 @@ class ScreenshotTest {
         goBack(labels)
 
         compose.onAllNodesWithContentDescription(labels.settings).onFirst().performClick()
-        settle()
+        // Waits for the screen itself: a fixed settle caught the stepped clock mid-transition, and
+        // the shot named settings showed Today.
+        waitForText(string(R.string.settings))
         shoot("$prefix-11-settings")
         repeat(3) { nudgeDown() }
         shoot("$prefix-11a-settings-notifications")

@@ -610,7 +610,7 @@
     <string name="credits">المصادر</string>
     <string name="credit_kfgqpc">مجمع الملك فهد لطباعة المصحف الشريف — المصحف العثماني برواية حفص</string>
     <string name="credit_itani">طلال عيتاني</string>
-    <string name="credits_desc">%1$s · %2$s، ترجمة %3$s</string>
+    <string name="credits_desc">%1$s\n%2$s، ترجمة %3$s</string>
     <string name="text_scale_default">الافتراضي</string>
     <string name="text_scale_large">كبير</string>
     <string name="text_scale_larger">أكبر</string>

@@ -95,54 +95,63 @@ class BackupRepository(
         if (root.optString("format") != MAGIC) return RestoreError.WRONG_FILE
         if (root.optInt("version", Int.MAX_VALUE) > VERSION) return RestoreError.TOO_NEW
 
-        val settings = root.optJSONObject("settings")
-        if (settings != null) {
-            dataStore.edit { preferences ->
-                preferences.clear()
-                settings.keys().forEach { tagged ->
-                    val tag = tagged.substringBefore(':')
-                    val name = tagged.substringAfter(':')
-                    when (tag) {
-                        "b" -> preferences[booleanPreferencesKey(name)] = settings.getBoolean(tagged)
-                        "i" -> preferences[intPreferencesKey(name)] = settings.getInt(tagged)
-                        "l" -> preferences[longPreferencesKey(name)] = settings.getLong(tagged)
-                        "f" -> preferences[floatPreferencesKey(name)] = settings.getDouble(tagged).toFloat()
-                        "d" -> preferences[doublePreferencesKey(name)] = settings.getDouble(tagged)
-                        "s" -> preferences[stringPreferencesKey(name)] = settings.getString(tagged)
-                        "set" -> preferences[stringSetPreferencesKey(name)] = settings.getJSONArray(tagged).toStringSet()
-                    }
-                }
-            }
-        }
-
-        root.optJSONArray("bookmarks")?.let { array ->
-            for (i in 0 until array.length()) {
-                val item = array.getJSONObject(i)
-                val surah = item.getInt("surah")
-                val ayah = item.getInt("ayah")
-                bookmarks.upsert(
+        // Everything is read and checked before anything is written, so a damaged file is refused
+        // whole instead of throwing halfway through, after the settings had already been replaced.
+        val parsed = runCatching {
+            val marks = root.optJSONArray("bookmarks")?.let { array ->
+                (0 until array.length()).map { i ->
+                    val item = array.getJSONObject(i)
+                    val surah = item.getInt("surah")
+                    val ayah = item.getInt("ayah")
                     BookmarkEntity(
                         id = BookmarkEntity.idFor(surah, ayah),
                         surahNumber = surah,
                         ayahNumber = ayah,
                         surahName = item.optString("surahName"),
                         timestamp = item.optLong("timestamp", System.currentTimeMillis()),
-                    ),
-                )
-            }
-        }
-
-        root.optJSONObject("khatma")?.let { plan ->
-            readingPlan.upsert(
+                    )
+                }
+            }.orEmpty()
+            val plan = root.optJSONObject("khatma")?.let { plan ->
                 ReadingPlanEntity(
-                    startedOn = plan.getString("startedOn"),
+                    // Parsed here as well as stored: a date the khatma card cannot read would
+                    // otherwise throw every time the plan is shown.
+                    startedOn = java.time.LocalDate.parse(plan.getString("startedOn")).toString(),
                     targetDays = plan.getInt("targetDays"),
                     startPage = plan.getInt("startPage"),
                     lastPage = plan.getInt("lastPage"),
                     updatedAt = System.currentTimeMillis(),
-                ),
-            )
+                )
+            }
+            marks to plan
+        }.getOrNull() ?: return RestoreError.UNREADABLE
+        val (marks, plan) = parsed
+
+        val settings = root.optJSONObject("settings")
+        if (settings != null) {
+            val applied = runCatching {
+                dataStore.edit { preferences ->
+                    preferences.clear()
+                    settings.keys().forEach { tagged ->
+                        val tag = tagged.substringBefore(':')
+                        val name = tagged.substringAfter(':')
+                        when (tag) {
+                            "b" -> preferences[booleanPreferencesKey(name)] = settings.getBoolean(tagged)
+                            "i" -> preferences[intPreferencesKey(name)] = settings.getInt(tagged)
+                            "l" -> preferences[longPreferencesKey(name)] = settings.getLong(tagged)
+                            "f" -> preferences[floatPreferencesKey(name)] = settings.getDouble(tagged).toFloat()
+                            "d" -> preferences[doublePreferencesKey(name)] = settings.getDouble(tagged)
+                            "s" -> preferences[stringPreferencesKey(name)] = settings.getString(tagged)
+                            "set" -> preferences[stringSetPreferencesKey(name)] = settings.getJSONArray(tagged).toStringSet()
+                        }
+                    }
+                }
+            }
+            if (applied.isFailure) return RestoreError.UNREADABLE
         }
+
+        marks.forEach { bookmarks.upsert(it) }
+        plan?.let { readingPlan.upsert(it) }
         return null
     }
 
