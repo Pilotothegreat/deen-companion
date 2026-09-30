@@ -551,7 +551,7 @@
     <string name="update_open_page">Open the release page</string>
     <string name="later">Later</string>
     <string name="whats_new_in">What\'s new in %1$s</string>
-    <string name="whats_new_body">Prayer times in Oman now match the Ministry of Endowments\' tables: Dhuhr and Maghrib were a minute late on most days.\n\nNo more battery-optimisation alert. Prayer alerts arrive without it, and the card only appears for a problem you can fix.\n\nToday dims the prayers that have passed, so the ones still ahead stand out. The Hadith list is tidier, and the credits read in Arabic.\n\nSupport Bilal through GitHub Sponsors.</string>
+    <string name="whats_new_body">A fresh look for Android 17: lists are grouped into clear blocks, tabs are joined buttons, and the Quran and Hadith headers fold away as you scroll.\n\nSilence during prayer can no longer leave your phone on Do Not Disturb, and it never turns off Do Not Disturb you set yourself.\n\nA half-written athkar list survives the app being closed in the background, a cancelled hadith download stays cancelled, and a damaged backup is refused instead of half restored.</string>
 
     <!-- Shortcuts and the tile -->
     <string name="tile_next_prayer">Next prayer</string>
