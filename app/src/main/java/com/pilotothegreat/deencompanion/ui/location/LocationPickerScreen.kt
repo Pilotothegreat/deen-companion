@@ -22,6 +22,7 @@ import androidx.compose.material.icons.rounded.MyLocation
 import androidx.compose.material.icons.rounded.SearchOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialShapes
@@ -32,7 +33,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,11 +41,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pilotothegreat.deencompanion.ui.components.groupedRowColors
 import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.core.text.Numerals
@@ -88,10 +91,13 @@ fun LocationPickerScreen(onBack: () -> Unit, viewModel: LocationViewModel = koin
         }
     }
 
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(
+            LargeFlexibleTopAppBar(
                 title = { Text(stringResource(R.string.location_title)) },
+                scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.go_back))
@@ -122,6 +128,7 @@ fun LocationPickerScreen(onBack: () -> Unit, viewModel: LocationViewModel = koin
                     }
                     item(key = "device") {
                         SegmentedListItem(
+                            colors = groupedRowColors(),
                             onClick = {
                                 if (hasLocationPermission(context)) viewModel.useDeviceLocation() else permission.launch(LOCATION_PERMISSIONS)
                             },
@@ -143,6 +150,7 @@ fun LocationPickerScreen(onBack: () -> Unit, viewModel: LocationViewModel = koin
                 }
                 itemsIndexed(cities, key = { _, city -> "${city.name}|${city.latitude}|${city.longitude}" }) { index, city ->
                     SegmentedListItem(
+                        colors = groupedRowColors(),
                         onClick = { viewModel.choose(city) },
                         shapes = ListItemDefaults.segmentedShapes(index, cities.size),
                         leadingContent = { Icon(Icons.Rounded.LocationCity, contentDescription = null) },

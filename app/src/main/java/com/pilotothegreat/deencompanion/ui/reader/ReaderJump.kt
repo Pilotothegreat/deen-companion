@@ -15,10 +15,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,6 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.pilotothegreat.deencompanion.ui.components.ConnectedChoice
+import com.pilotothegreat.deencompanion.ui.components.groupedRowColors
 import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.data.quran.MushafLayout
@@ -51,11 +51,21 @@ fun JumpSheet(quran: Quran, currentPage: Int, onJump: (Int) -> Unit, onDismiss: 
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.padding(bottom = Spacing.xxlarge), verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
-            SecondaryTabRow(selectedTabIndex = tab) {
-                Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.surahs)) })
-                Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.juz_tab)) })
-                Tab(selected = tab == 2, onClick = { tab = 2 }, text = { Text(stringResource(R.string.page_tab)) })
-            }
+            ConnectedChoice(
+                options = listOf(0, 1, 2),
+                selected = tab,
+                onSelect = { tab = it },
+                label = {
+                    when (it) {
+                        0 -> stringResource(R.string.surahs)
+                        1 -> stringResource(R.string.juz_tab)
+                        else -> stringResource(R.string.page_tab)
+                    }
+                },
+                // Tighter than a button's usual padding, so a longer label such as Bookmarks fits a third of the row.
+                contentPadding = PaddingValues(horizontal = Spacing.small),
+                modifier = Modifier.padding(horizontal = Spacing.large),
+            )
             when (tab) {
                 0 -> {
                     val surahs = quran.surahs
@@ -69,6 +79,7 @@ fun JumpSheet(quran: Quran, currentPage: Int, onJump: (Int) -> Unit, onDismiss: 
                         ) {
                             itemsIndexed(surahs, key = { _, s -> s.number }) { index, surah ->
                                 SegmentedListItem(
+                                    colors = groupedRowColors(),
                                     onClick = { onJump(quran.pageOf(surah.number, 1)) },
                                     shapes = ListItemDefaults.segmentedShapes(index, surahs.size),
                                     leadingContent = { ShapeBadge(Formatters.number(surah.number, locale)) },
@@ -103,6 +114,7 @@ fun JumpSheet(quran: Quran, currentPage: Int, onJump: (Int) -> Unit, onDismiss: 
                         ) {
                             itemsIndexed(juzs, key = { index, _ -> index }) { index, (surah, ayah) ->
                                 SegmentedListItem(
+                                    colors = groupedRowColors(),
                                     onClick = { onJump(quran.pageOf(surah, ayah)) },
                                     shapes = ListItemDefaults.segmentedShapes(index, juzs.size),
                                     leadingContent = { ShapeBadge(Formatters.number(index + 1, locale)) },

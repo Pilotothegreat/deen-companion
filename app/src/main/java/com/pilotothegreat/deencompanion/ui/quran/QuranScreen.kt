@@ -13,23 +13,22 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material.icons.rounded.BookmarkBorder
-import androidx.compose.material.icons.rounded.Bookmarks
 import androidx.compose.material.icons.rounded.BookmarkRemove
+import androidx.compose.material.icons.rounded.Bookmarks
 import androidx.compose.material.icons.rounded.SearchOff
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.ListItemShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.SegmentedListItem
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -39,6 +38,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -49,11 +49,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.core.quran.KhatmaProgress
 import com.pilotothegreat.deencompanion.core.quran.QuranDestination
 import com.pilotothegreat.deencompanion.data.quran.Bookmark
+import com.pilotothegreat.deencompanion.data.quran.MushafLayout
 import com.pilotothegreat.deencompanion.data.quran.Quran
 import com.pilotothegreat.deencompanion.data.quran.QuranSearchResults
 import com.pilotothegreat.deencompanion.data.quran.ResolvedDestination
@@ -62,17 +62,19 @@ import com.pilotothegreat.deencompanion.data.quran.Surah
 import com.pilotothegreat.deencompanion.ui.common.Formatters
 import com.pilotothegreat.deencompanion.ui.common.currentLocale
 import com.pilotothegreat.deencompanion.ui.common.isArabic
+import com.pilotothegreat.deencompanion.ui.components.ConnectedChoice
 import com.pilotothegreat.deencompanion.ui.components.EmptyState
 import com.pilotothegreat.deencompanion.ui.components.LoadingBox
 import com.pilotothegreat.deencompanion.ui.components.SearchField
 import com.pilotothegreat.deencompanion.ui.components.SectionHeader
 import com.pilotothegreat.deencompanion.ui.components.ShapeBadge
-import com.pilotothegreat.deencompanion.data.quran.MushafLayout
+import com.pilotothegreat.deencompanion.ui.components.groupedRowColors
 import com.pilotothegreat.deencompanion.ui.navigation.LocalBottomBarPadding
 import com.pilotothegreat.deencompanion.ui.navigation.ReaderKey
+import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.ui.theme.UthmanicHafs
-import org.koin.androidx.compose.koinViewModel
 import java.util.Locale
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun QuranScreen(onOpenReader: (ReaderKey) -> Unit, viewModel: QuranViewModel = koinViewModel()) {
@@ -85,7 +87,11 @@ fun QuranScreen(onOpenReader: (ReaderKey) -> Unit, viewModel: QuranViewModel = k
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var startingKhatma by rememberSaveable { mutableStateOf(false) }
 
-    Scaffold(topBar = { TopAppBar(title = { Text(stringResource(R.string.quran)) }) }) { padding ->
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = { LargeFlexibleTopAppBar(title = { Text(stringResource(R.string.quran)) }, scrollBehavior = scrollBehavior) },
+    ) { padding ->
         Column(Modifier.padding(padding).fillMaxSize()) {
             SearchField(
                 query = query,
@@ -101,11 +107,21 @@ fun QuranScreen(onOpenReader: (ReaderKey) -> Unit, viewModel: QuranViewModel = k
                 SearchResults(results, loaded, onOpenReader)
                 return@Column
             }
-            SecondaryTabRow(selectedTabIndex = tab) {
-                Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.surahs)) })
-                Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.juz_tab)) })
-                Tab(selected = tab == 2, onClick = { tab = 2 }, text = { Text(stringResource(R.string.bookmarks)) })
-            }
+            ConnectedChoice(
+                options = listOf(0, 1, 2),
+                selected = tab,
+                onSelect = { tab = it },
+                label = {
+                    when (it) {
+                        0 -> stringResource(R.string.surahs)
+                        1 -> stringResource(R.string.juz_tab)
+                        else -> stringResource(R.string.bookmarks)
+                    }
+                },
+                // Tighter than a button's usual padding, so a longer label such as Bookmarks fits a third of the row.
+                contentPadding = PaddingValues(horizontal = Spacing.small),
+                modifier = Modifier.padding(horizontal = Spacing.large, vertical = Spacing.small),
+            )
             when (tab) {
                 0 -> SurahList(loaded, lastReadPage, khatma, onOpenReader, viewModel::cancelKhatma) { startingKhatma = true }
                 1 -> JuzList(loaded, onOpenReader)
@@ -167,6 +183,7 @@ private fun SurahList(
         }
         itemsIndexed(quran.surahs, key = { _, surah -> surah.number }) { index, surah ->
             SegmentedListItem(
+                colors = groupedRowColors(),
                 onClick = { onOpenReader(ReaderKey(quran.pageOf(surah.number, 1))) },
                 shapes = ListItemDefaults.segmentedShapes(index, quran.surahs.size),
                 modifier = Modifier.animateItem(),
@@ -206,6 +223,7 @@ private fun JuzList(quran: Quran, onOpenReader: (ReaderKey) -> Unit) {
         itemsIndexed(starts, key = { index, _ -> index }) { index, (surah, ayah) ->
             val page = quran.pageOf(surah, ayah)
             SegmentedListItem(
+                colors = groupedRowColors(),
                 onClick = { onOpenReader(ReaderKey(page)) },
                 shapes = ListItemDefaults.segmentedShapes(index, starts.size),
                 leadingContent = { ShapeBadge(Formatters.number(index + 1, locale)) },
@@ -264,6 +282,7 @@ private fun BookmarkList(
         itemsIndexed(bookmarks, key = { _, b -> "${b.surah}:${b.ayah}" }) { index, bookmark ->
             val surah = quran.surah(bookmark.surah)
             SegmentedListItem(
+                colors = groupedRowColors(),
                 onClick = { onOpenReader(ReaderKey(quran.pageOf(bookmark.surah, bookmark.ayah), bookmark.surah, bookmark.ayah)) },
                 shapes = ListItemDefaults.segmentedShapes(index, bookmarks.size),
                 modifier = Modifier.animateItem(),
@@ -321,6 +340,7 @@ private fun SearchResults(results: QuranSearchResults?, quran: Quran, onOpenRead
                     item { SectionHeader(stringResource(R.string.surahs), Modifier.padding(start = 0.dp)) }
                     itemsIndexed(results.surahs, key = { _, s -> "surah-${s.number}" }) { index, surah ->
                         SegmentedListItem(
+                            colors = groupedRowColors(),
                             onClick = { onOpenReader(ReaderKey(quran.pageOf(surah.number, 1))) },
                             shapes = ListItemDefaults.segmentedShapes(index, results.surahs.size),
                             modifier = Modifier.animateItem(),

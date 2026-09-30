@@ -16,19 +16,22 @@ import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.PhoneAndroid
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.pilotothegreat.deencompanion.ui.components.groupedRowColors
 import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.alarms.Notifications as AppNotifications
@@ -55,10 +58,13 @@ fun ReliabilityScreen(canScheduleExact: Boolean, onBack: () -> Unit) {
     val context = LocalContext.current
     val items = remember(context, canScheduleExact) { checks(context, canScheduleExact) }
 
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(
+            LargeFlexibleTopAppBar(
                 title = { Text(stringResource(R.string.reliability)) },
+                scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.go_back))
@@ -75,6 +81,7 @@ fun ReliabilityScreen(canScheduleExact: Boolean, onBack: () -> Unit) {
             item { SectionHeader(stringResource(R.string.reliability_intro), Modifier.padding(start = 0.dp)) }
             itemsIndexed(items, key = { _, item -> item.check }) { index, item ->
                 SegmentedListItem(
+                    colors = groupedRowColors(),
                     onClick = { context.startSafely(intentFor(context, item.check)) },
                     shapes = ListItemDefaults.segmentedShapes(index, items.size),
                     leadingContent = {

@@ -59,6 +59,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pilotothegreat.deencompanion.ui.components.groupedRowColors
 import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.ui.common.rememberHaptics
 import com.pilotothegreat.deencompanion.R
@@ -331,6 +332,7 @@ private fun CategoryList(
         categories.forEachIndexed { index, category ->
             val group = library.groups.firstOrNull { g -> g.categories.any { it.id == category.id } }
             SegmentedListItem(
+                colors = groupedRowColors(),
                 onClick = { onOpen(category.id) },
                 shapes = ListItemDefaults.segmentedShapes(index, categories.size),
                 leadingContent = { Icon(athkarIcon(category.id, group?.id), contentDescription = null) },
@@ -361,6 +363,7 @@ private fun MyAthkar(
             val rows = lists.size + 1
             lists.forEachIndexed { index, list ->
                 SegmentedListItem(
+                    colors = groupedRowColors(),
                     onClick = { onOpen(list.id) },
                     shapes = ListItemDefaults.segmentedShapes(index, rows),
                     leadingContent = { Icon(athkarIcon(list.id), contentDescription = null) },
@@ -371,6 +374,7 @@ private fun MyAthkar(
                 ) { Text(list.title(locale)) }
             }
             SegmentedListItem(
+                colors = groupedRowColors(),
                 onClick = onNew,
                 shapes = ListItemDefaults.segmentedShapes(lists.size, rows),
                 leadingContent = {

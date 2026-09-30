@@ -26,6 +26,7 @@ import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Accessibility
 import androidx.compose.material.icons.rounded.FormatSize
+import com.pilotothegreat.deencompanion.ui.components.groupedRowColors
 import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import androidx.compose.material.icons.rounded.DeleteSweep
 import androidx.compose.material.icons.rounded.Restore
@@ -54,7 +55,6 @@ import androidx.compose.material.icons.rounded.RecordVoiceOver
 import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material.icons.rounded.Tune
-import androidx.compose.material.icons.rounded.VolumeUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
@@ -92,9 +92,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -191,7 +191,7 @@ fun SettingsScreen(
         val prayer = pickingFor ?: return@rememberLauncherForActivityResult
         pickingFor = null
         if (result.resultCode != android.app.Activity.RESULT_OK) return@rememberLauncherForActivityResult
-        val uri = result.data?.getParcelableExtra<android.net.Uri>(android.media.RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
+        val uri = result.data?.let { androidx.core.content.IntentCompat.getParcelableExtra(it, android.media.RingtoneManager.EXTRA_RINGTONE_PICKED_URI, android.net.Uri::class.java) }
         viewModel.setAdhanSound(prayer, uri?.toString() ?: SoundSettings.SILENT)
     }
     var exactAllowed by remember { mutableStateOf(viewModel.canScheduleExactAlarms()) }
@@ -287,7 +287,7 @@ fun SettingsScreen(
                     add { shapes ->
                         NavRow(
                             shapes,
-                            Icons.Rounded.VolumeUp,
+                            Icons.AutoMirrored.Rounded.VolumeUp,
                             stringResource(R.string.adhan_sound),
                             stringResource(R.string.adhan_sound_desc),
                         ) { showSounds = true }
@@ -528,13 +528,14 @@ fun SettingsScreen(
                             }
                         },
                         { shapes ->
-                            SegmentedListItem(
-                                onClick = { context.startSafely(SystemIntents.url(REPOSITORY_URL)) },
-                                shapes = shapes,
-                                leadingContent = { Icon(painterResource(R.drawable.github), contentDescription = null, modifier = Modifier.size(24.dp)) },
-                                supportingContent = { Text(stringResource(R.string.source_code_desc)) },
-                                trailingContent = { OpenIcon() },
-                            ) { Text(stringResource(R.string.source_code)) }
+                            // In a badge like every other row, so its text lines up with theirs.
+                            NavRow(
+                                shapes,
+                                ImageVector.vectorResource(R.drawable.github),
+                                stringResource(R.string.source_code),
+                                stringResource(R.string.source_code_desc),
+                                trailing = { OpenIcon() },
+                            ) { context.startSafely(SystemIntents.url(REPOSITORY_URL)) }
                         },
                         { shapes ->
                             NavRow(shapes, Icons.Rounded.Policy, stringResource(R.string.privacy_policy), null, trailing = { OpenIcon() }) {
@@ -676,6 +677,7 @@ private fun NavRow(
 ) {
     val interaction = remember { MutableInteractionSource() }
     SegmentedListItem(
+        colors = groupedRowColors(),
         onClick = onClick,
         shapes = shapes,
         leadingContent = { MorphBadge(icon, interaction) },
@@ -697,6 +699,7 @@ private fun SwitchRow(
     val interaction = remember { MutableInteractionSource() }
     val haptics = rememberHaptics()
     SegmentedListItem(
+        colors = groupedRowColors(),
         checked = checked,
         onCheckedChange = {
             haptics.toggle(it)
@@ -722,6 +725,7 @@ private fun SwitchRow(
 private fun ContentRow(shapes: ListItemShapes, icon: ImageVector, title: String, content: @Composable () -> Unit) {
     val interaction = remember { MutableInteractionSource() }
     SegmentedListItem(
+        colors = groupedRowColors(),
         shapes = shapes,
         leadingContent = { MorphBadge(icon, interaction) },
         supportingContent = content,
@@ -736,7 +740,7 @@ private fun ContentRow(shapes: ListItemShapes, icon: ImageVector, title: String,
 private fun PictureRow(shapes: ListItemShapes, icon: ImageVector, title: String, caption: String? = null, content: @Composable () -> Unit) {
     val interaction = remember { MutableInteractionSource() }
     // The list rows' own colour and spacing, so it reads as one of them rather than a card among them.
-    Surface(shape = shapes.shape, color = ListItemDefaults.segmentedColors().containerColor) {
+    Surface(shape = shapes.shape, color = groupedRowColors().containerColor) {
         Column(
             Modifier.fillMaxWidth().padding(horizontal = Spacing.large, vertical = Spacing.medium),
             verticalArrangement = Arrangement.spacedBy(Spacing.medium),

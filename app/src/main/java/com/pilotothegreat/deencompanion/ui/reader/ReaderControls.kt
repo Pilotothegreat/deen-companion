@@ -40,7 +40,8 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Surface
@@ -58,6 +59,7 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.pilotothegreat.deencompanion.ui.components.groupedRowColors
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.core.quran.RepeatMode
 import com.pilotothegreat.deencompanion.data.quran.Reciter
@@ -306,7 +308,7 @@ fun AyahMenu(
     }
 
     // Opened to its own height: half open, the share row sat below the fold.
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberBottomSheetState(SheetValue.Hidden, setOf(SheetValue.Hidden, SheetValue.Expanded))) {
         Column(
             Modifier.padding(start = Spacing.xxlarge, end = Spacing.xxlarge, bottom = Spacing.xxlarge),
             verticalArrangement = Arrangement.spacedBy(Spacing.medium),
@@ -358,6 +360,7 @@ fun AyahMenu(
             Column(Modifier.padding(top = Spacing.small), verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
                 actions.forEachIndexed { index, (icon, label, action) ->
                     SegmentedListItem(
+                        colors = groupedRowColors(),
                         onClick = action,
                         shapes = ListItemDefaults.segmentedShapes(index, actions.size),
                         leadingContent = { Icon(icon, contentDescription = null) },

@@ -21,7 +21,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.MenuDefaults
+import androidx.compose.material3.SelectableDropdownMenuItem
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -105,13 +106,17 @@ fun TasbihCard(
                     trailingIcon = { Icon(Icons.Rounded.ArrowDropDown, contentDescription = null) },
                 )
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                    Dhikr.entries.forEach { dhikr ->
-                        DropdownMenuItem(
-                            text = { Text(stringResource(dhikr.labelRes)) },
-                            onClick = {
+                    // The expressive menu item marks the dhikr being counted, so the open menu says
+                    // which one it is rather than only offering the others.
+                    Dhikr.entries.forEachIndexed { index, dhikr ->
+                        SelectableDropdownMenuItem(
+                            dhikr == state.dhikr,
+                            {
                                 onDhikrChange(dhikr)
                                 menuOpen = false
                             },
+                            { Text(stringResource(dhikr.labelRes)) },
+                            MenuDefaults.itemShape(index, Dhikr.entries.size),
                         )
                     }
                 }

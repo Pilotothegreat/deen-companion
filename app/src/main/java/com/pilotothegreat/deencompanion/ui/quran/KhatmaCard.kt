@@ -12,7 +12,7 @@ import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -55,7 +55,7 @@ fun KhatmaCard(progress: KhatmaProgress, onOpen: (Int) -> Unit, onCancel: () -> 
             if (progress.isComplete) {
                 Icon(Icons.Rounded.CheckCircle, contentDescription = null, modifier = Modifier.size(40.dp))
             } else {
-                CircularProgressIndicator(progress = { progress.fraction }, modifier = Modifier.size(40.dp))
+                CircularWavyProgressIndicator(progress = { progress.fraction }, modifier = Modifier.size(40.dp))
             }
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(stringResource(R.string.khatma), style = MaterialTheme.typography.titleMedium)

@@ -26,7 +26,8 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -75,7 +76,7 @@ fun SetupSheet(onChooseCity: () -> Unit, onDone: (shareUsage: Boolean) -> Unit) 
 
     ModalBottomSheet(
         onDismissRequest = { onDone(shareUsage) },
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        sheetState = rememberBottomSheetState(SheetValue.Hidden, setOf(SheetValue.Hidden, SheetValue.Expanded)),
     ) {
         SetupContent(
             notifications = notifications,

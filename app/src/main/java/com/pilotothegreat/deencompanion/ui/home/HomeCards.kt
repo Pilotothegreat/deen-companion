@@ -1,5 +1,6 @@
 package com.pilotothegreat.deencompanion.ui.home
 
+import com.pilotothegreat.deencompanion.ui.components.groupedRowColors
 import com.pilotothegreat.deencompanion.ui.common.rememberHaptics
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.scaleIn
@@ -55,6 +56,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -200,7 +202,7 @@ fun PrayerTimesCard(
     val context = LocalContext.current
     val haptics = rememberHaptics()
     val rowCount = Prayer.entries.size + 1
-    val defaultColors = ListItemDefaults.segmentedColors()
+    val defaultColors = groupedRowColors()
     Column(verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)) {
         Prayer.entries.forEachIndexed { index, prayer ->
             val isNext = prayer == nextPrayer
@@ -219,11 +221,11 @@ fun PrayerTimesCard(
             SegmentedListItem(
                 shapes = ListItemDefaults.segmentedShapes(index, rowCount),
                 colors = if (isNext) {
-                    ListItemDefaults.segmentedColors(containerColor = container, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
+                    groupedRowColors(containerColor = container, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
                 } else if (isPast) {
-                    ListItemDefaults.segmentedColors(containerColor = container, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
+                    groupedRowColors(containerColor = container, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
                 } else {
-                    ListItemDefaults.segmentedColors(containerColor = container)
+                    groupedRowColors(containerColor = container)
                 },
                 leadingContent = {
                     // Tapping the icon marks the prayer prayed. Every tap on the notification's
@@ -284,6 +286,7 @@ fun PrayerTimesCard(
         }
         // Night times for qiyam, after the five prayers.
         SegmentedListItem(
+            colors = groupedRowColors(),
             shapes = ListItemDefaults.segmentedShapes(rowCount - 1, rowCount),
             leadingContent = { Icon(Icons.Rounded.NightsStay, contentDescription = null) },
             supportingContent = {
@@ -452,13 +455,11 @@ fun MomentCard(
         if (onDismiss == null) {
             card()
         } else {
-            val state = rememberSwipeToDismissBoxState(
-                positionalThreshold = { it * SWIPE_AWAY },
-                confirmValueChange = { value ->
-                    if (value != SwipeToDismissBoxValue.Settled) onDismiss()
-                    true
-                },
-            )
+            val state = rememberSwipeToDismissBoxState(positionalThreshold = { it * SWIPE_AWAY })
+            // Acted on once the swipe has landed, rather than vetoed mid-gesture.
+            LaunchedEffect(state.currentValue) {
+                if (state.currentValue != SwipeToDismissBoxValue.Settled) onDismiss()
+            }
             SwipeToDismissBox(
                 state = state,
                 backgroundContent = {},
