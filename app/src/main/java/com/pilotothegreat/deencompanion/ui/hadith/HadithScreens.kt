@@ -22,19 +22,19 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -45,11 +45,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.pilotothegreat.deencompanion.ui.components.ConnectedChoice
+import com.pilotothegreat.deencompanion.ui.components.groupedRowColors
 import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.data.hadith.Hadith
@@ -85,8 +88,10 @@ fun HadithScreen(onOpenBook: (String) -> Unit, viewModel: HadithViewModel = koin
         }
     }
 
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
-        topBar = { TopAppBar(title = { Text(stringResource(R.string.hadith)) }) },
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = { LargeFlexibleTopAppBar(title = { Text(stringResource(R.string.hadith)) }, scrollBehavior = scrollBehavior) },
         snackbarHost = { SnackbarHost(snackbar, Modifier.padding(bottom = LocalBottomBarPadding.current)) },
     ) { padding ->
         Column(Modifier.padding(padding).fillMaxSize()) {
@@ -105,10 +110,20 @@ fun HadithScreen(onOpenBook: (String) -> Unit, viewModel: HadithViewModel = koin
                 SearchResults(results, bookNames, loadedBooks.any { !it.isComplete }, favoriteIds, viewModel::setFavorite)
                 return@Column
             }
-            SecondaryTabRow(selectedTabIndex = tab) {
-                Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.collections_tab)) })
-                Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.favorites_tab)) })
-            }
+            ConnectedChoice(
+                options = listOf(0, 1),
+                selected = tab,
+                onSelect = { tab = it },
+                label = {
+                    when (it) {
+                        0 -> stringResource(R.string.collections_tab)
+                        else -> stringResource(R.string.favorites_tab)
+                    }
+                },
+                // Tighter than a button's usual padding, so a longer label such as Bookmarks fits a third of the row.
+                contentPadding = PaddingValues(horizontal = Spacing.small),
+                modifier = Modifier.padding(horizontal = Spacing.large, vertical = Spacing.small),
+            )
             when (tab) {
                 0 -> BookList(loadedBooks, downloads, onOpenBook, viewModel::download, viewModel::cancelDownload)
                 else -> FavoriteList(favorites, bookNames, viewModel::setFavorite)
@@ -135,6 +150,7 @@ private fun BookList(
             val downloading = id in downloads
             val progress = downloads[id]
             SegmentedListItem(
+                colors = groupedRowColors(),
                 // A collection with nothing stored yet has nothing to open, so a tap downloads it.
                 onClick = { if (book.hadithCount > 0) onOpen(id) else if (!downloading) onDownload(id) },
                 shapes = ListItemDefaults.segmentedShapes(index, books.size),

@@ -6,6 +6,7 @@ import org.junit.Test
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
+import java.time.chrono.HijrahDate
 
 class DayScheduleTest {
     private val date = LocalDate.of(2026, 9, 11)
@@ -55,5 +56,18 @@ class DayScheduleTest {
     @Test fun keysAreBackwardCompatible() {
         assertEquals("Fajr", Prayer.FAJR.key)
         assertEquals(Prayer.MAGHRIB, Prayer.fromKey("Maghrib"))
+    }
+
+    /**
+     * The Makkah method's longer Ramadan Isha follows the Hijri date the reader sees. With the date
+     * moved a day earlier, the last day of Sha'ban already reads as 1 Ramadan, so its Isha is later.
+     */
+    @Test fun ramadanIshaFollowsTheHijriAdjustment() {
+        val firstOfRamadan = LocalDate.from(HijrahDate.of(1448, 9, 1))
+        val eve = firstOfRamadan.minusDays(1)
+        val makkah = config.copy(method = CalculationMethod.MAKKAH, iqama = emptyMap())
+        val plain = DaySchedule.forDate(eve, makkah).adhan.getValue(Prayer.ISHA)
+        val adjusted = DaySchedule.forDate(eve, makkah.copy(hijriAdjustment = 1)).adhan.getValue(Prayer.ISHA)
+        assertEquals(plain.plusMinutes(30), adjusted)
     }
 }

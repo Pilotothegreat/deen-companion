@@ -22,7 +22,7 @@ import androidx.compose.material3.FloatingToolbarDefaults
 import androidx.compose.material3.FloatingToolbarExitDirection
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItem
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
@@ -163,7 +163,7 @@ fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpe
         }
     }
 
-    val adaptive = NavigationSuiteScaffoldDefaults.navigationSuiteType(currentWindowAdaptiveInfo())
+    val adaptive = NavigationSuiteScaffoldDefaults.navigationSuiteType(currentWindowAdaptiveInfoV2())
     val compact = adaptive == NavigationSuiteType.ShortNavigationBarCompact ||
         adaptive == NavigationSuiteType.ShortNavigationBarMedium ||
         adaptive == NavigationSuiteType.NavigationBar

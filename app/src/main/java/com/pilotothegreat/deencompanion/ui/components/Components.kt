@@ -29,15 +29,24 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.toShape
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -55,6 +64,16 @@ import com.pilotothegreat.deencompanion.ui.theme.Spacing
 import com.pilotothegreat.deencompanion.ui.theme.rememberReducedMotion
 import java.util.Locale
 import com.pilotothegreat.deencompanion.R
+
+/**
+ * Colours for a row of a segmented group. The rows take a container tone of their own, so a group
+ * reads as one block lifted off the page; on the plain surface they vanished into it.
+ */
+@Composable
+fun groupedRowColors(
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+) = ListItemDefaults.segmentedColors(containerColor = containerColor, contentColor = contentColor)
 
 @Composable
 fun SectionHeader(text: String, modifier: Modifier = Modifier) {
@@ -143,22 +162,31 @@ fun SearchField(
     placeholder: String,
     modifier: Modifier = Modifier,
 ) {
+    // The field keeps its own text state; the screen's query is kept in step both ways, so a query
+    // set from outside (a cleared search, a restored screen) shows up in the field too.
+    val text = rememberTextFieldState(query)
+    val latestQuery by rememberUpdatedState(query)
+    val latestOnChange by rememberUpdatedState(onQueryChange)
+    LaunchedEffect(text) {
+        snapshotFlow { text.text.toString() }.collect { if (it != latestQuery) latestOnChange(it) }
+    }
+    LaunchedEffect(query) {
+        if (text.text.toString() != query) text.setTextAndPlaceCursorAtEnd(query)
+    }
     Surface(
         shape = CircleShape,
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         modifier = modifier.fillMaxWidth(),
     ) {
         SearchBarDefaults.InputField(
-            query = query,
-            onQueryChange = onQueryChange,
+            textFieldState = text,
+            searchBarState = rememberSearchBarState(),
             onSearch = {},
-            expanded = false,
-            onExpandedChange = {},
             placeholder = { Text(placeholder) },
             leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
             trailingIcon = {
                 if (query.isNotEmpty()) {
-                    IconButton(onClick = { onQueryChange("") }) {
+                    IconButton(onClick = { text.clearText() }) {
                         Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.clear_search))
                     }
                 }

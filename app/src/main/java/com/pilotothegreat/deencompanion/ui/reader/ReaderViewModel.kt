@@ -76,16 +76,34 @@ class ReaderViewModel(
     val playbackErrors: SharedFlow<NetError> = player.errors
 
     private var saveJob: Job? = null
+    private var unsavedPage: Int? = null
 
     fun onPageSettled(page: Int) {
         Analytics.record(UsageEvent.READER_PAGE_TURNED)
+        unsavedPage = page
         saveJob?.cancel()
         saveJob = viewModelScope.launch {
             delay(500)
-            settings.setLastReadPage(page)
-            // The khatma follows the pages actually reached, not a button someone has to remember.
-            khatma.onPageRead(page)
+            savePage(page)
         }
+    }
+
+    /**
+     * Saves a page still waiting out the pause at once. Called when the reader leaves the screen,
+     * so a page turned just before the app went to the background is not lost if Android then
+     * reclaims it.
+     */
+    fun savePendingPage() {
+        val page = unsavedPage ?: return
+        saveJob?.cancel()
+        saveJob = viewModelScope.launch { savePage(page) }
+    }
+
+    private suspend fun savePage(page: Int) {
+        settings.setLastReadPage(page)
+        // The khatma follows the pages actually reached, not a button someone has to remember.
+        khatma.onPageRead(page)
+        if (unsavedPage == page) unsavedPage = null
     }
 
     fun setBookmark(verse: Verse, bookmarked: Boolean) {

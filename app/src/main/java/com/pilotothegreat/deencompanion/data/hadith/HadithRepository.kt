@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -111,7 +112,9 @@ class HadithRepository(private val context: Context, private val dao: HadithDao)
                 Timber.w(e, "Download failed for %s", bookId)
                 _failures.emit(bookId)
             } finally {
-                downloadJobs.remove(bookId)
+                // Only its own entry: after a cancel and a quick retry the key already belongs to
+                // the new download, which would otherwise become impossible to cancel.
+                downloadJobs.remove(bookId, coroutineContext.job)
             }
         }
     }

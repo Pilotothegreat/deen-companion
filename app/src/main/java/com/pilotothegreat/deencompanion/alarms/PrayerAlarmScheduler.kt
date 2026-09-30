@@ -31,7 +31,12 @@ class PrayerAlarmScheduler(private val context: Context, private val settings: S
         val manager = alarmManager ?: return@withLock
         cancelAll(manager)
         val current = settings.current()
-        if (!current.notificationsEnabled && !current.athkarReminders) return@withLock
+        if (!current.notificationsEnabled && !current.athkarReminders) {
+            // Nothing will be scheduled, the restore included, so a silence of ours ends now.
+            QuietDuringPrayer.restore(context)
+            return@withLock
+        }
+        var insideQuiet = false
 
         val now = ZonedDateTime.now(current.zone)
         for (day in 0..1) {
@@ -68,9 +73,15 @@ class PrayerAlarmScheduler(private val context: Context, private val settings: S
                     // the two can never leave someone's phone silent for good. On Friday the window
                     // covers the khutbah too, which begins at the adhan rather than the iqama.
                     val quiet = QuietTimes.silenceWindow(prayer, adhan, iqama, sounds.silenceMinutes)
-                    if (quiet != null && quiet.start.isAfter(now)) {
-                        set(manager, AlarmKind.SILENCE_START, day, prayer, quiet.start)
-                        set(manager, AlarmKind.SILENCE_END, day, prayer, quiet.endInclusive)
+                    if (quiet != null) {
+                        if (quiet.start.isAfter(now)) set(manager, AlarmKind.SILENCE_START, day, prayer, quiet.start)
+                        // Re-armed even once the window has begun. Every reschedule cancels it first,
+                        // and one in the middle of the window (a tap on "Prayed", an alarm firing, a
+                        // reboot) used to leave the phone in Do Not Disturb for the rest of the day.
+                        if (quiet.endInclusive.isAfter(now)) {
+                            set(manager, AlarmKind.SILENCE_END, day, prayer, quiet.endInclusive)
+                            if (!quiet.start.isAfter(now)) insideQuiet = true
+                        }
                     }
                 }
             }
@@ -81,6 +92,9 @@ class PrayerAlarmScheduler(private val context: Context, private val settings: S
                     ?.let { set(manager, AlarmKind.ATHKAR_EVENING, day, Prayer.ASR, it) }
             }
         }
+        // No window covers now (the setting was turned off, the prayer muted, the times moved), so
+        // nothing will restore a silence of ours; end it here. It only acts on a silence Bilal made.
+        if (!insideQuiet) QuietDuringPrayer.restore(context)
     }
 
     /** Twenty minutes after the prayer has been prayed: the iqama, or twenty minutes after the adhan without one. */

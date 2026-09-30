@@ -19,14 +19,44 @@ object QuietDuringPrayer {
     fun isAllowed(context: Context): Boolean =
         context.getSystemService(NotificationManager::class.java)?.isNotificationPolicyAccessGranted == true
 
-    fun silence(context: Context) = apply(context, NotificationManager.INTERRUPTION_FILTER_PRIORITY)
+    /**
+     * Turns on Do Not Disturb only if it is off. When the reader already has it on, for a meeting or
+     * for sleep, it is theirs and is left alone, and so is not ours to turn off afterwards either.
+     */
+    fun silence(context: Context) {
+        val manager = manager(context) ?: return
+        if (manager.currentInterruptionFilter != NotificationManager.INTERRUPTION_FILTER_ALL) return
+        if (set(manager, NotificationManager.INTERRUPTION_FILTER_PRIORITY)) markSilenced(context, true)
+    }
 
-    fun restore(context: Context) = apply(context, NotificationManager.INTERRUPTION_FILTER_ALL)
+    /**
+     * Ends a silence this app began, and nothing else. If the reader changed Do Not Disturb in the
+     * meantime, their choice stands. Safe to call at any time: without a silence of ours it does nothing.
+     */
+    fun restore(context: Context) {
+        if (!wasSilenced(context)) return
+        markSilenced(context, false)
+        val manager = manager(context) ?: return
+        if (manager.currentInterruptionFilter == NotificationManager.INTERRUPTION_FILTER_PRIORITY) {
+            set(manager, NotificationManager.INTERRUPTION_FILTER_ALL)
+        }
+    }
 
-    private fun apply(context: Context, filter: Int) {
-        val manager = context.getSystemService(NotificationManager::class.java) ?: return
-        if (!manager.isNotificationPolicyAccessGranted) return
+    private fun manager(context: Context): NotificationManager? =
+        context.getSystemService(NotificationManager::class.java)?.takeIf { it.isNotificationPolicyAccessGranted }
+
+    private fun set(manager: NotificationManager, filter: Int): Boolean =
         runCatching { manager.setInterruptionFilter(filter) }
             .onFailure { Timber.w(it, "Could not change Do Not Disturb") }
-    }
+            .isSuccess
+
+    private fun prefs(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+
+    private fun wasSilenced(context: Context) = prefs(context).getBoolean(KEY_SILENCED, false)
+
+    private fun markSilenced(context: Context, silenced: Boolean) =
+        prefs(context).edit().putBoolean(KEY_SILENCED, silenced).commit()
+
+    private const val PREFS = "quiet_during_prayer"
+    private const val KEY_SILENCED = "silenced_by_bilal"
 }

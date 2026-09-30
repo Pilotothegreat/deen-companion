@@ -3,6 +3,7 @@ package com.pilotothegreat.deencompanion.ui.athkar
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pilotothegreat.deencompanion.core.athkar.AthkarCategory
@@ -15,9 +16,12 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import java.util.UUID
 
 /** One dhikr as it is being written; [id] survives edits so today's count stays with it. */
+@Serializable
 data class DraftDhikr(
     val id: String = UUID.randomUUID().toString(),
     val text: String = "",
@@ -25,6 +29,7 @@ data class DraftDhikr(
     val count: Int = 1,
 )
 
+@Serializable
 data class AthkarDraft(val id: String, val title: String, val items: List<DraftDhikr>, val isNew: Boolean) {
 
     /** A list needs a name and something in it to be worth keeping. */
@@ -67,10 +72,14 @@ sealed interface EditorEvent {
 /**
  * The draft is Compose state rather than a flow: text fields fed from a flow lose the cursor when
  * an update arrives a frame late, and a draft is only ever read by the one screen writing it.
+ *
+ * Every edit is also written to [saved], so a list half-written when Android reclaims the app in
+ * the background is still there on return, rather than reloaded from the last save.
  */
 class AthkarEditorViewModel(
     key: AthkarEditorKey,
     private val athkar: AthkarRepository,
+    private val saved: SavedStateHandle,
 ) : ViewModel() {
 
     var draft by mutableStateOf<AthkarDraft?>(null)
@@ -84,11 +93,19 @@ class AthkarEditorViewModel(
     val events: SharedFlow<EditorEvent> = _events.asSharedFlow()
 
     init {
-        viewModelScope.launch {
-            val existing = key.categoryId?.let { id -> athkar.custom.first().firstOrNull { it.id == id } }
-            val loaded = existing?.let(AthkarDraft::of) ?: AthkarDraft.blank()
-            original = loaded
-            draft = loaded
+        val kept = saved.get<String>(KEY_DRAFT)?.let(::decode)
+        if (kept != null) {
+            original = saved.get<String>(KEY_ORIGINAL)?.let(::decode)
+            draft = kept
+        } else {
+            viewModelScope.launch {
+                val existing = key.categoryId?.let { id -> athkar.custom.first().firstOrNull { it.id == id } }
+                val loaded = existing?.let(AthkarDraft::of) ?: AthkarDraft.blank()
+                original = loaded
+                saved[KEY_ORIGINAL] = Json.encodeToString(loaded)
+                draft = loaded
+                saved[KEY_DRAFT] = Json.encodeToString(loaded)
+            }
         }
     }
 
@@ -116,6 +133,7 @@ class AthkarEditorViewModel(
         viewModelScope.launch {
             athkar.saveCustom(current.toCategory())
             original = current
+            saved[KEY_ORIGINAL] = Json.encodeToString(current)
             _events.emit(EditorEvent.Saved)
         }
     }
@@ -129,7 +147,16 @@ class AthkarEditorViewModel(
     }
 
     private inline fun edit(change: AthkarDraft.() -> AthkarDraft) {
-        draft = draft?.change()
+        val changed = draft?.change() ?: return
+        draft = changed
+        saved[KEY_DRAFT] = Json.encodeToString(changed)
+    }
+
+    private fun decode(json: String): AthkarDraft? = runCatching { Json.decodeFromString<AthkarDraft>(json) }.getOrNull()
+
+    private companion object {
+        const val KEY_DRAFT = "draft"
+        const val KEY_ORIGINAL = "original"
     }
 
     private inline fun editItem(index: Int, crossinline change: DraftDhikr.() -> DraftDhikr) = edit {

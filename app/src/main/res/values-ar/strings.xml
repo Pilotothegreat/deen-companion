@@ -583,7 +583,7 @@
     <string name="update_open_page">فتح صفحة الإصدار</string>
     <string name="later">لاحقًا</string>
     <string name="whats_new_in">الجديد في %1$s</string>
-    <string name="whats_new_body">مواقيت الصلاة في عُمان تطابق الآن جداول وزارة الأوقاف: كان الظهر والمغرب يتأخران دقيقة في أغلب الأيام.\n\nلا مزيد من تنبيه توفير البطارية. تصل تنبيهات الصلاة من دونه، ولا تظهر البطاقة إلا لمشكلة يمكنك إصلاحها.\n\nصفحة اليوم تُخفت الصلوات التي مضت لتبرز القادمة. قائمة الحديث أنظف، والمصادر تُقرأ بالعربية.\n\nادعم بلال عبر GitHub Sponsors.</string>
+    <string name="whats_new_body">مظهر جديد لأندرويد 17: القوائم مجمّعة في كتل واضحة، والتبويبات أزرار متصلة، وعناوين القرآن والحديث تنطوي عند التمرير.\n\nكتم الصوت أثناء الصلاة لم يعد يترك هاتفك على وضع عدم الإزعاج، ولا يُطفئ وضع عدم الإزعاج الذي فعّلته بنفسك.\n\nقائمة الأذكار التي لم تكتمل تبقى إن أُغلق التطبيق في الخلفية، وتنزيل الحديث الملغى يبقى ملغى، والنسخة الاحتياطية التالفة تُرفض بدل أن تُستعاد نصفها.</string>
 
     <!-- Shortcuts and the tile -->
     <string name="tile_next_prayer">الصلاة القادمة</string>
@@ -610,7 +610,7 @@
     <string name="credits">المصادر</string>
     <string name="credit_kfgqpc">مجمع الملك فهد لطباعة المصحف الشريف — المصحف العثماني برواية حفص</string>
     <string name="credit_itani">طلال عيتاني</string>
-    <string name="credits_desc">%1$s · %2$s، ترجمة %3$s</string>
+    <string name="credits_desc">%1$s\n%2$s، ترجمة %3$s</string>
     <string name="text_scale_default">الافتراضي</string>
     <string name="text_scale_large">كبير</string>
     <string name="text_scale_larger">أكبر</string>
