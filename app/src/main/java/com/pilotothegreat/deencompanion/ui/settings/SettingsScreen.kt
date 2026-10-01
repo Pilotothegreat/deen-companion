@@ -135,7 +135,8 @@ import java.time.LocalTime
 import java.util.Locale
 
 private const val REPOSITORY_URL = "https://github.com/Pilotothegreat/deen-companion"
-private const val PRIVACY_URL = "https://github.com/Pilotothegreat/deen-companion/blob/main/PRIVACY.md"
+// The same address the Play listing gives, so the app and the store point at one policy.
+private const val PRIVACY_URL = "https://pilotothegreat.github.io/deen-companion/privacy.html"
 
 private typealias SettingsRow = @Composable (ListItemShapes) -> Unit
 

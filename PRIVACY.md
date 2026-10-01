@@ -1,77 +1,82 @@
-# Privacy Policy for Bilal
+# Privacy Policy: Bilal: Prayer Times & Athkar
 
-Last updated: September 19, 2026
+**Developer:** Oman Creative Studio
+**Last updated:** October 1, 2026
 
-Bilal has no accounts, ads or crash reporting, and no analytics unless you turn them on. Everything you set up in the app stays on your device. This page lists exactly what the app stores and every network request it can make.
+The same policy is published at https://pilotothegreat.github.io/deen-companion/privacy.html
 
-## What stays on your device
+## Who this policy covers
 
-- Your location coordinates and city name, or the city you picked, used to calculate prayer times and the Qibla direction.
-- Your settings: calculation method, time adjustments, iqama times, notification and reminder choices, theme, language and text size.
-- Quran bookmarks, your last-read page, hadith favorites, your tasbih count, and today's athkar progress and streak.
+This privacy policy applies to the Android app **Bilal: Prayer Times & Athkar** ("Bilal", "the app"). It is published on Google Play by the developer **Oman Creative Studio** ("we", "us") under the package name `com.pilotothegreat.bilal`. It also applies to the same app distributed from this GitHub repository under the package name `com.pilotothegreat.deencompanion`.
 
-This data is stored with Android's DataStore and a local Room database. It is never uploaded, and it is excluded from Android cloud backups.
+**In short:** Bilal has no accounts, no ads, and no tracking or advertising SDKs. Oman Creative Studio does not receive, collect, sell or share your personal data. Your location, settings and reading history stay on your device. The app contacts a few public services, only for the features listed below.
 
-## Counting what is used
+## 1. Data that stays on your device
 
-Settings has a switch called **Count what I use**. It is off in a new install, and while it is off the app records nothing at all.
+The app stores the following only on your phone, in its private storage. None of it is ever sent to us.
 
-Turned on, the app keeps a counter per day for each of a fixed list of things — the screens you open, a recitation played, a search made, an athkar session finished, a widget configured. It is a list of names and numbers, and that is the whole of it:
+- **Your location** (coordinates and city name). It is used to calculate prayer times and the Qibla direction, and to set a home point so the app can tell when you are travelling.
+- **Your settings:** calculation method, iqama times, alert choices, theme, language and text size.
+- **Your reading and worship history:** Quran bookmarks, your last-read page and khatma plan, hadith favourites, your tasbih count, athkar progress, and athkar lists you write yourself.
+- **Automatic backups** of the above, kept in the app's private storage. Backups you export are saved only where you choose.
+- **Usage counts**, only if you turn on "Share usage data". It is off unless you choose it.
+  - They are daily counts of which app features were opened, such as "app opened" or "page turned".
+  - They never include what you read or type, or where you are.
+  - They are kept for 90 days and deleted when you turn the setting off.
+  - In the versions currently published on Google Play and GitHub, these counts are not sent anywhere; they stay on your device.
 
-- **No text.** Not what you search for, not an ayah you read, bookmarked or shared, not a note.
-- **No location**, not even a country beyond the language your phone is set to.
-- **No identifier.** No account, no device id, no advertising id, nothing random kept to recognise this phone again. Two reports from one phone cannot be told apart from two reports from two phones.
-- **No times.** A counter says "seven today", never when.
+You can delete all of this at any time in three ways: Settings → Reset everything, clearing the app's storage, or uninstalling the app.
 
-The app asks once, on first run, alongside its permissions, and the answer starts as no. **Settings → General → Share usage data** turns it off again at any time, and turning it off deletes what was counted. Counters older than 90 days are deleted anyway.
+## 2. Services the app contacts
 
-Whether the totals are sent anywhere at all depends on the build. The open-source build is compiled with no collector address, so nothing is uploaded however the switch is set. A build that was given one sends the day's totals, described above, once a day over Wi-Fi and never on a low battery.
+These requests go directly from your device to the service named. We do not run a server and receive none of this data. As with any internet request, each service can see your device's IP address.
 
-## Network requests
-
-The app works offline for prayer times, city search, the Quran text, athkar, the Qibla compass, tasbih and the widgets. It only uses the internet for the features below:
-
-| Feature | Service | When | What the service receives |
+| Feature | Service | What is sent | When |
 | --- | --- | --- | --- |
-| City name | Android's system geocoder | After a location is found. Without it, the name comes from the city list bundled with the app | Your coordinates, handled by your device's geocoding provider |
-| Weather | api.open-meteo.com | While the app is open, at most once an hour, and never while battery saver is on | **Your approximate location**, rounded to two decimal places — about a kilometre — and your IP address. No account, no key, and nothing identifying you |
-| Nearby earthquakes | earthquake.usgs.gov | While the app is open, at most once an hour, and never while battery saver is on | Your IP address. The feed is the same worldwide list for everyone; the filtering by distance happens on your device, so the service is never told where you are |
-| Quran recitation | everyayah.com | When you play a recitation | Your IP address and the ayah requested |
-| Full hadith collections | cdn.jsdelivr.net | Only when you tap Download | Your IP address |
-| Update check | api.github.com (sideloaded installs) or Google Play (Play Store installs) | Up to four times a day while the app is open, once a day in the background, or when you tap the version in Settings | Your IP address |
-| Usage totals | Only a build configured with a collector, and only with **Share usage data** turned on | Once a day, on Wi-Fi | The counters and build described above, and your IP address |
+| Weather cards (rain, heat, wind) | Open-Meteo (api.open-meteo.com) | Your location rounded to about 1 km | While the app is open, at most once an hour, after you have set a location; not while battery saver is on |
+| Nearby earthquake card | U.S. Geological Survey (earthquake.usgs.gov) | Nothing about you: the app downloads the public worldwide feed and checks the distance on your device | While the app is open, at most once an hour; not while battery saver is on |
+| City name for your location | Your device's built-in Android geocoder | Your coordinates, handled by your phone's geocoding provider | When a new location is found |
+| Quran recitation | EveryAyah (everyayah.com) | The recitation file requested | When you play or download a recitation |
+| Full hadith collections | jsDelivr CDN (cdn.jsdelivr.net) | The collection requested | Only when you tap Download |
+| App updates | Google Play (Play In-App Updates) | Handled by Google Play under Google's privacy policy | When the app checks for an update |
 
-Weather is the only feature that sends anything about where you are. The coordinates are blunted to about a kilometre before they leave the device, which is enough to know whether it is raining over you and not enough to place a house. Under battery saver the request is not made at all, and the rest of the app carries on without it.
+Links you tap in the app, such as the source code or this policy, open in your browser.
 
-**1.9.0 removed the internet location fallback.** It was the one feature that sent your IP address to a third party — ipapi.co and freeipapi.com — for an approximate city that the device's own location and the offline city list bundled with the app already provide. It is gone, along with those two hosts, rather than hidden behind a switch that nobody reads.
-
-**1.9.0 also added a weekly automatic backup.** It is written to the app's own private files directory, keeps the last three copies, and never leaves the device. Nothing about it is uploaded anywhere; it exists so a reinstall does not lose a khatma.
-
-Eclipses need no request at all: the table is bundled with the app and works offline. Travel is worked out entirely on the device: your home point and your current position never leave it, and the app asks before it treats you as travelling.
-
-No personal information beyond what any web request carries (such as your IP address) is sent with these requests.
-
-## Permissions
+## 3. Permissions
 
 | Permission | Why |
 | --- | --- |
-| Location (approximate and precise) | Calculate prayer times and the Qibla for where you are. Requested only when you choose to use your location, and never used in the background. |
-| Notifications | Alert you at adhan and iqama times. |
-| Alarms and reminders (`SCHEDULE_EXACT_ALARM`) | Deliver notifications on time. You grant it in system settings; without it, alerts may be a few minutes late. |
-| Run at startup (`RECEIVE_BOOT_COMPLETED`) | Reschedule prayer alerts after the device restarts. |
-| Internet | The features in the table above. |
-| Install packages (`REQUEST_INSTALL_PACKAGES`) | Only in the version downloaded from GitHub, so it can install its own update after checking it against the published checksum. The Google Play version does not have this permission at all. |
-| Do Not Disturb access | Only if you turn on "silence during prayer". The app asks at that moment and never otherwise. |
-| Foreground media playback | Keep recitation playing with media controls when the app is in the background. |
+| Location (approximate and precise) | Prayer times and the Qibla for where you are. Used only while the app is open, never in the background, and only after you allow it. You can choose a city instead. |
+| Notifications | Adhan, iqama and athkar reminders. |
+| Alarms & reminders (exact alarms) | So prayer alerts arrive on time. You grant it in system settings. |
+| Do Not Disturb access (optional) | Only if you turn on "Silence during prayer": quiets the phone from the iqama and restores it afterwards. |
+| Run at startup | Reschedules prayer alerts after the phone restarts. |
+| Foreground service (media playback) | Keeps Quran recitation playing with media controls when you leave the app. |
+| Internet | The services listed in section 2. |
 
-## Children
+## 4. Sharing, selling and advertising
 
-The app collects no personal data from anyone, including children. The usage counters described above contain nothing personal and are off unless turned on.
+We do not sell, rent or share personal data, and we do not use your data for advertising. The app contains no ads and no analytics, crash-reporting or social-media SDKs.
 
-## Changes
+## 5. Security
 
-Changes to this policy are published in the [GitHub repository](https://github.com/Pilotothegreat/deen-companion) with a new date above.
+Every network request uses HTTPS. Data on the device is kept in the app's private storage, which other apps cannot read.
 
-## Contact
+## 6. Children
 
-Questions or concerns: open an issue at [github.com/Pilotothegreat/deen-companion/issues](https://github.com/Pilotothegreat/deen-companion/issues).
+Bilal is intended for users aged 13 and over. We do not knowingly collect personal data from anyone, including children.
+
+## 7. Your choices and rights
+
+We hold no data about you, so there is nothing for us to access, correct or delete on our side. You control everything on your device:
+- deny the location permission and choose a city instead;
+- turn usage counts off;
+- delete all app data as described in section 1.
+
+## 8. Changes to this policy
+
+If this policy changes, the new version will be published at the address above with a new "Last updated" date.
+
+## 9. Contact
+
+The developer is **Oman Creative Studio**, publisher of Bilal: Prayer Times & Athkar on Google Play. For questions about this policy or your privacy, open an issue at https://github.com/Pilotothegreat/deen-companion/issues. The app's source code is public at https://github.com/Pilotothegreat/deen-companion.

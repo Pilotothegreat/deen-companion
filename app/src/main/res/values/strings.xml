@@ -550,7 +550,7 @@
     <string name="update_open_page">Open the release page</string>
     <string name="later">Later</string>
     <string name="whats_new_in">What\'s new in %1$s</string>
-    <string name="whats_new_body">A fresh look for Android 17: lists are grouped into clear blocks, tabs are joined buttons, and the Quran and Hadith headers fold away as you scroll.\n\nSilence during prayer can no longer leave your phone on Do Not Disturb, and it never turns off Do Not Disturb you set yourself.\n\nA half-written athkar list survives the app being closed in the background, a cancelled hadith download stays cancelled, and a damaged backup is refused instead of half restored.</string>
+    <string name="whats_new_body">A fresh look for Android 17: grouped lists, joined-button tabs, and headers that fold away as you scroll.\n\nSilence during prayer now works: Bilal appears under Do Not Disturb access, never leaves the phone silenced, and never turns off Do Not Disturb you set yourself.\n\nHalf-written athkar lists are kept, cancelled hadith downloads stay cancelled, and damaged backups are refused.</string>
 
     <!-- Shortcuts and the tile -->
     <string name="tile_next_prayer">Next prayer</string>
