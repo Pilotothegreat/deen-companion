@@ -496,20 +496,10 @@ fun SettingsScreen(
                                 else viewModel.checkForUpdates()
                             }
                         },
-                        // The GitHub build keeps its bank sheet. The Play build links out instead:
-                        // Play's payments policy generally requires Play Billing for payments to the
-                        // developer, and the carve-out for donations is a link that receives nothing
-                        // in return, which is exactly what this is.
-                        if (BuildConfig.SUPPORT_SHEET) {
-                            supportRow { showSupport = true }
-                        } else {
-                            { shapes: ListItemShapes ->
-                                NavRow(
-                                    shapes, Icons.Rounded.Favorite, stringResource(R.string.support_development),
-                                    stringResource(R.string.support_link_desc), trailing = { OpenIcon() },
-                                ) { context.startSafely(SystemIntents.url(SPONSORS_URL)) }
-                            }
-                        },
+                        // Only the GitHub build asks for support. Play's payments policy wants Play
+                        // Billing for any payment to the developer, a tip included, and rejected the
+                        // Play build's link to GitHub Sponsors; so the Play build has no such row.
+                        if (BuildConfig.SUPPORT_SHEET) supportRow { showSupport = true } else null,
                         // One row for everything the licences ask to be named, rather than three.
                         credits?.let { c ->
                             @Composable { shapes: ListItemShapes ->
@@ -646,7 +636,8 @@ fun SettingsScreen(
             onDismiss = { showIqama = false },
         )
     }
-    if (showSupport) SupportSheet(onDismiss = { showSupport = false })
+    // Tested against the flag as well, so the Play build carries no donation sheet at all.
+    if (BuildConfig.SUPPORT_SHEET && showSupport) SupportSheet(onDismiss = { showSupport = false })
 }
 
 /** The "Support development" row. The Google Play build leaves it out (BuildConfig.SUPPORT_SHEET). */
