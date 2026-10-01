@@ -553,7 +553,6 @@
     <string name="motion_system">النظام</string>
     <string name="motion_on">مخفّفة</string>
     <string name="motion_off">كاملة</string>
-    <string name="support_link_desc">هدية بلا مقابل</string>
     <string name="general">عام</string>
     <string name="backup_export">حفظ نسخة احتياطية</string>
     <string name="backup_export_desc">إعداداتك وعلاماتك وختمتك في ملف تحتفظ به</string>

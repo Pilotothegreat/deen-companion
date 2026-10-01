@@ -64,7 +64,14 @@ class UpdateChecker(private val context: Context, private val settings: Settings
 
     val lastCheckedAt = settings.lastUpdateCheckedAt
 
-    val isPlayInstall: Boolean by lazy {
+    /**
+     * The Play build always updates through Play, whoever installed it: a review device or an internal
+     * test can install it some other way, and a Play app must never offer a download from elsewhere.
+     */
+    // A constant in the Play build, so the shrinker drops the GitHub path from it entirely.
+    val isPlayInstall: Boolean get() = BuildConfig.PLAY_BUILD || installedByPlay
+
+    private val installedByPlay: Boolean by lazy {
         val installer = runCatching {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 context.packageManager.getInstallSourceInfo(context.packageName).installingPackageName

@@ -521,7 +521,6 @@
     <string name="motion_system">System</string>
     <string name="motion_on">Reduced</string>
     <string name="motion_off">Full</string>
-    <string name="support_link_desc">A gift, with nothing received in return</string>
     <string name="general">General</string>
     <string name="backup_export">Save a backup</string>
     <string name="backup_export_desc">Your settings, bookmarks and khatma, in a file you keep</string>

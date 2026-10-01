@@ -38,11 +38,12 @@ android {
         applicationId = "com.pilotothegreat.deencompanion"
         minSdk = 26
         targetSdk = 37
-        versionCode = 205
-        versionName = "2.4.0"
+        versionCode = 206
+        versionName = "2.4.1"
         base.archivesName = "bilal-$versionName"
         // The donation sheet opens banking apps; the Google Play build leaves it out (see the play build type).
         buildConfigField("boolean", "SUPPORT_SHEET", "true")
+        buildConfigField("boolean", "PLAY_BUILD", "false")
 
         // Where anonymous usage reports are sent, for builds that have somewhere to send them.
         // Empty — the default, and what an open-source build compiles with — means the app counts
@@ -73,11 +74,12 @@ android {
             val release = signingConfigs.getByName("release")
             signingConfig = if (release.storeFile != null) release else signingConfigs.getByName("debug")
         }
-        // The Google Play build: the release build without the donation sheet, which Play's payments
-        // policy doesn't allow. `./gradlew bundlePlay` makes the App Bundle for the Play Console.
+        // The Google Play build: the release build with no donation sheet or link, which Play's payments
+        // policy doesn't allow, and updates only through Play. `./gradlew bundlePlay` makes the App Bundle for the Play Console.
         create("play") {
             initWith(getByName("release"))
             buildConfigField("boolean", "SUPPORT_SHEET", "false")
+            buildConfigField("boolean", "PLAY_BUILD", "true")
             matchingFallbacks += listOf("release")
         }
         debug {
