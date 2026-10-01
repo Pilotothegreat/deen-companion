@@ -1,37 +1,82 @@
-# Privacy Policy for Deen Companion
+# Privacy Policy: Bilal: Prayer Times & Athkar
 
-Last Updated: June 12, 2026
+**Developer:** Oman Creative Studio
+**Last updated:** October 1, 2026
 
-At Deen Companion, we prioritize your privacy above all else. This application is designed to function entirely offline, keeping your personal data safe, secure, and under your control.
+The same policy is published at https://pilotothegreat.github.io/deen-companion/privacy.html
 
-## 1. Information We Process and How We Use It
+## Who this policy covers
 
-### Location Data (GPS & Network coordinates)
-* **Purpose**: Used solely to calculate high-precision offline prayer times and to determine Qibla direction relative to your location.
-* **Storage**: Your coordinates are processed on-device and are never transmitted to our servers or third parties.
-* **IP-based Geolocation Backup**: If GPS signals are unavailable, the application can request geolocation details from privacy-friendly, standard HTTP/HTTPS geolocation providers (such as `ipapi.co` and `ip-api.com`). These requests only process your IP address to return latitude and longitude coordinates. This data is handled in memory, is not saved, and is processed locally.
+This privacy policy applies to the Android app **Bilal: Prayer Times & Athkar** ("Bilal", "the app"). It is published on Google Play by the developer **Oman Creative Studio** ("we", "us") under the package name `com.pilotothegreat.bilal`. It also applies to the same app distributed from this GitHub repository under the package name `com.pilotothegreat.deencompanion`.
 
-### Voice and Microphone Input (`RECORD_AUDIO`)
-* **Purpose**: Used to record short voice queries for search inputs in the offline Assistant/Lookup screens.
-* **Storage**: Voice data is transcribed locally on your device. Audio files or recordings are never stored, saved, or uploaded to any external servers.
+**In short:** Bilal has no accounts, no ads, and no tracking or advertising SDKs. Oman Creative Studio does not receive, collect, sell or share your personal data. Your location, settings and reading history stay on your device. The app contacts a few public services, only for the features listed below.
 
-### Settings and Personal Preferences
-* **Purpose**: Reminders, settings (dhikr targets, font configurations, calculations preference, and city overrides) are kept to customize your experience.
-* **Storage**: Stored locally on your device using Android Jetpack DataStore and Room Database.
+## 1. Data that stays on your device
 
-## 2. Third-Party Integrations & App Queries
+The app stores the following only on your phone, in its private storage. None of it is ever sent to us.
 
-### Local Omani Banking Apps
-To allow users in Oman to support developer operations locally, the settings and donation panels provide deep links to launch local banking applications (such as Bank Muscat, bm Wallet, NBO, Bank Dhofar, etc.) on the device.
-* **Data Privacy**: Deen Companion queries if these banking applications are installed to display the shortcut buttons. We do not access, collect, or store any financial details, account credentials, card information, or transaction records. All interactions are handled directly by your installed bank's official security systems.
+- **Your location** (coordinates and city name). It is used to calculate prayer times and the Qibla direction, and to set a home point so the app can tell when you are travelling.
+- **Your settings:** calculation method, iqama times, alert choices, theme, language and text size.
+- **Your reading and worship history:** Quran bookmarks, your last-read page and khatma plan, hadith favourites, your tasbih count, athkar progress, and athkar lists you write yourself.
+- **Automatic backups** of the above, kept in the app's private storage. Backups you export are saved only where you choose.
+- **Usage counts**, only if you turn on "Share usage data". It is off unless you choose it.
+  - They are daily counts of which app features were opened, such as "app opened" or "page turned".
+  - They never include what you read or type, or where you are.
+  - They are kept for 90 days and deleted when you turn the setting off.
+  - In the versions currently published on Google Play and GitHub, these counts are not sent anywhere; they stay on your device.
 
-## 3. Third-Party Analytics and Advertising
-Deen Companion is an open-source, non-commercial app.
-* We do not include any tracking software, analytic trackers (e.g., Firebase Analytics), advertising SDKs (e.g., Google AdMob), or marketing frameworks.
-* There are no background analytic processes sending your usage patterns to external entities.
+You can delete all of this at any time in three ways: Settings → Reset everything, clearing the app's storage, or uninstalling the app.
 
-## 4. Updates to This Policy
-Since the application operates offline, we do not notify users of privacy updates dynamically. We recommend reviewing the latest policy updates directly in our GitHub repository: [github.com/Pilotothegreat/deen-companion](https://github.com/Pilotothegreat/deen-companion).
+## 2. Services the app contacts
 
-## 5. Contact & Support
-If you have any questions or feedback, please open an issue in our official repository on GitHub.
+These requests go directly from your device to the service named. We do not run a server and receive none of this data. As with any internet request, each service can see your device's IP address.
+
+| Feature | Service | What is sent | When |
+| --- | --- | --- | --- |
+| Weather cards (rain, heat, wind) | Open-Meteo (api.open-meteo.com) | Your location rounded to about 1 km | While the app is open, at most once an hour, after you have set a location; not while battery saver is on |
+| Nearby earthquake card | U.S. Geological Survey (earthquake.usgs.gov) | Nothing about you: the app downloads the public worldwide feed and checks the distance on your device | While the app is open, at most once an hour; not while battery saver is on |
+| City name for your location | Your device's built-in Android geocoder | Your coordinates, handled by your phone's geocoding provider | When a new location is found |
+| Quran recitation | EveryAyah (everyayah.com) | The recitation file requested | When you play or download a recitation |
+| Full hadith collections | jsDelivr CDN (cdn.jsdelivr.net) | The collection requested | Only when you tap Download |
+| App updates | Google Play (Play In-App Updates) | Handled by Google Play under Google's privacy policy | When the app checks for an update |
+
+Links you tap in the app, such as the source code or this policy, open in your browser.
+
+## 3. Permissions
+
+| Permission | Why |
+| --- | --- |
+| Location (approximate and precise) | Prayer times and the Qibla for where you are. Used only while the app is open, never in the background, and only after you allow it. You can choose a city instead. |
+| Notifications | Adhan, iqama and athkar reminders. |
+| Alarms & reminders (exact alarms) | So prayer alerts arrive on time. You grant it in system settings. |
+| Do Not Disturb access (optional) | Only if you turn on "Silence during prayer": quiets the phone from the iqama and restores it afterwards. |
+| Run at startup | Reschedules prayer alerts after the phone restarts. |
+| Foreground service (media playback) | Keeps Quran recitation playing with media controls when you leave the app. |
+| Internet | The services listed in section 2. |
+
+## 4. Sharing, selling and advertising
+
+We do not sell, rent or share personal data, and we do not use your data for advertising. The app contains no ads and no analytics, crash-reporting or social-media SDKs.
+
+## 5. Security
+
+Every network request uses HTTPS. Data on the device is kept in the app's private storage, which other apps cannot read.
+
+## 6. Children
+
+Bilal is intended for users aged 13 and over. We do not knowingly collect personal data from anyone, including children.
+
+## 7. Your choices and rights
+
+We hold no data about you, so there is nothing for us to access, correct or delete on our side. You control everything on your device:
+- deny the location permission and choose a city instead;
+- turn usage counts off;
+- delete all app data as described in section 1.
+
+## 8. Changes to this policy
+
+If this policy changes, the new version will be published at the address above with a new "Last updated" date.
+
+## 9. Contact
+
+The developer is **Oman Creative Studio**, publisher of Bilal: Prayer Times & Athkar on Google Play. For questions about this policy or your privacy, open an issue at https://github.com/Pilotothegreat/deen-companion/issues. The app's source code is public at https://github.com/Pilotothegreat/deen-companion.

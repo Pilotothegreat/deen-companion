@@ -3,248 +3,105 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Privacy Policy — Deen Companion</title>
+  <title>Privacy Policy — Bilal: Prayer Times &amp; Athkar (Oman Creative Studio)</title>
+  <meta name="description" content="Privacy policy for the Android app Bilal: Prayer Times &amp; Athkar by Oman Creative Studio." />
   <style>
-    :root {
-      --bg: #0d1117;
-      --surface: #161b22;
-      --border: #30363d;
-      --text: #e6edf3;
-      --muted: #8b949e;
-      --gold: #c5a059;
-      --accent: #388bfd;
+    :root { --bg: #fff8f3; --surface: #f5ede4; --text: #1e1b16; --muted: #4e4639; --accent: #156c44; --border: #d1c5b4; }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #16130e; --surface: #231f1a; --text: #e9e1d9; --muted: #d1c5b4; --accent: #87d7a7; --border: #4e4639; }
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.7;
-      padding: 2rem 1rem;
-    }
-    .container { max-width: 780px; margin: 0 auto; }
-    header {
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 2rem;
-      margin-bottom: 2rem;
-      text-align: center;
-    }
-    .app-name {
-      font-size: 1.1rem;
-      color: var(--gold);
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
-    h1 { font-size: 2rem; margin: 0.5rem 0; }
-    .last-updated { color: var(--muted); font-size: 0.9rem; }
-    .summary-box {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-left: 4px solid var(--gold);
-      border-radius: 8px;
-      padding: 1.25rem 1.5rem;
-      margin-bottom: 2.5rem;
-    }
-    .summary-box p { color: var(--text); }
-    .check-list { list-style: none; margin-top: 0.75rem; }
-    .check-list li { padding: 0.2rem 0; }
-    .check-list li::before { content: "✓ "; color: var(--gold); font-weight: bold; }
-    h2 {
-      font-size: 1.2rem;
-      color: var(--gold);
-      margin: 2.5rem 0 0.75rem;
-      padding-bottom: 0.4rem;
-      border-bottom: 1px solid var(--border);
-    }
-    p { margin-bottom: 1rem; color: var(--text); }
-    ul { margin: 0.5rem 0 1rem 1.5rem; }
-    li { margin-bottom: 0.4rem; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 1rem 0 1.5rem;
-      font-size: 0.9rem;
-    }
-    th {
-      background: var(--surface);
-      text-align: left;
-      padding: 0.6rem 1rem;
-      border: 1px solid var(--border);
-      color: var(--gold);
-    }
-    td {
-      padding: 0.6rem 1rem;
-      border: 1px solid var(--border);
-      vertical-align: top;
-    }
-    .badge-no {
-      display: inline-block;
-      background: #2d1b1b;
-      color: #f85149;
-      border-radius: 4px;
-      padding: 0 6px;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-    .badge-yes {
-      display: inline-block;
-      background: #1b2d1b;
-      color: #3fb950;
-      border-radius: 4px;
-      padding: 0 6px;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 2rem 1rem; background: var(--bg); color: var(--text);
+           font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.65; }
+    main { max-width: 760px; margin: 0 auto; }
+    h1 { margin: 0 0 .25rem; font-size: 1.9rem; }
+    h2 { margin-top: 2.25rem; font-size: 1.25rem; color: var(--accent); }
+    .meta { color: var(--muted); margin: 0 0 1.5rem; }
+    .box { background: var(--surface); border-radius: 16px; padding: 1rem 1.25rem; }
+    table { width: 100%; border-collapse: collapse; margin: .75rem 0; font-size: .95rem; }
+    th, td { text-align: left; vertical-align: top; padding: .55rem .5rem; border-bottom: 1px solid var(--border); }
+    th { font-weight: 600; }
     a { color: var(--accent); }
-    footer {
-      margin-top: 4rem;
-      padding-top: 2rem;
-      border-top: 1px solid var(--border);
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.85rem;
-    }
+    code { font-size: .9em; }
   </style>
 </head>
 <body>
-<div class="container">
+<main>
+  <h1>Privacy Policy</h1>
+  <p class="meta"><strong>Bilal: Prayer Times &amp; Athkar</strong> · by <strong>Oman Creative Studio</strong> · Last updated: October 1, 2026</p>
 
-  <header>
-    <div class="app-name">🕌 Deen Companion</div>
-    <h1>Privacy Policy</h1>
-    <div class="last-updated">Last updated: June 17, 2026</div>
-  </header>
-
-  <div class="summary-box">
-    <strong>Short version:</strong> Deen Companion is designed to protect your privacy by default.
-    <ul class="check-list">
-      <li>No personal data is ever collected</li>
-      <li>No accounts required</li>
-      <li>No ads, no analytics, no tracking SDKs</li>
-      <li>Location is used only locally on your device</li>
-      <li>You are in full control</li>
-    </ul>
+  <div class="box">
+    <p><strong>Who this policy covers.</strong> This privacy policy applies to the Android app
+      <strong>Bilal: Prayer Times &amp; Athkar</strong> (“Bilal”, “the app”), published on Google Play by the developer
+      <strong>Oman Creative Studio</strong> (“we”, “us”) under the package name <code>com.pilotothegreat.bilal</code>.
+      It also applies to the same app distributed from our GitHub repository under the package name
+      <code>com.pilotothegreat.deencompanion</code>.</p>
+    <p><strong>In short:</strong> Bilal has no accounts, no ads and no tracking or advertising SDKs. Oman Creative Studio
+      does not receive, collect, sell or share your personal data. Your location, settings and reading history stay on
+      your device. The app contacts a few public services only for the features listed below.</p>
   </div>
 
-  <h2>1. Who We Are</h2>
-  <p>Deen Companion is developed and maintained by <strong>Piloto the Great</strong> (GitHub: <a href="https://github.com/Pilotothegreat/deen-companion">Pilotothegreat</a>). This is an open-source project. The source code is publicly available for inspection.</p>
-
-  <h2>2. Data We Collect</h2>
-  <p><strong>We do not collect any personal data.</strong> The app runs entirely offline except for the optional features listed below.</p>
-
-  <table>
-    <tr>
-      <th>Data Type</th>
-      <th>Collected?</th>
-      <th>Details</th>
-    </tr>
-    <tr>
-      <td>Name, email, account info</td>
-      <td><span class="badge-no">Never</span></td>
-      <td>No accounts exist</td>
-    </tr>
-    <tr>
-      <td>Location (GPS)</td>
-      <td><span class="badge-no">Not stored</span></td>
-      <td>Used locally on-device only to calculate prayer times and Qibla direction. Never transmitted.</td>
-    </tr>
-    <tr>
-      <td>Usage analytics</td>
-      <td><span class="badge-no">Never</span></td>
-      <td>No analytics SDK is included</td>
-    </tr>
-    <tr>
-      <td>Crash reports</td>
-      <td><span class="badge-no">Never</span></td>
-      <td>No crash reporting service</td>
-    </tr>
-    <tr>
-      <td>Advertising identifiers</td>
-      <td><span class="badge-no">Never</span></td>
-      <td>No ads in the app</td>
-    </tr>
-    <tr>
-      <td>Quran audio (streaming)</td>
-      <td><span class="badge-yes">Optional</span></td>
-      <td>Streamed from public Quran audio CDN. No personal data sent.</td>
-    </tr>
-    <tr>
-      <td>IP-based location</td>
-      <td><span class="badge-yes">Optional</span></td>
-      <td>Used as a fallback if GPS is unavailable and you enable this setting. Can be disabled.</td>
-    </tr>
-  </table>
-
-  <h2>3. Permissions Explained</h2>
-
-  <table>
-    <tr>
-      <th>Permission</th>
-      <th>Why It's Needed</th>
-    </tr>
-    <tr>
-      <td><code>ACCESS_FINE_LOCATION</code><br><code>ACCESS_COARSE_LOCATION</code></td>
-      <td>To calculate accurate prayer times and Qibla direction based on your current location. The location is processed on-device and never leaves your phone.</td>
-    </tr>
-    <tr>
-      <td><code>INTERNET</code></td>
-      <td>For optional Quran audio streaming and optional IP-based location fallback. The app is fully functional offline without these.</td>
-    </tr>
-    <tr>
-      <td><code>POST_NOTIFICATIONS</code></td>
-      <td>To deliver Adhan and Iqama reminders at the correct prayer times.</td>
-    </tr>
-    <tr>
-      <td><code>SCHEDULE_EXACT_ALARM</code><br><code>USE_EXACT_ALARM</code></td>
-      <td>Required so prayer alarms fire at the exact scheduled second, not delayed by Android's default alarm batching.</td>
-    </tr>
-    <tr>
-      <td><code>REQUEST_IGNORE_BATTERY_OPTIMIZATIONS</code></td>
-      <td>Prevents Android from killing scheduled prayer alarms during battery saving modes. Without this, alarms may be delayed or missed entirely.</td>
-    </tr>
-    <tr>
-      <td><code>RECEIVE_BOOT_COMPLETED</code></td>
-      <td>Reschedules prayer alarms after the device is restarted so you don't miss them.</td>
-    </tr>
-    <tr>
-      <td><code>FOREGROUND_SERVICE</code><br><code>FOREGROUND_SERVICE_MEDIA_PLAYBACK</code></td>
-      <td>Allows Quran audio to continue playing in the background with media controls in the notification shade.</td>
-    </tr>
-    <tr>
-      <td><code>VIBRATE</code></td>
-      <td>For optional haptic feedback during Adhan/Iqama alerts.</td>
-    </tr>
-  </table>
-
-  <h2>4. Third-Party Services</h2>
-  <p>Deen Companion does <strong>not</strong> include any third-party advertising, analytics, or tracking services (e.g., Google Analytics, Firebase Analytics, Facebook SDK, Crashlytics).</p>
-  <p>Optional network requests:</p>
+  <h2>1. Data that stays on your device</h2>
+  <p>The app stores the following only on your phone, in its private storage. It is never sent to us.</p>
   <ul>
-    <li><strong>Quran audio</strong>: Streams from a public Islamic audio CDN (e.g., everyayah.com or similar). No personal data is included in requests.</li>
-    <li><strong>IP geolocation</strong>: When GPS is unavailable and the user opts in, a public IP geolocation API may be queried. This sends your IP address to the service but no other personal information. This feature can be disabled in Settings.</li>
+    <li>Your location (coordinates and city name), used to calculate prayer times and the Qibla direction, and a home point used to notice when you are travelling.</li>
+    <li>Your settings: calculation method, iqama times, alert choices, theme, language and text size.</li>
+    <li>Quran bookmarks, your last-read page and khatma plan, hadith favourites, your tasbih count, athkar progress, and athkar lists you write yourself.</li>
+    <li>Automatic backups of the above, kept in the app's private storage. Backups you export are saved only where you choose.</li>
+    <li><strong>Usage counts</strong>, only if you turn on “Share usage data” (it is off unless you choose it): a daily count of which app features were opened, such as “app opened” or “page turned”. They never include what you read or type, or where you are. They are kept for 90 days and deleted when you turn the setting off. In the versions currently published on Google Play and GitHub these counts are not sent anywhere; they stay on your device.</li>
   </ul>
+  <p>You can delete all of this at any time with Settings → Reset everything, by clearing the app's storage, or by uninstalling the app.</p>
 
-  <h2>5. Data Storage</h2>
-  <p>All app data (prayer settings, Quran bookmarks, Hadith favorites, Tasbih counts, preferences) is stored locally on your device using Android's standard storage APIs (DataStore, Room database). This data is never uploaded to any server.</p>
+  <h2>2. Services the app contacts</h2>
+  <p>These requests go directly from your device to the service named. We do not run a server and receive none of this data.
+    Like any internet request, each service can see your device's IP address.</p>
+  <table>
+    <tr><th>Feature</th><th>Service</th><th>What is sent</th><th>When</th></tr>
+    <tr><td>Weather cards (rain, heat, wind)</td><td>Open-Meteo (api.open-meteo.com)</td><td>Your location rounded to about 1 km</td><td>While the app is open, at most once an hour, after you have set a location; not while battery saver is on</td></tr>
+    <tr><td>Nearby earthquake card</td><td>U.S. Geological Survey (earthquake.usgs.gov)</td><td>Nothing about you: the app downloads the public worldwide feed and checks distance on your device</td><td>While the app is open, at most once an hour; not while battery saver is on</td></tr>
+    <tr><td>City name for your location</td><td>Your device's built-in Android geocoder</td><td>Your coordinates, handled by your phone's geocoding provider</td><td>When a new location is found</td></tr>
+    <tr><td>Quran recitation</td><td>EveryAyah (everyayah.com)</td><td>The recitation file requested</td><td>When you play or download a recitation</td></tr>
+    <tr><td>Full hadith collections</td><td>jsDelivr CDN (cdn.jsdelivr.net)</td><td>The collection requested</td><td>Only when you tap Download</td></tr>
+    <tr><td>App updates</td><td>Google Play (Play In-App Updates)</td><td>Handled by Google Play under Google's privacy policy</td><td>When the app checks for an update</td></tr>
+  </table>
+  <p>Links you tap in the app, such as the source code or this policy, open in your browser.</p>
 
-  <h2>6. Children's Privacy</h2>
-  <p>Deen Companion does not knowingly collect any information from children under 13. No personal data is collected from any user regardless of age.</p>
+  <h2>3. Permissions</h2>
+  <table>
+    <tr><th>Permission</th><th>Why</th></tr>
+    <tr><td>Location (approximate and precise)</td><td>Prayer times and the Qibla for where you are. Used only while the app is open, never in the background, and only after you allow it. You can choose a city instead.</td></tr>
+    <tr><td>Notifications</td><td>Adhan, iqama and athkar reminders.</td></tr>
+    <tr><td>Alarms &amp; reminders (exact alarms)</td><td>So prayer alerts arrive on time. You grant it in system settings.</td></tr>
+    <tr><td>Do Not Disturb access (optional)</td><td>Only if you turn on “Silence during prayer”: quiets the phone from the iqama and restores it afterwards.</td></tr>
+    <tr><td>Run at startup</td><td>Reschedules prayer alerts after the phone restarts.</td></tr>
+    <tr><td>Foreground service (media playback)</td><td>Keeps Quran recitation playing with media controls when you leave the app.</td></tr>
+    <tr><td>Internet</td><td>The services listed in section 2.</td></tr>
+  </table>
 
-  <h2>7. Changes to This Policy</h2>
-  <p>If this privacy policy is updated, the new version will be published at this URL with a new "Last updated" date. Significant changes will also be noted in the app's release notes on GitHub.</p>
+  <h2>4. Sharing, selling and advertising</h2>
+  <p>We do not sell, rent or share personal data, and we do not use your data for advertising. The app contains no ads,
+    no analytics or crash-reporting SDKs, and no social-media SDKs.</p>
 
-  <h2>8. Open Source</h2>
-  <p>Deen Companion is open source. You can inspect the full source code at <a href="https://github.com/Pilotothegreat/deen-companion">github.com/Pilotothegreat/deen-companion</a> to verify these claims.</p>
+  <h2>5. Security</h2>
+  <p>Every network request uses HTTPS. Data on the device is kept in the app's private storage, which other apps cannot read.</p>
+
+  <h2>6. Children</h2>
+  <p>Bilal is intended for users aged 13 and over. We do not knowingly collect personal data from anyone, including children.</p>
+
+  <h2>7. Your choices and rights</h2>
+  <p>Because we hold no data about you, there is nothing for us to access, correct or delete on our side. You control everything
+    on your device: you can deny the location permission and choose a city, turn usage counts off, and delete all app data
+    as described in section 1.</p>
+
+  <h2>8. Changes to this policy</h2>
+  <p>If this policy changes, the new version will be published at this address with a new “Last updated” date.</p>
 
   <h2>9. Contact</h2>
-  <p>If you have any questions about this privacy policy, please open an issue on the <a href="https://github.com/Pilotothegreat/deen-companion/issues">GitHub repository</a>.</p>
-
-  <footer>
-    <p>Deen Companion — Privacy-first, offline Islamic companion.<br>
-    No ads. No tracking. No accounts.</p>
-  </footer>
-
-</div>
+  <p>Developer: <strong>Oman Creative Studio</strong>, publisher of Bilal: Prayer Times &amp; Athkar on Google Play.<br />
+    For questions about this policy or your privacy, open an issue at
+    <a href="https://github.com/Pilotothegreat/deen-companion/issues">github.com/Pilotothegreat/deen-companion/issues</a>.<br />
+    The app's source code is public at
+    <a href="https://github.com/Pilotothegreat/deen-companion">github.com/Pilotothegreat/deen-companion</a>.</p>
+</main>
 </body>
 </html>
