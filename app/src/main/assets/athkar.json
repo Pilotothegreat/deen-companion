@@ -1,0 +1,2222 @@
+{
+ "sources": [
+  "Seen-Arabic Morning and Evening Adhkar DB (MIT)",
+  "Hisn al-Muslim by Sa'id bin Ali bin Wahf al-Qahtani, via hisnmuslim.com"
+ ],
+ "core": [
+  {
+   "id": "morning",
+   "titleEn": "Morning",
+   "titleAr": "أذكار الصباح",
+   "items": [
+    {
+     "id": "seen-1",
+     "ar": "الْحَمْدُ لِلَّهِ وَحْدَهُ، وَالصَّلاَةُ وَالسَّلاَمُ عَلَى مَنْ لاَ نَبِيَّ بَعْدَهُ",
+     "en": "All praise is due to Allah alone, and peace and blessings be upon him after whom there is no other Prophet.",
+     "tr": "Alḥamdulillahi waḥdah waṣ-ṣalatu was-salam `alā man lā nabiyya ba`dah.",
+     "count": 1,
+     "virtueEn": "The recommendation to begin supplication with praise to Allah the Exalted and extolling Him, followed by prayers upon the Messenger of Allah ﷺ.",
+     "virtueAr": "استحباب ابتداء الدعاء بالحمد لله -تعالى- والثناء، ثم الصلاة على رسول الله ﷺ",
+     "sourceEn": "Anas (RA) said that he heard the Prophet (ﷺ) say: \"That I sit with people remembering Almighty Allah from the morning (Fajr) prayer until sunrise is more beloved to me than freeing four slaves from among the Children of Isma'il. That I sit with people remembering Allah from the afternoon ('Asr) prayer, until the sun sets, is more beloved to me than freeing four slaves from among the Children of Isma'il.\"This was reported by Abu Dawud (No. 3667). Al-Albani graded it good in Sahih Abu Dawud 2/698.",
+     "sourceAr": "عن أنس يرفعه: ((لأن أقعد مع قوم يذكرون اللَّه تعالى من صلاة الغداة حتى تطلع الشمس أحبُّ إليَّ من أن أُعتق أربعة من ولد إسماعيل، ولأن أقعد مع قوم يذكرون اللَّه من صلاة العصر إلى أن تغرب الشمس أحبّ إليَّ من أن أعتق أربعة)). أبو داود، برقم 3667، وحسنه الألباني، في صحيح أبي داود، 2/698 .",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-2",
+     "ar": "أَعُوذُ بِاللَّهِ مِنَ الشَّيطَانِ الرَّجِيمِ ﴿اللَّهُ لاَ إِلَهَ إِلاَّ هُوَ الْحَيُّ الْقَيُّومُ لاَ تَأْخُذُهُ سِنَةٌ وَلاَ نَوْمٌ لَّهُ مَا فِي السَّمَوَاتِ وَمَا فِي الأَرْضِ مَن ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلاَّ بِإِذْنِهِ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ وَلاَ يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلاَّ بِمَا شَاء وَسِعَ كُرْسِيُّهُ السَّمَوَاتِ وَالْأَرْضَ وَلاَ يَؤُودُهُ حِفْظُهُمَا وَهُوَ الْعَلِيُّ الْعَظِيمُ﴾",
+     "en": "Allah! There is none worthy of worship but He, the Ever-Living, the One Who sustains and protects all that exists. Neither slumber nor sleep overtakes Him. To Him belongs whatever is in the heavens and whatever is on the earth. Who is he that can intercede with Him except with His Permission? He knows what happens to them in this world, and what will happen to them in the Hereafter. And they will never encompass anything of His Knowledge except that which He wills. His Throne extends over the heavens and the earth, and He feels no fatigue in guarding and preserving them. And He is the Most High, the Most Great.",
+     "tr": "A`ūdhu billāhi min ash-shaytāni 'r-rajīm Allāhu lā ilāha illā huwa ‘l-Ḥayyul-Qayyūm, lā ta'khudhuhu sinatun wa lā nawm, lahu mā fis-samāwāti wa māfil-arḍ, man dhal-ladhī yashfa`u `indahu illā bi'idhnih, ya`lamu mā bayna aydīhim wa mā khalfahum, wa lā yuḥīṭūna bishay'im-min `ilmihi illā bimā shā', wasi`a kursiyyuhus-samāwāti wal-arḍ, wa lā ya'ūduhu hifẓuhumā, wa huwal-`Aliyyu‘l-`Aẓīm.",
+     "count": 1,
+     "virtueEn": "(Ayat al-Kursi; Al-Qur'an 2:255) Whoever says this when he rises in the morning will be protected from jinns until he retires in the evening, and whoever says it when retiring in the evening will be protected from them until he rises in the morning.",
+     "virtueAr": "[سورة البقرة، الآية: 255] من قالها حين يصبح أُجير من الجن حتى يمسي، ومن قالها حين يمسي أُجير منهم حتى يصبح",
+     "sourceEn": "It was reported by Al-Hakim 1 / 562, Al-Albani graded it as authentic in Sahihut-Targhib wat-Tarhib 1/273, and traces it to An-Nasa'i and At-Tabarani. He says that At-Tabarani's chain of transmission is reliable (Jayyid).",
+     "sourceAr": "أخرجه الحاكم، 1/562، وصححه الألباني في صحيح الترغيب والترهيب، 1/273، وعزاه إلى النسائي، والطبراني، وقال: ((إسناد الطبراني جيد)).",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-4",
+     "ar": "قُلْ هُوَ ٱللَّهُ أَحَدٌ، ٱللَّهُ ٱلصَّمَدُ، لَمْ يَلِدْ وَلَمْ يُولَدْ، وَلَمْ يَكُن لَّهُۥ كُفُوًا أَحَدٌۢ",
+     "en": "Say, He is Allah, [who is] One, Allah, the Eternal Refuge. He neither begets nor is born, Nor is there to Him any equivalent.",
+     "tr": "Bismillaahir Rahmaanir Raheem \"Qul huwal laahu ahad Allah hus-samad Lam yalid wa lam yoolad Wa lam yakul-lahoo kufuwan ahad",
+     "count": 3,
+     "virtueEn": "Al-Ikhlas 112:1-4, Al-Falaq 113:1-5, An-Nas 114:1-6. Whoever recites these three times in the morning and in the evening, they will suffice him (as a protection) against everything.",
+     "virtueAr": "من قالها ثلاث مرات حين يصبح وحين يمسي كفته من كل شيء",
+     "sourceEn": "The Hadith was reported by Abu Dawud 4/322, and At-Tirmidhi 5/567. See Al-Albani's Sahih At-Tirmidhi 3/182.",
+     "sourceAr": "أخرجه أبو داود، 4/ 322، برقم 5082، والترمذي، 5/ 567، برقم 3575، وانظر: صحيح الترمذي، 3/182.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-5",
+     "ar": "قُلْ أَعُوذُ بِرَبِّ ٱلْفَلَقِ، مِن شَرِّ مَا خَلَقَ، وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ، وَمِن شَرِّ ٱلنَّفَّٰثَٰتِ فِى ٱلْعُقَدِ، وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ",
+     "en": "Say, I seek refuge in the Lord of daybreak From the evil of that which He created And from the evil of darkness when it settles And from the evil of the blowers in knots And from the evil of an envier when he envies.",
+     "tr": "Bismillaahir Rahmaanir Raheem \"Qul a'oozu bi rabbil-falaq Min sharri maa khalaq Wa min sharri ghaasiqin izaa waqab Wa min sharrin-naffaa-taati fil 'uqad Wa min sharri haasidin izaa hasad",
+     "count": 3,
+     "virtueEn": "Al-Ikhlas 112:1-4, Al-Falaq 113:1-5, An-Nas 114:1-6. Whoever recites these three times in the morning and in the evening, they will suffice him (as a protection) against everything.",
+     "virtueAr": "من قالها ثلاث مرات حين يصبح وحين يمسي كفته من كل شيء",
+     "sourceEn": "The Hadith was reported by Abu Dawud 4/322, and At-Tirmidhi 5/567. See Al-Albani's Sahih At-Tirmidhi 3/182.",
+     "sourceAr": "أخرجه أبو داود، 4/ 322، برقم 5082، والترمذي، 5/ 567، برقم 3575، وانظر: صحيح الترمذي، 3/182.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-6",
+     "ar": "قُلْ أَعُوذُ بِرَبِّ ٱلنَّاسِ، مَلِكِ ٱلنَّاسِ، إِلَٰهِ ٱلنَّاسِ، مِن شَرِّ ٱلْوَسْوَاسِ ٱلْخَنَّاسِ، ٱلَّذِى يُوَسْوِسُ فِى صُدُورِ ٱلنَّاسِ، مِنَ ٱلْجِنَّةِ وَٱلنَّاسِ",
+     "en": "Say, I seek refuge in the Lord of mankind The Sovereign of mankind The God of mankind From the evil of the retreating whisperer Who whispers [evil] into the breasts of mankind From among the jinn and mankind.",
+     "tr": "Bismillaahir Rahmaanir Raheem \"Qul a'oozu birabbin naas Malikin naas Ilaahin naas Min sharril waswaasil khannaas Allazee yuwaswisu fee sudoorin naas Minal jinnati wannaas",
+     "count": 3,
+     "virtueEn": "Al-Ikhlas 112:1-4, Al-Falaq 113:1-5, An-Nas 114:1-6. Whoever recites these three times in the morning and in the evening, they will suffice him (as a protection) against everything.",
+     "virtueAr": "من قالها ثلاث مرات حين يصبح وحين يمسي كفته من كل شيء",
+     "sourceEn": "The Hadith was reported by Abu Dawud 4/322, and At-Tirmidhi 5/567. See Al-Albani's Sahih At-Tirmidhi 3/182.",
+     "sourceAr": "أخرجه أبو داود، 4/ 322، برقم 5082، والترمذي، 5/ 567، برقم 3575، وانظر: صحيح الترمذي، 3/182.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-7",
+     "ar": "أَصْبَحْنَا وَأَصْبَحَ الْملْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لاَ إِلَهَ إلاَّ اللَّهُ وَحْدَهُ لاَ شَرِيكَ لَهُ، لَهُ الْملْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، رَبِّ أَسْأَلُكَ خَيْرَ مَا فِي هَذَا الْيَوْمِ وَخَيرَ مَا بَعْدَهُ، وَأَعُوذُ بِكَ مِنْ شَرِّ مَا فِي هَذَا الْيَوْمِ وَشَرِّ مَا بَعْدَهُ، رَبِّ أَعُوذُ بِكَ مِنَ الْكَسَلِ وَسُوءِ الْكِبَرِ، رَبِّ أَعُوذُ بِكَ مِنْ عَذَابٍ فِي النَّارِ وَعَذَابٍ فِي الْقَبْرِ",
+     "en": "We have reached the morning and at this very time unto Allah belongs all sovereignty, and all praise is for Allah. None has the right to be worshipped except Allah, alone, without partner, to Him belongs all sovereignty and praise, and He is over all things omnipotent. My Lord, I ask You for the good of this day and the good of what follows it and I take refuge in You from the evil of this day and the evil of what follows it. My Lord, I take refuge in You from laziness and senility. My Lord, I take refuge in You from torment in the Fire and punishment in the grave.",
+     "tr": "Asbahna wa-asbahal-mulku lillah, walhamdu lillah, la ilaha illal-lah, wahdahu la shareeka lah, lahul-mulku walahul-hamd, wahuwa AAala kulli shayin qadeer, rabbi as-aluka khayra ma fee hathal-yawm, wakhayra ma baAAdahu, wa-aAAoothu bika min sharri hathal-yawm, washarri ma baAAdahu, rabbi aAAoothu bika minal-kasal, wasoo-il kibar, rabbi aAAoothu bika min AAathabin fin-nar, waAAathabin fil-qabr.",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Muslim, 4/2088, No. 2723.",
+     "sourceAr": "مسلم، 4/ 2088، برقم 2723.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-9",
+     "ar": "اللَّهُمَّ بِكَ أَصْبَحْنَا، وَبِكَ أَمْسَيْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ وَإِلَيْكَ النُّشُورُ",
+     "en": "O Allah, by Your leave we have reached the morning and by Your leave we have reached the evening, by Your leave we live and die and unto You is our resurrection",
+     "tr": "Allahumma bika asbahna, wabika amsayna, wabika nahya, wabika namootu wa-ilaykan-nushoor.",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Al-Tirmidhi, 5/466, No. 3391, and see: Sahih Al-Tirmidhi 3/142.",
+     "sourceAr": "الترمذي، 5/ 466، برقم 3391، وانظر: صحيح الترمذي 3/142.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-11",
+     "ar": "اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلاَّ أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ، وَأَبُوءُ بِذَنْبِي فَاغْفِرْ لِي فَإِنَّهُ لاَ يَغْفِرُ الذُّنوبَ إِلاَّ أَنْتَ",
+     "en": "O Allah, You are my Lord, none has the right to be worshipped except You, You created me and I am Your servant and I abide to Your covenant and promise as best I can, I take refuge in You from the evil of which I have committed. I acknowledge Your favour upon me and I acknowledge my sin, so forgive me, for verily none can forgive sin except You.",
+     "tr": "Allahumma anta rabbee la ilaha illa ant, khalaqtanee wa-ana AAabduk, wa-ana AAala AAahdika wawaAAdika mas-tataAAt, aAAoothu bika min sharri ma sanaAAt, aboo-o laka biniAAmatika AAalay, wa-aboo-o bithanbee, faghfir lee fa-innahu la yaghfiruth-thunooba illa ant.",
+     "count": 1,
+     "virtueEn": "Whoever recites this with conviction in the evening and dies during that night shall enter Paradise, and whoever recites it with conviction in the morning and dies during that day shall enter Paradise",
+     "virtueAr": "وَمَنْ قَالَهَا مِنَ النَّهَارِ مُوقِنًا بِهَا، فَمَاتَ مِنْ يَوْمِهِ قَبْلَ أَنْ يُمْسِيَ، فَهُوَ مِنْ أَهْلِ الْجَنَّةِ، وَمَنْ قَالَهَا مِنَ اللَّيْلِ وَهُوَ مُوقِنٌ بِهَا، فَمَاتَ قَبْلَ أَنْ يُصْبِحَ، فَهُوَ مِنْ أَهْلِ الْجَنَّةِ",
+     "sourceEn": "Narrated by Al-Bukhari, 7/150, No. 6306.",
+     "sourceAr": "أخرجه البخاري، 7/ 150، برقم 6306.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-12",
+     "ar": "اللَّهُمَّ إِنِّي أَصْبَحْتُ أُشْهِدُكَ، وَأُشْهِدُ حَمَلَةَ عَرْشِكَ، وَمَلاَئِكَتَكَ، وَجَمِيعَ خَلْقِكَ، أَنَّكَ أَنْتَ اللَّهُ لَا إِلَهَ إِلاَّ أَنْتَ وَحْدَكَ لاَ شَرِيكَ لَكَ، وَأَنَّ مُحَمَّداً عَبْدُكَ وَرَسُولُكَ",
+     "en": "O Allah, verily I have reached the morning and call on You, the bearers of Your throne, Your angels, and all of Your creation to witness that You are Allah, none has the right to be worshipped except You, alone, without partner, and that Muhammad is Your Servant and Messenger.",
+     "tr": "Allahumma innee asbahtu oshhiduka, wa-osshidu hamalata AAarshika, wamala-ikatika, wajameeAAa khalqika, annaka antal-lahu la ilaha illa ant, wahdaka la shareeka lak, wa-anna Muhammadan AAabduka warasooluka.",
+     "count": 4,
+     "virtueEn": "Allah will spare whoever says this four times in the morning or evening from the fire of Hell.",
+     "virtueAr": "من قالها حين يصبح، أو يمسي أربع مرات، أعتقه اللَّه من النار",
+     "sourceEn": "It was narrated by Abu Dawood, 4/317, No. 5069, and by Al-Bukhari in Al-Adab Al-Mufrad, No. 1201, and by Al-Nasa'i in 'Amal Al-Yawm wal-Laylah, No. 9, and by Ibn Al-Sunni, No. 70. Sheikh Ibn Baz classified the isnad of Al-Nasa'i and Abu Dawood as hasan in Tuhfat Al-Akhyar, p. 23.",
+     "sourceAr": "أخرجه أبو داود، 4/ 317، برقم 5069، والبخاري في الأدب المفرد، برقم 1201، والنسائي في عمل اليوم والليلة، برقم 9، وابن السني، برقم 70، وحسّن سماحة الشيخ ابن باز ‘ إسناد النسائي، وأبي داود، في تحفة الأخيار، ص23.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-14",
+     "ar": "اللَّهُمَّ مَا أَصْبَحَ بِي مِنْ نِعْمَةٍ أَوْ بِأَحَدٍ مِنْ خَلْقِكَ فَمِنْكَ وَحْدَكَ لاَ شَرِيكَ لَكَ، فَلَكَ الْحَمْدُ وَلَكَ الشُّكْرُ",
+     "en": "O Allah, what blessing I or any of Your creation have risen upon is from You alone, without partner. So for You is all praise and unto You all thanks.",
+     "tr": "Allahumma ma asbaha bee min niAAmatin, aw bi-ahadin min khalqika, faminka wahdaka la shareeka lak, falakal-hamdu walakash-shukr.",
+     "count": 1,
+     "virtueEn": "Whoever recites this in the morning, has completed his obligation to thank Allah for that day; and whoever says it in the evening, has completed his obligation for that night.",
+     "virtueAr": "من قالها حين يصبح فقد أدَّى شكر يومه، ومن قالها حين يمسي فقد أدَّى شكر ليلته",
+     "sourceEn": "It was narrated by Abu Dawood, 4/318, No. 5073, and by Al-Nasa'i in 'Amal Al-Yawm wal-Laylah, No. 7, and by Ibn Al-Sunni, No. 41, and by Ibn Hibban in Mawarid, No. 2361. Sheikh Ibn Baz classified the isnad as hasan in Tuhfat Al-Akhyar, p. 24.",
+     "sourceAr": "أخرجه أبو داود، 4/ 318، برقم 5073، والنسائي في عمل اليوم والليلة، برقم 7، وابن السني، برقم 41، وابن حبان، ((موارد)) برقم 2361، وحسّن ابن باز ‘ إسناده في تحفة الأخيار، ص24.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-16",
+     "ar": "اللَّهُمَّ عَافِنِي فِي بَدَنِي، اللَّهُمَّ عَافِنِي فِي سَمْعِي، اللَّهُمَّ عَافِنِي فِي بَصَرِي، لاَ إِلَهَ إِلاَّ أَنْتَ. اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْكُفْرِ، وَالفَقْرِ، وَأَعُوذُ بِكَ مِنْ عَذَابِ القَبْرِ، لاَ إِلَهَ إِلاَّ أَنْتَ",
+     "en": "O Allah, grant my body health, O Allah, grant my hearing health, O Allah, grant my sight health. None has the right to be worshipped except You. O Allah, I take refuge with You from disbelief and poverty, and I take refuge with You from the punishment of the grave. None has the right to be worshipped except You.",
+     "tr": "Allahumma AAafinee fee badanee, allahumma AAafinee fee samAAee, allahumma AAafinee fee basaree, la ilaha illa ant. Allahumma innee aAAoothu bika minal-kufr, walfaqr, wa-aAAoothu bika min AAathabil-qabr, la ilaha illa ant.",
+     "count": 3,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Abu Dawud 4/324, Ahmad 5/42, An-Nasa'i, 'Amalul-Yawm wal-Laylah (No. 22), Ibn As-Sunni (No. 69), Al-Bukhari Al-'Adab Al-Mufrad. Its chain of transmission is good (Hasan), Ibn Baz, p. 26.",
+     "sourceAr": "أبو داود، 4/ 324، برقم 5090، وأحمد، 5/ 42، برقم 20430، والنسائي في عمل اليوم والليلة، برقم 22، وابن السني، برقم 69، والبخاري في الأدب المفرد، برقم 701، وحسّن العلامة ابن باز ‘ إسناده في تحفة الأخيار، ص26.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-17",
+     "ar": "حَسْبِيَ اللَّهُ لاَ إِلَهَ إِلاَّ هُوَ عَلَيهِ تَوَكَّلتُ وَهُوَ رَبُّ الْعَرْشِ الْعَظِيمِ",
+     "en": "Allah is Sufficient for me, none has the right to be worshipped except Him, upon Him I rely and He is Lord of the exalted throne.",
+     "tr": "Hasbiyal-lahu la ilaha illa huwa, AAalayhi tawakkalt, wahuwa rabbul-AAarshil-AAatheem",
+     "count": 7,
+     "virtueEn": "Allah will grant whoever recites this seven times in the morning or evening whatever he desires from this world or the next",
+     "virtueAr": "من قالها حين يصبح وحين يمسي سبع مرات كفاه اللَّه ما أهمّه من أمر الدنيا والآخرة",
+     "sourceEn": "It was narrated by Ibn As-Sunni, No. 71, attributed directly to the Prophet (Marfu'), and by Abu Dawud as a statement of a Companion (Mawquf), 4/321, No. 5081. The chain of transmission was authenticated by Shu'ayb and 'Abd al-Qadir al-Arna'ut. See: Zad Al-Ma'ad 2/376.",
+     "sourceAr": "أخرجه ابن السني، برقم 71 مرفوعاً، وأبو داود موقوفاً، 4/ 321، برقم 5081، وصحّح إسناده شعيب وعبدالقادر الأرناؤوط. انظر: زاد المعاد 2/376.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-18",
+     "ar": "اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي الدُّنْيَا وَالآخِرَةِ، اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ: فِي دِينِي وَدُنْيَايَ وَأَهْلِي، وَمَالِي، اللَّهُمَّ اسْتُرْ عَوْرَاتِي، وَآمِنْ رَوْعَاتِي، اللَّهُمَّ احْفَظْنِي مِنْ بَينِ يَدَيَّ، وَمِنْ خَلْفِي، وَعَنْ يَمِينِي، وَعَنْ شِمَالِي، وَمِنْ فَوْقِي، وَأَعُوذُ بِعَظَمَتِكَ أَنْ أُغْتَالَ مِنْ تَحْتِي",
+     "en": "O Allah, I ask You for pardon and well-being in this life and the next. O Allah, I ask You for pardon and well-being in my religious and worldly affairs, and my family and my wealth. O Allah, veil my weaknesses and set at ease my dismay. O Allah, preserve me from the front and from behind and on my right and on my left and from above, and I take refuge with You lest I be swallowed up by the earth.",
+     "tr": "Allahumma innee as-alukal-AAafwa walAAafiyah, fid-dunya wal-akhirah, allahumma innee as-alukal-AAafwa walAAafiyah fee deenee, wadunyaya wa-ahlee, wamalee, allahummas-tur AAawratee, wa-amin rawAAatee, allahummah-fathnee min bayni yaday, wamin khalfee, waAAan yameenee, waAAan shimalee, wamin fawqee, wa-aAAoothu biAAathamatika an oghtala min tahtee.",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Abu Dawood, No. 5074, and Ibn Majah, No. 3871. See: Sahih Ibn Majah, 2/332.",
+     "sourceAr": "أبو داود، برقم 5074، وابن ماجه، برقم 3871، وانظر: صحيح ابن ماجه، 2/332.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-19",
+     "ar": "اللَّهُمَّ عَالِمَ الغَيْبِ وَالشَّهَادَةِ فَاطِرَ السَّمَوَاتِ وَالْأَرْضِ، رَبَّ كُلِّ شَيْءٍ وَمَلِيكَهُ، أَشْهَدُ أَنْ لاَ إِلَهَ إِلاَّ أَنْتَ، أَعُوذُ بِكَ مِنْ شَرِّ نَفْسِي، وَمِنْ شَرِّ الشَّيْطانِ وَشَرَكِهِ، وَأَنْ أَقْتَرِفَ عَلَى نَفْسِي سُوءاً، أَوْ أَجُرَّهُ إِلَى مُسْلِمٍ",
+     "en": "O Allah, Knower of the unseen and the seen, Creator of the heavens and the Earth, Lord and Sovereign of all things, I bear witness that none has the right to be worshipped except You. I take refuge in You from the evil of my soul and from the evil and shirk of the devil, and from committing wrong against my soul or bringing such upon another Muslim.",
+     "tr": "Allahumma AAalimal-ghaybi washshahadah, fatiras-samawati wal-ard, rabba kulli shayin wamaleekah, ashhadu an la ilaha illa ant, aAAoothu bika min sharri nafsee wamin sharrish-shaytani washirkih, waan aqtarifa AAala nafsee soo-an aw ajurrahu ila muslim.",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Al-Tirmidhi, No. 3392, and Abu Dawood, No. 5067. See: Sahih Al-Tirmidhi, 3/142.",
+     "sourceAr": "الترمذي، برقم 3392، وأبو داود، برقم 5067،. وانظر: صحيح الترمذي، 3/142.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-20",
+     "ar": "بِسْمِ اللَّهِ الَّذِي لاَ يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلاَ فِي السّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ",
+     "en": "In the name of Allah with whose name nothing is harmed on earth nor in the heavens and He is The All-Seeing, The All-Knowing.",
+     "tr": "Bismil-lahil-lathee la yadurru maAAas-mihi shay-on fil-ardi wala fis-sama-i wahuwas-sameeAAul-AAaleem.",
+     "count": 3,
+     "virtueEn": "Whoever recites it three times in the morning will not be afflicted by any calamity before evening, and whoever recites it three times in the evening will not be overtaken by any calamity before morning.",
+     "virtueAr": "من قالها ثلاثاً إذا أصبح، وثلاثاً إذا أمسى لم يضره شيء",
+     "sourceEn": "It was narrated by Abu Dawood, 4/323, No. 5088, Al-Tirmidhi, 5/465, No. 3388, Ibn Majah, No. 3869, and Ahmad, No. 446. See: Sahih Ibn Majah, 2/332. Sheikh Ibn Baz classified the isnad as hasan in Tuhfat Al-Akhyar, p. 39.",
+     "sourceAr": "أخرجه أبو داود، 4/ 323، برقم، 5088، والترمذي، 5/ 465، برقم 3388، وابن ماجه، برقم 3869، وأحمد، برقم 446. وانظر: صحيح ابن ماجه، 2/332، وحسّن إسناده العلامة ابن باز ‘ في تحفة الأخيار، ص39.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-21",
+     "ar": "رَضِيتُ بِاللَّهِ رَبَّاً، وَبِالْإِسْلاَمِ دِيناً، وَبِمُحَمَّدٍ ﷺ نَبِيًّا",
+     "en": "I am pleased with Allah as a Lord, and Islam as a religion and Muhammad as a Prophet.",
+     "tr": "Radeetu billahi rabban wabil-islami deenan wabiMuhammadin nabiyya.",
+     "count": 3,
+     "virtueEn": "Allah has promised that anyone who says this three times every morning or evening will be pleased on the Day of Resurrection.",
+     "virtueAr": "من قالها ثلاثاً حين يصبح وثلاثاً حين يمسي كان حقاً على اللَّه أن يرضيه يوم القيامة",
+     "sourceEn": "Ahmad, 4/337, No. 18967, Al-Nasa'i in 'Amal Al-Yawm wal-Laylah, No. 4, Ibn Al-Sunni, No. 68, Abu Dawood, 4/318, No. 1531, and Al-Tirmidhi, 5/465, No. 3389. Sheikh Ibn Baz classified it as hasan in Tuhfat Al-Akhyar, p. 39.",
+     "sourceAr": "أحمد، 4/ 337، برقم 18967، والنسائي في عمل اليوم والليلة، برقم 4، وابن السني، برقم 68، وأبو داود، 4/ 318، برقم 1531، والترمذي، 5/ 465، برقم، 3389، وحسّنه ابن باز ‘ في تحفة الأخيار ص39.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-22",
+     "ar": "يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغيثُ أَصْلِحْ لِي شَأْنِيَ كُلَّهُ وَلاَ تَكِلْنِي إِلَى نَفْسِي طَرْفَةَ عَيْنٍ",
+     "en": "O Ever Living, O Self-Subsisting and Supporter of all, by Your mercy I seek assistance, rectify for me all of my affairs and do not leave me to myself, even for the blink of an eye.",
+     "tr": "Ya hayyu ya qayyoom, birahmatika astagheeth, aslih lee sha/nee kullah, wala takilnee ila nafsee tarfata AAayn.",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Its chain of transmission is sound (Sahih), Al-Hakim 1/545, see Albani, Sahihut-Targhib wat-Tarhib, 1/273.",
+     "sourceAr": "الحاكم وصححه، ووافقه الذهبي، 1/545، وانظر: صحيح الترغيب والترهيب، 1/273.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-23",
+     "ar": "أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ رَبِّ الْعَالَمِينَ، اللَّهُمَّ إِنِّي أَسْأَلُكَ خَيْرَ هَذَا الْيَوْمِ: فَتْحَهُ، وَنَصْرَهُ، وَنورَهُ، وَبَرَكَتَهُ، وَهُدَاهُ، وَأَعُوذُ بِكَ مِنْ شَرِّ مَا فِيهِ وَشَرِّ مَا بَعْدَهُ",
+     "en": "We have reached the morning and at this very time all sovereignty belongs to Allah, Lord of the worlds. O Allah, I ask You for the good of this day, its triumphs and its victories, its light and its blessings and its guidance, and I take refuge in You from the evil of this day and the evil that follows it.",
+     "tr": "Asbahna wa-asbahal-mulku lillahi rabbil-AAalameen, allahumma innee as-aluka khayra hathal-yawm, fat-hahu, wanasrahu, wanoorahu, wabarakatahu, wahudahu, wa-aAAoothu bika min sharri ma feehi, washarri ma baAAdah.",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Abu Dawud 4/322. Its transmission chain is good (Hasan). See also Ibn Al-Qayyim, Zadul- Ma'ad 2/273.",
+     "sourceAr": "أبو داود، 4/ 322، برقم 5084، وحسن إسناده شعيب وعبد القادر الأرناؤوط في تحقيق زاد المعاد، 2/373.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-25",
+     "ar": "أَصْبَحْنا عَلَى فِطْرَةِ الْإِسْلاَمِ، وَعَلَى كَلِمَةِ الْإِخْلاَصِ، وَعَلَى دِينِ نَبِيِّنَا مُحَمَّدٍ ﷺ، وَعَلَى مِلَّةِ أَبِينَا إِبْرَاهِيمَ، حَنِيفاً مُسْلِماً وَمَا كَانَ مِنَ الْمُشرِكِينَ",
+     "en": "We rise upon the fitrah of Islam, and the word of pure faith, and upon the religion of our Prophet Muhammad ﷺ, and the religion of our forefather Ibraheem, who was a Muslim and of true faith and was not of those who associate others with Allah.",
+     "tr": "Asbahna AAala fitratil-islam, waAAala kalimatil-ikhlas, waAAala deeni nabiyyina Muhammad ﷺ, waAAala millati abeena Ibraheem, haneefan musliman wama kana minal-mushrikeen.",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Ahmad, 3/406 and 407, nos. 15360 and 15563, and Ibn Al-Sunni in 'Amal Al-Yawm wal-Laylah, No. 34. See: Sahih Al-Jami', 4/209.",
+     "sourceAr": "أحمد، 3/ 406، و407، برقم 15360، ورقم 15563، وابن السني في عمل اليوم والليلة، برقم 34، وانظر: صحيح الجامع، 4/209.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-27",
+     "ar": "اللَّهُمَّ إِنِّي أَسْأَلُكَ عِلْماً نَافِعاً، وَرِزْقاً طَيِّباً، وَعَمَلاً مُتَقَبَّلاً",
+     "en": "O Allah, I ask You for knowledge which is beneficial and sustenance which is good, and deeds which are acceptable.",
+     "tr": "Allahumma innee as-aluka AAilman nafiAAan, warizqan tayyiban, waAAamalan mutaqabbalan.",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "It was narrated by Ibn Al-Sunni in 'Amal Al-Yawm wal-Laylah, No. 54, and by Ibn Majah, No. 925. The chain of transmission was classified as hasan by 'Abd al-Qadir and Shu'ayb al-Arna'ut in their verification of Zad Al-Ma'ad, 2/375.",
+     "sourceAr": "أخرجه ابن السني في ((عمل اليوم والليلة)) برقم (54)، وابن ماجة برقم (925)، وحسن إسناده عبدالقادر وشعيب الأرناؤوط، في تحقيق ((زاد المعاد)) (2/375).",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-28",
+     "ar": "لاَ إِلَهَ إِلاَّ اللَّهُ، وَحْدَهُ لاَ شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ",
+     "en": "None has the right to be worshipped except Allah, alone, without partner, to Him belongs all sovereignty and praise, and He is over all things omnipotent.",
+     "tr": "La ilaha illal-lah, wahdahu la shareeka lah, lahul-mulku walahul-hamd, wahuwa AAala kulli shay-in qadeer.",
+     "count": 10,
+     "virtueEn": "Ten times or once when feeling lazy, and whoever says it ten times, it is as if he has freed four souls from the descendants of Isma'il.",
+     "virtueAr": "عشرَ مرَّات أَوْ مرَّةً واحدةً عندَ الكَسَلِ، ومن قالها عَشْرَ مِرَارٍ كَانَ كَمَنْ أَعْتَقَ أَرْبَعَةَ أَنْفُسٍ مِنْ وَلَدِ إِسْمَاعِيلَ.",
+     "sourceEn": "Sahih Al-Bukhari: 6404, Sahih Muslim: 2693, Al-Nasa'i in 'Amal Al-Yawm wal-Laylah, No. 24. See: Sahih Al-Targhib wal-Tarhib, 1/272, Tuhfat Al-Akhyar by Ibn Baz, p. 44, and its virtue in: p. 146, hadith No. 255. Once when feeling lazy: Abu Dawood, No. 5077, Ibn Majah, No. 3798, Ahmad, No. 8719. See: Sahih Al-Targhib wal-Tarhib, 1/270, Sahih Abi Dawood, 3/957, Sahih Ibn Majah, 2/331, and Zad Al-Ma'ad, 2/377.",
+     "sourceAr": "صحيح البخاري: 6404، صحيح مسلم: 2693، النسائي في عمل اليوم والليلة، برقم 24، وانظر: صحيح الترغيب والترهيب، 1/272، وتحفة الأخيار لابن باز ‘، ص44، وانظر فضلها في: ص146، حديث، رقم 255 مرَّةً واحدةً عندَ الكَسَلِ: أبو داود، برقم 5077، وابن ماجه، برقم 3798، وأحمد، برقم 8719، وانظر: صحيح الترغيب والترهيب، 1/270، وصحيح أبي داود، 3/957، وصحيح ابن ماجه، 2/331، وزاد المعاد، 2/377.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-29",
+     "ar": "اللَّهُمَّ صَلِّ وَسَلِّمْ عَلَى نَبَيِّنَا مُحَمَّدٍ",
+     "en": "O Allaah, send prayers and peace upon our Prophet Muhammad.",
+     "tr": "Allaahumma salli wa sallim 'alaa Nabiyyinaa Muhammadin",
+     "count": 10,
+     "virtueEn": "The Prophet (ﷺ) said: \"Who recites blessings upon me ten times in the morning and ten times in the evening will obtain my intercession on the Day of Resurrection.",
+     "virtueAr": "من صلّى عليَّ حين يصبح عشراً، وحين يمسي عشراً، أدركته شفاعتي يوم القيامة",
+     "sourceEn": "It was narrated by Al-Tabarani with two isnads, one of which is good. See: Majma' Al-Zawa'id, 10/120, and Sahih Al-Targhib wal-Tarhib, 1/273 [No. 656], and Da'if Al-Targhib wal-Tarhib, No. 396, and in Al-Silsilah Al-Da'ifah, No. 5788.",
+     "sourceAr": "أخرجه الطبراني بإسنادين أحدهما جيد، انظر: مجمع الزوائد (10/120)، وصحيح الترغيب والترهيب (1/273) [برقم (656)]، وضعيف الترغيب والترهيب برقم: 396. وفي السلسلة الضعيفة برقم: 5788.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-31",
+     "ar": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ: عَدَدَ خَلْقِهِ، وَرِضَا نَفْسِهِ، وَزِنَةَ عَرْشِهِ، وَمِدَادَ كَلِمَاتِهِ",
+     "en": "How perfect Allah is and I praise Him by the number of His creation and His pleasure, and by the weight of His throne, and the ink of His words.",
+     "tr": "Subhanal-lahi wabihamdih, AAadada khalqihi warida nafsih, wazinata AAarshih, wamidada kalimatih.",
+     "count": 3,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Muslim 4/2090, No. 2726.",
+     "sourceAr": "مسلم، 4/ 2090، برقم 2726.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-32",
+     "ar": "لاَ إِلَهَ إِلاَّ اللَّهُ، وَحْدَهُ لاَ شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ",
+     "en": "None has the right to be worshipped except Allah, alone, without partner, to Him belongs all sovereignty and praise, and He is over all things omnipotent.",
+     "tr": "La ilaha illal-lah, wahdahu la shareeka lah, lahul-mulku walahul-hamd, wahuwa AAala kulli shay-in qadeer.",
+     "count": 100,
+     "virtueEn": "Whoever recites this one hundred times a day will have the reward of freeing ten slaves. One hundred Hasanaat (rewards) will be written for him and one hundred misdeeds will be washed away. He will be shielded from Satan until the evening. No one will be able to present anything better than this except for someone who has recited more than this.",
+     "virtueAr": "من قالها مائة مرة في يوم كانت له عدل عشر رقاب، وكُتِبَ له مائة حسنة، ومُحيت عنه مائة سيئة، وكانت له حرزاً من الشيطان يومه ذلك حتى يمسي، ولم يأت أحد بأفضل مما جاء به إلا أحد عمل أكثر من ذلك",
+     "sourceEn": "Al-Bukhari, 4/95, No. 3293, and Muslim, 4/2071, No. 2691. Ten times: Al-Nasa'i in 'Amal Al-Yawm wal-Laylah, No. 24. See: Sahih Al-Targhib wal-Tarhib, 1/272, and Tuhfat Al-Akhyar by Ibn Baz, p. 44, and its virtue in: p. 146, hadith No. 255. Once when feeling lazy: Abu Dawood, No. 5077, Ibn Majah, No. 3798, Ahmad, No. 8719. See: Sahih Al-Targhib wal-Tarhib, 1/270, Sahih Abi Dawood, 3/957, Sahih Ibn Majah, 2/331, and Zad Al-Ma'ad, 2/377.",
+     "sourceAr": "البخاري، 4/ 95، برقم 3293، ومسلم، 4/ 2071، برقم 2691\nعشرَ مرَّات: النسائي في عمل اليوم والليلة، برقم 24، وانظر: صحيح الترغيب والترهيب، 1/272، وتحفة الأخيار لابن باز ‘، ص44، وانظر فضلها في: ص146، حديث، رقم 255 مرَّةً واحدةً عندَ الكَسَلِ: أبو داود، برقم 5077، وابن ماجه، برقم 3798، وأحمد، برقم 8719، وانظر: صحيح الترغيب والترهيب، 1/270، وصحيح أبي داود، 3/957، وصحيح ابن ماجه، 2/331، وزاد المعاد، 2/377.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-33",
+     "ar": "أَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ",
+     "en": "I seek Allaah’s forgiveness and I turn to Him in repentance.",
+     "tr": "Astaghfirullaaha wa 'atoobu 'ilayhi",
+     "count": 100,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Al-Bukhari with Al-Fath, 11/101 [No. 6307], and Muslim, 4/2075 [No. 2702].",
+     "sourceAr": "البخاري مع ((الفتح)) (11/101) [برقم (6307)]، ومسلم (4/2075) [برقم (2702)].",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-34",
+     "ar": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+     "en": "How perfect Allah is and I praise Him.",
+     "tr": "Subhanal-lahi wabihamdih.",
+     "count": 100,
+     "virtueEn": "Whoever recites this one hundred times in the morning and in the evening will not be surpassed on the Day of Resurrection by anyone having done better than this except for someone who had recited it more.",
+     "virtueAr": "من قالها مائة مرة حين يصبح وحين يمسي لم يأت أحد يوم القيامة بأفضل مما جاء به إلا أحد قال مثل ما قال أو زاد عليه",
+     "sourceEn": "Muslim 2692.",
+     "sourceAr": "مسلم، 4/ 2071 برقم 2692.",
+     "noteEn": "",
+     "noteAr": ""
+    }
+   ]
+  },
+  {
+   "id": "evening",
+   "titleEn": "Evening",
+   "titleAr": "أذكار المساء",
+   "items": [
+    {
+     "id": "seen-1",
+     "ar": "الْحَمْدُ لِلَّهِ وَحْدَهُ، وَالصَّلاَةُ وَالسَّلاَمُ عَلَى مَنْ لاَ نَبِيَّ بَعْدَهُ",
+     "en": "All praise is due to Allah alone, and peace and blessings be upon him after whom there is no other Prophet.",
+     "tr": "Alḥamdulillahi waḥdah waṣ-ṣalatu was-salam `alā man lā nabiyya ba`dah.",
+     "count": 1,
+     "virtueEn": "The recommendation to begin supplication with praise to Allah the Exalted and extolling Him, followed by prayers upon the Messenger of Allah ﷺ.",
+     "virtueAr": "استحباب ابتداء الدعاء بالحمد لله -تعالى- والثناء، ثم الصلاة على رسول الله ﷺ",
+     "sourceEn": "Anas (RA) said that he heard the Prophet (ﷺ) say: \"That I sit with people remembering Almighty Allah from the morning (Fajr) prayer until sunrise is more beloved to me than freeing four slaves from among the Children of Isma'il. That I sit with people remembering Allah from the afternoon ('Asr) prayer, until the sun sets, is more beloved to me than freeing four slaves from among the Children of Isma'il.\"This was reported by Abu Dawud (No. 3667). Al-Albani graded it good in Sahih Abu Dawud 2/698.",
+     "sourceAr": "عن أنس يرفعه: ((لأن أقعد مع قوم يذكرون اللَّه تعالى من صلاة الغداة حتى تطلع الشمس أحبُّ إليَّ من أن أُعتق أربعة من ولد إسماعيل، ولأن أقعد مع قوم يذكرون اللَّه من صلاة العصر إلى أن تغرب الشمس أحبّ إليَّ من أن أعتق أربعة)). أبو داود، برقم 3667، وحسنه الألباني، في صحيح أبي داود، 2/698 .",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-2",
+     "ar": "أَعُوذُ بِاللَّهِ مِنَ الشَّيطَانِ الرَّجِيمِ ﴿اللَّهُ لاَ إِلَهَ إِلاَّ هُوَ الْحَيُّ الْقَيُّومُ لاَ تَأْخُذُهُ سِنَةٌ وَلاَ نَوْمٌ لَّهُ مَا فِي السَّمَوَاتِ وَمَا فِي الأَرْضِ مَن ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلاَّ بِإِذْنِهِ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ وَلاَ يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلاَّ بِمَا شَاء وَسِعَ كُرْسِيُّهُ السَّمَوَاتِ وَالْأَرْضَ وَلاَ يَؤُودُهُ حِفْظُهُمَا وَهُوَ الْعَلِيُّ الْعَظِيمُ﴾",
+     "en": "Allah! There is none worthy of worship but He, the Ever-Living, the One Who sustains and protects all that exists. Neither slumber nor sleep overtakes Him. To Him belongs whatever is in the heavens and whatever is on the earth. Who is he that can intercede with Him except with His Permission? He knows what happens to them in this world, and what will happen to them in the Hereafter. And they will never encompass anything of His Knowledge except that which He wills. His Throne extends over the heavens and the earth, and He feels no fatigue in guarding and preserving them. And He is the Most High, the Most Great.",
+     "tr": "A`ūdhu billāhi min ash-shaytāni 'r-rajīm Allāhu lā ilāha illā huwa ‘l-Ḥayyul-Qayyūm, lā ta'khudhuhu sinatun wa lā nawm, lahu mā fis-samāwāti wa māfil-arḍ, man dhal-ladhī yashfa`u `indahu illā bi'idhnih, ya`lamu mā bayna aydīhim wa mā khalfahum, wa lā yuḥīṭūna bishay'im-min `ilmihi illā bimā shā', wasi`a kursiyyuhus-samāwāti wal-arḍ, wa lā ya'ūduhu hifẓuhumā, wa huwal-`Aliyyu‘l-`Aẓīm.",
+     "count": 1,
+     "virtueEn": "(Ayat al-Kursi; Al-Qur'an 2:255) Whoever says this when he rises in the morning will be protected from jinns until he retires in the evening, and whoever says it when retiring in the evening will be protected from them until he rises in the morning.",
+     "virtueAr": "[سورة البقرة، الآية: 255] من قالها حين يصبح أُجير من الجن حتى يمسي، ومن قالها حين يمسي أُجير منهم حتى يصبح",
+     "sourceEn": "It was reported by Al-Hakim 1 / 562, Al-Albani graded it as authentic in Sahihut-Targhib wat-Tarhib 1/273, and traces it to An-Nasa'i and At-Tabarani. He says that At-Tabarani's chain of transmission is reliable (Jayyid).",
+     "sourceAr": "أخرجه الحاكم، 1/562، وصححه الألباني في صحيح الترغيب والترهيب، 1/273، وعزاه إلى النسائي، والطبراني، وقال: ((إسناد الطبراني جيد)).",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-3",
+     "ar": "أَعُوذُ بِاللَّهِ مِنَ الشَّيطَانِ الرَّجِيمِ ﴿آمَنَ الرَّسُولُ بِمَا أُنزِلَ إِلَيْهِ مِن رَّبِّهِ وَالْمُؤْمِنُونَ كُلٌّ آمَنَ بِاللَّهِ وَمَلآئِكَتِهِ وَكُتُبِهِ وَرُسُلِهِ لاَ نُفَرِّقُ بَيْنَ أَحَدٍ مِّن رُّسُلِهِ وَقَالُواْ سَمِعْنَا وَأَطَعْنَا غُفْرَانَكَ رَبَّنَا وَإِلَيْكَ الْمَصِيرُ ۝ لاَ يُكَلِّفُ اللَّهُ نَفْساً إِلاَّ وُسْعَهَا لَهَا مَا كَسَبَتْ وَعَلَيْهَا مَا اكْتَسَبَتْ رَبَّنَا لاَ تُؤَاخِذْنَا إِن نَّسِينَا أَوْ أَخْطَأْنَا رَبَّنَا وَلاَ تَحْمِلْ عَلَيْنَا إِصْراً كَمَا حَمَلْتَهُ عَلَى الَّذِينَ مِن قَبْلِنَا رَبَّنَا وَلاَ تُحَمِّلْنَا مَا لاَ طَاقَةَ لَنَا بِهِ وَاعْفُ عَنَّا وَاغْفِرْ لَنَا وَارْحَمْنَآ أَنتَ مَوْلاَنَا فَانصُرْنَا عَلَى الْقَوْمِ الْكَافِرِينَ﴾.",
+     "en": "The Messenger has believed in what was revealed to him from his Lord, and [so have] the believers. All of them have believed in Allah and His angels and His books and His messengers, [saying], We make no distinction between any of His messengers. And they say, We hear and we obey. [We seek] Your forgiveness, our Lord, and to You is the [final] destination. Allah does not charge a soul except [with that within] its capacity. It will have [the consequence of] what [good] it has gained, and it will bear [the consequence of] what [evil] it has earned. Our Lord, do not impose blame upon us if we have forgotten or erred. Our Lord, and lay not upon us a burden like that which You laid upon those before us. Our Lord, and burden us not with that which we have no ability to bear. And pardon us; and forgive us; and have mercy upon us. You are our protector, so give us victory over the disbelieving people.",
+     "tr": "Aamanar-Rasoolu bimaaa unzila ilaihi mir-Rabbihee walmu'minoon; kullun aamana billaahi wa Malaaa'ikathihee wa Kutubhihee wa Rusulihee laa nufarriqu baina ahadim-mir-Rusulih wa qaaloo sami'naa wa ata'naa ghufraanaka Rabbanaa wa ilaikal-maseer Laa yukalliful-laahu nafsan illaa wus'ahaa; lahaa maa kasabat wa 'alaihaa maktasabat; Rabbanaa laa tu'aakhiznaaa in naseenaaa aw akhtaanaa; Rabbanaa wa laa tahmil-'alainaaa isran kamaa hamaltahoo 'alal-lazeena min qablinaa; Rabbanaa wa laa tuhammilnaa maa laa taaqata lanaa bih; wa'fu 'annaa waghfir lanaa warhamnaa; Anta mawlaanaa fansurnaa 'alal qawmil kaafireen",
+     "count": 1,
+     "virtueEn": "Al-Baqarah 2:285-6. These two Verses will be sufficient for anyone who recites them at night before sleeping.",
+     "virtueAr": "من قرأ آيتين من آخر سورة البقرة في ليلة كفتاه.",
+     "sourceEn": "It was narrated by Al-Bukhari, No. 4008, and Muslim, No. 807.",
+     "sourceAr": "أخرجه البخاري (4008)، ومسلم (807).",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-4",
+     "ar": "قُلْ هُوَ ٱللَّهُ أَحَدٌ، ٱللَّهُ ٱلصَّمَدُ، لَمْ يَلِدْ وَلَمْ يُولَدْ، وَلَمْ يَكُن لَّهُۥ كُفُوًا أَحَدٌۢ",
+     "en": "Say, He is Allah, [who is] One, Allah, the Eternal Refuge. He neither begets nor is born, Nor is there to Him any equivalent.",
+     "tr": "Bismillaahir Rahmaanir Raheem \"Qul huwal laahu ahad Allah hus-samad Lam yalid wa lam yoolad Wa lam yakul-lahoo kufuwan ahad",
+     "count": 3,
+     "virtueEn": "Al-Ikhlas 112:1-4, Al-Falaq 113:1-5, An-Nas 114:1-6. Whoever recites these three times in the morning and in the evening, they will suffice him (as a protection) against everything.",
+     "virtueAr": "من قالها ثلاث مرات حين يصبح وحين يمسي كفته من كل شيء",
+     "sourceEn": "The Hadith was reported by Abu Dawud 4/322, and At-Tirmidhi 5/567. See Al-Albani's Sahih At-Tirmidhi 3/182.",
+     "sourceAr": "أخرجه أبو داود، 4/ 322، برقم 5082، والترمذي، 5/ 567، برقم 3575، وانظر: صحيح الترمذي، 3/182.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-5",
+     "ar": "قُلْ أَعُوذُ بِرَبِّ ٱلْفَلَقِ، مِن شَرِّ مَا خَلَقَ، وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ، وَمِن شَرِّ ٱلنَّفَّٰثَٰتِ فِى ٱلْعُقَدِ، وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ",
+     "en": "Say, I seek refuge in the Lord of daybreak From the evil of that which He created And from the evil of darkness when it settles And from the evil of the blowers in knots And from the evil of an envier when he envies.",
+     "tr": "Bismillaahir Rahmaanir Raheem \"Qul a'oozu bi rabbil-falaq Min sharri maa khalaq Wa min sharri ghaasiqin izaa waqab Wa min sharrin-naffaa-taati fil 'uqad Wa min sharri haasidin izaa hasad",
+     "count": 3,
+     "virtueEn": "Al-Ikhlas 112:1-4, Al-Falaq 113:1-5, An-Nas 114:1-6. Whoever recites these three times in the morning and in the evening, they will suffice him (as a protection) against everything.",
+     "virtueAr": "من قالها ثلاث مرات حين يصبح وحين يمسي كفته من كل شيء",
+     "sourceEn": "The Hadith was reported by Abu Dawud 4/322, and At-Tirmidhi 5/567. See Al-Albani's Sahih At-Tirmidhi 3/182.",
+     "sourceAr": "أخرجه أبو داود، 4/ 322، برقم 5082، والترمذي، 5/ 567، برقم 3575، وانظر: صحيح الترمذي، 3/182.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-6",
+     "ar": "قُلْ أَعُوذُ بِرَبِّ ٱلنَّاسِ، مَلِكِ ٱلنَّاسِ، إِلَٰهِ ٱلنَّاسِ، مِن شَرِّ ٱلْوَسْوَاسِ ٱلْخَنَّاسِ، ٱلَّذِى يُوَسْوِسُ فِى صُدُورِ ٱلنَّاسِ، مِنَ ٱلْجِنَّةِ وَٱلنَّاسِ",
+     "en": "Say, I seek refuge in the Lord of mankind The Sovereign of mankind The God of mankind From the evil of the retreating whisperer Who whispers [evil] into the breasts of mankind From among the jinn and mankind.",
+     "tr": "Bismillaahir Rahmaanir Raheem \"Qul a'oozu birabbin naas Malikin naas Ilaahin naas Min sharril waswaasil khannaas Allazee yuwaswisu fee sudoorin naas Minal jinnati wannaas",
+     "count": 3,
+     "virtueEn": "Al-Ikhlas 112:1-4, Al-Falaq 113:1-5, An-Nas 114:1-6. Whoever recites these three times in the morning and in the evening, they will suffice him (as a protection) against everything.",
+     "virtueAr": "من قالها ثلاث مرات حين يصبح وحين يمسي كفته من كل شيء",
+     "sourceEn": "The Hadith was reported by Abu Dawud 4/322, and At-Tirmidhi 5/567. See Al-Albani's Sahih At-Tirmidhi 3/182.",
+     "sourceAr": "أخرجه أبو داود، 4/ 322، برقم 5082، والترمذي، 5/ 567، برقم 3575، وانظر: صحيح الترمذي، 3/182.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-8",
+     "ar": "أمسينا وأمسى الملك للَّه، وَالْحَمْدُ لِلَّهِ، لاَ إِلَهَ إلاَّ اللَّهُ وَحْدَهُ لاَ شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، رب أسألك خير ما في هذه الليلة، وخير ما بعدها، وأعوذ بك من شر ما في هذه الليلة، وشر ما بعدها، رَبِّ أَعُوذُ بِكَ مِنَ الْكَسَلِ وَسُوءِ الْكِبَرِ، رَبِّ أَعُوذُ بِكَ مِنْ عَذَابٍ فِي النَّارِ وَعَذَابٍ فِي الْقَبْرِ",
+     "en": "We have reached the evening and at this very time unto Allah belongs all sovereignty, and all praise is for Allah. None has the right to be worshipped except Allah, alone, without partner, to Him belongs all sovereignty and praise, and He is over all things omnipotent. My Lord, I ask You for the good of this night and the good of what follows it and I take refuge in You from the evil of this night and the evil of what follows it. My Lord, I take refuge in You from laziness and senility. My Lord, I take refuge in You from torment in the Fire and punishment in the grave.",
+     "tr": "Amsayna wa-amsal-mulku lillah, walhamdu lillah, la ilaha illal-lah, wahdahu la shareeka lah, lahul-mulku walahul-hamd, wahuwa AAala kulli shayin qadeer, rabbi as-aluka khayra ma fee hathihil-laylah, wakhayra ma baAAdaha, wa-aAAoothu bika min sharri hathihil-laylah, washarri ma baAAdaha, rabbi aAAoothu bika minal-kasal, wasoo-il kibar, rabbi aAAoothu bika min AAathabin fin-nar, waAAathabin fil-qabr.",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Muslim, 4/2088, No. 2723.",
+     "sourceAr": "مسلم، 4/ 2088، برقم 2723.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-10",
+     "ar": "اللَّهمَّ بِكَ أمسَينا وبِكَ أصبَحنا وبِكَ نَحيا وبِكَ نموتُ، وإليكَ المصيرُ",
+     "en": "O Allah, by Your leave we have reached the evening and by Your leave we have reached the morning, by Your leave we live and die and unto You is our return.",
+     "tr": "Allahumma bika amsayna, wabika asbahna, wabika nahya, wabika namootu wa-ilaykal-maseer.",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Al-Tirmidhi, 5/466, No. 3391, and see: Sahih Al-Tirmidhi 3/142.",
+     "sourceAr": "الترمذي، 5/ 466، برقم 3391، وانظر: صحيح الترمذي 3/142.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-11",
+     "ar": "اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلاَّ أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ، وَأَبُوءُ بِذَنْبِي فَاغْفِرْ لِي فَإِنَّهُ لاَ يَغْفِرُ الذُّنوبَ إِلاَّ أَنْتَ",
+     "en": "O Allah, You are my Lord, none has the right to be worshipped except You, You created me and I am Your servant and I abide to Your covenant and promise as best I can, I take refuge in You from the evil of which I have committed. I acknowledge Your favour upon me and I acknowledge my sin, so forgive me, for verily none can forgive sin except You.",
+     "tr": "Allahumma anta rabbee la ilaha illa ant, khalaqtanee wa-ana AAabduk, wa-ana AAala AAahdika wawaAAdika mas-tataAAt, aAAoothu bika min sharri ma sanaAAt, aboo-o laka biniAAmatika AAalay, wa-aboo-o bithanbee, faghfir lee fa-innahu la yaghfiruth-thunooba illa ant.",
+     "count": 1,
+     "virtueEn": "Whoever recites this with conviction in the evening and dies during that night shall enter Paradise, and whoever recites it with conviction in the morning and dies during that day shall enter Paradise",
+     "virtueAr": "وَمَنْ قَالَهَا مِنَ النَّهَارِ مُوقِنًا بِهَا، فَمَاتَ مِنْ يَوْمِهِ قَبْلَ أَنْ يُمْسِيَ، فَهُوَ مِنْ أَهْلِ الْجَنَّةِ، وَمَنْ قَالَهَا مِنَ اللَّيْلِ وَهُوَ مُوقِنٌ بِهَا، فَمَاتَ قَبْلَ أَنْ يُصْبِحَ، فَهُوَ مِنْ أَهْلِ الْجَنَّةِ",
+     "sourceEn": "Narrated by Al-Bukhari, 7/150, No. 6306.",
+     "sourceAr": "أخرجه البخاري، 7/ 150، برقم 6306.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-13",
+     "ar": "اللَّهم إني أمسيت أُشْهِدُكَ، وَأُشْهِدُ حَمَلَةَ عَرْشِكَ، وَمَلاَئِكَتَكَ، وَجَمِيعَ خَلْقِكَ، أَنَّكَ أَنْتَ اللَّهُ لَا إِلَهَ إِلاَّ أَنْتَ وَحْدَكَ لاَ شَرِيكَ لَكَ، وَأَنَّ مُحَمَّداً عَبْدُكَ وَرَسُولُكَ",
+     "en": "O Allah, verily I have reached the evening and call on You, the bearers of Your throne, Your angels, and all of Your creation to witness that You are Allah, none has the right to be worshipped except You, alone, without partner, and that Muhammad is Your Servant and Messenger.",
+     "tr": "Allahumma innee amsaytu oshhiduka, wa-osshidu hamalata AAarshika, wamala-ikatika, wajameeAAa khalqika, annaka antal-lahu la ilaha illa ant, wahdaka la shareeka lak, wa-anna Muhammadan AAabduka warasooluka.",
+     "count": 4,
+     "virtueEn": "Allah will spare whoever says this four times in the morning or evening from the fire of Hell.",
+     "virtueAr": "من قالها حين يصبح، أو يمسي أربع مرات، أعتقه اللَّه من النار",
+     "sourceEn": "It was narrated by Abu Dawood, 4/317, No. 5069, and by Al-Bukhari in Al-Adab Al-Mufrad, No. 1201, and by Al-Nasa'i in 'Amal Al-Yawm wal-Laylah, No. 9, and by Ibn Al-Sunni, No. 70. Sheikh Ibn Baz classified the isnad of Al-Nasa'i and Abu Dawood as hasan in Tuhfat Al-Akhyar, p. 23.",
+     "sourceAr": "أخرجه أبو داود، 4/ 317، برقم 5069، والبخاري في الأدب المفرد، برقم 1201، والنسائي في عمل اليوم والليلة، برقم 9، وابن السني، برقم 70، وحسّن سماحة الشيخ ابن باز ‘ إسناد النسائي، وأبي داود، في تحفة الأخيار، ص23.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-15",
+     "ar": "اللَّهم ما أمسى بي مِنْ نِعْمَةٍ أَوْ بِأَحَدٍ مِنْ خَلْقِكَ فَمِنْكَ وَحْدَكَ لاَ شَرِيكَ لَكَ، فَلَكَ الْحَمْدُ وَلَكَ الشُّكْرُ",
+     "en": "O Allah, what blessing I or any of Your creation have reached the evening upon is from You alone, without partner. So for You is all praise and unto You all thanks",
+     "tr": "Allahumma ma amsa bee min niAAmatin, aw bi-ahadin min khalqika, faminka wahdaka la shareeka lak, falakal-hamdu walakash-shukr.",
+     "count": 1,
+     "virtueEn": "Whoever recites this in the morning, has completed his obligation to thank Allah for that day; and whoever says it in the evening, has completed his obligation for that night.",
+     "virtueAr": "من قالها حين يصبح فقد أدَّى شكر يومه، ومن قالها حين يمسي فقد أدَّى شكر ليلته",
+     "sourceEn": "It was narrated by Abu Dawood, 4/318, No. 5073, and by Al-Nasa'i in 'Amal Al-Yawm wal-Laylah, No. 7, and by Ibn Al-Sunni, No. 41, and by Ibn Hibban in Mawarid, No. 2361. Sheikh Ibn Baz classified the isnad as hasan in Tuhfat Al-Akhyar, p. 24.",
+     "sourceAr": "أخرجه أبو داود، 4/ 318، برقم 5073، والنسائي في عمل اليوم والليلة، برقم 7، وابن السني، برقم 41، وابن حبان، ((موارد)) برقم 2361، وحسّن ابن باز ‘ إسناده في تحفة الأخيار، ص24.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-16",
+     "ar": "اللَّهُمَّ عَافِنِي فِي بَدَنِي، اللَّهُمَّ عَافِنِي فِي سَمْعِي، اللَّهُمَّ عَافِنِي فِي بَصَرِي، لاَ إِلَهَ إِلاَّ أَنْتَ. اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْكُفْرِ، وَالفَقْرِ، وَأَعُوذُ بِكَ مِنْ عَذَابِ القَبْرِ، لاَ إِلَهَ إِلاَّ أَنْتَ",
+     "en": "O Allah, grant my body health, O Allah, grant my hearing health, O Allah, grant my sight health. None has the right to be worshipped except You. O Allah, I take refuge with You from disbelief and poverty, and I take refuge with You from the punishment of the grave. None has the right to be worshipped except You.",
+     "tr": "Allahumma AAafinee fee badanee, allahumma AAafinee fee samAAee, allahumma AAafinee fee basaree, la ilaha illa ant. Allahumma innee aAAoothu bika minal-kufr, walfaqr, wa-aAAoothu bika min AAathabil-qabr, la ilaha illa ant.",
+     "count": 3,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Abu Dawud 4/324, Ahmad 5/42, An-Nasa'i, 'Amalul-Yawm wal-Laylah (No. 22), Ibn As-Sunni (No. 69), Al-Bukhari Al-'Adab Al-Mufrad. Its chain of transmission is good (Hasan), Ibn Baz, p. 26.",
+     "sourceAr": "أبو داود، 4/ 324، برقم 5090، وأحمد، 5/ 42، برقم 20430، والنسائي في عمل اليوم والليلة، برقم 22، وابن السني، برقم 69، والبخاري في الأدب المفرد، برقم 701، وحسّن العلامة ابن باز ‘ إسناده في تحفة الأخيار، ص26.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-17",
+     "ar": "حَسْبِيَ اللَّهُ لاَ إِلَهَ إِلاَّ هُوَ عَلَيهِ تَوَكَّلتُ وَهُوَ رَبُّ الْعَرْشِ الْعَظِيمِ",
+     "en": "Allah is Sufficient for me, none has the right to be worshipped except Him, upon Him I rely and He is Lord of the exalted throne.",
+     "tr": "Hasbiyal-lahu la ilaha illa huwa, AAalayhi tawakkalt, wahuwa rabbul-AAarshil-AAatheem",
+     "count": 7,
+     "virtueEn": "Allah will grant whoever recites this seven times in the morning or evening whatever he desires from this world or the next",
+     "virtueAr": "من قالها حين يصبح وحين يمسي سبع مرات كفاه اللَّه ما أهمّه من أمر الدنيا والآخرة",
+     "sourceEn": "It was narrated by Ibn As-Sunni, No. 71, attributed directly to the Prophet (Marfu'), and by Abu Dawud as a statement of a Companion (Mawquf), 4/321, No. 5081. The chain of transmission was authenticated by Shu'ayb and 'Abd al-Qadir al-Arna'ut. See: Zad Al-Ma'ad 2/376.",
+     "sourceAr": "أخرجه ابن السني، برقم 71 مرفوعاً، وأبو داود موقوفاً، 4/ 321، برقم 5081، وصحّح إسناده شعيب وعبدالقادر الأرناؤوط. انظر: زاد المعاد 2/376.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-18",
+     "ar": "اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي الدُّنْيَا وَالآخِرَةِ، اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ: فِي دِينِي وَدُنْيَايَ وَأَهْلِي، وَمَالِي، اللَّهُمَّ اسْتُرْ عَوْرَاتِي، وَآمِنْ رَوْعَاتِي، اللَّهُمَّ احْفَظْنِي مِنْ بَينِ يَدَيَّ، وَمِنْ خَلْفِي، وَعَنْ يَمِينِي، وَعَنْ شِمَالِي، وَمِنْ فَوْقِي، وَأَعُوذُ بِعَظَمَتِكَ أَنْ أُغْتَالَ مِنْ تَحْتِي",
+     "en": "O Allah, I ask You for pardon and well-being in this life and the next. O Allah, I ask You for pardon and well-being in my religious and worldly affairs, and my family and my wealth. O Allah, veil my weaknesses and set at ease my dismay. O Allah, preserve me from the front and from behind and on my right and on my left and from above, and I take refuge with You lest I be swallowed up by the earth.",
+     "tr": "Allahumma innee as-alukal-AAafwa walAAafiyah, fid-dunya wal-akhirah, allahumma innee as-alukal-AAafwa walAAafiyah fee deenee, wadunyaya wa-ahlee, wamalee, allahummas-tur AAawratee, wa-amin rawAAatee, allahummah-fathnee min bayni yaday, wamin khalfee, waAAan yameenee, waAAan shimalee, wamin fawqee, wa-aAAoothu biAAathamatika an oghtala min tahtee.",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Abu Dawood, No. 5074, and Ibn Majah, No. 3871. See: Sahih Ibn Majah, 2/332.",
+     "sourceAr": "أبو داود، برقم 5074، وابن ماجه، برقم 3871، وانظر: صحيح ابن ماجه، 2/332.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-19",
+     "ar": "اللَّهُمَّ عَالِمَ الغَيْبِ وَالشَّهَادَةِ فَاطِرَ السَّمَوَاتِ وَالْأَرْضِ، رَبَّ كُلِّ شَيْءٍ وَمَلِيكَهُ، أَشْهَدُ أَنْ لاَ إِلَهَ إِلاَّ أَنْتَ، أَعُوذُ بِكَ مِنْ شَرِّ نَفْسِي، وَمِنْ شَرِّ الشَّيْطانِ وَشَرَكِهِ، وَأَنْ أَقْتَرِفَ عَلَى نَفْسِي سُوءاً، أَوْ أَجُرَّهُ إِلَى مُسْلِمٍ",
+     "en": "O Allah, Knower of the unseen and the seen, Creator of the heavens and the Earth, Lord and Sovereign of all things, I bear witness that none has the right to be worshipped except You. I take refuge in You from the evil of my soul and from the evil and shirk of the devil, and from committing wrong against my soul or bringing such upon another Muslim.",
+     "tr": "Allahumma AAalimal-ghaybi washshahadah, fatiras-samawati wal-ard, rabba kulli shayin wamaleekah, ashhadu an la ilaha illa ant, aAAoothu bika min sharri nafsee wamin sharrish-shaytani washirkih, waan aqtarifa AAala nafsee soo-an aw ajurrahu ila muslim.",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Al-Tirmidhi, No. 3392, and Abu Dawood, No. 5067. See: Sahih Al-Tirmidhi, 3/142.",
+     "sourceAr": "الترمذي، برقم 3392، وأبو داود، برقم 5067،. وانظر: صحيح الترمذي، 3/142.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-20",
+     "ar": "بِسْمِ اللَّهِ الَّذِي لاَ يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلاَ فِي السّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ",
+     "en": "In the name of Allah with whose name nothing is harmed on earth nor in the heavens and He is The All-Seeing, The All-Knowing.",
+     "tr": "Bismil-lahil-lathee la yadurru maAAas-mihi shay-on fil-ardi wala fis-sama-i wahuwas-sameeAAul-AAaleem.",
+     "count": 3,
+     "virtueEn": "Whoever recites it three times in the morning will not be afflicted by any calamity before evening, and whoever recites it three times in the evening will not be overtaken by any calamity before morning.",
+     "virtueAr": "من قالها ثلاثاً إذا أصبح، وثلاثاً إذا أمسى لم يضره شيء",
+     "sourceEn": "It was narrated by Abu Dawood, 4/323, No. 5088, Al-Tirmidhi, 5/465, No. 3388, Ibn Majah, No. 3869, and Ahmad, No. 446. See: Sahih Ibn Majah, 2/332. Sheikh Ibn Baz classified the isnad as hasan in Tuhfat Al-Akhyar, p. 39.",
+     "sourceAr": "أخرجه أبو داود، 4/ 323، برقم، 5088، والترمذي، 5/ 465، برقم 3388، وابن ماجه، برقم 3869، وأحمد، برقم 446. وانظر: صحيح ابن ماجه، 2/332، وحسّن إسناده العلامة ابن باز ‘ في تحفة الأخيار، ص39.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-21",
+     "ar": "رَضِيتُ بِاللَّهِ رَبَّاً، وَبِالْإِسْلاَمِ دِيناً، وَبِمُحَمَّدٍ ﷺ نَبِيًّا",
+     "en": "I am pleased with Allah as a Lord, and Islam as a religion and Muhammad as a Prophet.",
+     "tr": "Radeetu billahi rabban wabil-islami deenan wabiMuhammadin nabiyya.",
+     "count": 3,
+     "virtueEn": "Allah has promised that anyone who says this three times every morning or evening will be pleased on the Day of Resurrection.",
+     "virtueAr": "من قالها ثلاثاً حين يصبح وثلاثاً حين يمسي كان حقاً على اللَّه أن يرضيه يوم القيامة",
+     "sourceEn": "Ahmad, 4/337, No. 18967, Al-Nasa'i in 'Amal Al-Yawm wal-Laylah, No. 4, Ibn Al-Sunni, No. 68, Abu Dawood, 4/318, No. 1531, and Al-Tirmidhi, 5/465, No. 3389. Sheikh Ibn Baz classified it as hasan in Tuhfat Al-Akhyar, p. 39.",
+     "sourceAr": "أحمد، 4/ 337، برقم 18967، والنسائي في عمل اليوم والليلة، برقم 4، وابن السني، برقم 68، وأبو داود، 4/ 318، برقم 1531، والترمذي، 5/ 465، برقم، 3389، وحسّنه ابن باز ‘ في تحفة الأخيار ص39.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-22",
+     "ar": "يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغيثُ أَصْلِحْ لِي شَأْنِيَ كُلَّهُ وَلاَ تَكِلْنِي إِلَى نَفْسِي طَرْفَةَ عَيْنٍ",
+     "en": "O Ever Living, O Self-Subsisting and Supporter of all, by Your mercy I seek assistance, rectify for me all of my affairs and do not leave me to myself, even for the blink of an eye.",
+     "tr": "Ya hayyu ya qayyoom, birahmatika astagheeth, aslih lee sha/nee kullah, wala takilnee ila nafsee tarfata AAayn.",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Its chain of transmission is sound (Sahih), Al-Hakim 1/545, see Albani, Sahihut-Targhib wat-Tarhib, 1/273.",
+     "sourceAr": "الحاكم وصححه، ووافقه الذهبي، 1/545، وانظر: صحيح الترغيب والترهيب، 1/273.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-24",
+     "ar": "أَمْسَيْنا وَأَمْسَى الْمُلْكُ للهِ رَبِّ الْعَالَمَيْنِ، اللَّهُمَّ إِنَّي أسْأَلُكَ خَيْرَ هَذَه اللَّيْلَةِ فَتْحَهَا ونَصْرَهَا، ونُوْرَهَا وبَرَكَتهَا، وَهُدَاهَا، وَأَعُوذُ بِكَ مِنْ شَرِّ مَا فيهِا وَشَرَّ مَا بَعْدَهَا",
+     "en": "We have reached the evening and at this very time all sovereignty belongs to Allah, Lord of the worlds. O Allah, I ask You for the good of tonight, its triumphs and its victories, its light and its blessings and its guidance, and I take refuge in You from the evil of tonight and the evil that follows it.",
+     "tr": "Amsayna wa-amsal-mulku lillahi rabbil-AAalameen, allahumma innee as-aluka khayra hathihil-laylah, fat-haha, wanasraha, wanooraha, wabarakataha, wahudaha, wa-aAAoothu bika min sharri ma feeha, washarri ma baAAdaha.",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Abu Dawud 4/322. Its transmission chain is good (Hasan). See also Ibn Al-Qayyim, Zadul- Ma'ad 2/273.",
+     "sourceAr": "أبو داود، 4/ 322، برقم 5084، وحسن إسناده شعيب وعبد القادر الأرناؤوط في تحقيق زاد المعاد، 2/373.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-26",
+     "ar": "أمسينا على فطرة الإسلام، وَعَلَى كَلِمَةِ الْإِخْلاَصِ، وَعَلَى دِينِ نَبِيِّنَا مُحَمَّدٍ ﷺ، وَعَلَى مِلَّةِ أَبِينَا إِبْرَاهِيمَ، حَنِيفاً مُسْلِماً وَمَا كَانَ مِنَ الْمُشرِكِينَ",
+     "en": "We have entered the evening upon the fitrah of Islam, and the word of pure faith, and upon the religion of our Prophet Muhammad ﷺ, and the religion of our forefather Ibraheem, who was a Muslim and of true faith and was not of those who associate others with Allah.",
+     "tr": "Amsayna AAala fitratil-islam, waAAala kalimatil-ikhlas, waAAala deeni nabiyyina Muhammad ﷺ, waAAala millati abeena Ibraheem, haneefan musliman wama kana minal-mushrikeen.",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Ahmad, 3/406 and 407, nos. 15360 and 15563, and Ibn Al-Sunni in 'Amal Al-Yawm wal-Laylah, No. 34. See: Sahih Al-Jami', 4/209.",
+     "sourceAr": "أحمد، 3/ 406، و407، برقم 15360، ورقم 15563، وابن السني في عمل اليوم والليلة، برقم 34، وانظر: صحيح الجامع، 4/209.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-28",
+     "ar": "لاَ إِلَهَ إِلاَّ اللَّهُ، وَحْدَهُ لاَ شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ",
+     "en": "None has the right to be worshipped except Allah, alone, without partner, to Him belongs all sovereignty and praise, and He is over all things omnipotent.",
+     "tr": "La ilaha illal-lah, wahdahu la shareeka lah, lahul-mulku walahul-hamd, wahuwa AAala kulli shay-in qadeer.",
+     "count": 10,
+     "virtueEn": "Ten times or once when feeling lazy, and whoever says it ten times, it is as if he has freed four souls from the descendants of Isma'il.",
+     "virtueAr": "عشرَ مرَّات أَوْ مرَّةً واحدةً عندَ الكَسَلِ، ومن قالها عَشْرَ مِرَارٍ كَانَ كَمَنْ أَعْتَقَ أَرْبَعَةَ أَنْفُسٍ مِنْ وَلَدِ إِسْمَاعِيلَ.",
+     "sourceEn": "Sahih Al-Bukhari: 6404, Sahih Muslim: 2693, Al-Nasa'i in 'Amal Al-Yawm wal-Laylah, No. 24. See: Sahih Al-Targhib wal-Tarhib, 1/272, Tuhfat Al-Akhyar by Ibn Baz, p. 44, and its virtue in: p. 146, hadith No. 255. Once when feeling lazy: Abu Dawood, No. 5077, Ibn Majah, No. 3798, Ahmad, No. 8719. See: Sahih Al-Targhib wal-Tarhib, 1/270, Sahih Abi Dawood, 3/957, Sahih Ibn Majah, 2/331, and Zad Al-Ma'ad, 2/377.",
+     "sourceAr": "صحيح البخاري: 6404، صحيح مسلم: 2693، النسائي في عمل اليوم والليلة، برقم 24، وانظر: صحيح الترغيب والترهيب، 1/272، وتحفة الأخيار لابن باز ‘، ص44، وانظر فضلها في: ص146، حديث، رقم 255 مرَّةً واحدةً عندَ الكَسَلِ: أبو داود، برقم 5077، وابن ماجه، برقم 3798، وأحمد، برقم 8719، وانظر: صحيح الترغيب والترهيب، 1/270، وصحيح أبي داود، 3/957، وصحيح ابن ماجه، 2/331، وزاد المعاد، 2/377.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-29",
+     "ar": "اللَّهُمَّ صَلِّ وَسَلِّمْ عَلَى نَبَيِّنَا مُحَمَّدٍ",
+     "en": "O Allaah, send prayers and peace upon our Prophet Muhammad.",
+     "tr": "Allaahumma salli wa sallim 'alaa Nabiyyinaa Muhammadin",
+     "count": 10,
+     "virtueEn": "The Prophet (ﷺ) said: \"Who recites blessings upon me ten times in the morning and ten times in the evening will obtain my intercession on the Day of Resurrection.",
+     "virtueAr": "من صلّى عليَّ حين يصبح عشراً، وحين يمسي عشراً، أدركته شفاعتي يوم القيامة",
+     "sourceEn": "It was narrated by Al-Tabarani with two isnads, one of which is good. See: Majma' Al-Zawa'id, 10/120, and Sahih Al-Targhib wal-Tarhib, 1/273 [No. 656], and Da'if Al-Targhib wal-Tarhib, No. 396, and in Al-Silsilah Al-Da'ifah, No. 5788.",
+     "sourceAr": "أخرجه الطبراني بإسنادين أحدهما جيد، انظر: مجمع الزوائد (10/120)، وصحيح الترغيب والترهيب (1/273) [برقم (656)]، وضعيف الترغيب والترهيب برقم: 396. وفي السلسلة الضعيفة برقم: 5788.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-30",
+     "ar": "أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ",
+     "en": "I take refuge in Allah’s perfect words from the evil He has created.",
+     "tr": "aAAoothu bikalimatil-lahit-tammati min sharri ma khalaq.",
+     "count": 3,
+     "virtueEn": "Whoever recites this three times in the evening will be protected from insect stings",
+     "virtueAr": "من قالها حين يمسي ثلاث مرات لم تضرّه حُمَة تلك الليلة",
+     "sourceEn": "Ahmad 2/ 290, An-Nasa'i, 'Amalul-Yawm wal-Laylah No. 590, At-Tirmidhi 3/187, Ibn As-Sunni No. 68. According to Al-Albani, Ibn Majah's (2/266) chain of transmission is sound (Sahih), and following Ibn Baz 45, At-Tirmidhi's report is good (Hasan).",
+     "sourceAr": "، أخرجه أحمد، 2/ 290، برقم 7898، والنسائي في عمل اليوم والليلة، برقم 590، وابن السني، برقم 68، وانظر: صحيح الترمذي، 3/187، وصحيح ابن ماجه، 2/266، وتحفة الأخيار لابن باز، ص45.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-34",
+     "ar": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+     "en": "How perfect Allah is and I praise Him.",
+     "tr": "Subhanal-lahi wabihamdih.",
+     "count": 100,
+     "virtueEn": "Whoever recites this one hundred times in the morning and in the evening will not be surpassed on the Day of Resurrection by anyone having done better than this except for someone who had recited it more.",
+     "virtueAr": "من قالها مائة مرة حين يصبح وحين يمسي لم يأت أحد يوم القيامة بأفضل مما جاء به إلا أحد قال مثل ما قال أو زاد عليه",
+     "sourceEn": "Muslim 2692.",
+     "sourceAr": "مسلم، 4/ 2071 برقم 2692.",
+     "noteEn": "",
+     "noteAr": ""
+    }
+   ]
+  },
+  {
+   "id": "after-prayer",
+   "titleEn": "After prayer",
+   "titleAr": "أذكار بعد الصلاة",
+   "items": [
+    {
+     "id": "hisn-66a",
+     "ar": "أَسْتَغْفِرُ اللَّهَ",
+     "en": "I ask Allah for forgiveness.",
+     "tr": "",
+     "count": 3,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 25",
+     "sourceAr": "حصن المسلم، الباب 25",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "hisn-66b",
+     "ar": "اللَّهُمَّ أَنْتَ السَّلاَمُ، وَمِنْكَ السَّلاَمُ، تَبَارَكْتَ يَا ذَا الْجَلاَلِ وَالْإِكْرَامِ",
+     "en": "O Allah, You are As-Salam and from You is all peace, blessed are You, O Possessor of majesty and honour.",
+     "tr": "",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 25",
+     "sourceAr": "حصن المسلم، الباب 25",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "hisn-67a",
+     "ar": "لاَ إِلَهَ إِلاَّ اللَّهُ وَحْدَهُ لاَ شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ",
+     "en": "None has the right to be worshipped except Allah, alone, without partner, to Him belongs all sovereignty and praise and He is over all things omnipotent.",
+     "tr": "",
+     "count": 3,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 25",
+     "sourceAr": "حصن المسلم، الباب 25",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "hisn-67b",
+     "ar": "اللَّهُمَّ لاَ مَانِعَ لِمَا أَعْطَيْتَ، وَلاَ مُعْطِيَ لِمَا مَنَعْتَ، وَلاَ يَنْفَعُ ذَا الْجَدِّ مِنْكَ الجَدُّ",
+     "en": "O Allah, none can prevent what You have willed to bestow and none can bestow what You have willed to prevent, and no wealth or majesty can benefit anyone, as from You is all wealth and majesty.",
+     "tr": "",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 25",
+     "sourceAr": "حصن المسلم، الباب 25",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "hisn-68",
+     "ar": "لَا إِلَهَ إِلاَّ اللَّهُ وَحْدَهُ لاَ شَرِيكَ لَهُ، لَهُ الْمُلْكُ، وَلَهُ الْحَمدُ، وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ. لاَ حَوْلَ وَلاَ قُوَّةَ إِلاَّ بِاللَّهِ، لاَ إِلَهَ إِلاَّ اللَّهُ، وَلاَ نَعْبُدُ إِلاَّ إِيَّاهُ, لَهُ النِّعْمَةُ وَلَهُ الْفَضْلُ وَلَهُ الثَّنَاءُ الْحَسَنُ، لَا إِلَهَ إِلاَّ اللَّهُ مُخْلِصِينَ لَهُ الدِّينَ وَلَوْ كَرِهَ الكَافِرُونَ",
+     "en": "None has the right to be worshipped except Allah, alone, without partner, to Him belongs all sovereignty and praise and He is over all things omnipotent. There is no might nor power except with Allah, none has the right to be worshipped except Allah and we worship none except Him. For Him is all favour, grace, and glorious praise. None has the right to be worshipped except Allah and we are sincere in faith and devotion to Him although the disbelievers detest it.",
+     "tr": "La ilaha illal-lah, wahdahu la shareeka lah, lahul-mulku walahul-hamd, wahuwa AAala kulli shayin qadeer. la hawla wala quwwata illa billah, la ilaha illal-lah, wala naAAbudu illa iyyah, lahun-niAAmatu walahul-fadl walahuth-thana-ol- hasan, la ilaha illal-lah mukhliseena lahud-deen walaw karihal-kafiroon.",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 25",
+     "sourceAr": "حصن المسلم، الباب 25",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "hisn-69a",
+     "ar": "سُبْحَانَ اللَّهِ",
+     "en": "How perfect Allah is.",
+     "tr": "",
+     "count": 33,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 25",
+     "sourceAr": "حصن المسلم، الباب 25",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "hisn-69b",
+     "ar": "الْحَمْدُ لِلَّهِ",
+     "en": "All praise is for Allah.",
+     "tr": "",
+     "count": 33,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 25",
+     "sourceAr": "حصن المسلم، الباب 25",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "hisn-69c",
+     "ar": "اللَّهُ أَكْبَرُ",
+     "en": "Allah is the greatest.",
+     "tr": "",
+     "count": 33,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 25",
+     "sourceAr": "حصن المسلم، الباب 25",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "hisn-69d",
+     "ar": "لاَ إِلَهَ إِلاَّ اللَّهُ وَحْدَهُ لاَ شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ",
+     "en": "None has the right to be worshipped except Allah, alone, without partner, to Him belongs all sovereignty and praise and He is over all things omnipotent.",
+     "tr": "",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 25",
+     "sourceAr": "حصن المسلم، الباب 25",
+     "noteEn": "Completes the hundred",
+     "noteAr": "تمام المئة"
+    },
+    {
+     "id": "seen-2",
+     "ar": "أَعُوذُ بِاللَّهِ مِنَ الشَّيطَانِ الرَّجِيمِ ﴿اللَّهُ لاَ إِلَهَ إِلاَّ هُوَ الْحَيُّ الْقَيُّومُ لاَ تَأْخُذُهُ سِنَةٌ وَلاَ نَوْمٌ لَّهُ مَا فِي السَّمَوَاتِ وَمَا فِي الأَرْضِ مَن ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلاَّ بِإِذْنِهِ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ وَلاَ يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلاَّ بِمَا شَاء وَسِعَ كُرْسِيُّهُ السَّمَوَاتِ وَالْأَرْضَ وَلاَ يَؤُودُهُ حِفْظُهُمَا وَهُوَ الْعَلِيُّ الْعَظِيمُ﴾",
+     "en": "Allah! There is none worthy of worship but He, the Ever-Living, the One Who sustains and protects all that exists. Neither slumber nor sleep overtakes Him. To Him belongs whatever is in the heavens and whatever is on the earth. Who is he that can intercede with Him except with His Permission? He knows what happens to them in this world, and what will happen to them in the Hereafter. And they will never encompass anything of His Knowledge except that which He wills. His Throne extends over the heavens and the earth, and He feels no fatigue in guarding and preserving them. And He is the Most High, the Most Great.",
+     "tr": "A`ūdhu billāhi min ash-shaytāni 'r-rajīm Allāhu lā ilāha illā huwa ‘l-Ḥayyul-Qayyūm, lā ta'khudhuhu sinatun wa lā nawm, lahu mā fis-samāwāti wa māfil-arḍ, man dhal-ladhī yashfa`u `indahu illā bi'idhnih, ya`lamu mā bayna aydīhim wa mā khalfahum, wa lā yuḥīṭūna bishay'im-min `ilmihi illā bimā shā', wasi`a kursiyyuhus-samāwāti wal-arḍ, wa lā ya'ūduhu hifẓuhumā, wa huwal-`Aliyyu‘l-`Aẓīm.",
+     "count": 1,
+     "virtueEn": "(Ayat al-Kursi; Al-Qur'an 2:255) Whoever says this when he rises in the morning will be protected from jinns until he retires in the evening, and whoever says it when retiring in the evening will be protected from them until he rises in the morning.",
+     "virtueAr": "[سورة البقرة، الآية: 255] من قالها حين يصبح أُجير من الجن حتى يمسي، ومن قالها حين يمسي أُجير منهم حتى يصبح",
+     "sourceEn": "It was reported by Al-Hakim 1 / 562, Al-Albani graded it as authentic in Sahihut-Targhib wat-Tarhib 1/273, and traces it to An-Nasa'i and At-Tabarani. He says that At-Tabarani's chain of transmission is reliable (Jayyid).",
+     "sourceAr": "أخرجه الحاكم، 1/562، وصححه الألباني في صحيح الترغيب والترهيب، 1/273، وعزاه إلى النسائي، والطبراني، وقال: ((إسناد الطبراني جيد)).",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "seen-4",
+     "ar": "قُلْ هُوَ ٱللَّهُ أَحَدٌ، ٱللَّهُ ٱلصَّمَدُ، لَمْ يَلِدْ وَلَمْ يُولَدْ، وَلَمْ يَكُن لَّهُۥ كُفُوًا أَحَدٌۢ",
+     "en": "Say, He is Allah, [who is] One, Allah, the Eternal Refuge. He neither begets nor is born, Nor is there to Him any equivalent.",
+     "tr": "Bismillaahir Rahmaanir Raheem \"Qul huwal laahu ahad Allah hus-samad Lam yalid wa lam yoolad Wa lam yakul-lahoo kufuwan ahad",
+     "count": 1,
+     "virtueEn": "Al-Ikhlas 112:1-4, Al-Falaq 113:1-5, An-Nas 114:1-6. Whoever recites these three times in the morning and in the evening, they will suffice him (as a protection) against everything.",
+     "virtueAr": "من قالها ثلاث مرات حين يصبح وحين يمسي كفته من كل شيء",
+     "sourceEn": "The Hadith was reported by Abu Dawud 4/322, and At-Tirmidhi 5/567. See Al-Albani's Sahih At-Tirmidhi 3/182.",
+     "sourceAr": "أخرجه أبو داود، 4/ 322، برقم 5082، والترمذي، 5/ 567، برقم 3575، وانظر: صحيح الترمذي، 3/182.",
+     "noteEn": "Three times after Fajr and Maghrib",
+     "noteAr": "ثلاث مرات بعد الفجر والمغرب"
+    },
+    {
+     "id": "seen-5",
+     "ar": "قُلْ أَعُوذُ بِرَبِّ ٱلْفَلَقِ، مِن شَرِّ مَا خَلَقَ، وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ، وَمِن شَرِّ ٱلنَّفَّٰثَٰتِ فِى ٱلْعُقَدِ، وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ",
+     "en": "Say, I seek refuge in the Lord of daybreak From the evil of that which He created And from the evil of darkness when it settles And from the evil of the blowers in knots And from the evil of an envier when he envies.",
+     "tr": "Bismillaahir Rahmaanir Raheem \"Qul a'oozu bi rabbil-falaq Min sharri maa khalaq Wa min sharri ghaasiqin izaa waqab Wa min sharrin-naffaa-taati fil 'uqad Wa min sharri haasidin izaa hasad",
+     "count": 1,
+     "virtueEn": "Al-Ikhlas 112:1-4, Al-Falaq 113:1-5, An-Nas 114:1-6. Whoever recites these three times in the morning and in the evening, they will suffice him (as a protection) against everything.",
+     "virtueAr": "من قالها ثلاث مرات حين يصبح وحين يمسي كفته من كل شيء",
+     "sourceEn": "The Hadith was reported by Abu Dawud 4/322, and At-Tirmidhi 5/567. See Al-Albani's Sahih At-Tirmidhi 3/182.",
+     "sourceAr": "أخرجه أبو داود، 4/ 322، برقم 5082، والترمذي، 5/ 567، برقم 3575، وانظر: صحيح الترمذي، 3/182.",
+     "noteEn": "Three times after Fajr and Maghrib",
+     "noteAr": "ثلاث مرات بعد الفجر والمغرب"
+    },
+    {
+     "id": "seen-6",
+     "ar": "قُلْ أَعُوذُ بِرَبِّ ٱلنَّاسِ، مَلِكِ ٱلنَّاسِ، إِلَٰهِ ٱلنَّاسِ، مِن شَرِّ ٱلْوَسْوَاسِ ٱلْخَنَّاسِ، ٱلَّذِى يُوَسْوِسُ فِى صُدُورِ ٱلنَّاسِ، مِنَ ٱلْجِنَّةِ وَٱلنَّاسِ",
+     "en": "Say, I seek refuge in the Lord of mankind The Sovereign of mankind The God of mankind From the evil of the retreating whisperer Who whispers [evil] into the breasts of mankind From among the jinn and mankind.",
+     "tr": "Bismillaahir Rahmaanir Raheem \"Qul a'oozu birabbin naas Malikin naas Ilaahin naas Min sharril waswaasil khannaas Allazee yuwaswisu fee sudoorin naas Minal jinnati wannaas",
+     "count": 1,
+     "virtueEn": "Al-Ikhlas 112:1-4, Al-Falaq 113:1-5, An-Nas 114:1-6. Whoever recites these three times in the morning and in the evening, they will suffice him (as a protection) against everything.",
+     "virtueAr": "من قالها ثلاث مرات حين يصبح وحين يمسي كفته من كل شيء",
+     "sourceEn": "The Hadith was reported by Abu Dawud 4/322, and At-Tirmidhi 5/567. See Al-Albani's Sahih At-Tirmidhi 3/182.",
+     "sourceAr": "أخرجه أبو داود، 4/ 322، برقم 5082، والترمذي، 5/ 567، برقم 3575، وانظر: صحيح الترمذي، 3/182.",
+     "noteEn": "Three times after Fajr and Maghrib",
+     "noteAr": "ثلاث مرات بعد الفجر والمغرب"
+    },
+    {
+     "id": "hisn-72",
+     "ar": "لاَ إِلَهَ إِلاَّ اللَّهُ وَحْدَهُ لاَ شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ يُحْيِي وَيُمِيتُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ",
+     "en": "None has the right to be worshipped except Allah, alone, without partner, to Him belongs all sovereignty and praise, He gives life and causes death and He is over all things omnipotent.",
+     "tr": "",
+     "count": 10,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 25",
+     "sourceAr": "حصن المسلم، الباب 25",
+     "noteEn": "After Fajr and Maghrib",
+     "noteAr": "بعد صلاة الفجر والمغرب"
+    },
+    {
+     "id": "hisn-73",
+     "ar": "اللَّهُمَّ إِنِّي أَسْأَلُكَ عِلْماً نافِعاً، وَرِزْقاً طَيِّباً، وَعَمَلاً مُتَقَبَّلاً",
+     "en": "O Allah, I ask You for knowledge which is beneficial and sustenance which is good, and deeds which are acceptable.",
+     "tr": "",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 25",
+     "sourceAr": "حصن المسلم، الباب 25",
+     "noteEn": "After Fajr",
+     "noteAr": "بعد صلاة الفجر"
+    }
+   ]
+  },
+  {
+   "id": "waking",
+   "titleEn": "Waking up",
+   "titleAr": "أذكار الاستيقاظ",
+   "items": [
+    {
+     "id": "hisn-1",
+     "ar": "الْحَمْدُ للَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا، وَإِلَيْهِ النُّشُورُ",
+     "en": "All praise is for Allah who gave us life after having taken it from us and unto Him is the resurrection.",
+     "tr": "Alhamdu lillahil-lathee ahyana baAAda ma amatana wa-ilayhin-nushoor.",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 1",
+     "sourceAr": "حصن المسلم، الباب 1",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "hisn-2",
+     "ar": "لاَ إِلَهَ إِلاَّ اللَّهُ وَحْدَهُ لاَ شَريكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، سُبْحَانَ اللَّهِ، وَالْحَمْدُ للَّهِ، وَلاَ إِلَهَ إِلاَّ اللَّهُ، وَاللَّهُ أَكبَرُ، وَلاَ حَوْلَ وَلاَ قُوَّةَ إِلاَّ بِاللَّهِ الْعَلِيِّ الْعَظِيمِ، رَبِّ اغْفرْ لِي",
+     "en": "None has the right to be worshipped except Allah, alone without associate, to Him belongs sovereignty and praise and He is over all things wholly capable. How perfect Allah is, and all praise is for Allah, and none has the right to be worshipped except Allah, Allah is the greatest and there is no power nor might except with Allah, The Most High, The Supreme.O my Lord forgive me",
+     "tr": "La ilaha illal-lahu wahdahu la shareeka lah, lahul-mulku walahul-hamd, wahuwa AAala kulli shay-in qadeer, subhanal-lah, walhamdu lillah, wala ilaha illal-lah wallahu akbar, wala hawla wala quwwata illa billahil-AAaliyyil AAatheem. Rabbigh-fir lee",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 1",
+     "sourceAr": "حصن المسلم، الباب 1",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "hisn-3",
+     "ar": "الْحَمْدُ لِلَّهِ الَّذِي عَافَانِي فِي جَسَدِي، وَرَدَّ عَلَيَّ رُوحِي، وَأَذِنَ لي بِذِكْرِهِ",
+     "en": "All praise is for Allah who restored to me my health and returned my soul and has allowed me to remember Him.",
+     "tr": "Alhamdu lillahil-lathee AAafanee fee jasadee waradda AAalayya roohee wa-athina lee bithikrih.",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 1",
+     "sourceAr": "حصن المسلم، الباب 1",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "hisn-4",
+     "ar": "﴿ إِنَّ فِي خَلْقِ السَّمَوَاتِ وَالأَرْضِ وَاخْتِلاَفِ اللَّيْلِ وَالنَّهَارِ لَآيَاتٍ لأُوْلِي الألْبَابِ ۝ الَّذِينَ يَذْكُرُونَ اللَّهَ قِيَاماً وَقُعُوداً وَعَلَىَ جُنُوبِهِمْ وَيَتَفَكَّرُونَ فِي خَلْقِ السَّمَوَاتِ وَالأَرْضِ رَبَّنَا مَا خَلَقْتَ هَذا بَاطِلاً سُبْحَانَكَ فَقِنَا عَذَابَ النَّارِ ۝ رَبَّنَا إِنَّكَ مَن تُدْخِلِ النَّارَ فَقَدْ أَخْزَيْتَهُ وَمَا لِلظَّالِمِينَ مِنْ أَنصَارٍ ۝ رَّبَّنَا إِنَّنَا سَمِعْنَا مُنَادِياً يُنَادِي لِلإِيمَانِ أَنْ آمِنُواْ بِرَبِّكُمْ فَآمَنَّا رَبَّنَا فَاغْفِرْ لَنَا ذُنُوبَنَا وَكَفِّرْ عَنَّا سَيِّئَاتِنَا وَتَوَفَّنَا مَعَ الأبْرَارِ ۝ رَبَّنَا وَآتِنَا مَا وَعَدتَّنَا عَلَى رُسُلِكَ وَلاَ تُخْزِنَا يَوْمَ الْقِيَامَةِ إِنَّكَ لاَ تُخْلِفُ الْمِيعَادَ ۝ فَاسْتَجَابَ لَهُمْ رَبُّهُمْ أَنِّي لاَ أُضِيعُ عَمَلَ عَامِلٍ مِّنكُم مِّن ذَكَرٍ أَوْ أُنثَى بَعْضُكُم مِّن بَعْضٍ فَالَّذِينَ هَاجَرُواْ وَأُخْرِجُواْ مِن دِيَارِهِمْ وَأُوذُواْ فِي سَبِيلِي وَقَاتَلُواْ وَقُتِلُواْ لأُكَفِّرَنَّ عَنْهُمْ سَيِّئَاتِهِمْ وَلأُدْخِلَنَّهُمْ جَنَّاتٍ تَجْرِي مِن تَحْتِهَا الأَنْهَارُ ثَوَاباً مِّن عِندِ اللَّهِ وَاللَّهُ عِندَهُ حُسْنُ الثَّوَابِ ۝ لاَ يَغُرَّنَّكَ تَقَلُّبُ الَّذِينَ كَفَرُواْ فِي الْبِلاَدِ ۝ مَتَاعٌ قَلِيلٌ ثُمَّ مَأْوَاهُمْ جَهَنَّمُ وَبِئْسَ الْمِهَادُ ۝ لَكِنِ الَّذِينَ اتَّقَوْاْ رَبَّهُمْ لَهُمْ جَنَّاتٌ تَجْرِي مِنْ تَحْتِهَا الأَنْهَارُ خَالِدِينَ فِيهَا نُزُلاً مِّنْ عِندِ اللَّهِ وَمَا عِندَ اللَّهِ خَيْرٌ لِّلأَبْرَارِ ۝ وَإِنَّ مِنْ أَهْلِ الْكِتَابِ لَمَن يُؤْمِنُ بِاللَّهِ وَمَا أُنزِلَ إِلَيْكُمْ وَمَآ أُنزِلَ إِلَيْهِمْ خَاشِعِينَ لِلَّهِ لاَ يَشْتَرُونَ بِآيَاتِ اللَّهِ ثَمَناً قَلِيلاً أُوْلَئِكَ لَهُمْ أَجْرُهُمْ عِندَ رَبِّهِمْ إِنَّ اللَّهَ سَرِيعُ الْحِسَابِ ۝ يَا أَيُّهَا الَّذِينَ آمَنُواْ اصْبِرُواْ وَصَابِرُواْ وَرَابِطُواْ وَاتَّقُواْ اللَّهَ لَعَلَّكُمْ تُفْلِحُونَ ﴾",
+     "en": "Indeed, in the creation of the heavens and the earth and the alternation of the night and the day are signs for those of understanding. Who remember Allah while standing or sitting or [lying] on their sides and give thought to the creation of the heavens and the earth, [saying], Our Lord, You did not create this aimlessly; exalted are You [above such a thing]; then protect us from the punishment of the Fire. Our Lord, indeed whoever You admit to the Fire - You have disgraced him, and for the wrongdoers there are no helpers. Our Lord, indeed we have heard a caller calling to faith, [saying], 'Believe in your Lord,' and we have believed. Our Lord, so forgive us our sins and remove from us our misdeeds and cause us to die with the righteous. Our Lord, and grant us what You promised us through Your messengers and do not disgrace us on the Day of Resurrection. Indeed, You do not fail in [Your] promise. And their Lord responded to them, Never will I allow to be lost the work of [any] worker among you, whether male or female; you are of one another. So those who emigrated or were evicted from their homes or were harmed in My cause or fought or were killed - I will surely remove from them their misdeeds, and I will surely admit them to gardens beneath which rivers flow as reward from Allah, and Allah has with Him the best reward. Be not deceived by the [uninhibited] movement of the disbelievers throughout the land. [It is but] a small enjoyment; then their [final] refuge is Hell, and wretched is the resting place. But those who feared their Lord will have gardens beneath which rivers flow, abiding eternally therein, as accommodation from Allah. And that which is with Allah is best for the righteous. And indeed, among the People of the Scripture are those who believe in Allah and what was revealed to you and what was revealed to them, [being] humbly submissive to Allah. They do not exchange the verses of Allah for a small price.Those will have their reward with their Lord. Indeed, Allah is swift in account. O you who have believed, persevere and endure and remain stationed and fear Allah that you may be successful.",
+     "tr": "From Verse 3:190 till the end of the chapter Al-Imran",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 1",
+     "sourceAr": "حصن المسلم، الباب 1",
+     "noteEn": "",
+     "noteAr": ""
+    }
+   ]
+  },
+  {
+   "id": "sleep",
+   "titleEn": "Before sleep",
+   "titleAr": "أذكار النوم",
+   "items": [
+    {
+     "id": "hisn-99-seen-4",
+     "ar": "قُلْ هُوَ ٱللَّهُ أَحَدٌ، ٱللَّهُ ٱلصَّمَدُ، لَمْ يَلِدْ وَلَمْ يُولَدْ، وَلَمْ يَكُن لَّهُۥ كُفُوًا أَحَدٌۢ",
+     "en": "Say, He is Allah, [who is] One, Allah, the Eternal Refuge. He neither begets nor is born, Nor is there to Him any equivalent.",
+     "tr": "Bismillaahir Rahmaanir Raheem \"Qul huwal laahu ahad Allah hus-samad Lam yalid wa lam yoolad Wa lam yakul-lahoo kufuwan ahad",
+     "count": 3,
+     "virtueEn": "Al-Ikhlas 112:1-4, Al-Falaq 113:1-5, An-Nas 114:1-6. Whoever recites these three times in the morning and in the evening, they will suffice him (as a protection) against everything.",
+     "virtueAr": "من قالها ثلاث مرات حين يصبح وحين يمسي كفته من كل شيء",
+     "sourceEn": "The Hadith was reported by Abu Dawud 4/322, and At-Tirmidhi 5/567. See Al-Albani's Sahih At-Tirmidhi 3/182.",
+     "sourceAr": "أخرجه أبو داود، 4/ 322، برقم 5082، والترمذي، 5/ 567، برقم 3575، وانظر: صحيح الترمذي، 3/182.",
+     "noteEn": "Cup your hands, blow into them and recite, then wipe over your body. Do this three times.",
+     "noteAr": "اجمع كفيك وانفث فيهما واقرأ، ثم امسح بهما ما استطعت من جسدك. ثلاث مرات"
+    },
+    {
+     "id": "hisn-99-seen-5",
+     "ar": "قُلْ أَعُوذُ بِرَبِّ ٱلْفَلَقِ، مِن شَرِّ مَا خَلَقَ، وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ، وَمِن شَرِّ ٱلنَّفَّٰثَٰتِ فِى ٱلْعُقَدِ، وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ",
+     "en": "Say, I seek refuge in the Lord of daybreak From the evil of that which He created And from the evil of darkness when it settles And from the evil of the blowers in knots And from the evil of an envier when he envies.",
+     "tr": "Bismillaahir Rahmaanir Raheem \"Qul a'oozu bi rabbil-falaq Min sharri maa khalaq Wa min sharri ghaasiqin izaa waqab Wa min sharrin-naffaa-taati fil 'uqad Wa min sharri haasidin izaa hasad",
+     "count": 3,
+     "virtueEn": "Al-Ikhlas 112:1-4, Al-Falaq 113:1-5, An-Nas 114:1-6. Whoever recites these three times in the morning and in the evening, they will suffice him (as a protection) against everything.",
+     "virtueAr": "من قالها ثلاث مرات حين يصبح وحين يمسي كفته من كل شيء",
+     "sourceEn": "The Hadith was reported by Abu Dawud 4/322, and At-Tirmidhi 5/567. See Al-Albani's Sahih At-Tirmidhi 3/182.",
+     "sourceAr": "أخرجه أبو داود، 4/ 322، برقم 5082، والترمذي، 5/ 567، برقم 3575، وانظر: صحيح الترمذي، 3/182.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "hisn-99-seen-6",
+     "ar": "قُلْ أَعُوذُ بِرَبِّ ٱلنَّاسِ، مَلِكِ ٱلنَّاسِ، إِلَٰهِ ٱلنَّاسِ، مِن شَرِّ ٱلْوَسْوَاسِ ٱلْخَنَّاسِ، ٱلَّذِى يُوَسْوِسُ فِى صُدُورِ ٱلنَّاسِ، مِنَ ٱلْجِنَّةِ وَٱلنَّاسِ",
+     "en": "Say, I seek refuge in the Lord of mankind The Sovereign of mankind The God of mankind From the evil of the retreating whisperer Who whispers [evil] into the breasts of mankind From among the jinn and mankind.",
+     "tr": "Bismillaahir Rahmaanir Raheem \"Qul a'oozu birabbin naas Malikin naas Ilaahin naas Min sharril waswaasil khannaas Allazee yuwaswisu fee sudoorin naas Minal jinnati wannaas",
+     "count": 3,
+     "virtueEn": "Al-Ikhlas 112:1-4, Al-Falaq 113:1-5, An-Nas 114:1-6. Whoever recites these three times in the morning and in the evening, they will suffice him (as a protection) against everything.",
+     "virtueAr": "من قالها ثلاث مرات حين يصبح وحين يمسي كفته من كل شيء",
+     "sourceEn": "The Hadith was reported by Abu Dawud 4/322, and At-Tirmidhi 5/567. See Al-Albani's Sahih At-Tirmidhi 3/182.",
+     "sourceAr": "أخرجه أبو داود، 4/ 322، برقم 5082، والترمذي، 5/ 567، برقم 3575، وانظر: صحيح الترمذي، 3/182.",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "hisn-100",
+     "ar": "﴿اللَّهُ لاَ إِلَهَ إِلاَّ هُوَ الْحَيُّ الْقَيُّومُ لاَ تَأْخُذُهُ سِنَةٌ وَلاَ نَوْمٌ لَّهُ مَا فِي السَّمَوَاتِ وَمَا فِي الأَرْضِ مَن ذَا الَّذِي يَشْفَعُ عِنْـــــــــــدَهُ إِلاَّ بِإِذْنِهِ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ وَلاَ يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلاَّ بِمَا شَاء وَسِعَ كُرْسِيُّهُ السَّمَوَاتِ وَالأَرْضَ وَلاَ يَؤُودُهُ حِفْظُهُمَا وَهُوَ الْعَلِيُّ الْعَظِيمُ﴾",
+     "en": "Allah - there is no deity except Him, the Ever-Living, the Sustainer of [all] existence. Neither drowsiness overtakes Him nor sleep. To Him belongs whatever is in the heavens and whatever is on the earth. Who is it that can intercede with Him except by His permission? He knows what is [presently] before them and what will be after them, and they encompass not a thing of His knowledge except for what He wills. His Kursi extends over the heavens and the earth, and their preservation tires Him not. And He is the Most High, the Most Great.",
+     "tr": "Recite Ayat-Al-Kursiy (Al-Baqarah :255)",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 28",
+     "sourceAr": "حصن المسلم، الباب 28",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "hisn-101",
+     "ar": "﴿آمَنَ الرَّسُولُ بِمَا أُنزِلَ إِلَيْهِ مِن رَّبِّهِ وَالْمُؤْمِنُونَ كُلٌّ آمَنَ بِاللَّهِ وَمَلآئِكَتِهِ وَكُتُبِهِ وَرُسُلِهِ لاَ نُفَرِّقُ بَيْنَ أَحَدٍ مِّن رُّسُلِهِ وَقَالُواْ سَمِعْنَا وَأَطَعْنَا غُفْرَانَكَ رَبَّنَا وَإِلَيْكَ الْمَصِيرُ ۝ لاَ يُكَلِّفُ اللَّهُ نَفْساً إِلاَّ وُسْعَهَا لَهَا مَا كَسَبَتْ وَعَلَيْهَا مَا اكْتَسَبَتْ رَبَّنَا لاَ تُؤَاخِذْنَا إِن نَّسِينَا أَوْ أَخْطَأْنَا رَبَّنَا وَلاَ تَحْمِلْ عَلَيْنَا إِصْراً كَمَا حَمَلْتَهُ عَلَى الَّذِينَ مِن قَبْلِنَا رَبَّنَا وَلاَ تُحَمِّلْنَا مَا لاَ طَاقَةَ لَنَا بِهِ وَاعْفُ عَنَّا وَاغْفِرْ لَنَا وَارْحَمْنَآ أَنتَ مَوْلاَنَا فَانصُرْنَا عَلَى الْقَوْمِ الْكَافِرِينَ﴾",
+     "en": "The Messenger has believed in what was revealed to him from his Lord, and [so have] the believers. All of them have believed in Allah and His angels and His books and His messengers, [saying], We make no distinction between any of His messengers. And they say, We hear and we obey. [We seek] Your forgiveness, our Lord, and to You is the [final] destination. Allah does not charge a soul except [with that within] its capacity. It will have [the consequence of] what [good] it has gained, and it will bear [the consequence of] what [evil] it has earned. Our Lord, do not impose blame upon us if we have forgotten or erred. Our Lord, and lay not upon us a burden like that which You laid upon those before us. Our Lord, and burden us not with that which we have no ability to bear. And pardon us; and forgive us; and have mercy upon us. You are our protector, so give us victory over the disbelieving people.",
+     "tr": "Recite last two verses of Soorah (Al-Baqarah :285-286)",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 28",
+     "sourceAr": "حصن المسلم، الباب 28",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "hisn-102",
+     "ar": "بِاسْمِكَ رَبِّي وَضَعْتُ جَنْبِي، وَبِكَ أَرْفَعُهُ، فَإِن أَمْسَكْتَ نَفْسِي فارْحَمْهَا، وَإِنْ أَرْسَلْتَهَا فَاحْفَظْهَا، بِمَا تَحْفَظُ بِهِ عِبَادَكَ الصَّالِحِينَ",
+     "en": "In Your name my Lord, I lie down and in Your name I rise, so if You should take my soul then have mercy upon it, and if You should return my soul then protect it in the manner You do so with Your righteous servants.",
+     "tr": "Bismika rabbee wadaAAtu janbee wabika arfaAAuh, fa-in amsakta nafsee farhamha, wa-in arsaltaha fahfathha bima tahfathu bihi AAibadakas-saliheen.",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 28",
+     "sourceAr": "حصن المسلم، الباب 28",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "hisn-103",
+     "ar": "اللَّهُمَّ إِنَّكَ خَلَقْتَ نَفْسِي وَأَنْتَ تَوَفَّاهَا، لَكَ مَمَاتُهَا وَمَحْياهَا، إِنْ أَحْيَيْتَهَا فَاحْفَظْهَا، وَإِنْ أَمَتَّهَا فَاغْفِرْ لَهَا. اللَّهُمَّ إِنِّي أَسْأَلُكَ العَافِيَةَ",
+     "en": "O Allah, verily You have created my soul and You shall take it’s life, to You belongs it’s life and death. If You should keep my soul alive then protect it, and if You should take it’s life then forgive it. O Allah, I ask You to grant me good health.",
+     "tr": "Allahumma innaka khalaqta nafsee wa-anta tawaffaha, laka mamatuha wamahyaha in ahyaytaha fahfathha, wa-in amattaha faghfir laha. Allahumma innee as-alukal-AAafiyah.",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 28",
+     "sourceAr": "حصن المسلم، الباب 28",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "hisn-104",
+     "ar": "اللَّهُمَّ قِنِي عَذَابَكَ يَوْمَ تَبْعَثُ عِبَادَكَ",
+     "en": "O Allah, protect me from Your punishment on the day Your servants are resurrected.",
+     "tr": "Allahumma qinee AAathabaka yawma tabAAathu AAibadak.",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 28",
+     "sourceAr": "حصن المسلم، الباب 28",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "hisn-105",
+     "ar": "بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا",
+     "en": "In Your name O Allah, I live and die.",
+     "tr": "Bismikal-lahumma amootu wa-ahya.",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 28",
+     "sourceAr": "حصن المسلم، الباب 28",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "hisn-106a",
+     "ar": "سُبْحَانَ اللَّهِ",
+     "en": "How perfect Allah is.",
+     "tr": "",
+     "count": 33,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 28",
+     "sourceAr": "حصن المسلم، الباب 28",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "hisn-106b",
+     "ar": "الْحَمْدُ لِلَّهِ",
+     "en": "All praise is for Allah.",
+     "tr": "",
+     "count": 33,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 28",
+     "sourceAr": "حصن المسلم، الباب 28",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "hisn-106c",
+     "ar": "اللَّهُ أَكْبَرُ",
+     "en": "Allah is the greatest.",
+     "tr": "",
+     "count": 34,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 28",
+     "sourceAr": "حصن المسلم، الباب 28",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "hisn-107",
+     "ar": "اللَّهُمَّ رَبَّ السَّمَوَاتِ السَّبْعِ وَرَبَّ الأَرْضِ، وَرَبَّ الْعَرْشِ الْعَظِيمِ، رَبَّنَا وَرَبَّ كُلِّ شَيْءٍ، فَالِقَ الْحَبِّ وَالنَّوَى، وَمُنْزِلَ التَّوْرَاةِ وَالْإِنْجِيلِ، وَالْفُرْقَانِ، أَعُوذُ بِكَ مِنْ شَرِّ كُلِّ شَيْءٍ أَنْتَ آخِذٌ بِنَاصِيَتِهِ. اللَّهُمَّ أَنْتَ الأَوَّلُ فَلَيْسَ قَبْلَكَ شَيْءٌ، وَأَنْتَ الآخِرُ فَلَيسَ بَعْدَكَ شَيْءٌ، وَأَنْتَ الظَّاهِرُ فَلَيْسَ فَوْقَكَ شَيْءٌ، وَأَنْتَ الْبَاطِنُ فَلَيْسَ دُونَكَ شَيْءٌ، اقْضِ عَنَّا الدَّيْنَ وَأَغْنِنَا مِنَ الْفَقْرِ",
+     "en": "O Allah, Lord of the seven heavens and the exalted throne, our Lord and Lord of all things, Splitter of the seed and the date stone, Revealer of the Tawrah, the Injeel and the Furqan, I take refuge in You from the evil of all things You shall seize by the forelock (i.e. You have total mastery over). O Allah, You are The First so there is nothing before You and You are The Last so there is nothing after You.You are Aththahir so there is nothing above You and You are Al-Batin so there is nothing closer than You.Settle our debt for us and spare us from poverty.",
+     "tr": "Allahumma rabbas-samawatis-sabAA, warabbal-AAarshil-AAatheem, rabbana warabba kulli shay/, faliqal-habbi wannawa, wamunazzilat-tawra, wal-injeel, walfurqan, aAAoothu bika min sharri kulli shayin anta akhithun binasiyatih. Allahumma antal-awwal, falaysa qablaka shay/, wa-antal-akhir, falaysa baAAdaka shay/, wa-antath-thahir falaysa fawqaka shay/, waantal-batin, falaysa doonaka shay/, iqdi AAannad-dayna wa-aghnina minal-faqr.",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 28",
+     "sourceAr": "حصن المسلم، الباب 28",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "hisn-108",
+     "ar": "الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنَا وَسَقَانَا، وَكَفَانَا، وَآوَانَا، فَكَمْ مِمَّنْ لاَ كَافِيَ لَهُ وَلاَ مُؤْوِيَ",
+     "en": "All praise is for Allah, Who fed us and gave us drink, and Who is sufficient for us and has sheltered us, for how many have none to suffice them or shelter them.",
+     "tr": "Alhamdu lillahil-lathee atAAamana wasaqana, wakafana, wa-awana, fakam mimman la kafiya lahu wala mu'wee.",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 28",
+     "sourceAr": "حصن المسلم، الباب 28",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "hisn-109",
+     "ar": "اللَّهُمَّ عَالِمَ الغَيْبِ وَالشَّهَادَةِ فَاطِرَ السَّمَوَاتِ وَالْأَرْضِ، رَبَّ كُلِّ شَيْءٍ وَمَلِيكَهُ، أَشْهَدُ أَنْ لاَ إِلَهَ إِلاَّ أَنْتَ، أَعُوذُ بِكَ مِنْ شَرِّ نَفْسِي، وَمِنْ شَرِّ الشَّيْطانِ وَشِرْكِهِ، وَأَنْ أَقْتَرِفَ عَلَى نَفْسِي سُوءاً، أَوْ أَجُرَّهُ إِلَى مُسْلِمٍ",
+     "en": "O Allah, Knower of the seen and the unseen, Creator of the heavens and the earth, Lord and Sovereign of all things I bear witness that none has the right to be worshipped except You. I take refuge in You from the evil of my soul and from the evil and shirk of the devil, and from committing wrong against my soul or bringing such upon another Muslim.",
+     "tr": "Allahumma AAalimal-ghaybi washshahadah, fatiras-samawati wal-ard, rabba kulli shayin wamaleekah, ashhadu an la ilaha illa ant, aAAoothu bika min sharri nafsee wamin sharrish-shaytani washirkih, wa-an aqtarifa AAala nafsee soo-an aw ajurrahu ila muslim.",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 28",
+     "sourceAr": "حصن المسلم، الباب 28",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "hisn-110",
+     "ar": "يَقْرَأُ ﴿الم﴾ تَنْزِيلَ السَّجْدَة ِ، وَتَبَارَكَ الَّذي بِيَدِهِ الْمُلْكُ",
+     "en": "The Prophet never used to sleep until he had recited Soorat As-Sajdah (chapter 32) and Soorat Al-Mulk (chapter 67).",
+     "tr": "",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 28",
+     "sourceAr": "حصن المسلم، الباب 28",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "hisn-111",
+     "ar": "اللَّهُمَّ أَسْلَمْتُ نَفْسِي إِلَيْكَ، وَفَوَّضْتُ أَمْرِي إِلَيْكَ، وَوَجَّهْتُ وَجْهِي إِلَيْكَ، وَأَلْجَأْتُ ظَهْرِي إِلَيْكَ، رَغْبَةً وَرَهْبَةً إِلَيْكَ، لاَ مَلْجَأَ وَلاَ مَنْجَا مِنْكَ إِلاَّ إِلَيْكَ، آمَنْتُ بِكِتَابِكَ الَّذِي أَنْزَلْتَ، وَبِنَبِيِّكَ الَّذِي أَرْسَلْتَ",
+     "en": "O Allah, I submit my soul unto You, and I entrust my affair unto You, and I turn my face towards You, and I totally rely on You, in hope and fear of You.Verily there is no refuge nor safe haven from You except with You. I believe in Your Book which You have revealed and in Your Prophet whom You have sent. If you then die, you will die upon the fitrah.",
+     "tr": "Allahumma aslamtu nafsee ilayk, wafawwadtu amree ilayk, wawajjahtu wajhee ilayk, wa-alja/tu thahree ilayk, raghbatan warahbatan ilayk, la maljaa wala manja minka illa ilayk, amantu bikitabikal-lathee anzalt, wabinabiyyikal-lathee arsalt.",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 28",
+     "sourceAr": "حصن المسلم، الباب 28",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "hisn-112",
+     "ar": "لاَ إِلَهَ إِلاَّ اللَّهُ الْوَاحِدُ الْقَهّارُ، رَبُّ السَّمَوَاتِ وَالْأَرْضِ وَمَا بَيْنَهُمَا الْعَزيزُ الْغَفَّارُ",
+     "en": "None has the right to be worshipped except Allah, The One, AL-Qahhar.Lord of the heavens and the Earth and all between them, The Exalted in Might, The Oft-Forgiving.",
+     "tr": "La ilaha illal-lahul-wahidul-qahhar, rabbus-samawati wama baynahuma, alAAazeezul-ghaffar.",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 29",
+     "sourceAr": "حصن المسلم، الباب 29",
+     "noteEn": "",
+     "noteAr": ""
+    },
+    {
+     "id": "hisn-113",
+     "ar": "أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ غَضَبِهِ وَعِقَابِهِ، وَشَرِّ عِبَادِهِ، وَمِنْ هَمَزَاتِ الشَّياطِينِ وَأَنْ يَحْضُرُونِ",
+     "en": "I take refuge in the perfect words of Allah from His anger and punishment, and from the evil of His servants, and from the madness and appearance of devils.",
+     "tr": "aAAoothu bikalimatil-lahit-tammat min ghadabih,waAAiqabih, washarri AAibadih, wamin hamazatish-shayateen, wa-an yahduroon.",
+     "count": 1,
+     "virtueEn": "",
+     "virtueAr": "",
+     "sourceEn": "Hisn al-Muslim, chapter 30",
+     "sourceAr": "حصن المسلم، الباب 30",
+     "noteEn": "",
+     "noteAr": ""
+    }
+   ]
+  }
+ ],
+ "groups": [
+  {
+   "id": "home",
+   "titleEn": "Home & daily life",
+   "titleAr": "المنزل والحياة اليومية",
+   "categories": [
+    {
+     "id": "leaving-home",
+     "titleEn": "Leaving home",
+     "titleAr": "الخروج من المنزل",
+     "items": [
+      {
+       "id": "hisn-16",
+       "ar": "بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَاَ حَوْلَ وَلَا قُوَّةَ إِلاَّ بِاللَّهِ",
+       "en": "In the name of Allah, I place my trust in Allah, and there is no might nor power except with Allah.",
+       "tr": "Bismil-lah, tawakkaltu AAalal-lah, wala hawla wala quwwata illa billah.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 10",
+       "sourceAr": "حصن المسلم، الباب 10",
+       "noteEn": "",
+       "noteAr": ""
+      },
+      {
+       "id": "hisn-17",
+       "ar": "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ أَنْ أَضِلَّ، أَوْ أُضَلَّ، أَوْ أَزِلَّ، أَوْ أُزَلَّ، أَوْ أَظْلِمَ، أَوْ أُظْلَمَ، أَوْ أَجْهَلَ، أَوْ يُجْهَلَ عَلَيَّ",
+       "en": "O Allah, I take refuge with You lest I should stray or be led astray, or slip or be tripped, or oppress or be oppressed, or behave foolishly or be treated foolishly.",
+       "tr": "Allahumma innee aAAoothu bika an adilla aw odal, aw azilla aw ozall, aw athlima aw othlam, aw ajhala aw yujhala AAalay.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 10",
+       "sourceAr": "حصن المسلم، الباب 10",
+       "noteEn": "",
+       "noteAr": ""
+      }
+     ]
+    },
+    {
+     "id": "entering-home",
+     "titleEn": "Entering home",
+     "titleAr": "دخول المنزل",
+     "items": [
+      {
+       "id": "hisn-18",
+       "ar": "بِسْمِ اللَّهِ وَلَجْنَا، وَبِسْمِ اللَّهِ خَرَجْنَا، وَعَلَى اللَّهِ رَبِّنَا تَوَكَّلْنَا، ثُمَّ لِيُسَلِّمْ عَلَى أَهْلِهِ",
+       "en": "In the name of Allah we enter and in the name of Allah we leave, and upon our Lord we place our trust.",
+       "tr": "Bismil-lahi walajna, wabismil-lahi kharajna, waAAala rabbina tawakkalna.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 11",
+       "sourceAr": "حصن المسلم، الباب 11",
+       "noteEn": "",
+       "noteAr": ""
+      }
+     ]
+    },
+    {
+     "id": "restroom",
+     "titleEn": "Restroom",
+     "titleAr": "دخول الخلاء والخروج منه",
+     "items": [
+      {
+       "id": "hisn-10",
+       "ar": "بِسْمِ اللَّهِ، اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْخُبْثِ وَالْخَبائِث",
+       "en": "In the name of Allah. O Allah, I take refuge with You from all evil and evil-doers.",
+       "tr": "",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 6",
+       "sourceAr": "حصن المسلم، الباب 6",
+       "noteEn": "Before entering the restroom",
+       "noteAr": "قبل دخول الخلاء"
+      },
+      {
+       "id": "hisn-11",
+       "ar": "غُفْرَانَكَ",
+       "en": "I ask You (Allah) for forgiveness.",
+       "tr": "Ghufranak.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 7",
+       "sourceAr": "حصن المسلم، الباب 7",
+       "noteEn": "",
+       "noteAr": ""
+      }
+     ]
+    },
+    {
+     "id": "clothes",
+     "titleEn": "Getting dressed",
+     "titleAr": "اللباس",
+     "items": [
+      {
+       "id": "hisn-5",
+       "ar": "الْحَمْدُ للَّهِ الَّذِي كَسَانِي هَذَا الثَّوْبَ وَرَزَقَنِيهِ مِنْ غَيْرِ حَوْلٍ مِنِّي وَلاَ قُوَّة",
+       "en": "All Praise is for Allah who has clothed me with this garment and provided it for me, with no power nor might from myself.",
+       "tr": "Alhamdu lillahil-lathee kasanee hatha (aththawb) warazaqaneehi min ghayri hawlin minnee wala quwwah.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 2",
+       "sourceAr": "حصن المسلم، الباب 2",
+       "noteEn": "",
+       "noteAr": ""
+      },
+      {
+       "id": "hisn-6",
+       "ar": "اللَّهُمَّ لَكَ الْحَمْدُ أَنْتَ كَسَوْتَنِيهِ، أَسْأَلُكَ مِنْ خَيْرِهِ وَخَيْرِ مَا صُنِعَ لَهُ، وَأَعُوذُ بِكَ مِنْ شَرِّهِ وَشَرِّ مَا صُنِعَ لَهُ",
+       "en": "O Allah, for You is all praise, You have clothed me with it (i.e. the garment), I ask You for the good of it and the good for which it was made, and I seek refuge with You from the evil of it and the evil for which it was made.",
+       "tr": "Allahumma lakal-hamdu anta kasawtaneeh, as-aluka min khayrihi wakhayri ma suniAAa lah, wa-aAAoothu bika min sharrihi washarri ma suniAAa lah.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 3",
+       "sourceAr": "حصن المسلم، الباب 3",
+       "noteEn": "",
+       "noteAr": ""
+      },
+      {
+       "id": "hisn-9",
+       "ar": "بِسْمِ اللَّهِ",
+       "en": "In the name of Allah.",
+       "tr": "Bismil-lah.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 5",
+       "sourceAr": "حصن المسلم، الباب 5",
+       "noteEn": "",
+       "noteAr": ""
+      }
+     ]
+    },
+    {
+     "id": "sneezing",
+     "titleEn": "Sneezing",
+     "titleAr": "العطاس",
+     "items": [
+      {
+       "id": "hisn-188a",
+       "ar": "الْحَمْدُ لِلَّهِ",
+       "en": "All praise is for Allah.",
+       "tr": "",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 77",
+       "sourceAr": "حصن المسلم، الباب 77",
+       "noteEn": "When you sneeze",
+       "noteAr": "إذا عطست"
+      },
+      {
+       "id": "hisn-188b",
+       "ar": "يَرْحَمُكَ اللَّهُ",
+       "en": "May Allah have mercy upon you.",
+       "tr": "",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 77",
+       "sourceAr": "حصن المسلم، الباب 77",
+       "noteEn": "To someone who sneezes and praises Allah",
+       "noteAr": "لمن عطس فحمد الله"
+      },
+      {
+       "id": "hisn-188c",
+       "ar": "يَهْدِيكُمُ اللَّهُ وَيُصْلِحُ بَالَكُمْ",
+       "en": "May Allah guide you and rectify your condition.",
+       "tr": "",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 77",
+       "sourceAr": "حصن المسلم، الباب 77",
+       "noteEn": "The reply of the one who sneezed",
+       "noteAr": "ردّ العاطس"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "prayer",
+   "titleEn": "Prayer & mosque",
+   "titleAr": "الصلاة والمسجد",
+   "categories": [
+    {
+     "id": "wudu",
+     "titleEn": "Ablution",
+     "titleAr": "الوضوء",
+     "items": [
+      {
+       "id": "hisn-12",
+       "ar": "بِسْمِ اللَّهِ",
+       "en": "In the name of Allah.",
+       "tr": "Bismil-lah.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 8",
+       "sourceAr": "حصن المسلم، الباب 8",
+       "noteEn": "",
+       "noteAr": ""
+      },
+      {
+       "id": "hisn-13",
+       "ar": "أَشْهَدُ أَنْ لاَ إِلَهَ إِلاَّ اللَّهُ وَحْدَهُ لاَ شَرِيكَ لَهُ وَأَشْهَدُ أَنَّ مُحَمَّداً عَبْدُهُ وَرَسُولُهُ",
+       "en": "I bear witness that none has the right to be worshipped except Allah, alone without partner, and I bear witness that Muhammad is His slave and Messenger.",
+       "tr": "Ashhadu an la ilaha illal-lahu wahdahu la shareeka lah, wa-ashhadu anna Muhammadan AAabduhu warasooluh.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 9",
+       "sourceAr": "حصن المسلم، الباب 9",
+       "noteEn": "",
+       "noteAr": ""
+      },
+      {
+       "id": "hisn-14",
+       "ar": "اللَّهُمَّ اجْعَلْنِي مِنَ التَّوَّابِينَ وَاجْعَلْنِي مِنَ الْمُتَطَهِّرِينَ",
+       "en": "O Allah, make me of those who return to You often in repentance and make me of those who remain clean and pure.",
+       "tr": "Allahummaj-AAalnee minat-tawwabeena wajAAalnee minal-mutatahhireen.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 9",
+       "sourceAr": "حصن المسلم، الباب 9",
+       "noteEn": "",
+       "noteAr": ""
+      },
+      {
+       "id": "hisn-15",
+       "ar": "سُبْحانَكَ اللَّهُمَّ وَبِحَمْدِكَ، أَشْهَدُ أَنْ لاَ إِلَهَ إِلاَّ أَنْتَ، أَسْتَغْفِرُكَ وَأَتوبُ إِلَيْكَ",
+       "en": "How perfect You are O Allah, and I praise You, I bear witness that none has the right to be worshipped except You, I seek Your forgiveness and turn in repentance to You.",
+       "tr": "Subhanakal-lahumma wabihamdika ashhadu an la ilaha illa anta astaghfiruka wa-atoobu ilayk.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 9",
+       "sourceAr": "حصن المسلم، الباب 9",
+       "noteEn": "",
+       "noteAr": ""
+      }
+     ]
+    },
+    {
+     "id": "mosque",
+     "titleEn": "Going to the mosque",
+     "titleAr": "المسجد",
+     "items": [
+      {
+       "id": "hisn-19",
+       "ar": "اللَّهُمَّ اجْعَلْ فِي قَلْبِي نُوراً، وَفِي لِسَانِي نُوراً، وَفِي سَمْعِي نُوراً، وَفِي بَصَرِي نُوراً، وَمِنْ فَوْقِي نُوراً، وَمِنْ تَحْتِي نُوراً، وَعَنْ يَمِينِي نُوراً، وَعَنْ شِمَالِي نُوراً، وَمِنْ أَمَامِي نُوراً، وَمِنْ خَلْفِي نُوراً، وَاجْعَلْ فِي نَفْسِي نُوراً، وَأَعْظِمْ لِي نُوراً، وَعَظِّم لِي نُوراً، وَاجْعَلْ لِي نُوراً، وَاجْعَلْنِي نُوراً، اللَّهُمَّ أَعْطِنِي نُوراً، وَاجْعَلْ فِي عَصَبِي نُوراً، وَفِي لَحْمِي نُوراً، وَفِي دَمِي نُوراً، وَفِي شَعْرِي نُوراً، وَفِي بَشَرِي نُوراًاللَّهُمَّ اجْعَلْ لِي نُوراً فِي قَبْرِي... وَنُوراً فِي عِظَامِيوَزِدْنِي نُوراً، وَزِدْنِي نُوراً، وَزِدْنِي نُوراًوَهَبْ لِي نُوراً عَلَى نُورٍ",
+       "en": "‘O Allaah, place within my heart light; and upon my tongue light; and within my ears light; and within my eyes light; and place above me light; and beneath me light; and on my right light; and on my left light; and in front of me light; and behind me light; and place light within my soul; and augment light for me; and greaten light for me; and grant me light and make me light. O Allaah, bestow upon me light; and place light in my tendons; and light in my flesh; and light in my blood; and in light in my hair and light in my skin.’ [O Allaah, place light for me in my grave and light in my bones]. [And increase me with light and increase me with light and increase me with light]. [And grant me light upon light.]’",
+       "tr": "Allaahummaj 'al fee qalbee nooran, wa fee lisaanee nooran, wa fee sam'ee nooran, wa fee basaree nooran, wa min fawqee nooran, wa min tahtee nooran, wa 'an yameenee nooran, wa 'an shimaalee nooran, wa min 'amaamee nooran, wa min khalfee nooran. Wa j'al fee nafsee nooran, wa 'a'dhim lee nooran, wa 'a'dhim lee nooran. Waj'al lee nooran, waj'alnee nooran. Allaahumma a'tineje nooran, waj'al fee 'asabee nooran, wa fee lahmee nooran, wa fee damee nooran, wa fee sha'ree nooran, wa fee basharee nooran.[Allaahummaj'al lee nooran fee qabree, wa nooran fee 'idhaamee.][Wa zidnee nooran, wa zidnee nooran, wa zidnee nooran.][Wa hab lee nooran 'alaa noor.]",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 12",
+       "sourceAr": "حصن المسلم، الباب 12",
+       "noteEn": "",
+       "noteAr": ""
+      },
+      {
+       "id": "hisn-20",
+       "ar": "أَعُوذُ بِاللَّهِ العَظِيمِ، وَبِوَجْهِهِ الْكَرِيمِ، وَسُلْطَانِهِ الْقَدِيمِ، مِنَ الشَّيْطَانِ الرَّجِيمِ، بِسْمِ اللَّهِ، وَالصَّلَاةُ وَالسَّلَامُ عَلَى رَسُولِ اللَّهِ، اللَّهُمَّ افْتَحْ لِي أَبْوَابَ رَحْمَتِكَ",
+       "en": "I take refuge with Allah, The Supreme and with His Noble Face, and His eternal authority from the accursed devil. In the name of Allah, and prayers and peace be upon the Messenger of Allah. O Allah, open the gates of Your mercy for me.",
+       "tr": "",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 13",
+       "sourceAr": "حصن المسلم، الباب 13",
+       "noteEn": "Enter with your right foot",
+       "noteAr": "ادخل برجلك اليمنى"
+      },
+      {
+       "id": "hisn-21",
+       "ar": "بِسْمِ اللَّهِ وَالصّلَاةُ وَالسَّلَامُ عَلَى رَسُولِ اللَّهِ، اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنْ فَضْلِك، اللَّهُمَّ اعْصِمْنِي مِنَ الشَّيْطَانِ الرَّجِيمِ",
+       "en": "In the name of Allah, and prayers and peace be upon the Messenger of Allah. O Allah, I ask You from Your favour. O Allah, guard me from the accursed devil.",
+       "tr": "",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 14",
+       "sourceAr": "حصن المسلم، الباب 14",
+       "noteEn": "Leave with your left foot",
+       "noteAr": "اخرج برجلك اليسرى"
+      }
+     ]
+    },
+    {
+     "id": "adhan",
+     "titleEn": "Hearing the adhan",
+     "titleAr": "سماع الأذان",
+     "items": [
+      {
+       "id": "hisn-22",
+       "ar": "لاَ حَوْلَ وَلاَ قُوَّةَ إِلاَّ بِاللَّهِ",
+       "en": "There is no might nor power except with Allah.",
+       "tr": "",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 15",
+       "sourceAr": "حصن المسلم، الباب 15",
+       "noteEn": "Repeat after the mu'adhin, and say this at “Hayya ʿala-s-salah” and “Hayya ʿala-l-falah”",
+       "noteAr": "ردّد مع المؤذن، وقل هذا عند «حيّ على الصلاة» و«حيّ على الفلاح»"
+      },
+      {
+       "id": "hisn-23",
+       "ar": "وَأَنَا أَشْهَدُ أَنْ لاَ إِلَهَ إِلاَّ اللَّهُ وَحْدَهُ لاَ شَرِيكَ لَهُ وَأَنَّ مُحَمَّداً عَبْدُهُ وَرَسُولُهُ، رَضِيتُ بِاللَّهِ رَبَّاً، وَبِمُحَمَّدٍ رَسُولاً، وَبِالْإِسْلاَمِ دِينَاً",
+       "en": "And I too bear witness that none has the right to be worshipped except Allah, alone, without partner, and that Muhammad is His slave and Messenger. I am pleased with Allah as a Lord, and Muhammad as a Messenger and Islam as a religion.",
+       "tr": "",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 15",
+       "sourceAr": "حصن المسلم، الباب 15",
+       "noteEn": "After the mu'adhin's testimony of faith",
+       "noteAr": "عقب تشهّد المؤذن"
+      },
+      {
+       "id": "hisn-25",
+       "ar": "اللَّهُمَّ رَبَّ هَذِهِ الدَّعْوَةِ التَّامَّةِ، وَالصَّلاَةِ الْقَائِمَةِ، آتِ مُحَمَّداً الْوَسِيلَةَ وَالْفَضِيلَةَ، وَابْعَثْهُ مَقَامَاً مَحمُوداً الَّذِي وَعَدْتَهُ، إِنَّكَ لَا تُخْلِفُ الْمِيعَادَ",
+       "en": "O Allah, Owner of this perfect call and Owner of this prayer to be performed, bestow upon Muhammad al-waseelah and al-fadeelah and send him upon a praised platform which You have promised him. Verily, You never fail in Your promise.",
+       "tr": "",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 15",
+       "sourceAr": "حصن المسلم، الباب 15",
+       "noteEn": "After the adhan, send blessings on the Prophet ﷺ, then say",
+       "noteAr": "بعد الأذان صلِّ على النبي ﷺ ثم قل"
+      }
+     ]
+    },
+    {
+     "id": "istikhara",
+     "titleEn": "Istikhara",
+     "titleAr": "الاستخارة",
+     "items": [
+      {
+       "id": "hisn-74",
+       "ar": "اللَّهُمَّ إِنِّي أَسْتَخِيرُكَ بِعِلْمِكَ، وَأَسْتَقْدِرُكَ بِقُدْرَتِكَ، وَأَسْأَلُكَ مِنْ فَضْلِكَ العَظِيمِ؛ فَإِنَّكَ تَقْدِرُ وَلاَ أَقْدِرُ، وَتَعْلَمُ وَلاَ أَعْلَمُ، وَأَنْتَ عَلاَّمُ الغُيُوبِ، اللَّهُمَّ إِنْ كُنْتَ تَعْلَمُ أَنَّ هَذَا الأمْرَ - وَيُسَمِّي حَاجَتَهُ - خَيْرٌ لِي فِي دِينِي وَمَعَاشِي وَعَاقِبَةِ أَمْرِي – أَوْ قَالَ: عَاجِلِهِ وَآجِلِهِ - فَاقْدُرْهُ لِي وَيَسِّرْهُ لِي ثمَّ بَارِكْ لِي فِيهِ، وَإِنْ كُنْتَ تَعْلَمُ أَنَّ هَذَا الْأَمْرَ شَرٌّ لِي فِي دِينِي وَمَعَاشِي وَعَاقِبَةِ أَمْرِي – أَوْ قَالَ: عَاجِلِهِ وَآجِلِهِ – فَاصْرِفْهُ عَنِّي وَاصْرِفْنِي عَنْهُ وَاقْدُرْ لِيَ الْخَيْرَ حَيْثُ كَانَ، ثُمَّ أَرْضِنِي بِهِ",
+       "en": "O Allah, I seek Your counsel by Your knowledge and by Your power I seek strength and I ask You from Your immense favour, for verily You are able while I am not and verily You know while I do not and You are the Knower of the unseen. O Allah, if You know this affair (name it) to be good for me in relation to my religion, my life, and end, then decree and facilitate it for me, and bless me with it, and if You know this affair to be ill for me towards my religion, my life, and end, then remove it from me and remove me from it, and decree for me what is good wherever it be and make me satisfied with such.",
+       "tr": "",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 26",
+       "sourceAr": "حصن المسلم، الباب 26",
+       "noteEn": "Pray two voluntary rak'ahs, then say this, naming your matter where marked",
+       "noteAr": "صلِّ ركعتين من غير الفريضة، ثم قل وسمِّ حاجتك في موضعها"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "food",
+   "titleEn": "Food & fasting",
+   "titleAr": "الطعام والصيام",
+   "categories": [
+    {
+     "id": "eating",
+     "titleEn": "Before and after eating",
+     "titleAr": "الطعام",
+     "items": [
+      {
+       "id": "hisn-178a",
+       "ar": "بِسْمِ اللَّهِ",
+       "en": "In the name of Allah.",
+       "tr": "",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 69",
+       "sourceAr": "حصن المسلم، الباب 69",
+       "noteEn": "Before eating",
+       "noteAr": "قبل الأكل"
+      },
+      {
+       "id": "hisn-178b",
+       "ar": "بسمِ اللَّهِ فِي أَوَّلِهِ وَآخِرِهِ",
+       "en": "In the name of Allah, at its beginning and its end.",
+       "tr": "",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 69",
+       "sourceAr": "حصن المسلم، الباب 69",
+       "noteEn": "If you forgot at the start, say this when you remember",
+       "noteAr": "إن نسيت في أوله فقل حين تذكر"
+      },
+      {
+       "id": "hisn-179a",
+       "ar": "اللَّهُمَّ بَارِكْ لَنَا فِيهِ وَأَطْعِمْنَا خَيْراً مِنْهُ",
+       "en": "O Allah, bless it for us and feed us better than it.",
+       "tr": "",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 69",
+       "sourceAr": "حصن المسلم، الباب 69",
+       "noteEn": "When Allah gives you food",
+       "noteAr": "إذا أطعمك الله طعامًا"
+      },
+      {
+       "id": "hisn-179b",
+       "ar": "اللَّهُمَّ بَارِكْ لَنَا فِيهِ وَزِدْنَا مِنْهُ",
+       "en": "O Allah, bless it for us and give us more of it.",
+       "tr": "",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 69",
+       "sourceAr": "حصن المسلم، الباب 69",
+       "noteEn": "When Allah gives you milk to drink",
+       "noteAr": "إذا سقاك الله لبنًا"
+      },
+      {
+       "id": "hisn-180",
+       "ar": "الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنِي هَذَا، وَرَزَقَنِيهِ، مِنْ غَيْرِ حَوْلٍ مِنِّي وَلاَ قُوَّةٍ",
+       "en": "All praise is for Allah who fed me this and provided it for me without any might nor power from myself.",
+       "tr": "Alhamdu lillahil-lathee atAAamanee hatha warazaqaneehi min ghayri hawlin minnee wala quwwah.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 70",
+       "sourceAr": "حصن المسلم، الباب 70",
+       "noteEn": "",
+       "noteAr": ""
+      },
+      {
+       "id": "hisn-181",
+       "ar": "الْحَمْدُ لِلَّهِ حَمْداً كَثِيراً طَيِّباً مُبَارَكاً فِيهِ، غَيْرَ مَكْفِيٍّ وَلاَ مُوَدَّعٍ، وَلاَ مُسْتَغْنَىً عَنْهُ رَبَّنَا",
+       "en": "Allah be praised with an abundant beautiful blessed praise, a never-ending praise, a praise which we will never bid farewell to and an indispensable praise, He is our Lord.",
+       "tr": "Alhamdu lillahi hamdan katheeran tayyiban mubarakan feeh, ghayra makfiyyin wala muwaddaAAin, wala mustaghnan AAanhu rabbuna.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 70",
+       "sourceAr": "حصن المسلم، الباب 70",
+       "noteEn": "",
+       "noteAr": ""
+      }
+     ]
+    },
+    {
+     "id": "host",
+     "titleEn": "For your host",
+     "titleAr": "الدعاء لصاحب الطعام",
+     "items": [
+      {
+       "id": "hisn-182",
+       "ar": "اللَّهُمَّ بَارِكْ لَهُمْ فِيمَا رَزَقْتَهُم، وَاغْفِرْ لَهُمْ وَارْحَمْهُمْ",
+       "en": "O Allah, bless for them, that which You have provided them, forgive them and have mercy upon them.",
+       "tr": "Allahumma barik lahum feema razaqtahum, waghfir lahum warhamhum.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 71",
+       "sourceAr": "حصن المسلم، الباب 71",
+       "noteEn": "",
+       "noteAr": ""
+      }
+     ]
+    },
+    {
+     "id": "iftar",
+     "titleEn": "Breaking the fast",
+     "titleAr": "الإفطار",
+     "items": [
+      {
+       "id": "hisn-176",
+       "ar": "ذَهَبَ الظَّمَأُ وَابْتَلَّتِ العُرُوقُ، وَثَبَتَ الْأَجْرُ إِنْ شَاءَ اللَّهُ",
+       "en": "The thirst has gone and the veins are quenched, and reward is confirmed, if Allah wills.",
+       "tr": "Thahabath-thama-o wabtallatil-AAurooq, wathabatal-ajru in shaal-lah.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 68",
+       "sourceAr": "حصن المسلم، الباب 68",
+       "noteEn": "",
+       "noteAr": ""
+      },
+      {
+       "id": "hisn-177",
+       "ar": "اللَّهُمَّ إِنِّي أَسْأَلُكَ بِرَحْمَتِكَ الَّتِي وَسِعَتْ كُلَّ شَيْءٍ أَنْ تَغْفِرَ لِي",
+       "en": "O Allah, I ask You by Your mercy which envelopes all things, that You forgive me.",
+       "tr": "Allahumma inne as-aluka birahmatikal-latee wasiAAat kulla shay, an taghfira lee.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 68",
+       "sourceAr": "حصن المسلم، الباب 68",
+       "noteEn": "",
+       "noteAr": ""
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "travel",
+   "titleEn": "Travel",
+   "titleAr": "السفر",
+   "categories": [
+    {
+     "id": "riding",
+     "titleEn": "Riding",
+     "titleAr": "الركوب",
+     "items": [
+      {
+       "id": "hisn-206",
+       "ar": "بِسْمِ اللَّهِ، وَالْحَمْدُ للَّهِ ﴿سُبْحَانَ الَّذِي سَخَّرَ لَنَا هَذَا وَمَا كُنَّا لَهُ مُقْرِنِينَ، وَإِنَّا إِلَى رَبِّنَا لَمُنقَلِبُونَ﴾، الْحَمْدُ لِلَّهِ، الْحَمْدُ لِلَّهِ، الْحَمْدُ لِلَّهِ، اللَّهُ أَكْبَرُ، اللَّهُ أَكْبَرُ، اللَّهُ أَكْبَرُ، سُبْحَانَكَ اللَّهُمَّ إِنِّي ظَلَمْتُ نَفْسِي فَاغْفِرْ لِي؛ فَإِنَّهُ لاَ يَغْفِرُ الذُّنُوبَ إِلاَّ أَنْتَ",
+       "en": "In the name of Allah and all praise is for Allah. How perfect He is, the One Who has placed this (transport) at our service and we ourselves would not have been capable of that, and to our Lord is our final destiny. All praise is for Allah, All praise is for Allah, All praise is for Allah, Allah is the greatest, Allah is the greatest, Allah is the greatest. How perfect You are, O Allah, verily I have wronged my soul, so forgive me, for surely none can forgive sins except You.",
+       "tr": "Bismil-lah, walhamdu lillah, subhanal-lathee sakhkhara lana hatha wama kunna lahu muqrineen, wainna ila rabbina lamunqaliboon, alhamdu lillah, alhamdu lillah, alhamdu lillah, Allahu akbar, Allahu akbar, Allahu akbar, subhanakal-lahumma innee thalamtu nafsee faghfir lee fainnahu la yaghfiruth-thunooba illa ant.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 95",
+       "sourceAr": "حصن المسلم، الباب 95",
+       "noteEn": "",
+       "noteAr": ""
+      }
+     ]
+    },
+    {
+     "id": "travelling",
+     "titleEn": "Setting out",
+     "titleAr": "السفر",
+     "items": [
+      {
+       "id": "hisn-207",
+       "ar": "اللَّهُ أَكْبَرُ، اللَّهُ أَكْبَرُ، اللَّهُ أَكْبَرُ، ﴿سُبْحَانَ الَّذِي سَخَّرَ لَنَا هَذَا وَمَا كُنَّا لَهُ مُقْرِنِينَ ۝ وَإِنَّا إِلَى رَبِّنَا لَمُنقَلِبُونَ﴾، اللَّهُمَّ إِنّا نَسْأَلُكَ فِي سَفَرِنَا هَذَا البِرَّ وَالتَّقْوَى، وَمِنَ الْعَمَلِ مَا تَرْضَى، اللَّهُمَّ هَوِّنْ عَلَيْنَا سَفَرَنَا هَذَا وَاطْوِ عَنَّا بُعْدَهُ، اللَّهُمَّ أَنْتَ الصَّاحِبُ فِي السَّفَرِ، وَالْخَليفَةُ فِي الْأَهْلِ، اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنْ وَعْثَاءِ السَّفَرِ، وَكَآبَةِ الْمَنْظَرِ، وَسُوءِ الْمُنْقَلَبِ فِي الْمَالِ وَالْأَهْلِ",
+       "en": "Allah is the greatest, Allah is the greatest, Allah is the greatest. How perfect He is, The One Who has placed this (transport) at our service, and we ourselves would not have been capable of that, and to our Lord is our final destiny. O Allah, we ask You for birr and taqwa in this journey of ours, and we ask You for deeds which please You. O Allah, facilitate our journey and let us cover its distance quickly. O Allah, You are The Companion on the journey and The Successor over the family. O Allah, I take refuge with You from the difficulties of travel, from having a change of hearts and being in a bad predicament, and I take refuge in You from an ill fated outcome with wealth and family.",
+       "tr": "",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 96",
+       "sourceAr": "حصن المسلم، الباب 96",
+       "noteEn": "",
+       "noteAr": ""
+      }
+     ]
+    },
+    {
+     "id": "market",
+     "titleEn": "Entering a market",
+     "titleAr": "دخول السوق",
+     "items": [
+      {
+       "id": "hisn-209",
+       "ar": "لاَ إِلَهَ إِلاَّ اللَّهُ وَحْدَهُ لاَ شَرِيكَ لَهُ، لَهُ الْمُلْكُ، وَلَهُ الْحَمْدُ، يُحْيِي وَيُمِيتُ، وَهُوَ حَيٌّ لاِ يَمُوتُ، بِيَدِهِ الْخَيْرُ، وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ",
+       "en": "None has the right to be worshipped except Allah, alone, without partner, to Him belongs all sovereignty and praise. He gives life and causes death, and He is living and does not die. In His hand is all good and He is over all things, omnipotent.",
+       "tr": "La ilaha illal-lah, wahdahu la shareeka lah, lahul-mulku walahul-hamd, yuhyee wayumeetu wahuwa hayyun la yamoot, biyadihil-khayru wahuwa AAala kulli shayin qadeer.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 98",
+       "sourceAr": "حصن المسلم، الباب 98",
+       "noteEn": "",
+       "noteAr": ""
+      }
+     ]
+    },
+    {
+     "id": "returning",
+     "titleEn": "Returning home",
+     "titleAr": "الرجوع من السفر",
+     "items": [
+      {
+       "id": "hisn-217a",
+       "ar": "اللَّهُ أَكْبَرُ",
+       "en": "Allah is the greatest.",
+       "tr": "",
+       "count": 3,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 105",
+       "sourceAr": "حصن المسلم، الباب 105",
+       "noteEn": "On the way back, at every high point",
+       "noteAr": "على كل مرتفع في طريق العودة"
+      },
+      {
+       "id": "hisn-217b",
+       "ar": "لاَ إِلَهَ إِلاَّ اللَّهُ وَحْدَهُ لاَ شَرِيكَ لَهُ، لَهُ الْمُلْكُ، وَلَهُ الْحَمْدُ، وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، آيِبُونَ، تَائِبُونَ، عَابِدُونَ، لِرَبِّنا حَامِدُونَ، صَدَقَ اللَّهُ وَعْدَهُ، وَنَصَرَ عَبْدَهُ، وَهَزَمَ الْأَحْزابَ وَحْدَهُ",
+       "en": "None has the right to be worshipped except Allah, alone, without partner. To Him belongs all sovereignty and praise, and He is over all things omnipotent. We return, repent, worship and praise our Lord. Allah fulfilled His promise, aided His Servant, and single-handedly defeated the allies.",
+       "tr": "",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 105",
+       "sourceAr": "حصن المسلم، الباب 105",
+       "noteEn": "Then say",
+       "noteAr": "ثم قل"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "hardship",
+   "titleEn": "Hardship & feelings",
+   "titleAr": "الشدائد والمشاعر",
+   "categories": [
+    {
+     "id": "worry",
+     "titleEn": "Worry and grief",
+     "titleAr": "الهم والحزن",
+     "items": [
+      {
+       "id": "hisn-120",
+       "ar": "اللَّهُمَّ إِنِّي عَبْدُكَ، ابْنُ عَبْدِكَ، ابْنُ أَمَتِكَ، نَاصِيَتِي بِيَدِكَ، مَاضٍ فِيَّ حُكْمُكَ، عَدْلٌ فِيَّ قَضَاؤُكَ، أَسْأَلُكَ بِكُــــلِّ اسْمٍ هُوَ لَكَ، سَمَّيْتَ بِهِ نَفْسَكَ، أَوْ أَنْزَلْتَهُ فِي كِتَابِكَ، أَوْ عَلَّمْتَهُ أَحَداً مِنْ خَلْقِكَ، أَوِ اسْتَأْثَرْتَ بِهِ فِي عِلْمِ الغَيْبِ عِنْدَكَ، أَنْ تَجْعَلَ القُرْآنَ رَبِيعَ قَلْبِي، وَنُورَ صَدْرِي، وَجَلاَءَ حُزْنِي، وَذَهَابَ هَمِّي",
+       "en": "O Allah, I am Your servant, son of Your servant, son of Your maidservant, my forelock is in Your hand (i.e. You have total mastery over), Your command over me is forever executed and Your decree over me is just. I ask You by every name belonging to You which You named Yourself with, or revealed in Your Book, or You taught to any of Your creation, or You have preserved in the knowledge of the unseen with You, that You make the Quran the life of my heart and the light of my breast, and a departure for my sorrow and a release for my anxiety.",
+       "tr": "Allahumma innee AAabduk, ibnu AAabdik, ibnu amatik, nasiyatee biyadik, madin fiyya hukmuk, AAadlun fiyya qada-ok, as-aluka bikulli ismin huwa lak, sammayta bihi nafsak, aw anzaltahu fee kitabik, aw AAallamtahu ahadan min khalqik awis-ta/tharta bihi fee AAilmil-ghaybi AAindak, an tajAAalal-Qurana rabeeAAa qalbee, wanoora sadree, wajalaa huznee wathahaba hammee.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 34",
+       "sourceAr": "حصن المسلم، الباب 34",
+       "noteEn": "",
+       "noteAr": ""
+      },
+      {
+       "id": "hisn-121",
+       "ar": "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْهَمِّ وَالْحَزَنِ، وَالْعَجْزِ وَالْكَسَلِ، وَالْبُخْلِ وَالْجُبْنِ، وَضَلَعِ الدَّيْنِ وَغَلَبَةِ الرِّجَالِ",
+       "en": "O Allah, I take refuge in You from anxiety and sorrow, weakness and laziness, miserliness and cowardice, the burden of debts and from being over powered by men.",
+       "tr": "Allahumma innee aAAoothu bika minal-hammi walhuzn, walAAajzi walkasali walbukhli waljubn, wadalAAid-dayni waghalabatir-rijal.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 34",
+       "sourceAr": "حصن المسلم، الباب 34",
+       "noteEn": "",
+       "noteAr": ""
+      }
+     ]
+    },
+    {
+     "id": "distress",
+     "titleEn": "Distress",
+     "titleAr": "الكرب",
+     "items": [
+      {
+       "id": "hisn-122",
+       "ar": "لاَ إِلَهَ إِلاَّ اللَّهُ الْعَظِيمُ الْحَلِيمُ، لاَ إِلَهَ إِلاَّ اللَّهُ رَبُّ الْعَرْشِ الْعَظِيمِ، لاَ إِلَهَ إِلاَّ اللَّهُ رَبُّ السَّمَوَاتِ وَرَبُّ الْأَرْضِ وَرَبُّ الْعَرْشِ الْكَرِيمِ",
+       "en": "None has the right to be worshipped except Allah Forbearing. None has the right to be worshipped except Allah, Lord of the magnificent throne. None has the right to be worshipped except Allah, Lord of the heavens, Lord of the Earth and Lord of the noble throne.",
+       "tr": "La ilaha illal-lahul-AAatheemul-haleem, la ilaha illal-lahu rabbul-AAarshil-AAatheem, la ilaha illal-lahu rabbus-samawati warabbul-ardi warabbul-AAarshil-kareem.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 35",
+       "sourceAr": "حصن المسلم، الباب 35",
+       "noteEn": "",
+       "noteAr": ""
+      },
+      {
+       "id": "hisn-123",
+       "ar": "اللَّهُمَّ رَحْمَتَكَ أَرْجُو، فَلاَ تَكِلْنِي إِلَى نَفْسِي طَرْفَةَ عَيْنٍ، وَأَصْلِحْ لِي شَأْنِي كُلَّهُ، لاَ إِلَهَ إِلاَّ أَنْتَ",
+       "en": "O Allah, it is Your mercy that I hope for, so do not leave me in charge of my affairs even for a blink of an eye and rectify for me all of my affairs.None has the right to be worshipped except You.",
+       "tr": "Allahumma rahmataka arjoo fala takilnee ila nafsee tarfata AAayn, wa-aslih lee sha/nee kullah, la ilaha illa ant.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 35",
+       "sourceAr": "حصن المسلم، الباب 35",
+       "noteEn": "",
+       "noteAr": ""
+      },
+      {
+       "id": "hisn-124",
+       "ar": "لاَ إِلَهَ إِلاَّ أَنْتَ سُبْحَانَكَ إِنِّي كُنْتُ مِنَ الظّالِمِينَ",
+       "en": "None has the right to be worshipped except You. How perfect You are, verily I was among the wrong-doers.",
+       "tr": "La ilaha illa anta subhanaka innee kuntu minath-thalimeen.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 35",
+       "sourceAr": "حصن المسلم، الباب 35",
+       "noteEn": "",
+       "noteAr": ""
+      },
+      {
+       "id": "hisn-125",
+       "ar": "اللَّهُ اللَّهُ رَبِّي لاَ أُشْرِكُ بِهِ شَيْئاً",
+       "en": "Allah, Allah is my Lord, I do not associate anything with Him.",
+       "tr": "None has the right to be worshipped except You. How perfect You are, verily I was among the wrong-doers.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 35",
+       "sourceAr": "حصن المسلم، الباب 35",
+       "noteEn": "",
+       "noteAr": ""
+      }
+     ]
+    },
+    {
+     "id": "difficulty",
+     "titleEn": "When things are hard",
+     "titleAr": "الأمر الصعب",
+     "items": [
+      {
+       "id": "hisn-139",
+       "ar": "اللَّهُمَّ لاَ سَهْلَ إِلاَّ مَا جَعَلْتَهُ سَهْلاً، وَأَنْتَ تَجْعَلُ الْحَزْنَ إِذَا شِئْتَ سَهْلاً",
+       "en": "O Allah, there is no ease except in that which You have made easy, and You make the difficulty, if You wish, easy.",
+       "tr": "Allahumma la sahla illa ma jaAAaltahu sahla, wa-anta tajAAalul- hazana in shi'ta sahla.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 43",
+       "sourceAr": "حصن المسلم، الباب 43",
+       "noteEn": "",
+       "noteAr": ""
+      }
+     ]
+    },
+    {
+     "id": "calamity",
+     "titleEn": "When tragedy strikes",
+     "titleAr": "المصيبة",
+     "items": [
+      {
+       "id": "hisn-154",
+       "ar": "إِنَّا لِلَّهِ وَإِنَّا إِلَيْهِ رَاجِعُونَ، اللَّهُمَّ أْجُرْنِي فِي مُصِيبَتِي، وَأَخْلِفْ لِي خَيْرَاً مِنْهَا",
+       "en": "To Allah we belong and unto Him is our return.O Allah, recompense me for my affliction and replace it for me with something better.",
+       "tr": "Inna lillahi wa-inna ilayhi rajiAAoon, allahumma/- jurnee fee museebatee wakhluf lee khayran minha.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 53",
+       "sourceAr": "حصن المسلم، الباب 53",
+       "noteEn": "",
+       "noteAr": ""
+      }
+     ]
+    },
+    {
+     "id": "anger",
+     "titleEn": "Anger",
+     "titleAr": "الغضب",
+     "items": [
+      {
+       "id": "hisn-193",
+       "ar": "أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ",
+       "en": "I take refuge with Allah from the accursed devil.",
+       "tr": "aAAoothu billahi minash-shaytanir-rajeem.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 82",
+       "sourceAr": "حصن المسلم، الباب 82",
+       "noteEn": "",
+       "noteAr": ""
+      }
+     ]
+    },
+    {
+     "id": "pain",
+     "titleEn": "Pain",
+     "titleAr": "الألم",
+     "items": [
+      {
+       "id": "hisn-243a",
+       "ar": "بِسْمِ اللَّهِ",
+       "en": "In the name of Allah.",
+       "tr": "",
+       "count": 3,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 124",
+       "sourceAr": "حصن المسلم، الباب 124",
+       "noteEn": "Place your hand where it hurts",
+       "noteAr": "ضع يدك على موضع الألم"
+      },
+      {
+       "id": "hisn-243b",
+       "ar": "أَعُوذُ بِاللَّهِ وَقُدْرَتِهِ مِنْ شَرِّ مَا أَجِدُ وَأُحَاذِرُ",
+       "en": "I take refuge in Allah and within His omnipotence from the evil that I feel and am wary of.",
+       "tr": "",
+       "count": 7,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 124",
+       "sourceAr": "حصن المسلم، الباب 124",
+       "noteEn": "",
+       "noteAr": ""
+      }
+     ]
+    },
+    {
+     "id": "fear",
+     "titleEn": "Fear",
+     "titleAr": "الفزع",
+     "items": [
+      {
+       "id": "hisn-245",
+       "ar": "لاَ إِلَهَ إِلاَّ اللَّهُ!",
+       "en": "None has the right to be worshipped except Allah.",
+       "tr": "La ilaha illal-lah.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 126",
+       "sourceAr": "حصن المسلم، الباب 126",
+       "noteEn": "",
+       "noteAr": ""
+      }
+     ]
+    },
+    {
+     "id": "evil-eye",
+     "titleEn": "Evil eye",
+     "titleAr": "العين",
+     "items": [
+      {
+       "id": "hisn-244",
+       "ar": "إِذَا رَأَى أَحَدُكُم مِنْ أَخِيهِ، أَوْ مِنْ نَفْسِهِ، أَوْ مِنْ مَالِهِ مَا يُعْجِبُهُ فَلْيَدْعُ لَهُ بِالْبَرَكَةِ فَإِنَّ الْعَيْنَ حَقٌّ",
+       "en": "If you see anything of your brother that pleases you, or of his person or of his property [then ask Allah to bless him in it] for the envious eye is real.",
+       "tr": "",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 125",
+       "sourceAr": "حصن المسلم، الباب 125",
+       "noteEn": "",
+       "noteAr": ""
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "nature",
+   "titleEn": "Weather & nature",
+   "titleAr": "الطقس والطبيعة",
+   "categories": [
+    {
+     "id": "wind",
+     "titleEn": "Wind",
+     "titleAr": "الريح",
+     "items": [
+      {
+       "id": "hisn-166",
+       "ar": "اللَّهُمَّ إِنِّي أَسْــــــأَلُكَ خَيْرَهَا، وَأَعُوذُ بِكَ مِنْ شَرِّهَا",
+       "en": "O Allah, I ask You for it’s goodness and I take refuge with You from it’s evil.",
+       "tr": "Allahumma innee as-aluka khayraha wa-aAAoothu bika min sharriha.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 61",
+       "sourceAr": "حصن المسلم، الباب 61",
+       "noteEn": "",
+       "noteAr": ""
+      },
+      {
+       "id": "hisn-167",
+       "ar": "اللَّهُمَّ إِنِّي أَسْأَلُكَ خَيْرَهَا، وَخَيْرَ مَا فِيهَا، وَخَيْرَ مَا أُرْسِلَتْ بِهِ، وَأَعُوذُ بِكَ مِنْ شَرِّهَا، وَشَرِّ مَا فِيهَا، وَشَرِّ مَا أُرْسِلَتْ بِهِ",
+       "en": "O Allah, I ask You for it’s goodness, the good within it, and the good it was sent with, and I take refuge with You from it’s evil, the evil within it, and from the evil it was sent with.",
+       "tr": "Allahumma innee as-aluka khayraha wakhayra ma feeha, wakhayra ma orsilat bih, wa-aAAoothu bika min sharriha, washarri ma feeha washarri ma orsilat bih.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 61",
+       "sourceAr": "حصن المسلم، الباب 61",
+       "noteEn": "",
+       "noteAr": ""
+      }
+     ]
+    },
+    {
+     "id": "thunder",
+     "titleEn": "Thunder",
+     "titleAr": "الرعد",
+     "items": [
+      {
+       "id": "hisn-168",
+       "ar": "سُبْحَانَ الَّذِي يُسَبِّحُ الرَّعْدُ بِحَمْدِهِ وَالْمَلاَئِكةُ مِنْ خِيفَتِهِ",
+       "en": "How perfect He is, (The One) Whom the thunder declares His perfection with His praise, as do the angles out of fear of Him.",
+       "tr": "Subhanal-lathee yusabbihur-raAAdu bihamdih, walmala-ikatu min kheefatih.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 62",
+       "sourceAr": "حصن المسلم، الباب 62",
+       "noteEn": "",
+       "noteAr": ""
+      }
+     ]
+    },
+    {
+     "id": "rain",
+     "titleEn": "Rain",
+     "titleAr": "المطر",
+     "items": [
+      {
+       "id": "hisn-172",
+       "ar": "اللَّهُمَّ صَيِّباً نَافِعاً",
+       "en": "O Allah, may it be a beneficial rain cloud.",
+       "tr": "Allahumma sayyiban nafiAAa.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 64",
+       "sourceAr": "حصن المسلم، الباب 64",
+       "noteEn": "",
+       "noteAr": ""
+      },
+      {
+       "id": "hisn-173",
+       "ar": "مُطِرْنَا بِفَضْلِ اللَّهِ وَرَحْمَتِهِ",
+       "en": "We have been given rain by the grace and mercy of Allah.",
+       "tr": "Mutirna bifadlil-lahi warahmatih.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 65",
+       "sourceAr": "حصن المسلم، الباب 65",
+       "noteEn": "",
+       "noteAr": ""
+      }
+     ]
+    },
+    {
+     "id": "new-moon",
+     "titleEn": "New moon",
+     "titleAr": "رؤية الهلال",
+     "items": [
+      {
+       "id": "hisn-175",
+       "ar": "اللَّهُ أَكْبَرُ، اللَّهُمَّ أَهِلَّهُ عَلَيْنَا بِالْأَمْنِ وَالْإِيمَانِ، وَالسَّلاَمَةِ وَالْإِسْلاَمِ، وَالتَّوْفِيقِ لِمَا تُحِبُّ رَبَّنَا وَتَرْضَى، رَبُّنَا وَرَبُّكَ اللَّهُ",
+       "en": "Allah is the greatest. O Allah, let the crescent loom above us in safety, faith, peace, and Islam, and in agreement with all that You love and pleases You. Our Lord and your Lord is Allah.",
+       "tr": "Allahu akbar, allahumma ahillahu AAalayna bil-amni wal-eeman, wassalamati wal-islam, wattawfeeiqi lima tuhibbu watarda, rabbuna warabbukal-lah.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 67",
+       "sourceAr": "حصن المسلم، الباب 67",
+       "noteEn": "",
+       "noteAr": ""
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "social",
+   "titleEn": "People & forgiveness",
+   "titleAr": "الناس والاستغفار",
+   "categories": [
+    {
+     "id": "gathering",
+     "titleEn": "Leaving a gathering",
+     "titleAr": "كفارة المجلس",
+     "items": [
+      {
+       "id": "hisn-196",
+       "ar": "سُبْحَانَكَ اللَّهُمَّ وَبِحَمْدِكَ، أَشْهَدُ أَنْ لاَ إِلَهَ إِلاَّ أَنْتَ، أَسْتَغْفِرُكَ وَأَتُوبُ إِلَيْكَ",
+       "en": "How perfect You are O Allah, and I praise You. I bear witness that None has the right to be worshipped except You. I seek Your forgiveness and turn to You in repentance.",
+       "tr": "Subhanakal-lahumma wabihamdik, ashhadu an la ilaha illa ant, astaghfiruka wa-atoobu ilayk.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 85",
+       "sourceAr": "حصن المسلم، الباب 85",
+       "noteEn": "",
+       "noteAr": ""
+      }
+     ]
+    },
+    {
+     "id": "kindness",
+     "titleEn": "Thanking a kindness",
+     "titleAr": "لمن صنع إليك معروفًا",
+     "items": [
+      {
+       "id": "hisn-198",
+       "ar": "جَزَاكَ اللَّهُ خَيْراً",
+       "en": "If someone does you a favour and you say: (May Allah reward you with goodness.) then you have indeed excelled in praising him.",
+       "tr": "If someone does you a favour and you say: (Jazakal-lahu khayran.) then you have indeed excelled in praising him.",
+       "count": 1,
+       "virtueEn": "",
+       "virtueAr": "",
+       "sourceEn": "Hisn al-Muslim, chapter 87",
+       "sourceAr": "حصن المسلم، الباب 87",
+       "noteEn": "",
+       "noteAr": ""
+      }
+     ]
+    },
+    {
+     "id": "forgiveness",
+     "titleEn": "Seeking forgiveness",
+     "titleAr": "الاستغفار والتوبة",
+     "items": [
+      {
+       "id": "hisn-248",
+       "ar": "أَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ",
+       "en": "I seek Allah's forgiveness and repent to Him.",
+       "tr": "",
+       "count": 100,
+       "virtueEn": "The Prophet ﷺ said: “By Allah, I seek forgiveness and repent to Allah more than seventy times a day,” and he told people to repent a hundred times a day.",
+       "virtueAr": "قَالَ رَسُولُ اللَّهِ صلى الله عليه وسلم: وَاللَّهِ إِنِّي لأَسْتَغفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ فِي الْيَوْمِ أَكْثَرَ مِنْ سَبْعِينَ مَرَّةٍ",
+       "sourceEn": "Hisn al-Muslim, chapter 129",
+       "sourceAr": "حصن المسلم، الباب 129",
+       "noteEn": "",
+       "noteAr": ""
+      },
+      {
+       "id": "hisn-250",
+       "ar": "أَسْتَغْفِرُ اللَّهَ الْعَظيمَ الَّذِي لاَ إِلَهَ إِلاَّ هُوَ الْحَيُّ القَيّوُمُ وَأَتُوبُ إِلَيهِ",
+       "en": "I seek Allah's forgiveness, besides whom, none has the right to be worshipped except He, The Ever Living, The Self-Subsisting and Supporter of all, and I turn to Him in repentance.",
+       "tr": "",
+       "count": 1,
+       "virtueEn": "Allah forgives whoever says it, even one who fled from the battlefield.",
+       "virtueAr": "غَفَرَ اللَّهُ لَهُ وَإِنْ كَانَ فَرَّ مِنَ الزَّحْفِ",
+       "sourceEn": "Hisn al-Muslim, chapter 129",
+       "sourceAr": "حصن المسلم، الباب 129",
+       "noteEn": "",
+       "noteAr": ""
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

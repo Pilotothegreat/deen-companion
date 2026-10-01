@@ -23,9 +23,10 @@ misc.xml
 deploymentTargetDropDown.xml
 render.experimental.xml
 
-# Keystore files
+# Keystore files and signing credentials
 *.jks
 *.keystore
+keystore.properties
 
 # Google Services (e.g. APIs or Firebase)
 google-services.json
@@ -41,3 +42,7 @@ bugreport.zip
 framework*.jar
 
 *.salive
+
+# Downloaded build inputs (quran.com line data, printed page images)
+.cache/
+__pycache__/

@@ -1,25 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Mosque green, the app's primary colour. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
-    android:viewportWidth="128"
-    android:viewportHeight="128">
-  <group android:scaleX="0.7"
-      android:scaleY="0.7"
-      android:translateX="19.2"
-      android:translateY="19.2">
-    <path
-        android:pathData="M0,0h128v128h-128z">
-      <aapt:attr name="android:fillColor">
-        <gradient
-            android:centerX="0"
-            android:centerY="0"
-            android:gradientRadius="147.81"
-            android:type="radial">
-          <item android:offset="0" android:color="#FF27344E"/>
-          <item android:offset="1" android:color="#FF030712"/>
-        </gradient>
-      </aapt:attr>
-    </path>
-  </group>
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+  <path
+      android:pathData="M0,0h108v108h-108z"
+      android:fillColor="#FF156C44" />
 </vector>

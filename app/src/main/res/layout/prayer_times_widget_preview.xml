@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Widget picker preview for the prayer times table before Android 15. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView style="@style/WidgetPreviewTitle" android:text="@string/widget_prayer_times_title" />
+
+    <LinearLayout style="@style/WidgetPreviewRow">
+        <TextView style="@style/WidgetPreviewName" android:text="@string/fajr" />
+        <TextView style="@style/WidgetPreviewTime" android:text="@string/preview_time_fajr" />
+    </LinearLayout>
+
+    <LinearLayout style="@style/WidgetPreviewRow">
+        <TextView style="@style/WidgetPreviewName" android:text="@string/dhuhr" />
+        <TextView style="@style/WidgetPreviewTime" android:text="@string/preview_time_dhuhr" />
+    </LinearLayout>
+
+    <LinearLayout style="@style/WidgetPreviewRow">
+        <TextView style="@style/WidgetPreviewName" android:text="@string/asr" />
+        <TextView style="@style/WidgetPreviewTime" android:text="@string/preview_time_asr" />
+    </LinearLayout>
+
+    <LinearLayout style="@style/WidgetPreviewRow">
+        <TextView style="@style/WidgetPreviewName" android:text="@string/maghrib" />
+        <TextView style="@style/WidgetPreviewTime" android:text="@string/preview_time_maghrib" />
+    </LinearLayout>
+
+    <LinearLayout style="@style/WidgetPreviewRow">
+        <TextView style="@style/WidgetPreviewName" android:text="@string/isha" />
+        <TextView style="@style/WidgetPreviewTime" android:text="@string/preview_time_isha" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Tasbih Counter Widget: Material 3 Expressive layout -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@android:id/background"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_background"
+    android:baselineAligned="false"
+    android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:padding="16dp"
-    android:gravity="center_vertical">
+    android:padding="16dp">
 
     <LinearLayout
         android:layout_width="0dp"
@@ -19,30 +19,30 @@
             android:id="@+id/widget_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:letterSpacing="0.08"
             android:text="@string/tasbih_counter"
             android:textColor="@color/widget_text_secondary"
             android:textSize="11sp"
-            android:letterSpacing="0.08"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/widget_tasbih_count"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="33"
+            android:layout_marginTop="2dp"
             android:textColor="@color/widget_text_primary"
             android:textSize="32sp"
             android:textStyle="bold"
-            android:layout_marginTop="2dp" />
+            android:text="@string/preview_tasbih_count" />
 
         <TextView
             android:id="@+id/widget_dhikr_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="SubhanAllah"
             android:textColor="@color/widget_accent"
             android:textSize="12sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:text="@string/tasbih_dhikr_subhanallah" />
     </LinearLayout>
 
     <LinearLayout
@@ -50,14 +50,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/widget_btn_background"
+        android:contentDescription="@string/cd_tasbih_button"
+        android:gravity="center"
         android:paddingHorizontal="16dp"
-        android:paddingVertical="12dp"
-        android:gravity="center">
+        android:paddingVertical="12dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="+1"
+            android:text="@string/tasbih_plus_one"
             android:textColor="@color/widget_text_primary"
             android:textSize="18sp"
             android:textStyle="bold" />

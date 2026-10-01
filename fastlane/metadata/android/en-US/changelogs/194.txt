@@ -1,0 +1,6 @@
+- Redesigned with Material 3 Expressive
+- Oman prayer times now match the Ministry timetable (Isha was about 15 minutes late)
+- The notifications switch now really turns alerts off
+- Hadith favorites survive re-downloads; collections download only when you ask
+- Quran bookmarks, continue reading and a verse action sheet
+- More accurate Qibla compass and a battery-friendly prayer widget

@@ -1,0 +1,5 @@
+My athkar: make lists of your own under the ones that come with the app. Give each dhikr a note and a count, reorder them, and count them in the same session screen. Backups carry them.
+
+Settings you can see: language, text size, Asr time, the reminder before prayer and silence during prayer are now picture cards.
+
+A quicker feel: counts move the moment you tap, each tab keeps its place when you come back, and the app opens without a blank screen.

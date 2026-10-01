@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Long-press the icon. The four things people open the app to do, without opening the app first. -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="athkar"
+        android:enabled="true"
+        android:icon="@drawable/notification"
+        android:shortcutShortLabel="@string/shortcut_athkar_short"
+        android:shortcutLongLabel="@string/shortcut_athkar_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="${applicationId}"
+            android:targetClass="com.pilotothegreat.deencompanion.MainActivity">
+            <extra
+                android:name="com.pilotothegreat.deencompanion.destination"
+                android:value="athkar/morning" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="continue-reading"
+        android:enabled="true"
+        android:icon="@drawable/notification"
+        android:shortcutShortLabel="@string/shortcut_read_short"
+        android:shortcutLongLabel="@string/shortcut_read_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="${applicationId}"
+            android:targetClass="com.pilotothegreat.deencompanion.MainActivity">
+            <extra
+                android:name="com.pilotothegreat.deencompanion.destination"
+                android:value="screen/quran" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="qibla"
+        android:enabled="true"
+        android:icon="@drawable/notification"
+        android:shortcutShortLabel="@string/shortcut_qibla_short"
+        android:shortcutLongLabel="@string/shortcut_qibla_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="${applicationId}"
+            android:targetClass="com.pilotothegreat.deencompanion.MainActivity">
+            <extra
+                android:name="com.pilotothegreat.deencompanion.destination"
+                android:value="screen/qibla" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="tasbih"
+        android:enabled="true"
+        android:icon="@drawable/notification"
+        android:shortcutShortLabel="@string/shortcut_tasbih_short"
+        android:shortcutLongLabel="@string/shortcut_tasbih_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="${applicationId}"
+            android:targetClass="com.pilotothegreat.deencompanion.MainActivity">
+            <extra
+                android:name="com.pilotothegreat.deencompanion.destination"
+                android:value="screen/tasbih" />
+        </intent>
+    </shortcut>
+</shortcuts>

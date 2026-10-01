@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The same highlight for one cell of a strip of five, where the cell is about as tall as it is wide.
+
+  A fully rounded corner there is a circle sitting on the row, touching the prayers either side of it;
+  this is a radius, and the inset keeps it clear of its neighbours.
+-->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:insetLeft="3dp"
+    android:insetRight="3dp">
+    <shape>
+        <solid android:color="#FFFFFFFF" />
+        <corners android:radius="14dp" />
+    </shape>
+</inset>
