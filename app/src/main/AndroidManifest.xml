@@ -11,6 +11,9 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Silence during prayer. Without this declaration the app is not listed under Do Not Disturb
+         access, so the reader could never grant it. A normal permission: no prompt of its own. -->
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <!-- Background Quran recitation. -->
     <!-- Only the sideloaded build installs its own updates; the Play build removes this. -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
