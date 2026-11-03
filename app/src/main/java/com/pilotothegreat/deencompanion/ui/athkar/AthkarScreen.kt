@@ -1,6 +1,6 @@
 package com.pilotothegreat.deencompanion.ui.athkar
 
-import com.pilotothegreat.deencompanion.ui.components.headerFrost
+import com.pilotothegreat.deencompanion.ui.components.HeaderFrost
 import dev.chrisbanes.haze.rememberHazeState
 import dev.chrisbanes.haze.hazeSource
 import androidx.compose.ui.graphics.Color
@@ -124,7 +124,6 @@ fun AthkarScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = { LargeFlexibleTopAppBar(
             colors = com.pilotothegreat.deencompanion.ui.components.glassBarColors(),
-            modifier = Modifier.headerFrost(header),
             title = { Text(stringResource(R.string.athkar)) }, scrollBehavior = scrollBehavior) },
         snackbarHost = { SnackbarHost(snackbar, Modifier.padding(bottom = LocalBottomBarPadding.current)) },
     ) { padding ->
@@ -192,6 +191,8 @@ fun AthkarScreen(
                 }
             }
         }
+        // The frosted header over the page, as in Traffic Light; drawn after the page, under the title.
+        HeaderFrost(header, padding.calculateTopPadding())
     }
 }
 

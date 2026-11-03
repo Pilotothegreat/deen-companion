@@ -1,6 +1,6 @@
 package com.pilotothegreat.deencompanion.ui.home
 
-import com.pilotothegreat.deencompanion.ui.components.headerFrost
+import com.pilotothegreat.deencompanion.ui.components.HeaderFrost
 import dev.chrisbanes.haze.rememberHazeState
 import dev.chrisbanes.haze.hazeSource
 import android.Manifest
@@ -178,7 +178,6 @@ fun HomeScreen(
         topBar = {
             LargeFlexibleTopAppBar(
                 colors = com.pilotothegreat.deencompanion.ui.components.glassBarColors(),
-                modifier = Modifier.headerFrost(header),
                 title = {
                     val title = current?.hijri?.let {
                         stringResource(R.string.hijri_date, Numerals.localize(HijriCalendar.format(it, locale), locale))
@@ -359,6 +358,8 @@ fun HomeScreen(
                 item(key = "qibla") { Box(springItem()) { QiblaShortcut(current.settings.location, locale, onOpenQibla) } }
             }
         }
+        // The frosted header over the page, as in Traffic Light; drawn after the page, under the title.
+        HeaderFrost(header, padding.calculateTopPadding())
     }
 }
 

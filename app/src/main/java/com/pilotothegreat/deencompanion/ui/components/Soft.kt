@@ -1,5 +1,7 @@
 package com.pilotothegreat.deencompanion.ui.components
 
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -141,22 +143,59 @@ fun Modifier.glass(state: HazeState?, shape: Shape, tint: Float = 0.5f, rim: Boo
 }
 
 /**
- * A header of graded frost, as leekleak's Traffic Light draws its page titles: what scrolls beneath is
- * blurred fully along the top edge and less and less toward the bottom, where the header melts into the
- * page with no line between them.
+ * The frost behind a tab's header, as leekleak's Traffic Light draws it: a layer over the list and under
+ * the title that runs from the very top of the screen, status bar and all, to a little past the bar.
+ * What scrolls beneath it is blurred fully at the top and less and less further down, and the veil over
+ * the blur thins with it, so the header melts into the page with no edge at all.
+ *
+ * Lay it over the page's content, after it, with the height the scaffold gives the top bar.
  */
 @Composable
-fun Modifier.headerFrost(state: HazeState): Modifier = hazeBlur(
-    input = HazeInput.Sources(state),
-    style = dev.chrisbanes.haze.blur.materials.HazeMaterials.ultraThin(MaterialTheme.colorScheme.background).then {
-        if (progressiveBlurAvailable) {
-            progressive(dev.chrisbanes.haze.HazeProgressive.verticalGradient(startIntensity = 1f, endIntensity = 0f))
-        } else {
-            // Without runtime shaders (Android 12) a graded mask over an even blur gives nearly the same fade.
-            mask(Brush.verticalGradient(listOf(Color.Black, Color.Transparent)))
+fun HeaderFrost(state: HazeState, barHeight: androidx.compose.ui.unit.Dp) {
+    val total = barHeight + HEADER_FADE
+    // Full frost behind the title, so nothing shows through the words; the fade is all below the bar.
+    val solid = if (total.value > 0f) (barHeight / total).coerceIn(0f, 1f) else 0f
+    androidx.compose.foundation.layout.Box(
+        Modifier
+            .fillMaxWidth()
+            .height(total)
+            .headerFrost(state, solid),
+    )
+}
+
+@Composable
+private fun Modifier.headerFrost(state: HazeState, solid: Float): Modifier {
+    val page = MaterialTheme.colorScheme.background
+    val style = remember(page, solid) {
+        val veil = Brush.verticalGradient(
+            0f to page.copy(alpha = 0.82f),
+            solid to page.copy(alpha = 0.7f),
+            1f to page.copy(alpha = 0f),
+        )
+        HazeBlurStyle {
+            blurRadius(24.dp)
+            backgroundColor(page)
+            noiseFactor(0.05f)
+            colorEffects(listOf(HazeColorEffect.tint(veil)))
+            fallbackColorEffect(HazeColorEffect.tint(veil))
+            if (progressiveBlurAvailable) {
+                // Traffic Light's progressive blur, held at full strength through the bar.
+                progressive(
+                    dev.chrisbanes.haze.HazeProgressive.Brush(
+                        Brush.verticalGradient(0f to Color.Black, solid to Color.Black, 1f to Color.Transparent),
+                    ),
+                )
+            } else {
+                // Without runtime shaders (Android 12) the whole effect fades instead, which reads the same.
+                mask(Brush.verticalGradient(0f to Color.Black, solid to Color.Black, 1f to Color.Transparent))
+            }
         }
-    },
-)
+    }
+    return hazeBlur(input = HazeInput.Sources(state), style = style)
+}
+
+/** How far the frost runs past the bar, fading out. */
+private val HEADER_FADE = 40.dp
 
 /**
  * Haze's progressive blur is a runtime shader, which Android has from 13 on. Robolectric's renderer

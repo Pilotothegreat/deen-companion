@@ -1,7 +1,7 @@
 package com.pilotothegreat.deencompanion.ui.quran
 
 import androidx.compose.foundation.layout.height
-import com.pilotothegreat.deencompanion.ui.components.headerFrost
+import com.pilotothegreat.deencompanion.ui.components.HeaderFrost
 import dev.chrisbanes.haze.rememberHazeState
 import dev.chrisbanes.haze.hazeSource
 import androidx.compose.foundation.layout.Arrangement
@@ -101,7 +101,6 @@ fun QuranScreen(onOpenReader: (ReaderKey) -> Unit, viewModel: QuranViewModel = k
         topBar = {
             LargeFlexibleTopAppBar(
                 colors = com.pilotothegreat.deencompanion.ui.components.glassBarColors(),
-                modifier = Modifier.headerFrost(header),
                 title = { Text(stringResource(R.string.quran)) },
                 scrollBehavior = scrollBehavior,
             )
@@ -145,6 +144,8 @@ fun QuranScreen(onOpenReader: (ReaderKey) -> Unit, viewModel: QuranViewModel = k
                 else -> BookmarkList(bookmarks, loaded, onOpenReader, viewModel::removeBookmark)
             }
         }
+        // The frosted header over the page, as in Traffic Light; drawn after the page, under the title.
+        HeaderFrost(header, padding.calculateTopPadding())
     }
 
     if (startingKhatma) {

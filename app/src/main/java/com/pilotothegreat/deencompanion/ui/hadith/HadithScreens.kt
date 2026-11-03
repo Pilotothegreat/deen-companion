@@ -1,7 +1,7 @@
 package com.pilotothegreat.deencompanion.ui.hadith
 
 import androidx.compose.foundation.layout.height
-import com.pilotothegreat.deencompanion.ui.components.headerFrost
+import com.pilotothegreat.deencompanion.ui.components.HeaderFrost
 import dev.chrisbanes.haze.rememberHazeState
 import dev.chrisbanes.haze.hazeSource
 import androidx.compose.foundation.layout.Arrangement
@@ -102,7 +102,6 @@ fun HadithScreen(onOpenBook: (String) -> Unit, viewModel: HadithViewModel = koin
         topBar = {
             LargeFlexibleTopAppBar(
                 colors = com.pilotothegreat.deencompanion.ui.components.glassBarColors(),
-                modifier = Modifier.headerFrost(header),
                 title = { Text(stringResource(R.string.hadith)) },
                 scrollBehavior = scrollBehavior,
             )
@@ -146,6 +145,8 @@ fun HadithScreen(onOpenBook: (String) -> Unit, viewModel: HadithViewModel = koin
                 else -> FavoriteList(favorites, bookNames, viewModel::setFavorite)
             }
         }
+        // The frosted header over the page, as in Traffic Light; drawn after the page, under the title.
+        HeaderFrost(header, padding.calculateTopPadding())
     }
 }
 
