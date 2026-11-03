@@ -150,7 +150,7 @@ fun Modifier.glass(state: HazeState?, shape: Shape, tint: Float = 0.5f, rim: Boo
 
 /**
  * The frost behind a tab's header, as leekleak's Traffic Light draws it: a layer over the list and under
- * the title that runs from the very top of the screen, status bar and all, to a little past the bar.
+ * the title that runs from the very top of the screen, status bar and all, to the bar's lower edge.
  * What scrolls beneath it is blurred fully at the top and less and less further down, and the veil over
  * the blur thins with it, so the header melts into the page with no edge at all.
  *
@@ -158,9 +158,10 @@ fun Modifier.glass(state: HazeState?, shape: Shape, tint: Float = 0.5f, rim: Boo
  */
 @Composable
 fun HeaderFrost(state: HazeState, barHeight: androidx.compose.ui.unit.Dp) {
-    val total = barHeight + HEADER_FADE
-    // Full frost behind the title, so nothing shows through the words; the fade is all below the bar.
-    val solid = if (total.value > 0f) (barHeight / total).coerceIn(0f, 1f) else 0f
+    // Within the header's own height, as in Traffic Light: full frost through its upper part, fading to
+    // clear at its lower edge. Nothing below the header is touched, so a page at rest is never blurred.
+    val total = barHeight
+    val solid = HEADER_SOLID
     androidx.compose.foundation.layout.Box(
         Modifier
             .fillMaxWidth()
@@ -202,8 +203,8 @@ private fun Modifier.headerFrost(state: HazeState, solid: Float): Modifier {
     return hazeBlur(input = HazeInput.Sources(state), style = style)
 }
 
-/** How far the frost runs past the bar, fading out. */
-private val HEADER_FADE = 40.dp
+/** The share of the header, from its top, that is fully frosted before the fade begins. */
+private const val HEADER_SOLID = 0.82f
 
 /**
  * Haze's progressive blur is a runtime shader, which Android has from 13 on. Robolectric's renderer

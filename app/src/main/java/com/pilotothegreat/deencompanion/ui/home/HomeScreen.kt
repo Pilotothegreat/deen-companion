@@ -1,5 +1,8 @@
 package com.pilotothegreat.deencompanion.ui.home
 
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.platform.LocalDensity
 import com.pilotothegreat.deencompanion.ui.components.HeaderFrost
 import dev.chrisbanes.haze.rememberHazeState
 import dev.chrisbanes.haze.hazeSource
@@ -171,6 +174,9 @@ fun HomeScreen(
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     // The header is glass over the day: the list scrolls under it and shows through, blurred.
     val header = rememberHazeState()
+    // The header's own height, measured. Scaffold's padding is updated during layout without a
+    // recomposition, so a list that read it on the first frame kept no room for the header on a device.
+    var headerPx by remember { mutableIntStateOf(0) }
     Scaffold(
         // The sky behind the tabs shows through; see SkyWash.
         containerColor = androidx.compose.ui.graphics.Color.Transparent,
@@ -178,6 +184,7 @@ fun HomeScreen(
         topBar = {
             LargeFlexibleTopAppBar(
                 colors = com.pilotothegreat.deencompanion.ui.components.glassBarColors(),
+                modifier = Modifier.onSizeChanged { headerPx = it.height },
                 title = {
                     val title = current?.hijri?.let {
                         stringResource(R.string.hijri_date, Numerals.localize(HijriCalendar.format(it, locale), locale))
@@ -222,6 +229,7 @@ fun HomeScreen(
         },
         snackbarHost = { SnackbarHost(snackbar, Modifier.padding(bottom = LocalBottomBarPadding.current)) },
     ) { padding ->
+        val headerTop = with(LocalDensity.current) { headerPx.toDp() }.coerceAtLeast(padding.calculateTopPadding())
         if (current == null) {
             LoadingBox(Modifier.padding(padding))
             return@Scaffold
@@ -240,13 +248,13 @@ fun HomeScreen(
                 PullToRefreshDefaults.LoadingIndicator(
                     state = pullState,
                     isRefreshing = isRefreshing,
-                    modifier = Modifier.align(Alignment.TopCenter).padding(top = padding.calculateTopPadding()),
+                    modifier = Modifier.align(Alignment.TopCenter).padding(top = headerTop),
                 )
             },
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize().hazeSource(header),
-                contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = Spacing.small + padding.calculateTopPadding(), bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
+                contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = Spacing.small + headerTop, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
                 verticalArrangement = Arrangement.spacedBy(Spacing.medium),
             ) {
                 // At most one thing to go and fix. A column of permission cards above the prayer
@@ -359,7 +367,7 @@ fun HomeScreen(
             }
         }
         // The frosted header over the page, as in Traffic Light; drawn after the page, under the title.
-        HeaderFrost(header, padding.calculateTopPadding())
+        HeaderFrost(header, headerTop)
     }
 }
 

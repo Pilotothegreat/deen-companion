@@ -99,6 +99,9 @@ fun QuranScreen(onOpenReader: (ReaderKey) -> Unit, viewModel: QuranViewModel = k
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     // The same graded frost as Today's header: what passes beneath it is blurred, most at the top.
     val header = rememberHazeState()
+    // The header's own height, measured. Scaffold's padding is updated during layout without a
+    // recomposition, so a list that read it on the first frame kept no room for the header on a device.
+    var headerPx by remember { mutableIntStateOf(0) }
     Scaffold(
         // The sky behind the tabs shows through; see SkyWash.
         containerColor = androidx.compose.ui.graphics.Color.Transparent,
@@ -106,16 +109,18 @@ fun QuranScreen(onOpenReader: (ReaderKey) -> Unit, viewModel: QuranViewModel = k
         topBar = {
             LargeFlexibleTopAppBar(
                 colors = com.pilotothegreat.deencompanion.ui.components.glassBarColors(),
+                modifier = Modifier.onSizeChanged { headerPx = it.height },
                 title = { Text(stringResource(R.string.quran)) },
                 scrollBehavior = scrollBehavior,
             )
         },
     ) { padding ->
+        val headerTop = with(LocalDensity.current) { headerPx.toDp() }.coerceAtLeast(padding.calculateTopPadding())
         // As in Traffic Light: the list runs the full height under the header and the controls, which
         // float over it on the frost, so its rows slide beneath them and fade instead of being cut off.
         val density = LocalDensity.current
         var controlsHeight by remember { mutableIntStateOf(0) }
-        val listTop = padding.calculateTopPadding() + with(density) { controlsHeight.toDp() }
+        val listTop = headerTop + with(density) { controlsHeight.toDp() }
         val loaded = quran
         Box(Modifier.padding(bottom = padding.calculateBottomPadding()).fillMaxSize()) {
             Box(Modifier.fillMaxSize().hazeSource(header)) {
@@ -130,7 +135,7 @@ fun QuranScreen(onOpenReader: (ReaderKey) -> Unit, viewModel: QuranViewModel = k
                 }
             }
             HeaderFrost(header, listTop)
-            Column(Modifier.padding(top = padding.calculateTopPadding()).onSizeChanged { controlsHeight = it.height }) {
+            Column(Modifier.padding(top = headerTop).onSizeChanged { controlsHeight = it.height }) {
                 SearchField(
                     query = query,
                     onQueryChange = viewModel::onQueryChange,
