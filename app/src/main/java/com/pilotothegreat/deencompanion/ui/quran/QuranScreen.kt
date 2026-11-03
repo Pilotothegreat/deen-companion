@@ -89,8 +89,10 @@ fun QuranScreen(onOpenReader: (ReaderKey) -> Unit, viewModel: QuranViewModel = k
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
+        // The sky behind the tabs shows through; see SkyWash.
+        containerColor = androidx.compose.ui.graphics.Color.Transparent,
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = { LargeFlexibleTopAppBar(title = { Text(stringResource(R.string.quran)) }, scrollBehavior = scrollBehavior) },
+        topBar = { LargeFlexibleTopAppBar(colors = com.pilotothegreat.deencompanion.ui.components.skyBarColors(), title = { Text(stringResource(R.string.quran)) }, scrollBehavior = scrollBehavior) },
     ) { padding ->
         Column(Modifier.padding(padding).fillMaxSize()) {
             SearchField(

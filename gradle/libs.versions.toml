@@ -5,6 +5,7 @@ ksp = "2.3.12"
 composeBom = "2026.09.00"
 material3 = "1.5.0-alpha28"
 graphicsShapes = "1.1.0"
+haze = "2.1.0"
 coreKtx = "1.18.0"
 appcompat = "1.8.0"
 activityCompose = "1.13.0"
@@ -40,6 +41,8 @@ compose-material3-navigation-suite = { module = "androidx.compose.material3:mate
 compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
 compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
 androidx-graphics-shapes = { module = "androidx.graphics:graphics-shapes", version.ref = "graphicsShapes" }
+haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
+haze-blur = { module = "dev.chrisbanes.haze:haze-blur", version.ref = "haze" }
 
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }

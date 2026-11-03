@@ -1,5 +1,6 @@
 package com.pilotothegreat.deencompanion.ui.athkar
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -68,6 +69,19 @@ fun TasbihCard(
     modifier: Modifier = Modifier,
 ) {
     val target = TasbihEngine.roundTarget(state)
+    // A round is finished when the count wraps back down on its own; a reset is not a finished round.
+    var rounds by remember { androidx.compose.runtime.mutableIntStateOf(0) }
+    var resetting by remember { androidx.compose.runtime.mutableStateOf(false) }
+    var last by remember { androidx.compose.runtime.mutableIntStateOf(state.count) }
+    LaunchedEffect(state.count, state.dhikr) {
+        if (state.count < last && !resetting) rounds++
+        resetting = false
+        last = state.count
+    }
+    val reset = {
+        resetting = true
+        onReset()
+    }
     val progress by animateFloatAsState(
         targetValue = state.count / target.toFloat(),
         animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec(),
@@ -95,7 +109,7 @@ fun TasbihCard(
         ) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(R.string.tasbih_counter), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                IconButton(onClick = onReset) {
+                IconButton(onClick = reset) {
                     Icon(Icons.Rounded.RestartAlt, contentDescription = stringResource(R.string.reset_tasbih))
                 }
             }
@@ -122,6 +136,7 @@ fun TasbihCard(
                 }
             }
             Box(Modifier.size(208.dp), contentAlignment = Alignment.Center) {
+                com.pilotothegreat.deencompanion.ui.components.Bloom(key = rounds, color = MaterialTheme.colorScheme.primary, modifier = Modifier.matchParentSize())
                 CircularWavyProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxSize())
                 Box(
                     modifier = Modifier

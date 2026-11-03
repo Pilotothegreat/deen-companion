@@ -167,9 +167,11 @@ fun HomeScreen(
     val current = content
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
+        // The sky behind the tabs shows through; see SkyWash.
+        containerColor = androidx.compose.ui.graphics.Color.Transparent,
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            LargeFlexibleTopAppBar(
+            LargeFlexibleTopAppBar(colors = com.pilotothegreat.deencompanion.ui.components.skyBarColors(), 
                 title = {
                     val title = current?.hijri?.let {
                         stringResource(R.string.hijri_date, Numerals.localize(HijriCalendar.format(it, locale), locale))
@@ -297,6 +299,10 @@ fun HomeScreen(
                         }
                     }
                 }
+                // The next prayer's sky first: a card asking for a permission or a passing moment waits under it.
+                if (hasCountdown) {
+                    item(key = "hero") { countdownState.value?.let { NextPrayerHero(it, locale, springItem()) } }
+                }
                 repairs.firstOrNull()?.let { repair ->
                     item(key = "repair") { Box(springItem()) { repair() } }
                 }
@@ -319,9 +325,6 @@ fun HomeScreen(
                             else -> null
                         },
                     )
-                }
-                if (hasCountdown) {
-                    item(key = "hero") { countdownState.value?.let { NextPrayerHero(it, locale, springItem()) } }
                 }
                 item(key = "times") {
                     Box(springItem()) {

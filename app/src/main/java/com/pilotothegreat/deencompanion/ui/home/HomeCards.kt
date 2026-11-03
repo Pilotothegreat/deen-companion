@@ -1,5 +1,12 @@
 package com.pilotothegreat.deencompanion.ui.home
 
+import com.pilotothegreat.deencompanion.ui.components.frost
+import androidx.compose.foundation.layout.requiredSize
+import com.pilotothegreat.deencompanion.ui.components.Bloom
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Shadow
 import com.pilotothegreat.deencompanion.ui.components.groupedRowColors
 import com.pilotothegreat.deencompanion.ui.common.rememberHaptics
 import androidx.compose.animation.scaleOut
@@ -120,11 +127,59 @@ fun NextPrayerHero(countdown: Countdown, locale: Locale, modifier: Modifier = Mo
     val shape = animatedPolygonShape(next.prayer.shape)
     val countdownDescription = stringResource(R.string.cd_countdown, name, remaining)
 
+    val sky = LocalSky.current
+    if (sky == null) {
+        PlainHero(name, remaining, countdownDescription, adhanTime, iqama, context, locale, shape, next.prayer, modifier)
+        return
+    }
+    // The next prayer, written on the sky of this moment: it is the one bright thing on Today.
+    val onSky = TextStyle(color = Color.White, shadow = Shadow(Color.Black.copy(alpha = 0.28f), blurRadius = 12f))
+    Box(
+        modifier
+            .fillMaxWidth()
+            .height(232.dp)
+            .clip(RoundedCornerShape(32.dp))
+            .semantics(mergeDescendants = true) {},
+    ) {
+        SkyCanvas(sky, Modifier.matchParentSize())
+        Column(Modifier.padding(Spacing.xxlarge), verticalArrangement = Arrangement.spacedBy(Spacing.hair)) {
+            Text(stringResource(R.string.next_prayer_label), style = MaterialTheme.typography.labelLarge.merge(onSky).copy(color = Color.White.copy(alpha = 0.86f)))
+            Text(name, style = MaterialTheme.typography.headlineMediumEmphasized.merge(onSky))
+            Odometer(
+                text = remaining,
+                style = MaterialTheme.typography.displayMediumEmphasized.copy(fontFeatureSettings = "tnum").merge(onSky),
+                modifier = Modifier.clearAndSetSemantics {
+                    contentDescription = countdownDescription
+                    liveRegion = LiveRegionMode.Polite
+                },
+            )
+            val times = buildString {
+                append(stringResource(R.string.adhan_at, adhanTime))
+                if (iqama != null) append(" · ").append(stringResource(R.string.iqama_at, Formatters.time(context, iqama.toLocalTime(), locale)))
+            }
+            Text(times, style = MaterialTheme.typography.bodyLarge.merge(onSky).copy(color = Color.White.copy(alpha = 0.92f)))
+        }
+    }
+}
+
+/** Where there is no sky to draw on (a test, a preview), the hero as it was. */
+@Composable
+private fun PlainHero(
+    name: String,
+    remaining: String,
+    countdownDescription: String,
+    adhanTime: String,
+    iqama: java.time.ZonedDateTime?,
+    context: android.content.Context,
+    locale: Locale,
+    shape: androidx.compose.ui.graphics.Shape,
+    prayer: com.pilotothegreat.deencompanion.core.prayer.Prayer,
+    modifier: Modifier,
+) {
     Surface(
         shape = MaterialTheme.shapes.extraLargeIncreased,
         color = MaterialTheme.colorScheme.primaryContainer,
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        // One focus stop for screen readers: label, prayer, time left and times together.
         modifier = modifier.fillMaxWidth().semantics(mergeDescendants = true) {},
     ) {
         Row(Modifier.padding(Spacing.xxlarge), verticalAlignment = Alignment.CenterVertically) {
@@ -141,17 +196,14 @@ fun NextPrayerHero(countdown: Countdown, locale: Locale, modifier: Modifier = Mo
                 )
                 Text(stringResource(R.string.adhan_at, adhanTime), style = MaterialTheme.typography.bodyLarge)
                 if (iqama != null) {
-                    Text(
-                        stringResource(R.string.iqama_at, Formatters.time(context, iqama.toLocalTime(), locale)),
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
+                    Text(stringResource(R.string.iqama_at, Formatters.time(context, iqama.toLocalTime(), locale)), style = MaterialTheme.typography.bodyLarge)
                 }
             }
             Box(
                 modifier = Modifier.size(88.dp).clip(shape).background(MaterialTheme.colorScheme.primary),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(next.prayer.icon, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(36.dp))
+                Icon(prayer.icon, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(36.dp))
             }
         }
     }
@@ -214,14 +266,14 @@ fun PrayerTimesCard(
             val iqama = schedule.iqama[prayer]?.takeIf { it != adhan }
             // The highlight fades across to the next prayer when one passes.
             val container by animateColorAsState(
-                if (isNext) MaterialTheme.colorScheme.secondaryContainer else defaultColors.containerColor,
+                if (isNext) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f) else defaultColors.containerColor,
                 MaterialTheme.motionScheme.slowEffectsSpec(),
                 label = "nextPrayer",
             )
             SegmentedListItem(
                 shapes = ListItemDefaults.segmentedShapes(index, rowCount),
                 colors = if (isNext) {
-                    groupedRowColors(containerColor = container, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
+                    groupedRowColors(containerColor = container, contentColor = MaterialTheme.colorScheme.onPrimaryContainer)
                 } else if (isPast) {
                     groupedRowColors(containerColor = container, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
                 } else {
@@ -233,23 +285,38 @@ fun PrayerTimesCard(
                     // shows, and the only place it can be corrected.
                     if (prayer.isObligatory) {
                         val done = prayer in prayed
-                        IconToggleButton(
-                            checked = done,
-                            onCheckedChange = {
-                                haptics.toggle(it)
-                                onTogglePrayed(prayer, it)
-                            },
-                        ) {
-                            SwapIcon(done) { on ->
-                                Icon(
-                                    imageVector = if (on) Icons.Rounded.CheckCircle else prayer.icon,
-                                    contentDescription = stringResource(if (on) R.string.unmark_prayed else R.string.mark_prayed, name),
-                                    tint = if (on) MaterialTheme.colorScheme.primary else LocalContentColor.current,
-                                )
+                        val mark = stringResource(R.string.mark_prayed, name)
+                        Box(contentAlignment = Alignment.Center) {
+                            // A soft bloom when a prayer is marked; nothing when the mark is taken back.
+                            Bloom(key = done, play = done, color = MaterialTheme.colorScheme.primary, modifier = Modifier.matchParentSize())
+                            IconToggleButton(
+                                checked = done,
+                                onCheckedChange = {
+                                    haptics.toggle(it)
+                                    onTogglePrayed(prayer, it)
+                                },
+                            ) {
+                                SwapIcon(done) { on ->
+                                    if (on) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.CheckCircle,
+                                            contentDescription = stringResource(R.string.unmark_prayed, name),
+                                            tint = MaterialTheme.colorScheme.primary,
+                                        )
+                                    } else {
+                                        PrayerGlyph(
+                                            prayer,
+                                            dimmed = isPast,
+                                            modifier = Modifier.size(26.dp).clearAndSetSemantics {
+                                                contentDescription = mark
+                                            },
+                                        )
+                                    }
+                                }
                             }
                         }
                     } else {
-                        Icon(prayer.icon, contentDescription = null)
+                        PrayerGlyph(prayer, dimmed = isPast, modifier = Modifier.size(26.dp))
                     }
                 },
                 supportingContent = iqama?.let {
@@ -318,11 +385,12 @@ fun AthkarNowCard(category: AthkarCategory, progress: DayProgress, locale: Local
     val press = remember { MutableInteractionSource() }
     Card(
         onClick = onOpen,
-        modifier = Modifier.squashOnPress(press),
+        // Frosted glass over the sky: quiet, so the next prayer's sky above stays the one bright thing.
+        modifier = Modifier.squashOnPress(press).frost(MaterialTheme.shapes.extraLarge),
         shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+            containerColor = Color.Transparent,
+            contentColor = MaterialTheme.colorScheme.onSurface,
         ),
         interactionSource = press,
     ) {
@@ -331,8 +399,8 @@ fun AthkarNowCard(category: AthkarCategory, progress: DayProgress, locale: Local
                 CircularWavyProgressIndicator(
                     progress = { fraction },
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.tertiary,
-                    trackColor = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.16f),
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.16f),
                 )
                 Icon(athkarIcon(category.id), contentDescription = null)
             }
@@ -364,11 +432,12 @@ fun QiblaShortcut(location: SavedLocation, locale: Locale, onOpen: () -> Unit) {
     val press = remember { MutableInteractionSource() }
     Card(
         onClick = onOpen,
-        modifier = Modifier.squashOnPress(press),
+        // Frosted glass over the sky: quiet, so the next prayer's sky above stays the one bright thing.
+        modifier = Modifier.squashOnPress(press).frost(MaterialTheme.shapes.extraLarge),
         shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            containerColor = Color.Transparent,
+            contentColor = MaterialTheme.colorScheme.onSurface,
         ),
         interactionSource = press,
     ) {
@@ -415,10 +484,12 @@ fun MomentCard(
     answer: Pair<String, () -> Unit>? = null,
     decline: Pair<String, () -> Unit>? = null,
 ) {
+    // Frosted like the other cards on the sky; the moment's own badge carries its colour.
     val colors = CardDefaults.cardColors(
-        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+        containerColor = Color.Transparent,
+        contentColor = MaterialTheme.colorScheme.onSurface,
     )
+    val glass = Modifier.frost(MaterialTheme.shapes.extraLarge)
     val press = remember { MutableInteractionSource() }
     val content: @Composable ColumnScope.() -> Unit = {
         Column(Modifier.fillMaxWidth().padding(Spacing.xlarge), verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
@@ -471,14 +542,14 @@ fun MomentCard(
         if (onOpen != null) {
             Card(
                 onClick = onOpen,
-                modifier = modifier.squashOnPress(press),
+                modifier = modifier.squashOnPress(press).then(glass),
                 shape = MaterialTheme.shapes.extraLarge,
                 colors = colors,
                 interactionSource = press,
                 content = content,
             )
         } else {
-            Card(modifier = modifier, shape = MaterialTheme.shapes.extraLarge, colors = colors, content = content)
+            Card(modifier = modifier.then(glass), shape = MaterialTheme.shapes.extraLarge, colors = colors, content = content)
         }
     }
 }

@@ -1,5 +1,16 @@
 package com.pilotothegreat.deencompanion.ui
 
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.runtime.produceState
+import java.time.LocalDate
+import com.pilotothegreat.deencompanion.core.prayer.DaySchedule
+import com.pilotothegreat.deencompanion.ui.components.LocalFrost
+import com.pilotothegreat.deencompanion.ui.home.LocalSky
+import com.pilotothegreat.deencompanion.ui.home.rememberSky
+import com.pilotothegreat.deencompanion.ui.home.SkyWash
+import dev.chrisbanes.haze.rememberHazeState
+import dev.chrisbanes.haze.hazeSource
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.core.Spring
@@ -195,8 +206,29 @@ fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpe
             }
         },
     ) {
-        CompositionLocalProvider(LocalBottomBarPadding provides if (floatingBar) FloatingBarClearance else 0.dp) {
+        // The sky over the day, behind every tab: what the frosted cards and the floating bar blur.
+        val frost = rememberHazeState()
+        val zone = settings.zone
+        val config = settings.prayerConfig
+        val today by produceState(DaySchedule.forDate(LocalDate.now(zone), config), zone, config) {
+            while (true) {
+                value = DaySchedule.forDate(LocalDate.now(zone), config)
+                kotlinx.coroutines.delay(60_000)
+            }
+        }
+        val sky by rememberSky(today, zone)
+        CompositionLocalProvider(
+            LocalBottomBarPadding provides if (floatingBar) FloatingBarClearance else 0.dp,
+            LocalFrost provides frost,
+            LocalSky provides sky,
+        ) {
             Box(Modifier.fillMaxSize().nestedScroll(barScroll)) {
+                SkyWash(
+                    sky = sky,
+                    paper = MaterialTheme.colorScheme.background,
+                    dark = MaterialTheme.colorScheme.background.luminance() < 0.5f,
+                    modifier = Modifier.fillMaxSize().hazeSource(frost),
+                )
                 val entryProvider = entryProvider {
                         entry<HomeKey>(metadata = tabMotion) {
                             HomeScreen(

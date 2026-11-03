@@ -412,6 +412,13 @@ private fun FinishPage(reducedMotion: Boolean, onBack: () -> Unit) {
             },
             contentAlignment = Alignment.Center,
         ) {
+            // A bloom opens behind the mark as it lands: the list is done.
+            com.pilotothegreat.deencompanion.ui.components.Bloom(
+                key = Unit,
+                onArrival = true,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.matchParentSize(),
+            )
             Box(Modifier.fillMaxSize().clip(MaterialShapes.SoftBurst.toShape()).background(MaterialTheme.colorScheme.primaryContainer))
             Icon(Icons.Rounded.Check, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.size(64.dp))
         }

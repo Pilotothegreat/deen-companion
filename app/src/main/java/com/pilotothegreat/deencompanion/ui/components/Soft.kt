@@ -1,0 +1,108 @@
+package com.pilotothegreat.deencompanion.ui.components
+
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.unit.dp
+import com.pilotothegreat.deencompanion.ui.theme.rememberReducedMotion
+import dev.chrisbanes.haze.HazeInput
+import dev.chrisbanes.haze.HazePerformanceMode
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.blur.HazeBlurStyle
+import dev.chrisbanes.haze.blur.HazeColorEffect
+import dev.chrisbanes.haze.blur.hazeBlur
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
+
+/** The sky behind the tabs, for frosted surfaces to blur; null where there is none, as on pushed screens. */
+val LocalFrost = staticCompositionLocalOf<HazeState?> { null }
+
+/**
+ * Frosted glass: the sky behind blurred, a pale veil of the page's own colour over it, and a fine light
+ * edge along the top, as light catches the rim of a pane. Below Android 12, and anywhere without a sky
+ * behind, it is the same veil, opaque enough to read on.
+ */
+@Composable
+fun Modifier.frost(shape: Shape, veil: Float = 0.62f): Modifier {
+    val colors = MaterialTheme.colorScheme
+    val dark = colors.background.luminance() < 0.5f
+    val surface = colors.surfaceContainerLow
+    val rim = Brush.verticalGradient(
+        listOf(Color.White.copy(alpha = if (dark) 0.16f else 0.7f), Color.White.copy(alpha = if (dark) 0.04f else 0.18f)),
+    )
+    val state = LocalFrost.current
+    val glass = if (state == null) {
+        Modifier.clip(shape).background(surface.copy(alpha = 0.94f))
+    } else {
+        val style = remember(surface, veil) {
+            HazeBlurStyle {
+                blurRadius(28.dp)
+                backgroundColor(surface)
+                noiseFactor(0.06f)
+                colorEffects(listOf(HazeColorEffect.tint(surface.copy(alpha = veil))))
+                fallbackColorEffect(HazeColorEffect.tint(surface.copy(alpha = 0.92f)))
+            }
+        }
+        Modifier
+            .clip(shape)
+            .hazeBlur(input = HazeInput.Backdrop(state), style = style, performanceMode = HazePerformanceMode.Adaptive)
+    }
+    return this.then(glass).border(1.dp, rim, shape)
+}
+
+/**
+ * A soft bloom: a ring of rounded petals that opens out from the middle and fades, for the small
+ * completions worth a moment — a prayer marked, a round of tasbih, a list of athkar finished. It plays
+ * once each time [key] changes after the first, and not at all under reduced motion.
+ */
+@Composable
+fun Bloom(key: Any?, color: Color, modifier: Modifier = Modifier, play: Boolean = true, onArrival: Boolean = false) {
+    val still = rememberReducedMotion()
+    val progress = remember { Animatable(1f) }
+    val first = remember { mutableListOf(true) }
+    LaunchedEffect(key) {
+        if (first[0]) {
+            first[0] = false
+            if (!onArrival) return@LaunchedEffect
+        }
+        if (still || !play) return@LaunchedEffect
+        progress.snapTo(0f)
+        progress.animateTo(1f, tween(BLOOM_MS, easing = FastOutSlowInEasing))
+    }
+    Canvas(modifier) {
+        val p = progress.value
+        if (p >= 1f) return@Canvas
+        val fade = 1f - p
+        // Drawn past its own bounds: the petals open out over the row around it.
+        val reach = size.minDimension * (0.3f + 0.75f * p)
+        rotate(p * 40f) {
+            for (i in 0 until PETALS) {
+                val angle = 2 * PI * i / PETALS
+                val at = Offset(center.x + (reach * cos(angle)).toFloat(), center.y + (reach * sin(angle)).toFloat())
+                val r = size.minDimension * (if (i % 2 == 0) 0.09f else 0.06f) * (1f - 0.4f * p)
+                drawCircle(color.copy(alpha = 0.85f * fade), r, at)
+            }
+        }
+        drawCircle(color.copy(alpha = 0.22f * fade), reach * 0.8f, center)
+    }
+}
+
+private const val PETALS = 10
+private const val BLOOM_MS = 720

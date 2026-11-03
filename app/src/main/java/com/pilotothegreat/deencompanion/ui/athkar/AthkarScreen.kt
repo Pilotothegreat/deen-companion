@@ -1,5 +1,7 @@
 package com.pilotothegreat.deencompanion.ui.athkar
 
+import androidx.compose.ui.graphics.Color
+import com.pilotothegreat.deencompanion.ui.components.frost
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -113,8 +115,10 @@ fun AthkarScreen(
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
+        // The sky behind the tabs shows through; see SkyWash.
+        containerColor = androidx.compose.ui.graphics.Color.Transparent,
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = { LargeFlexibleTopAppBar(title = { Text(stringResource(R.string.athkar)) }, scrollBehavior = scrollBehavior) },
+        topBar = { LargeFlexibleTopAppBar(colors = com.pilotothegreat.deencompanion.ui.components.skyBarColors(), title = { Text(stringResource(R.string.athkar)) }, scrollBehavior = scrollBehavior) },
         snackbarHost = { SnackbarHost(snackbar, Modifier.padding(bottom = LocalBottomBarPadding.current)) },
     ) { padding ->
         val home = state ?: run {
@@ -282,8 +286,9 @@ private fun CoreTile(category: AthkarCategory, progress: DayProgress, locale: Lo
         onClick = onClick,
         interactionSource = interaction,
         shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(containerColor = container, contentColor = content),
-        modifier = modifier.pressScale(interaction),
+        // Frosted glass; the category's own colour lives in its badge and its line of progress.
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent, contentColor = MaterialTheme.colorScheme.onSurface),
+        modifier = modifier.pressScale(interaction).frost(MaterialTheme.shapes.extraLarge),
     ) {
         Column(Modifier.padding(Spacing.large), verticalArrangement = Arrangement.spacedBy(Spacing.medium)) {
             Row(verticalAlignment = Alignment.CenterVertically) {

@@ -71,7 +71,8 @@ import com.pilotothegreat.deencompanion.R
  */
 @Composable
 fun groupedRowColors(
-    containerColor: Color = MaterialTheme.colorScheme.surfaceContainer,
+    // A touch translucent, so the time of day behind the tabs glows faintly through a list.
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.8f),
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
 ) = ListItemDefaults.segmentedColors(containerColor = containerColor, contentColor = contentColor)
 
@@ -98,11 +99,12 @@ fun PermissionCard(
     onSecondaryAction: () -> Unit = {},
 ) {
     Card(
-        modifier = modifier.fillMaxWidth(),
+        // Frosted, like every card over the sky; the request reads, it does not shout.
+        modifier = modifier.fillMaxWidth().frost(MaterialTheme.shapes.extraLarge),
         shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+            containerColor = Color.Transparent,
+            contentColor = MaterialTheme.colorScheme.onSurface,
         ),
     ) {
         Column(Modifier.padding(Spacing.xlarge), verticalArrangement = Arrangement.spacedBy(Spacing.medium)) {
@@ -235,3 +237,13 @@ fun RollingNumber(value: Int, locale: Locale, style: TextStyle, color: Color, mo
         modifier = modifier,
     ) { Text(Formatters.number(it, locale), style = style, color = color) }
 }
+
+/**
+ * A tab's top bar over the sky: clear while the page is at the top, and a near-opaque wash of the page
+ * once content scrolls under it, so titles stay readable over the list.
+ */
+@androidx.compose.runtime.Composable
+fun skyBarColors() = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
+    containerColor = androidx.compose.ui.graphics.Color.Transparent,
+    scrolledContainerColor = androidx.compose.material3.MaterialTheme.colorScheme.background.copy(alpha = 0.94f),
+)

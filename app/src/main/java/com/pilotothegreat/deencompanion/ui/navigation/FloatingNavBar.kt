@@ -58,7 +58,10 @@ fun FloatingNavBar(
     HorizontalFloatingToolbar(
         expanded = true,
         modifier = modifier,
-        colors = FloatingToolbarDefaults.standardFloatingToolbarColors(),
+        // A pane of frost over the page: the time of day shows faintly through the bar.
+        colors = FloatingToolbarDefaults.standardFloatingToolbarColors(
+            toolbarContainerColor = androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.86f),
+        ),
         scrollBehavior = scrollBehavior,
     ) {
         TopLevel.entries.forEach { tab ->
