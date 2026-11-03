@@ -633,4 +633,18 @@
     <string name="tafsir_range">On ayahs %1$s to %2$s</string>
     <string name="tafsir_previous">Previous ayah</string>
     <string name="tafsir_next">Next ayah</string>
+    <string name="muezzin_madinah">The Prophet\'s Mosque</string>
+    <string name="muezzin_madinah_note">Madinah · about 3 minutes</string>
+    <string name="muezzin_fajr">Fajr adhan</string>
+    <string name="muezzin_fajr_note">With «as-salatu khayrun min an-nawm» · about 1½ minutes</string>
+    <string name="muezzin_gentle">A gentle adhan</string>
+    <string name="muezzin_gentle_note">Soft and unhurried · about 2½ minutes</string>
+    <string name="muezzin_with_dua">Adhan with its dua</string>
+    <string name="muezzin_with_dua_note">Followed by the dua after the adhan · about 3 minutes</string>
+    <string name="muezzin_brisk">A brisk adhan</string>
+    <string name="muezzin_brisk_note">Under a minute and a half</string>
+    <string name="adhan_listen">Listen</string>
+    <string name="adhan_download_one">Download, about 1.5 MB</string>
+    <string name="dua_after_adhan">Dua after the adhan</string>
+    <string name="download_failed_short">Couldn\'t download. Check your connection and try again.</string>
 </resources>

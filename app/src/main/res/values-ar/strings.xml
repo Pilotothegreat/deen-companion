@@ -669,4 +669,18 @@
     <string name="tafsir_range">في الآيات من %1$s إلى %2$s</string>
     <string name="tafsir_previous">الآية السابقة</string>
     <string name="tafsir_next">الآية التالية</string>
+    <string name="muezzin_madinah">المسجد النبوي</string>
+    <string name="muezzin_madinah_note">المدينة المنورة · نحو ثلاث دقائق</string>
+    <string name="muezzin_fajr">أذان الفجر</string>
+    <string name="muezzin_fajr_note">فيه «الصلاة خير من النوم» · نحو دقيقة ونصف</string>
+    <string name="muezzin_gentle">أذان هادئ</string>
+    <string name="muezzin_gentle_note">رخيم متأنٍّ · نحو دقيقتين ونصف</string>
+    <string name="muezzin_with_dua">أذان مع دعائه</string>
+    <string name="muezzin_with_dua_note">يتبعه دعاء ما بعد الأذان · نحو ثلاث دقائق</string>
+    <string name="muezzin_brisk">أذان قصير</string>
+    <string name="muezzin_brisk_note">أقل من دقيقة ونصف</string>
+    <string name="adhan_listen">استمع</string>
+    <string name="adhan_download_one">نزّله، نحو ١٫٥ ميغابايت</string>
+    <string name="dua_after_adhan">دعاء ما بعد الأذان</string>
+    <string name="download_failed_short">تعذّر التنزيل. تأكّد من الاتصال وحاول مجددًا.</string>
 </resources>

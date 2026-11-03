@@ -71,6 +71,9 @@ object AthkarIds {
     const val WAKING = "waking"
     const val SLEEP = "sleep"
 
+    /** "Hearing the adhan", whose last dua is the one said after it. */
+    const val ADHAN = "adhan"
+
     /** Lists the reader made are kept apart from the bundled ids by this prefix. */
     private const val CUSTOM_PREFIX = "custom-"
 

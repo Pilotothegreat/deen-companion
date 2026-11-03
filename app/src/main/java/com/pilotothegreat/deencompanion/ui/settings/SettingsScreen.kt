@@ -1,5 +1,14 @@
 package com.pilotothegreat.deencompanion.ui.settings
 
+import androidx.compose.foundation.layout.Box
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.Stop
 import android.text.format.DateFormat
 import androidx.annotation.StringRes
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -603,6 +612,7 @@ fun SettingsScreen(
     if (showSounds) {
         AdhanSoundSheet(
             sounds = s.sounds,
+            onMuezzin = { prayer, id -> viewModel.setAdhanSound(prayer, id) },
             onSystem = { viewModel.setAdhanSound(it, SoundSettings.SYSTEM_SOUND) },
             onSilent = { viewModel.setAdhanSound(it, SoundSettings.SILENT) },
             onPick = { prayer, title ->
@@ -929,17 +939,17 @@ private val Float.labelRes: Int
     }
 
 /**
- * The sound each prayer's adhan plays.
+ * The adhan each prayer calls with.
  *
- * 1.9.0 promised this row and shipped a deep link into the system's notification-channel settings
- * instead, which is a different app's screen, in a different language, describing a channel sound
- * this app deliberately does not use — the adhan plays as alarm audio so that it is heard through
- * Do Not Disturb. The picker offered here is the system's own, which previews as it scrolls, and
- * asks for alarm sounds because those are the ones the player can actually honour.
+ * Each prayer opens a list of voices: the two bundled adhans and three more that are fetched once when
+ * chosen, each with a play button to hear it first, then the phone's own alarm sound, a sound picked
+ * from the phone, or silence. A preview plays as media, at media volume, so trying voices at night
+ * never sounds an alarm through the house.
  */
 @Composable
 private fun AdhanSoundSheet(
     sounds: SoundSettings,
+    onMuezzin: (Prayer, String) -> Unit,
     onSystem: (Prayer) -> Unit,
     onSilent: (Prayer) -> Unit,
     onPick: (Prayer, String) -> Unit,
@@ -948,7 +958,7 @@ private fun AdhanSoundSheet(
     var editing by remember { mutableStateOf<Prayer?>(null) }
     ModalBottomSheet(onDismissRequest = onDismiss) {
         Column(
-            Modifier.padding(start = Spacing.large, end = Spacing.large, bottom = 32.dp),
+            Modifier.padding(start = Spacing.large, end = Spacing.large, bottom = Spacing.xxlarge),
             verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
         ) {
             Text(
@@ -962,44 +972,197 @@ private fun AdhanSoundSheet(
                     ListItemDefaults.segmentedShapes(index, Prayer.obligatory.size),
                     prayer.icon,
                     stringResource(prayer.nameRes),
-                    stringResource(soundLabel(sounds.adhanFor(prayer))),
+                    soundLabel(sounds.adhanFor(prayer)),
                 ) { editing = prayer }
             }
         }
     }
     editing?.let { prayer ->
         val title = stringResource(prayer.nameRes)
-        val current = soundLabel(sounds.adhanFor(prayer))
-        ChoiceDialog(
-            title = title,
-            options = SOUND_CHOICES,
-            selected = if (current in SOUND_CHOICES) current else R.string.adhan_sound_pick,
-            label = { stringResource(it) },
-            onSelect = { choice ->
-                when (choice) {
-                    R.string.adhan_sound_system -> onSystem(prayer)
-                    R.string.adhan_sound_silent -> onSilent(prayer)
-                    else -> onPick(prayer, title)
-                }
-                editing = null
-            },
+        AdhanVoiceSheet(
+            prayer = prayer,
+            current = sounds.adhanFor(prayer),
+            onMuezzin = { onMuezzin(prayer, it); editing = null },
+            onSystem = { onSystem(prayer); editing = null },
+            onSilent = { onSilent(prayer); editing = null },
+            onPick = { onPick(prayer, title); editing = null },
             onDismiss = { editing = null },
         )
     }
 }
 
-/** The three answers, in the order they are worth offering. */
-private val SOUND_CHOICES = listOf(
-    R.string.adhan_sound_system,
-    R.string.adhan_sound_pick,
-    R.string.adhan_sound_silent,
-)
+@Composable
+private fun AdhanVoiceSheet(
+    prayer: Prayer,
+    current: String,
+    onMuezzin: (String) -> Unit,
+    onSystem: () -> Unit,
+    onSilent: () -> Unit,
+    onPick: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val preview = remember { AdhanPreview(context) }
+    DisposableEffect(preview) { onDispose { preview.release() } }
+    var downloading by remember { mutableStateOf<Map<String, Float>>(emptyMap()) }
+    var failed by remember { mutableStateOf<String?>(null) }
+    // Fajr's own adhan first at Fajr; it is out of place at the other four.
+    val voices = remember(prayer) {
+        val fajr = prayer == Prayer.FAJR
+        com.pilotothegreat.deencompanion.data.adhan.Muezzin.entries.sortedBy { if (it.fajr == fajr) 0 else 1 }
+    }
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true),
+    ) {
+        Column(
+            Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(start = Spacing.large, end = Spacing.large, bottom = Spacing.xxlarge),
+            verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+        ) {
+            Text(
+                stringResource(prayer.nameRes),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(start = Spacing.small, bottom = Spacing.medium),
+            )
+            val rows = voices.size + 3
+            voices.forEachIndexed { index, voice ->
+                val progress = downloading[voice.id]
+                val ready = com.pilotothegreat.deencompanion.data.adhan.AdhanAudio.isReady(context, voice) && progress == null
+                SegmentedListItem(
+                    colors = groupedRowColors(),
+                    onClick = {
+                        if (com.pilotothegreat.deencompanion.data.adhan.AdhanAudio.isReady(context, voice)) {
+                            preview.stop()
+                            onMuezzin(voice.id)
+                        } else if (progress == null) {
+                            failed = null
+                            downloading = downloading + (voice.id to 0f)
+                            scope.launch {
+                                runCatching {
+                                    com.pilotothegreat.deencompanion.data.adhan.AdhanAudio.download(context, voice) { p ->
+                                        downloading = downloading + (voice.id to p)
+                                    }
+                                }.onSuccess { onMuezzin(voice.id) }
+                                    .onFailure { failed = voice.id }
+                                downloading = downloading - voice.id
+                            }
+                        }
+                    },
+                    shapes = ListItemDefaults.segmentedShapes(index, rows),
+                    leadingContent = { androidx.compose.material3.RadioButton(selected = current == voice.id, onClick = null) },
+                    supportingContent = {
+                        Column(verticalArrangement = Arrangement.spacedBy(Spacing.hair)) {
+                            Text(stringResource(voice.noteRes))
+                            when {
+                                progress != null -> androidx.compose.material3.LinearWavyProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth())
+                                failed == voice.id -> Text(stringResource(R.string.download_failed_short), color = MaterialTheme.colorScheme.error)
+                                !ready -> Text(stringResource(R.string.adhan_download_one), color = MaterialTheme.colorScheme.primary)
+                            }
+                        }
+                    },
+                    trailingContent = {
+                        if (ready) {
+                            val playing = preview.playing == voice.id
+                            Box(contentAlignment = Alignment.Center) {
+                                if (playing) {
+                                    androidx.compose.material3.CircularProgressIndicator(
+                                        progress = { preview.progress },
+                                        modifier = Modifier.size(44.dp),
+                                        strokeWidth = 2.dp,
+                                    )
+                                }
+                                androidx.compose.material3.IconButton(onClick = { preview.toggle(voice) }) {
+                                    Icon(
+                                        if (playing) Icons.Rounded.Stop else Icons.Rounded.PlayArrow,
+                                        contentDescription = stringResource(if (playing) R.string.stop_playback else R.string.adhan_listen),
+                                    )
+                                }
+                            }
+                        } else {
+                            Icon(Icons.Rounded.Download, contentDescription = null)
+                        }
+                    },
+                ) { Text(stringResource(voice.nameRes)) }
+            }
+            listOf(
+                Triple(R.string.adhan_sound_system, current == SoundSettings.SYSTEM_SOUND, onSystem),
+                Triple(R.string.adhan_sound_pick, current.startsWith("content://"), onPick),
+                Triple(R.string.adhan_sound_silent, current == SoundSettings.SILENT, onSilent),
+            ).forEachIndexed { i, (label, selected, action) ->
+                SegmentedListItem(
+                    colors = groupedRowColors(),
+                    onClick = { preview.stop(); action() },
+                    shapes = ListItemDefaults.segmentedShapes(voices.size + i, rows),
+                    leadingContent = { androidx.compose.material3.RadioButton(selected = selected, onClick = null) },
+                ) { Text(stringResource(label)) }
+            }
+        }
+    }
+}
 
-@StringRes
-private fun soundLabel(sound: String): Int = when (sound) {
-    SoundSettings.SYSTEM_SOUND -> R.string.adhan_sound_system
-    SoundSettings.SILENT -> R.string.adhan_sound_silent
-    else -> R.string.adhan_sound_custom
+/**
+ * Plays a voice in the adhan picker, one at a time, as media. [playing] and [progress] are snapshot
+ * state, so the play button and its ring follow along.
+ */
+@Stable
+private class AdhanPreview(private val context: android.content.Context) {
+    var playing by mutableStateOf<String?>(null)
+        private set
+    var progress by mutableFloatStateOf(0f)
+        private set
+    private var player: android.media.MediaPlayer? = null
+    private val ticker = android.os.Handler(android.os.Looper.getMainLooper())
+    private val tick = object : Runnable {
+        override fun run() {
+            val p = player ?: return
+            runCatching { progress = p.currentPosition.toFloat() / p.duration.coerceAtLeast(1) }
+            ticker.postDelayed(this, 200)
+        }
+    }
+
+    fun toggle(voice: com.pilotothegreat.deencompanion.data.adhan.Muezzin) {
+        if (playing == voice.id) return stop()
+        stop()
+        val uri = com.pilotothegreat.deencompanion.data.adhan.AdhanAudio.uriFor(context, voice) ?: return
+        player = runCatching {
+            android.media.MediaPlayer().apply {
+                setAudioAttributes(
+                    android.media.AudioAttributes.Builder()
+                        .setUsage(android.media.AudioAttributes.USAGE_MEDIA)
+                        .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SPEECH)
+                        .build(),
+                )
+                setDataSource(context, uri)
+                setOnCompletionListener { stop() }
+                prepare()
+                start()
+            }
+        }.getOrNull() ?: return
+        playing = voice.id
+        progress = 0f
+        ticker.post(tick)
+    }
+
+    fun stop() {
+        ticker.removeCallbacks(tick)
+        player?.runCatching { if (isPlaying) stop(); release() }
+        player = null
+        playing = null
+        progress = 0f
+    }
+
+    fun release() = stop()
+}
+
+@Composable
+private fun soundLabel(sound: String): String = when (sound) {
+    SoundSettings.SYSTEM_SOUND -> stringResource(R.string.adhan_sound_system)
+    SoundSettings.SILENT -> stringResource(R.string.adhan_sound_silent)
+    else -> com.pilotothegreat.deencompanion.data.adhan.Muezzin.byId(sound)?.let { stringResource(it.nameRes) }
+        ?: stringResource(R.string.adhan_sound_custom)
 }
 
 /**

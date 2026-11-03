@@ -236,6 +236,17 @@ object Notifications {
                     .setOnlyAlertOnce(true)
                     .setProgress(PROGRESS_MAX, (stage.fraction * PROGRESS_MAX).toInt(), false)
                     .addAction(0, res.getString(R.string.action_snooze), action(context, PrayerActionReceiver.ACTION_SNOOZE, prayer))
+                    // The adhan has just finished: the dua said after it is one tap away.
+                    .addAction(
+                        0,
+                        res.getString(R.string.dua_after_adhan),
+                        PendingIntent.getActivity(
+                            context,
+                            DUA_REQUEST_BASE + prayer.ordinal,
+                            com.pilotothegreat.deencompanion.ui.navigation.DeepLinks.athkar(context, com.pilotothegreat.deencompanion.core.athkar.AthkarIds.ADHAN),
+                            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                        ),
+                    )
                 if (iqamaAt != null) {
                     // Android draws the remaining time itself, and keeps drawing it after the app is gone.
                     builder.setUsesChronometer(true).setChronometerCountDown(true).setWhen(iqamaAt)
@@ -318,4 +329,7 @@ object Notifications {
             PrayerActionReceiver.intent(context, action, prayer),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
+
+    /** Request codes for the "dua after the adhan" action, one per prayer. */
+    private const val DUA_REQUEST_BASE = 7_400
 }

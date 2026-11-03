@@ -29,7 +29,9 @@ class SmartSettingsMappingTest {
         assertTrue("the Islamic day turns over at Maghrib, which is not a preference", settings.smart.hijriDayStartsAtMaghrib)
         assertEquals(Defaults.SAFAR_KM, settings.smart.safarKm)
 
-        assertEquals(SoundSettings.SYSTEM_SOUND, settings.sounds.adhanFor(Prayer.FAJR))
+        // A real adhan out of the box: the Fajr adhan at Fajr, the Prophet's Mosque at the rest.
+        assertEquals(SoundSettings.DEFAULT_FAJR, settings.sounds.adhanFor(Prayer.FAJR))
+        assertEquals(SoundSettings.DEFAULT_ADHAN, settings.sounds.adhanFor(Prayer.DHUHR))
         assertEquals("no early reminder until one is chosen", 0, settings.sounds.preReminderMinutes)
         assertEquals(0, settings.sounds.silenceMinutes)
 
@@ -66,7 +68,7 @@ class SmartSettingsMappingTest {
 
         assertEquals("makkah", settings.sounds.adhanFor(Prayer.FAJR))
         assertEquals(SoundSettings.SILENT, settings.sounds.adhanFor(Prayer.ASR))
-        assertEquals(SoundSettings.SYSTEM_SOUND, settings.sounds.adhanFor(Prayer.ISHA))
+        assertEquals(SoundSettings.DEFAULT_ADHAN, settings.sounds.adhanFor(Prayer.ISHA))
         assertEquals(15, settings.sounds.preReminderMinutes)
         assertEquals(setOf(Prayer.FAJR, Prayer.MAGHRIB), settings.sounds.preReminderPrayers)
         assertEquals(20, settings.sounds.silenceMinutes)

@@ -102,7 +102,7 @@ class PrayerAlarmReceiver : BroadcastReceiver(), KoinComponent {
                 context = context,
                 prayer = prayer,
                 languageTag = current.appLanguage,
-                sound = sound.takeUnless { it == SoundSettings.SYSTEM_SOUND },
+                sound = sound,
                 iqamaAt = iqamaAt ?: 0L,
             )
             return

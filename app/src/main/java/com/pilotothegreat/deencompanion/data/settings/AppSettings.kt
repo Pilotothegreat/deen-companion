@@ -82,10 +82,15 @@ data class SoundSettings(
     /** Minutes of silence from iqama; 0 turns it off. */
     val silenceMinutes: Int = 0,
 ) {
-    fun adhanFor(prayer: Prayer): String = adhan[prayer] ?: SYSTEM_SOUND
+    /** Until someone chooses, a real adhan: the Fajr adhan at Fajr, the Prophet's Mosque otherwise. */
+    fun adhanFor(prayer: Prayer): String = adhan[prayer] ?: if (prayer == Prayer.FAJR) DEFAULT_FAJR else DEFAULT_ADHAN
 
     companion object {
         const val SYSTEM_SOUND = "system"
+
+        /** Muezzin ids of the two bundled adhans; see data/adhan/Muezzin.kt. */
+        const val DEFAULT_ADHAN = "madinah"
+        const val DEFAULT_FAJR = "fajr"
         const val SILENT = "silent"
     }
 }

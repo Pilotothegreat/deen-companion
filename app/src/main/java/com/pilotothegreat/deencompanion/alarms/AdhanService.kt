@@ -114,15 +114,53 @@ class AdhanService : Service() {
                     true
                 }
                 prepare()
+                // Comes up over four seconds rather than at full alarm volume in a quiet room.
+                setVolume(FADE_FROM, FADE_FROM)
                 start()
             }
         }.onFailure {
             Timber.w(it, "Could not play the adhan")
             handOverToCountdown()
         }.getOrNull()
+        if (player != null) {
+            requestFocus()
+            fadeIn()
+        }
+    }
+
+    private val fade = android.os.Handler(android.os.Looper.getMainLooper())
+
+    private fun fadeIn() {
+        for (step in 1..FADE_STEPS) {
+            fade.postDelayed({
+                val volume = FADE_FROM + (1f - FADE_FROM) * step / FADE_STEPS
+                player?.runCatching { setVolume(volume, volume) }
+            }, FADE_MILLIS * step / FADE_STEPS)
+        }
+    }
+
+    private var focus: android.media.AudioFocusRequest? = null
+
+    /** Asks music and podcasts to step aside while the adhan plays, and hands them back after. */
+    private fun requestFocus() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        val manager = getSystemService(AudioManager::class.java) ?: return
+        val request = android.media.AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
+            .setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build(),
+            )
+            .build()
+        runCatching { manager.requestAudioFocus(request) }
+        focus = request
     }
 
     override fun onDestroy() {
+        fade.removeCallbacksAndMessages(null)
+        focus?.let { request -> getSystemService(AudioManager::class.java)?.runCatching { abandonAudioFocusRequest(request) } }
+        focus = null
         player?.runCatching {
             if (isPlaying) stop()
             release()
@@ -142,9 +180,15 @@ class AdhanService : Service() {
         private const val EXTRA_SOUND = "sound"
         private const val EXTRA_IQAMA_AT = "iqama_at"
 
-        /** Starts the adhan for [prayer]; [sound] is a URI, or null for the phone's own alarm sound. */
+        /**
+         * Starts the adhan for [prayer]. [sound] is the stored choice — a muezzin id, the phone's alarm
+         * sound, or a sound the reader picked — and is resolved here, so a muezzin whose download has
+         * gone missing still calls with the bundled adhan rather than with nothing.
+         */
         fun start(context: Context, prayer: Prayer, languageTag: String, sound: String?, iqamaAt: Long = 0L) {
-            val resolved = sound ?: defaultAlarmUri(context)
+            val resolved = com.pilotothegreat.deencompanion.data.adhan.AdhanAudio
+                .resolve(context, sound ?: com.pilotothegreat.deencompanion.data.settings.SoundSettings.SYSTEM_SOUND, prayer == Prayer.FAJR)
+                ?.toString()
             val intent = Intent(context, AdhanService::class.java)
                 .putExtra(EXTRA_PRAYER, prayer.key)
                 .putExtra(EXTRA_LANGUAGE, languageTag)
@@ -158,12 +202,9 @@ class AdhanService : Service() {
             runCatching { context.stopService(Intent(context, AdhanService::class.java)) }
         }
 
-        private fun defaultAlarmUri(context: Context): String? =
-            android.media.RingtoneManager
-                .getActualDefaultRingtoneUri(context, android.media.RingtoneManager.TYPE_NOTIFICATION)
-                ?.toString()
-
-        @Suppress("unused")
-        private val audioManagerHint = AudioManager.STREAM_ALARM
     }
 }
+
+private const val FADE_FROM = 0.15f
+private const val FADE_STEPS = 12
+private const val FADE_MILLIS = 4_000L

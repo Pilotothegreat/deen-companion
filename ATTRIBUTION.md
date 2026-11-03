@@ -17,6 +17,12 @@ Traffic Light is licensed under the GPLv3, so Bilal is distributed under the sam
 - **Weather:** [Open-Meteo](https://open-meteo.com), free for non-commercial use and requiring no account or key.
 - **Eclipse predictions:** NASA/GSFC eclipse predictions by Fred Espenak, [eclipse.gsfc.nasa.gov](https://eclipse.gsfc.nasa.gov), a US government work in the public domain. Bundled as a table to 2045 by `scripts/eclipses/build_eclipses.py`.
 - **Earthquakes:** the [USGS](https://earthquake.usgs.gov) real-time feeds, a US government work in the public domain.
+- **Adhan recordings** (all from Wikimedia Commons; trimmed and loudness-matched for the two that ship in the app, as their licences allow):
+  - *The Prophet's Mosque* (bundled): "33937 ejaz215 call-to-prayer-from-the-prophet-s-mo.ogg" by ejaz215, [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
+  - *Fajr adhan* (bundled): "Athan during Ramadan 2.wav" by daSupremo, [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). The shortened, normalised copy in the app is shared under the same licence.
+  - *A gentle adhan* (fetched on request): "Beautiful adhan.ogg" by Adam-synagda, CC0.
+  - *Adhan with its dua* (fetched on request): "Azan.ogg" by Andrewler, CC BY-SA 4.0.
+  - *A brisk adhan* (fetched on request): "The Adhan - Muslim Call to Prayer - Aaqib Azeez.mp3", uploaded by Atcovi, CC BY-SA 4.0.
 - **Recitation audio:** streamed from [everyayah.com](https://everyayah.com).
 - **Hadith collections:** [fawazahmed0/hadith-api](https://github.com/fawazahmed0/hadith-api), served by jsDelivr.
 - **Fonts:** KFGQPC Uthmanic Hafs, version 18 (King Fahd Glorious Quran Printing Complex; free to use and distribute, not to modify), the font the Complex builds for its QPC Hafs text; [Amiri](https://github.com/aliftype/amiri) (OFL) and Google Sans Flex (OFL).
