@@ -149,6 +149,18 @@ fun Modifier.glass(state: HazeState?, shape: Shape, tint: Float = 0.5f, rim: Boo
 fun Modifier.headerFrost(state: HazeState): Modifier = hazeBlur(
     input = HazeInput.Sources(state),
     style = dev.chrisbanes.haze.blur.materials.HazeMaterials.ultraThin(MaterialTheme.colorScheme.background).then {
-        progressive(dev.chrisbanes.haze.HazeProgressive.verticalGradient(startIntensity = 1f, endIntensity = 0f))
+        if (progressiveBlurAvailable) {
+            progressive(dev.chrisbanes.haze.HazeProgressive.verticalGradient(startIntensity = 1f, endIntensity = 0f))
+        } else {
+            // Without runtime shaders (Android 12) a graded mask over an even blur gives nearly the same fade.
+            mask(Brush.verticalGradient(listOf(Color.Black, Color.Transparent)))
+        }
     },
 )
+
+/**
+ * Haze's progressive blur is a runtime shader, which Android has from 13 on. Robolectric's renderer
+ * cannot build one either, and an exception there would end the render tests.
+ */
+private val progressiveBlurAvailable: Boolean =
+    android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU && android.os.Build.FINGERPRINT != "robolectric"

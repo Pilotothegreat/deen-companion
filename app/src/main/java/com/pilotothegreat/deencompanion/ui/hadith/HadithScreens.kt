@@ -1,5 +1,9 @@
 package com.pilotothegreat.deencompanion.ui.hadith
 
+import androidx.compose.foundation.layout.height
+import com.pilotothegreat.deencompanion.ui.components.headerFrost
+import dev.chrisbanes.haze.rememberHazeState
+import dev.chrisbanes.haze.hazeSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -89,14 +93,25 @@ fun HadithScreen(onOpenBook: (String) -> Unit, viewModel: HadithViewModel = koin
     }
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    // The same graded frost as Today's header: what passes beneath it is blurred, most at the top.
+    val header = rememberHazeState()
     Scaffold(
         // The sky behind the tabs shows through; see SkyWash.
         containerColor = androidx.compose.ui.graphics.Color.Transparent,
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = { LargeFlexibleTopAppBar(colors = com.pilotothegreat.deencompanion.ui.components.skyBarColors(), title = { Text(stringResource(R.string.hadith)) }, scrollBehavior = scrollBehavior) },
+        topBar = {
+            LargeFlexibleTopAppBar(
+                colors = com.pilotothegreat.deencompanion.ui.components.glassBarColors(),
+                modifier = Modifier.headerFrost(header),
+                title = { Text(stringResource(R.string.hadith)) },
+                scrollBehavior = scrollBehavior,
+            )
+        },
         snackbarHost = { SnackbarHost(snackbar, Modifier.padding(bottom = LocalBottomBarPadding.current)) },
     ) { padding ->
-        Column(Modifier.padding(padding).fillMaxSize()) {
+        // The page starts under the header and is what it frosts; the header's height is kept as space.
+        Column(Modifier.padding(bottom = padding.calculateBottomPadding()).fillMaxSize().hazeSource(header)) {
+            androidx.compose.foundation.layout.Spacer(Modifier.height(padding.calculateTopPadding()))
             SearchField(
                 query = query,
                 onQueryChange = viewModel::onQueryChange,
