@@ -1,0 +1,42 @@
+name: Play listing
+# Pushes the Google Play store listing for com.pilotothegreat.bilal: the text and graphics in
+# fastlane/metadata/android, in English and Arabic. Runs when the listing changes, or from the Actions tab.
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "fastlane/metadata/android/**"
+      - ".github/workflows/play-listing.yml"
+
+jobs:
+  listing:
+    runs-on: ubuntu-latest
+    env:
+      PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+
+    steps:
+      - name: Check for the Play key
+        if: env.PLAY_SERVICE_ACCOUNT_JSON == ''
+        run: echo "::notice::Skipped. Add the PLAY_SERVICE_ACCOUNT_JSON repository secret to push the listing to Google Play."
+
+      - uses: actions/checkout@v5
+        if: env.PLAY_SERVICE_ACCOUNT_JSON != ''
+
+      - name: Set up Ruby for fastlane
+        if: env.PLAY_SERVICE_ACCOUNT_JSON != ''
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+
+      - name: Push the listing
+        if: env.PLAY_SERVICE_ACCOUNT_JSON != ''
+        run: |
+          gem install fastlane --no-document --quiet
+          fastlane supply --package_name com.pilotothegreat.bilal \
+            --metadata_path fastlane/metadata/android \
+            --json_key_data "$PLAY_SERVICE_ACCOUNT_JSON" \
+            --skip_upload_apk true --skip_upload_aab true --skip_upload_changelogs true \
+            --sync_image_upload true

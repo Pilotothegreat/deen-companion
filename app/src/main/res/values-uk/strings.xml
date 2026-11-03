@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name_short">Світлофор</string>
-    <string name="today">Сьогодні</string>
-    <string name="app_name">Світлофор: Мережевий Трекер</string>
-    <string name="grant">Грант</string>
-    <string name="settings">Налаштування</string>
-</resources>

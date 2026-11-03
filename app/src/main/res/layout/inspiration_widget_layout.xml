@@ -1,54 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Inspiration Widget: Material 3 Expressive layout -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@android:id/background"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_background"
+    android:gravity="center_vertical"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:gravity="center_vertical">
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/widget_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:letterSpacing="0.08"
         android:text="@string/daily_inspiration"
         android:textColor="@color/widget_text_secondary"
         android:textSize="11sp"
-        android:letterSpacing="0.08"
         android:textStyle="bold" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="8dp" />
 
     <TextView
         android:id="@+id/widget_inspiration_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="&quot;Verily, with hardship comes ease.&quot;"
+        android:layout_marginTop="8dp"
+        android:ellipsize="end"
+        android:lineSpacingExtra="3dp"
+        android:maxLines="3"
         android:textColor="@color/widget_text_primary"
         android:textSize="14sp"
         android:textStyle="bold"
-        android:lineSpacingExtra="3dp"
-        android:maxLines="3"
-        android:ellipsize="end" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="8dp" />
+        android:text="@string/preview_inspiration" />
 
     <TextView
         android:id="@+id/widget_inspiration_ref"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="— Surah Ash-Sharh 94:6"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/widget_chip_background"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="4dp"
         android:textColor="@color/widget_accent"
         android:textSize="11sp"
         android:textStyle="bold"
-        android:background="@drawable/widget_chip_background"
-        android:paddingHorizontal="10dp"
-        android:paddingVertical="4dp" />
+        android:text="@string/preview_inspiration_ref" />
 
 </LinearLayout>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="27 27 54 54" width="216" height="216">
+  <!-- Bilal mark on a transparent ground, in mosque green. -->
+  <g transform="translate(8.386 2.684) scale(0.8772)">
+    <path d="M77 61V70H49M63 70V36M49 70V36M36 36V70H27V62" fill="none" stroke="#156C44" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="70" cy="80" r="4.5" fill="#F2C572"/>
+  </g>
+</svg>

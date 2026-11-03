@@ -1,0 +1,240 @@
+package com.pilotothegreat.deencompanion.ui.reader
+
+import com.pilotothegreat.deencompanion.core.analytics.UsageEvent
+import com.pilotothegreat.deencompanion.data.analytics.Analytics
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.pilotothegreat.deencompanion.core.prayer.DaySchedule
+import com.pilotothegreat.deencompanion.core.prayer.Prayer
+import com.pilotothegreat.deencompanion.core.quran.RepeatMode
+import com.pilotothegreat.deencompanion.core.time.Ticker
+import com.pilotothegreat.deencompanion.data.net.NetError
+import com.pilotothegreat.deencompanion.data.quran.KhatmaRepository
+import com.pilotothegreat.deencompanion.data.quran.Quran
+import com.pilotothegreat.deencompanion.data.quran.QuranRepository
+import com.pilotothegreat.deencompanion.data.quran.Reciter
+import com.pilotothegreat.deencompanion.data.quran.Verse
+import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
+import com.pilotothegreat.deencompanion.playback.AudioCache
+import com.pilotothegreat.deencompanion.playback.PlaybackState
+import com.pilotothegreat.deencompanion.playback.QuranPlayer
+import com.pilotothegreat.deencompanion.ui.navigation.ReaderKey
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+
+class ReaderViewModel(
+    private val args: ReaderKey,
+    private val repository: QuranRepository,
+    private val settings: SettingsRepository,
+    private val khatma: KhatmaRepository,
+    private val player: QuranPlayer,
+    private val qcfTable: com.pilotothegreat.deencompanion.data.quran.MushafQcfRepository,
+    val fonts: com.pilotothegreat.deencompanion.data.quran.MushafFonts,
+) : ViewModel() {
+
+    val initialPage: Int = args.page.coerceIn(1, 604)
+
+    private val _targetAyah = MutableStateFlow(if (args.surah > 0 && args.ayah > 0) args.surah to args.ayah else null)
+
+    /**
+     * The ayah the reader was opened on from search or a bookmark, lit long enough for the eye to find
+     * it. It lets go after a few seconds or the first page turn; before 2.5 it stayed lit on every page
+     * until a recitation began.
+     */
+    val targetAyah: StateFlow<Pair<Int, Int>?> = _targetAyah
+
+    init {
+        if (_targetAyah.value != null) viewModelScope.launch {
+            delay(TARGET_LIT_MS)
+            _targetAyah.value = null
+        }
+    }
+
+    /** Lets go of the search or bookmark highlight, once the reader has moved on. */
+    fun releaseTarget() {
+        _targetAyah.value = null
+    }
+
+    val quran: StateFlow<Quran?> = flow { emit(repository.quran()) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    private val reciter: StateFlow<Reciter> = settings.settings
+        .map { it.reciter }
+        .distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, Reciter.MISHARY)
+
+    val bookmarks: StateFlow<Set<Pair<Int, Int>>> = repository.bookmarks
+        .map { list -> list.map { it.surah to it.ayah }.toSet() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
+
+    /**
+     * True between Isha and Fajr, which the reader uses to take the page down a shade.
+     *
+     * Reading at night on a screen set for daylight is the most common reason someone puts the
+     * mushaf down, and reaching for the system brightness slider mid-ayah is the other. This is
+     * deliberately small — a few percent, not a night filter — and it is not a setting, because
+     * asking someone whether they would like the screen to stop hurting is not a real question.
+     */
+    val nightDim: StateFlow<Boolean> = combine(settings.settings, Ticker.minutes) { s, _ ->
+        val now = java.time.ZonedDateTime.now(s.zone)
+        val today = DaySchedule.forDate(now.toLocalDate(), s.prayerConfig)
+        val isha = today.adhan[Prayer.ISHA]
+        val fajr = today.adhan[Prayer.FAJR]
+        (isha != null && !now.isBefore(isha)) || (fajr != null && now.isBefore(fajr))
+    }.distinctUntilChanged().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+
+    /**
+     * The print-exact table, while the reader wants the printed page; null for the bundled font. Each
+     * page still falls back to the bundled font until its own QCF font has arrived.
+     */
+    val qcf: StateFlow<com.pilotothegreat.deencompanion.data.quran.MushafQcf?> = settings.settings
+        .map { it.quran.printedPage }
+        .distinctUntilChanged()
+        .map { wanted -> if (wanted) qcfTable.table() else null }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    /** Pages whose QCF font is on the phone; a page re-reads its font when this changes. */
+    val fontsReady: StateFlow<Set<Int>> = fonts.ready
+
+    fun setPrintedPage(enabled: Boolean) {
+        viewModelScope.launch { settings.setPrintedPage(enabled) }
+    }
+
+    val playback: StateFlow<PlaybackState> = player.state
+    val playbackErrors: SharedFlow<NetError> = player.errors
+
+    private var saveJob: Job? = null
+    private var unsavedPage: Int? = null
+    private var settledOnce = false
+
+    /**
+     * A page came to rest. It becomes the place to continue from at once (after a short pause, so a fast
+     * flick through ten pages writes once), but it counts toward the khatma only once it has been on
+     * screen long enough to have been read: a jump to page 400 is not 400 pages read. Opening the reader
+     * is not a page turn either.
+     */
+    fun onPageSettled(page: Int) {
+        if (settledOnce) {
+            Analytics.record(UsageEvent.READER_PAGE_TURNED)
+            if (page != initialPage) releaseTarget()
+        }
+        settledOnce = true
+        if (qcf.value != null) fonts.prefetch(page)
+        unsavedPage = page
+        saveJob?.cancel()
+        saveJob = viewModelScope.launch {
+            delay(SAVE_PAUSE_MS)
+            settings.setLastReadPage(page)
+            delay(READ_DWELL_MS - SAVE_PAUSE_MS)
+            savePage(page)
+        }
+    }
+
+    /**
+     * Saves a page still waiting out the pause at once. Called when the reader leaves the screen,
+     * so a page turned just before the app went to the background is not lost if Android then
+     * reclaims it.
+     */
+    fun savePendingPage() {
+        val page = unsavedPage ?: return
+        saveJob?.cancel()
+        saveJob = viewModelScope.launch { savePage(page) }
+    }
+
+    private suspend fun savePage(page: Int) {
+        settings.setLastReadPage(page)
+        // The khatma follows the pages actually reached, not a button someone has to remember.
+        khatma.onPageRead(page)
+        if (unsavedPage == page) unsavedPage = null
+    }
+
+    fun setBookmark(verse: Verse, bookmarked: Boolean) {
+        if (bookmarked) Analytics.record(UsageEvent.AYAH_BOOKMARKED)
+        viewModelScope.launch { repository.setBookmark(verse, bookmarked) }
+    }
+
+    /**
+     * A single tap on an ayah: the player comes up on it, ready but not reciting. With a recitation
+     * already going, it moves there and carries on.
+     */
+    fun cue(verse: Verse) {
+        val quran = quran.value ?: return
+        Analytics.record(UsageEvent.RECITATION_PLAYED)
+        player.cue(quran.surah(verse.surah), verse.number, reciter.value)
+    }
+
+    /**
+     * From the long-press menu: recite from this ayah on. A one-ayah repeat left from memorising is
+     * lifted first, or "play from here" would recite this ayah alone, over and over.
+     */
+    fun playFrom(verse: Verse) {
+        val quran = quran.value ?: return
+        Analytics.record(UsageEvent.RECITATION_PLAYED)
+        val state = player.state.value
+        if (state.repeatMode == RepeatMode.AYAH) viewModelScope.launch { settings.setRepeat(RepeatMode.OFF, state.repeatCount) }
+        player.play(quran.surah(verse.surah), verse.number, reciter.value)
+    }
+
+    /** From the long-press menu: recite this ayah over and over, for memorising. */
+    fun repeatAyah(verse: Verse) {
+        val quran = quran.value ?: return
+        Analytics.record(UsageEvent.AYAH_REPEATED)
+        viewModelScope.launch { settings.setRepeat(RepeatMode.AYAH, player.state.value.repeatCount) }
+        player.play(quran.surah(verse.surah), verse.number, reciter.value)
+    }
+
+    fun togglePlayPause() = player.togglePlayPause()
+    fun next() = player.next()
+    fun previous() = player.previous()
+    fun stop() = player.stop()
+    fun setSleepTimer(minutes: Int) = player.setSleepTimer(minutes)
+
+    /** One button, no menu: off, this ayah, the whole surah, and round again. */
+    fun cycleRepeat() {
+        val state = player.state.value
+        val next = when (state.repeatMode) {
+            RepeatMode.OFF -> RepeatMode.AYAH
+            RepeatMode.AYAH -> RepeatMode.SURAH
+            RepeatMode.SURAH, RepeatMode.RANGE -> RepeatMode.OFF
+        }
+        viewModelScope.launch { settings.setRepeat(next, state.repeatCount) }
+    }
+
+    fun setReciter(reciter: Reciter) {
+        Analytics.record(UsageEvent.RECITER_CHANGED)
+        viewModelScope.launch {
+            settings.setReciter(reciter)
+            if (player.state.value.isActive) player.changeReciter(reciter)
+        }
+    }
+
+    /** Empties the downloaded recitations; whatever plays next is fetched again. */
+    fun clearDownloads() = AudioCache.clear()
+
+    /** Replays the ayah that failed, which is what the snackbar's retry offers. */
+    fun retry() {
+        val quran = quran.value ?: return
+        val state = player.state.value
+        if (!state.isActive) return
+        player.play(quran.surah(state.surah), state.ayah.coerceAtLeast(1), state.reciter)
+    }
+}
+
+/** A flick through several pages writes the position once, after this pause. */
+private const val SAVE_PAUSE_MS = 500L
+
+/** A page on screen this long has been read, and counts toward the khatma. */
+private const val READ_DWELL_MS = 2_000L
+
+/** How long the ayah the reader was opened on stays lit. */
+private const val TARGET_LIT_MS = 4_000L

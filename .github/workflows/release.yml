@@ -1,0 +1,92 @@
+name: Release
+# Pushing a version tag (v1.7.0) builds the release APK with the signing secrets and publishes it as a GitHub release.
+permissions:
+  contents: write
+
+on:
+  push:
+    tags: [ "v*" ]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+      RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+      RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+      RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+      PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        # Its default also asks for the old "tools" package, which the runner's command-line
+        # tools no longer carry, and sdkmanager fails on it. Gradle fetches the rest itself.
+        with:
+          packages: platform-tools
+
+      # A debug-signed APK can't update an installed copy, so a release without the key fails instead,
+      # saying exactly which secret is missing or wrong.
+      - name: Restore release keystore
+        env:
+          KEYSTORE_IS_VARIABLE: ${{ vars.RELEASE_KEYSTORE_BASE64 != '' }}
+        run: |
+          missing=""
+          for name in RELEASE_KEYSTORE_BASE64 RELEASE_KEYSTORE_PASSWORD RELEASE_KEY_ALIAS RELEASE_KEY_PASSWORD; do
+            [ -n "${!name}" ] || missing="$missing $name"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Missing secrets:$missing. Add them under Settings > Secrets and variables > Actions > Secrets > Repository secrets (not Variables, and not the github-pages environment)."
+            if [ "$KEYSTORE_IS_VARIABLE" = "true" ]; then
+              echo "::error::RELEASE_KEYSTORE_BASE64 was saved as a Variable. Delete it there and add it as a Repository secret."
+            fi
+            exit 1
+          fi
+          if ! echo "$RELEASE_KEYSTORE_BASE64" | base64 -d > release.jks 2>/dev/null; then
+            echo "::error::RELEASE_KEYSTORE_BASE64 isn't valid base64. Encode the keystore with: base64 -w0 release.jks"
+            exit 1
+          fi
+          if ! keytool -list -keystore release.jks -storepass "$RELEASE_KEYSTORE_PASSWORD" -alias "$RELEASE_KEY_ALIAS" > /dev/null 2>&1; then
+            echo "::error::The keystore was restored, but RELEASE_KEYSTORE_PASSWORD or RELEASE_KEY_ALIAS doesn't match it."
+            exit 1
+          fi
+          echo "RELEASE_KEYSTORE_FILE=release.jks" >> "$GITHUB_ENV"
+
+      - name: Lint, test and build
+        run: ./gradlew lintDebug testDebugUnitTest assembleRelease bundlePlay
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          code=$(grep -oP 'versionCode = \K\d+' app/build.gradle.kts)
+          notes="fastlane/metadata/android/en-US/changelogs/$code.txt"
+          [ -f "$notes" ] || { echo "::error::Missing $notes"; exit 1; }
+          gh release create "$GITHUB_REF_NAME" app/build/outputs/apk/release/*.apk app/build/outputs/bundle/play/*.aab \
+            --title "Bilal $GITHUB_REF_NAME" \
+            --notes-file "$notes"
+
+      - name: Set up Ruby for fastlane
+        if: env.PLAY_SERVICE_ACCOUNT_JSON != ''
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+
+      # Needs the PLAY_SERVICE_ACCOUNT_JSON secret; without it the Play upload is skipped.
+      - name: Upload to Google Play internal testing
+        if: env.PLAY_SERVICE_ACCOUNT_JSON != ''
+        run: |
+          gem install fastlane --no-document --quiet
+          fastlane supply --package_name com.pilotothegreat.bilal \
+            --aab "$(ls app/build/outputs/bundle/play/*.aab)" --track internal \
+            --json_key_data "$PLAY_SERVICE_ACCOUNT_JSON" --metadata_path fastlane/metadata/android \
+            --skip_upload_metadata true --skip_upload_images true --skip_upload_screenshots true --skip_upload_apk true

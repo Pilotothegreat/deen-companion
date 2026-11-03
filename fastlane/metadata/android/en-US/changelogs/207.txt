@@ -1,0 +1,5 @@
+A fresh look for Android 17: grouped lists, joined-button tabs, and headers that fold away as you scroll.
+
+Silence during prayer now works: Bilal appears under Do Not Disturb access, never leaves the phone silenced, and never turns off Do Not Disturb you set yourself.
+
+Half-written athkar lists are kept, cancelled hadith downloads stay cancelled, and damaged backups are refused.

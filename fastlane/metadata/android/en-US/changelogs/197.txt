@@ -1,0 +1,9 @@
+One mark per ayah. The mushaf printed two: an empty rosette and the number beside it, because the number is meant to sit inside the rosette and no font on Android composes it. It is drawn now, as the mushaf prints it. The sajdah sign was printed twice as well, and is not any more.
+
+One notification per prayer. The adhan used to raise two at once and the iqama added a third. Now a single notification arrives with the adhan, becomes a live countdown and a filling bar to the iqama, and announces the iqama in place. The countdown is drawn by Android itself, so it ticks with nothing running and costs no battery.
+
+Settings that say what they do. Eleven groups became six, about fifty rows became thirty, and every description now says what a feature does for you rather than which service its data comes from. Settings that did nothing at all are gone. Five switches for the weather, travel and the Islamic year became one. The internet location fallback was removed outright — it was the only feature that sent your IP address to a third party, and your device and the offline city list already answered the question.
+
+Widgets that fit your phone. Every widget now has four or five sizes and tells you more as you make it bigger, from a 2x1 countdown to the full day with iqama times. They resize properly on Samsung's grid, sit flush with the launcher's own corners, and carry a shape that changes with each prayer and a bar that fills as the prayer approaches.
+
+And the small things. The screen stays awake while you read. The page follows the recitation. After Isha it comes down a shade and returns at Fajr. Your settings, bookmarks and khatma are copied quietly once a week, so a reinstall no longer costs you anything. On Friday the silence window covers the khutbah. On the odd nights of the last ten, Bilal holds its own nudges until morning.

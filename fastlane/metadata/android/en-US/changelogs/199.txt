@@ -1,0 +1,7 @@
+The Quran, like the printed mushaf. The text is now the King Fahd Complex's own, in the Complex's own font, so the stray dots inside words are gone. Every page is one size, its fifteen lines spread down the page and stretched with kashida (ـ) the way the print is. Swipe to turn the page. Tap an ayah and the recitation bar comes up on it; press and hold it for its translation, a bookmark, copy, share and repeat.
+
+Widgets that keep up. The next-prayer bar moves between prayers, and every widget lays itself out for the space it is given, so Isha no longer falls off the bottom of a stack. A widget's settings open on what it already has, show it live, and offer only what that widget uses.
+
+Fewer settings, each one finished. Times of calamity, Smart suggestions, the recitation cache size and the Arabic text size are gone. The theme is one picker, with an OLED option beside Auto.
+
+A calmer Today. The daily cards and the location card are gone: tap the place under the date to change it. The compass turns, settles and locks onto the Qibla like a real one.

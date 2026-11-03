@@ -36,8 +36,12 @@ These requests go directly from your device to the service named. We do not run 
 | Weather cards (rain, heat, wind) | Open-Meteo (api.open-meteo.com) | Your location rounded to about 1 km | While the app is open, at most once an hour, after you have set a location; not while battery saver is on |
 | Nearby earthquake card | U.S. Geological Survey (earthquake.usgs.gov) | Nothing about you: the app downloads the public worldwide feed and checks the distance on your device | While the app is open, at most once an hour; not while battery saver is on |
 | City name for your location | Your device's built-in Android geocoder | Your coordinates, handled by your phone's geocoding provider | When a new location is found |
+| Adhan voices | Wikimedia Commons (upload.wikimedia.org) | The recording chosen | Only when you choose an adhan voice that is not built in |
 | Quran recitation | EveryAyah (everyayah.com) | The recitation file requested | When you play or download a recitation |
+| Printed mushaf pages | Quran.com CDN (static.qurancdn.com) | The page font requested | When you open a page in the printed style, its neighbours on Wi-Fi, or when you tap "Download every page" |
 | Full hadith collections | jsDelivr CDN (cdn.jsdelivr.net) | The collection requested | Only when you tap Download |
+| Tafsir (as-Sa'di, Ibn Kathir) | Quran.com API (api.quran.com) | The commentary and surah requested | The first time you open that commentary on that surah |
+| Tafsir (al-Jalalayn) | jsDelivr CDN (cdn.jsdelivr.net) | The commentary and surah requested | The first time you open that commentary on that surah |
 | App updates | Google Play (Play In-App Updates) | Handled by Google Play under Google's privacy policy | When the app checks for an update |
 
 Links you tap in the app, such as the source code or this policy, open in your browser.

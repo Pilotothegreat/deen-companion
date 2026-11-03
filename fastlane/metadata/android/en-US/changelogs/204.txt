@@ -1,0 +1,7 @@
+Prayer times in Oman now match the Ministry of Endowments' tables: Dhuhr and Maghrib were a minute late on most days.
+
+No more battery-optimisation alert. Prayer alerts arrive without it, and the card only appears for a problem you can fix.
+
+Today dims the prayers that have passed, so the ones still ahead stand out. The Hadith list is tidier, and the credits read in Arabic.
+
+Support Bilal through GitHub Sponsors.

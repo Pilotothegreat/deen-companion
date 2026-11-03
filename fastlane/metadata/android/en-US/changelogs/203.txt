@@ -1,0 +1,3 @@
+The Khatma widget shows today's page count even at its smallest size, instead of a cut-off sentence.
+
+Long athkar such as Ayat al-Kursi now fade at the bottom of the card when there is more to scroll.

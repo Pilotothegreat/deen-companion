@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sample content for the widget picker before Android 15; later versions show generated previews. -->
+<resources>
+    <string name="preview_time_fajr" translatable="false">4:36</string>
+    <string name="preview_time_dhuhr" translatable="false">12:09</string>
+    <string name="preview_time_asr" translatable="false">3:35</string>
+    <string name="preview_time_maghrib" translatable="false">6:20</string>
+    <string name="preview_time_isha" translatable="false">7:30</string>
+    <string name="preview_verse" translatable="false">فَإِنَّ مَعَ الْعُسْرِ يُسْرًا</string>
+    <string name="preview_verse_ref" translatable="false">94:5</string>
+    <string name="preview_athkar_count" translatable="false">7 / 26</string>
+    <string name="preview_qibla_bearing" translatable="false">294° from north</string>
+    <string name="preview_qibla_distance" translatable="false">2,158 km to Makkah</string>
+    <string name="preview_khatma_due" translatable="false">3 pages to read today</string>
+    <string name="preview_khatma_progress" translatable="false">128 of 604 pages · 24 days left</string>
+    <string name="preview_date_weekday" translatable="false">Thursday</string>
+    <string name="preview_date_hijri" translatable="false">29 Rabi\' I 1448 AH</string>
+    <string name="preview_date_gregorian" translatable="false">18 September 2026</string>
+
+    <style name="WidgetPreviewLabel">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/widget_text_secondary</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="WidgetPreviewTitle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/widget_text_primary</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="WidgetPreviewRow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">6dp</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <style name="WidgetPreviewName">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textColor">@color/widget_text_primary</item>
+        <item name="android:textSize">13sp</item>
+    </style>
+
+    <style name="WidgetPreviewTime">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/widget_text_primary</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+</resources>

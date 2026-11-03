@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500">
+  <!-- Play Store feature graphic (English): the Kufic mark, the wordmark in both scripts, and what the app does. -->
+  <rect width="1024" height="500" fill="#156C44"/>
+  <g transform="translate(118 128) scale(5.1) translate(-29 -31.2)"><g transform="translate(8.386 2.684) scale(0.8772)"><path d="M77 61V70H49M63 70V36M49 70V36M36 36V70H27V62" fill="none" stroke="#FFF8F3" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="70" cy="80" r="4.5" fill="#F2C572"/></g></g>
+  <text x="452" y="222" font-family="Reem Kufi" font-weight="700" font-size="124" fill="#FFF8F3">Bilal</text>
+  <text x="456" y="332" font-family="Reem Kufi" font-weight="700" font-size="104" fill="#F2C572">بلال</text>
+  <text x="456" y="400" font-family="Readex Pro" font-weight="400" font-size="27" fill="#FFF8F3" fill-opacity="0.86">Prayer times · Athkar · Quran · Qibla</text>
+</svg>

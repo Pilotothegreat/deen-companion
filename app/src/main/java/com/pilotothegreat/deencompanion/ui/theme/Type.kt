@@ -1,88 +1,122 @@
-// FIXED: Add Amiri Google Font, local amiri fallback fonts, and globally exposed arabicFontFamily
+@file:OptIn(ExperimentalTextApi::class)
+
 package com.pilotothegreat.deencompanion.ui.theme
 
 import androidx.compose.material3.Typography
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.googlefonts.Font
-import androidx.compose.ui.text.googlefonts.GoogleFont
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.isSpecified
 import com.pilotothegreat.deencompanion.R
 
-private val provider = GoogleFont.Provider(
-    providerAuthority = "com.google.android.gms.fonts",
-    providerPackage = "com.google.android.gms",
-    certificates = R.array.com_google_android_gms_fonts_certs
+private fun googleSans(weight: Int) = Font(
+    R.font.google_sans_flex,
+    weight = FontWeight(weight),
+    variationSettings = FontVariation.Settings(FontVariation.weight(weight)),
 )
 
-val nunitoFont = GoogleFont("Nunito")
-val amiriFont = GoogleFont("Amiri")
-val scheherazadeFont = GoogleFont("Scheherazade New")
+/** UI typeface. Arabic glyphs fall back to the system's Arabic UI font. */
+val GoogleSansFlex = FontFamily(googleSans(400), googleSans(500), googleSans(600), googleSans(700), googleSans(800))
 
-val arabicFontFamily = FontFamily(
-    Font(googleFont = amiriFont, fontProvider = provider, weight = FontWeight.Normal),
-    Font(googleFont = amiriFont, fontProvider = provider, weight = FontWeight.Bold),
-    androidx.compose.ui.text.font.Font(R.font.amiri_regular, weight = FontWeight.Normal),
-    androidx.compose.ui.text.font.Font(R.font.amiri_bold, weight = FontWeight.Bold)
+/** King Fahd Complex Uthmanic Hafs script, used only for Quran text. */
+val UthmanicHafs = FontFamily(Font(R.font.uthmanic_hafs))
+
+/** Classical naskh for hadith and other Arabic prose. */
+val Amiri = FontFamily(
+    Font(R.font.amiri_regular, FontWeight.Normal),
+    Font(R.font.amiri_bold, FontWeight.Bold),
 )
 
-val uthmaniFontFamily = FontFamily(
-    Font(googleFont = scheherazadeFont, fontProvider = provider, weight = FontWeight.Normal),
-    Font(googleFont = scheherazadeFont, fontProvider = provider, weight = FontWeight.Bold),
-    androidx.compose.ui.text.font.Font(R.font.scheherazade_new, weight = FontWeight.Normal),
-    androidx.compose.ui.text.font.Font(R.font.lalezar, weight = FontWeight.Bold)
-)
+/**
+ * The M3 Expressive type scale set in Google Sans Flex. Arabic script needs more vertical room
+ * than Latin, so line heights grow when the UI is in Arabic.
+ */
+fun deenTypography(arabic: Boolean): Typography {
+    val base = Typography()
+    fun TextStyle.adapt(): TextStyle = copy(
+        fontFamily = GoogleSansFlex,
+        lineHeight = if (arabic && lineHeight.isSpecified) lineHeight * 1.3f else lineHeight,
+    )
+    return Typography(
+        displayLarge = base.displayLarge.adapt(),
+        displayMedium = base.displayMedium.adapt(),
+        displaySmall = base.displaySmall.adapt(),
+        headlineLarge = base.headlineLarge.adapt(),
+        headlineMedium = base.headlineMedium.adapt(),
+        headlineSmall = base.headlineSmall.adapt(),
+        titleLarge = base.titleLarge.adapt(),
+        titleMedium = base.titleMedium.adapt(),
+        titleSmall = base.titleSmall.adapt(),
+        bodyLarge = base.bodyLarge.adapt(),
+        bodyMedium = base.bodyMedium.adapt(),
+        bodySmall = base.bodySmall.adapt(),
+        labelLarge = base.labelLarge.adapt(),
+        labelMedium = base.labelMedium.adapt(),
+        labelSmall = base.labelSmall.adapt(),
+        displayLargeEmphasized = base.displayLargeEmphasized.adapt(),
+        displayMediumEmphasized = base.displayMediumEmphasized.adapt(),
+        displaySmallEmphasized = base.displaySmallEmphasized.adapt(),
+        headlineLargeEmphasized = base.headlineLargeEmphasized.adapt(),
+        headlineMediumEmphasized = base.headlineMediumEmphasized.adapt(),
+        headlineSmallEmphasized = base.headlineSmallEmphasized.adapt(),
+        titleLargeEmphasized = base.titleLargeEmphasized.adapt(),
+        titleMediumEmphasized = base.titleMediumEmphasized.adapt(),
+        titleSmallEmphasized = base.titleSmallEmphasized.adapt(),
+        bodyLargeEmphasized = base.bodyLargeEmphasized.adapt(),
+        bodyMediumEmphasized = base.bodyMediumEmphasized.adapt(),
+        bodySmallEmphasized = base.bodySmallEmphasized.adapt(),
+        labelLargeEmphasized = base.labelLargeEmphasized.adapt(),
+        labelMediumEmphasized = base.labelMediumEmphasized.adapt(),
+        labelSmallEmphasized = base.labelSmallEmphasized.adapt(),
+    )
+}
 
-val nunitoFontFamily = FontFamily(
-    Font(googleFont = nunitoFont, fontProvider = provider, weight = FontWeight.Normal),
-    Font(googleFont = nunitoFont, fontProvider = provider, weight = FontWeight.Medium),
-    Font(googleFont = nunitoFont, fontProvider = provider, weight = FontWeight.SemiBold),
-    Font(googleFont = nunitoFont, fontProvider = provider, weight = FontWeight.Bold),
-    // Local fallbacks for offline:
-    androidx.compose.ui.text.font.Font(R.font.nunito_regular, weight = FontWeight.Normal),
-    androidx.compose.ui.text.font.Font(R.font.nunito_medium, weight = FontWeight.Medium),
-    androidx.compose.ui.text.font.Font(R.font.nunito_semibold, weight = FontWeight.SemiBold),
-    androidx.compose.ui.text.font.Font(R.font.nunito_bold, weight = FontWeight.Bold),
-    // Arabic fallbacks:
-    androidx.compose.ui.text.font.Font(R.font.amiri_regular, weight = FontWeight.Normal),
-    androidx.compose.ui.text.font.Font(R.font.amiri_bold, weight = FontWeight.Bold)
-)
-
-val AppTypography = Typography(
-    displayLarge = TextStyle(fontFamily = nunitoFontFamily, fontWeight = FontWeight.Bold, fontSize = 57.sp, lineHeight = 64.sp),
-    displayMedium = TextStyle(fontFamily = nunitoFontFamily, fontWeight = FontWeight.Medium, fontSize = 45.sp, lineHeight = 52.sp),
-    displaySmall = TextStyle(fontFamily = nunitoFontFamily, fontWeight = FontWeight.Normal, fontSize = 36.sp, lineHeight = 44.sp),
-    headlineLarge = TextStyle(fontFamily = nunitoFontFamily, fontWeight = FontWeight.Bold, fontSize = 32.sp, lineHeight = 40.sp),
-    headlineMedium = TextStyle(fontFamily = nunitoFontFamily, fontWeight = FontWeight.Medium, fontSize = 28.sp, lineHeight = 36.sp),
-    headlineSmall = TextStyle(fontFamily = nunitoFontFamily, fontWeight = FontWeight.Normal, fontSize = 24.sp, lineHeight = 32.sp),
-    titleLarge = TextStyle(fontFamily = nunitoFontFamily, fontWeight = FontWeight.SemiBold, fontSize = 22.sp, lineHeight = 28.sp),
-    titleMedium = TextStyle(fontFamily = nunitoFontFamily, fontWeight = FontWeight.SemiBold, fontSize = 16.sp, lineHeight = 24.sp),
-    titleSmall = TextStyle(fontFamily = nunitoFontFamily, fontWeight = FontWeight.Medium, fontSize = 14.sp, lineHeight = 20.sp),
-    bodyLarge = TextStyle(fontFamily = nunitoFontFamily, fontWeight = FontWeight.Normal, fontSize = 16.sp, lineHeight = 24.sp),
-    bodyMedium = TextStyle(fontFamily = nunitoFontFamily, fontWeight = FontWeight.Normal, fontSize = 14.sp, lineHeight = 20.sp),
-    bodySmall = TextStyle(fontFamily = nunitoFontFamily, fontWeight = FontWeight.Normal, fontSize = 12.sp, lineHeight = 16.sp),
-    labelLarge = TextStyle(fontFamily = nunitoFontFamily, fontWeight = FontWeight.Medium, fontSize = 14.sp, lineHeight = 20.sp),
-    labelMedium = TextStyle(fontFamily = nunitoFontFamily, fontWeight = FontWeight.Medium, fontSize = 12.sp, lineHeight = 16.sp),
-    labelSmall = TextStyle(fontFamily = nunitoFontFamily, fontWeight = FontWeight.Medium, fontSize = 11.sp, lineHeight = 16.sp)
-)
-
-val ArabicTypography = Typography(
-    displayLarge = TextStyle(fontFamily = uthmaniFontFamily, fontWeight = FontWeight.Bold, fontSize = 57.sp, lineHeight = 74.sp),
-    displayMedium = TextStyle(fontFamily = uthmaniFontFamily, fontWeight = FontWeight.Medium, fontSize = 45.sp, lineHeight = 58.sp),
-    displaySmall = TextStyle(fontFamily = uthmaniFontFamily, fontWeight = FontWeight.Normal, fontSize = 36.sp, lineHeight = 48.sp),
-    headlineLarge = TextStyle(fontFamily = uthmaniFontFamily, fontWeight = FontWeight.Bold, fontSize = 32.sp, lineHeight = 44.sp),
-    headlineMedium = TextStyle(fontFamily = uthmaniFontFamily, fontWeight = FontWeight.Medium, fontSize = 28.sp, lineHeight = 38.sp),
-    headlineSmall = TextStyle(fontFamily = uthmaniFontFamily, fontWeight = FontWeight.Normal, fontSize = 24.sp, lineHeight = 34.sp),
-    titleLarge = TextStyle(fontFamily = arabicFontFamily, fontWeight = FontWeight.SemiBold, fontSize = 22.sp, lineHeight = 32.sp),
-    titleMedium = TextStyle(fontFamily = arabicFontFamily, fontWeight = FontWeight.SemiBold, fontSize = 16.sp, lineHeight = 28.sp),
-    titleSmall = TextStyle(fontFamily = arabicFontFamily, fontWeight = FontWeight.Medium, fontSize = 14.sp, lineHeight = 24.sp),
-    bodyLarge = TextStyle(fontFamily = arabicFontFamily, fontWeight = FontWeight.Normal, fontSize = 20.sp, lineHeight = 44.sp),
-    bodyMedium = TextStyle(fontFamily = arabicFontFamily, fontWeight = FontWeight.Normal, fontSize = 16.sp, lineHeight = 36.sp),
-    bodySmall = TextStyle(fontFamily = arabicFontFamily, fontWeight = FontWeight.Normal, fontSize = 14.sp, lineHeight = 32.sp),
-    labelLarge = TextStyle(fontFamily = arabicFontFamily, fontWeight = FontWeight.Medium, fontSize = 14.sp, lineHeight = 24.sp),
-    labelMedium = TextStyle(fontFamily = arabicFontFamily, fontWeight = FontWeight.Medium, fontSize = 12.sp, lineHeight = 20.sp),
-    labelSmall = TextStyle(fontFamily = arabicFontFamily, fontWeight = FontWeight.Medium, fontSize = 11.sp, lineHeight = 18.sp)
-)
-
-
+/**
+ * Multiplies every size and line height by [scale].
+ *
+ * This is on top of the system font scale rather than instead of it: people who have already turned
+ * the system slider up and still cannot read comfortably have nowhere else to go, and telling them
+ * to change a system setting they have already changed is not an answer.
+ */
+fun Typography.scaledBy(scale: Float): Typography {
+    if (scale == 1f) return this
+    fun TextStyle.scaled(): TextStyle = copy(
+        fontSize = if (fontSize.isSpecified) fontSize * scale else fontSize,
+        lineHeight = if (lineHeight.isSpecified) lineHeight * scale else lineHeight,
+    )
+    return Typography(
+        displayLarge = displayLarge.scaled(),
+        displayMedium = displayMedium.scaled(),
+        displaySmall = displaySmall.scaled(),
+        headlineLarge = headlineLarge.scaled(),
+        headlineMedium = headlineMedium.scaled(),
+        headlineSmall = headlineSmall.scaled(),
+        titleLarge = titleLarge.scaled(),
+        titleMedium = titleMedium.scaled(),
+        titleSmall = titleSmall.scaled(),
+        bodyLarge = bodyLarge.scaled(),
+        bodyMedium = bodyMedium.scaled(),
+        bodySmall = bodySmall.scaled(),
+        labelLarge = labelLarge.scaled(),
+        labelMedium = labelMedium.scaled(),
+        labelSmall = labelSmall.scaled(),
+        displayLargeEmphasized = displayLargeEmphasized.scaled(),
+        displayMediumEmphasized = displayMediumEmphasized.scaled(),
+        displaySmallEmphasized = displaySmallEmphasized.scaled(),
+        headlineLargeEmphasized = headlineLargeEmphasized.scaled(),
+        headlineMediumEmphasized = headlineMediumEmphasized.scaled(),
+        headlineSmallEmphasized = headlineSmallEmphasized.scaled(),
+        titleLargeEmphasized = titleLargeEmphasized.scaled(),
+        titleMediumEmphasized = titleMediumEmphasized.scaled(),
+        titleSmallEmphasized = titleSmallEmphasized.scaled(),
+        bodyLargeEmphasized = bodyLargeEmphasized.scaled(),
+        bodyMediumEmphasized = bodyMediumEmphasized.scaled(),
+        bodySmallEmphasized = bodySmallEmphasized.scaled(),
+        labelLargeEmphasized = labelLargeEmphasized.scaled(),
+        labelMediumEmphasized = labelMediumEmphasized.scaled(),
+        labelSmallEmphasized = labelSmallEmphasized.scaled(),
+    )
+}
