@@ -110,7 +110,7 @@
     <!-- Tasbih -->
     <string name="tasbih_counter">التسبيح</string>
     <string name="reset_tasbih">تصفير العداد</string>
-    <string name="tasbih_reset_done">تم تصفير العداد</string>
+    <string name="tasbih_reset_done">عاد العدّاد إلى الصفر</string>
     <string name="tasbih_of_target">من %1$s</string>
     <string name="cd_tasbih_button">عدّ الذكر</string>
     <string name="tasbih_dhikr_subhanallah">سبحان الله</string>
@@ -208,9 +208,9 @@
     <string name="download_collection">تنزيل الكتاب كاملًا</string>
     <string name="cancel_download">إلغاء التنزيل</string>
     <string name="download_failed">تعذّر تنزيل %1$s. تحقق من اتصالك.</string>
-    <string name="downloads_note">لا تُنزَّل الكتب الكاملة إلا عند طلبك، من jsDelivr (بضعة ميغابايت لكل كتاب).</string>
+    <string name="downloads_note">تُنزَّل المجموعات الكاملة حين تطلبها فقط، وحجم كلٍّ منها بضعة ميغابايت.</string>
     <string name="sample_banner">أنت تقرأ عينة من هذا الكتاب. نزّله لقراءة جميع الأحاديث والبحث فيها.</string>
-    <string name="search_incomplete">البحث في الكتب غير المنزّلة جزئي.</string>
+    <string name="search_incomplete">لا يشمل البحث كل نصوص الكتب التي لم تنزّلها بعد.</string>
     <string name="favorites_empty">لا توجد أحاديث مفضلة بعد</string>
     <string name="favorites_empty_body">المس القلب في أي حديث لحفظه هنا.</string>
     <string name="hadith_number">حديث %1$s</string>
@@ -295,7 +295,7 @@
     <string name="athkar_no_results">لا توجد أذكار مطابقة</string>
     <string name="athkar_now">الآن</string>
     <string name="athkar_progress">%1$s من %2$s</string>
-    <string name="athkar_done_today">أُنجزت اليوم</string>
+    <string name="athkar_done_today">أتممتها اليوم</string>
     <string name="athkar_start">ابدأ</string>
     <string name="athkar_continue">تابع</string>
     <string name="athkar_again">اقرأ مجددًا</string>
@@ -482,7 +482,7 @@
     <string name="weather_cold">برد شديد</string>
     <string name="weather_cold_body">استعذ من زمهرير جهنم، وترفّق في الوضوء إن شقّ البرد.</string>
     <string name="travel_ask">هل أنت مسافر؟</string>
-    <string name="travel_ask_body">تبعد عن منزلك نحو %1$s كم. إن أكّدت ظهرت أذكار السفر وتنبيه القصر، وتوقفت تنبيهات الإقامة.</string>
+    <string name="travel_ask_body">أنت على بُعد نحو %1$s كم من منزلك. أكّد لتظهر لك أذكار السفر وتنبيه قصر الصلاة، وتتوقف تنبيهات الإقامة.</string>
     <string name="travel_yes">نعم، مسافر</string>
     <string name="travel_no">لا، أنا في بلدي</string>
     <string name="travel_duas">أذكار السفر</string>
@@ -507,7 +507,7 @@
     <string name="pre_prayer_body">تهيّأ وتوضّأ قبل %1$s.</string>
     <string name="action_prayed">صليت</string>
     <string name="action_snooze">بعد ١٠ دقائق</string>
-    <string name="reliability">ضمان وصول التنبيهات</string>
+    <string name="reliability">لا يفوتك أذان</string>
     <string name="reliability_intro">ما يظهر بالأحمر أدناه يؤخّر تنبيهات الصلاة أو يمنعها.</string>
     <string name="reliability_card_title">قد لا تصل التنبيهات</string>
     <string name="reliability_card_body">هناك ما يؤخّر الأذان أو يكتمه في هذا الهاتف، وإصلاحه لا يستغرق دقيقة.</string>
@@ -557,7 +557,7 @@
     <string name="backup_export">حفظ نسخة احتياطية</string>
     <string name="backup_export_desc">إعداداتك وعلاماتك وختمتك في ملف تحتفظ به</string>
     <string name="backup_import">استعادة نسخة</string>
-    <string name="backup_auto_desc">تُكتب بهدوء مرة كل أسبوع وتُحفظ ثلاثة أسابيع، على هذا الهاتف وحده</string>
+    <string name="backup_auto_desc">تُحفظ مرة كل أسبوع وتبقى ثلاثة أسابيع، على هذا الهاتف فقط</string>
     <string name="backup_auto_none">لا توجد نسخة تلقائية بعد، وتُكتب الأولى خلال أسبوع من التثبيت.</string>
     <string name="backup_choose_file">اختيار ملف بدلاً من ذلك…</string>
     <string name="backup_import_desc">يستبدل ما في الهاتف بالنسخة التي تختارها</string>
@@ -575,14 +575,14 @@
     <string name="update_no_notes">لم تُنشر ملاحظات لهذا الإصدار.</string>
     <string name="update_downloading">جارٍ التنزيل والتحقق…</string>
     <string name="update_ready">تم التنزيل والتحقق، وسيطلب منك النظام التأكيد.</string>
-    <string name="update_checksum_failed">لم يطابق الملف بصمته المنشورة فحُذف، ولم يُثبّت شيء.</string>
+    <string name="update_checksum_failed">وصل الملف تالفًا فلم يُثبَّت. حاول مرة أخرى.</string>
     <string name="update_not_allowed">يحتاج النظام إذنك ليثبّت بلال تحديثاته.</string>
     <string name="update_download_failed">فشل التنزيل، تحقق من اتصالك وأعد المحاولة.</string>
     <string name="update_now">تحديث</string>
     <string name="update_open_page">فتح صفحة الإصدار</string>
     <string name="later">لاحقًا</string>
     <string name="whats_new_in">الجديد في %1$s</string>
-    <string name="whats_new_body">مظهر جديد لأندرويد 17: قوائم مجمّعة، وتبويبات بأزرار متصلة، وعناوين تنطوي عند التمرير.\n\nكتم الصوت أثناء الصلاة يعمل الآن: يظهر بلال في إذن وضع عدم الإزعاج، ولا يترك هاتفك صامتًا، ولا يُطفئ وضع عدم الإزعاج الذي فعّلته بنفسك.\n\nقوائم الأذكار غير المكتملة تُحفظ، وتنزيل الحديث الملغى يبقى ملغى، والنسخ الاحتياطية التالفة تُرفض.</string>
+    <string name="whats_new_body">المصحف كما يطبعه مجمّع الملك فهد: كل صفحة بخطّها، تُجلب مرة واحدة حين تقرؤها.\n\nالتفسير على أي آية: اضغط عليها مطوّلًا واختر من خمسة تفاسير، والميسّر يعمل دون اتصال.\n\nأذان حقيقي: أذان الفجر للفجر، وصوت تختاره لكل صلاة، ودعاء ما بعد الأذان بلمسة.\n\nوسماء حيّة في «اليوم» تتبدّل مع ساعات النهار، وزجاج مُصنفَر في أرجاء التطبيق.</string>
 
     <!-- Shortcuts and the tile -->
     <string name="tile_next_prayer">الصلاة القادمة</string>
@@ -617,12 +617,12 @@
     <string name="iqama_sheet_intro">كم يفصل بين الأذان والإقامة في مسجدك.</string>
     <string name="iqama_varies">يختلف من صلاة لأخرى</string>
     <plurals name="days_observed">
-        <item quantity="zero">لا أيام في آخر ثلاثين</item>
-        <item quantity="one">يوم واحد في آخر ثلاثين</item>
-        <item quantity="two">يومان في آخر ثلاثين</item>
-        <item quantity="few">%1$s أيام في آخر ثلاثين</item>
-        <item quantity="many">%1$s يومًا في آخر ثلاثين</item>
-        <item quantity="other">%1$s يوم في آخر ثلاثين</item>
+        <item quantity="zero">لا أيام من آخر ثلاثين يومًا</item>
+        <item quantity="one">يوم واحد من آخر ثلاثين يومًا</item>
+        <item quantity="two">يومان من آخر ثلاثين يومًا</item>
+        <item quantity="few">%1$s أيام من آخر ثلاثين يومًا</item>
+        <item quantity="many">%1$s يومًا من آخر ثلاثين يومًا</item>
+        <item quantity="other">%1$s يوم من آخر ثلاثين يومًا</item>
     </plurals>
     <string name="play_from_here">استمع من هنا</string>
     <string name="repeat_this_ayah">كرّر هذه الآية</string>

@@ -94,7 +94,7 @@
     <!-- Tasbih -->
     <string name="tasbih_counter">Tasbih</string>
     <string name="reset_tasbih">Reset counter</string>
-    <string name="tasbih_reset_done">Counter reset</string>
+    <string name="tasbih_reset_done">Counter back to zero</string>
     <string name="tasbih_of_target">of %1$s</string>
     <string name="cd_tasbih_button">Count dhikr</string>
     <string name="tasbih_plus_one" translatable="false">+1</string>
@@ -185,7 +185,7 @@
     <string name="download_collection">Download full collection</string>
     <string name="cancel_download">Cancel download</string>
     <string name="download_failed">Couldn\'t download %1$s. Check your connection.</string>
-    <string name="downloads_note">Full collections are downloaded only when you ask, from jsDelivr (a few MB each).</string>
+    <string name="downloads_note">Full collections download only when you ask, a few MB each.</string>
     <string name="sample_banner">You\'re reading a sample of this collection. Download it to read and search every hadith.</string>
     <string name="search_incomplete">Collections you haven\'t downloaded are only partly searched.</string>
     <string name="favorites_empty">No favorites yet</string>
@@ -450,7 +450,7 @@
     <string name="weather_cold">Severe cold</string>
     <string name="weather_cold_body">Seek refuge from the cold of Hellfire, and keep wudu warm if the cold makes it hard.</string>
     <string name="travel_ask">Are you travelling?</string>
-    <string name="travel_ask_body">You are about %1$s km from home. Say yes and the travel duas and a note on shortening prayers appear, and iqama alerts stop.</string>
+    <string name="travel_ask_body">You\'re about %1$s km from home. Say yes to see the travel duas and a note on shortening prayers; iqama alerts will pause.</string>
     <string name="travel_yes">Yes, travelling</string>
     <string name="travel_no">No, I am home</string>
     <string name="travel_duas">The duas of travel</string>
@@ -475,7 +475,7 @@
     <string name="pre_prayer_body">Time to make wudu before %1$s.</string>
     <string name="action_prayed">Prayed</string>
     <string name="action_snooze">In 10 minutes</string>
-    <string name="reliability">Make alerts arrive</string>
+    <string name="reliability">Never miss an adhan</string>
     <string name="reliability_intro">Anything marked in red below will delay or silence your prayer alerts.</string>
     <string name="reliability_card_title">Alerts may not arrive</string>
     <string name="reliability_card_body">Something on this phone will delay or silence the adhan. It takes a minute to put right.</string>
@@ -525,7 +525,7 @@
     <string name="backup_export">Save a backup</string>
     <string name="backup_export_desc">Your settings, bookmarks and khatma, in a file you keep</string>
     <string name="backup_import">Restore a backup</string>
-    <string name="backup_auto_desc">Written quietly once a week and kept for three weeks, on this phone only</string>
+    <string name="backup_auto_desc">Saved once a week and kept for three weeks, on this phone only</string>
     <string name="backup_auto_none">There is no automatic copy yet. The first is written within a week of installing.</string>
     <string name="backup_choose_file">Choose a file instead…</string>
     <string name="backup_import_desc">Replaces what is on this phone with a copy you choose</string>
@@ -543,14 +543,14 @@
     <string name="update_no_notes">No release notes were published for this version.</string>
     <string name="update_downloading">Downloading and checking the file…</string>
     <string name="update_ready">Downloaded and verified. Android will ask you to confirm.</string>
-    <string name="update_checksum_failed">The download did not match its published checksum and was deleted. Nothing was installed.</string>
+    <string name="update_checksum_failed">The download arrived damaged, so it wasn\'t installed. Try again.</string>
     <string name="update_not_allowed">Android needs your permission for Bilal to install updates.</string>
     <string name="update_download_failed">The download failed. Check your connection and try again.</string>
     <string name="update_now">Update</string>
     <string name="update_open_page">Open the release page</string>
     <string name="later">Later</string>
     <string name="whats_new_in">What\'s new in %1$s</string>
-    <string name="whats_new_body">A fresh look for Android 17: grouped lists, joined-button tabs, and headers that fold away as you scroll.\n\nSilence during prayer now works: Bilal appears under Do Not Disturb access, never leaves the phone silenced, and never turns off Do Not Disturb you set yourself.\n\nHalf-written athkar lists are kept, cancelled hadith downloads stay cancelled, and damaged backups are refused.</string>
+    <string name="whats_new_body">The mushaf as the King Fahd Complex prints it: every page in its own lettering, fetched once as you read.\n\nTafsir on any ayah. Long-press it and choose from five commentaries; al-Muyassar works offline.\n\nA real adhan: the Fajr adhan at Fajr, a voice of your choice for each prayer, and the dua after it one tap away.\n\nAnd a living sky on Today that follows the hours, with frosted glass across the app.</string>
 
     <!-- Shortcuts and the tile -->
     <string name="tile_next_prayer">Next prayer</string>
