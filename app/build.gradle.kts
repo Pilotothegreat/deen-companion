@@ -146,6 +146,7 @@ dependencies {
     // Frosted glass over the sky: real backdrop blur on Android 12+, a soft tint before that.
     implementation(libs.haze)
     implementation(libs.haze.blur)
+    implementation(libs.haze.blur.materials)
 
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)

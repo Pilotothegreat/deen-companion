@@ -1,6 +1,6 @@
 package com.pilotothegreat.deencompanion.ui.athkar
 
-import com.pilotothegreat.deencompanion.ui.components.glass
+import com.pilotothegreat.deencompanion.ui.components.headerFrost
 import dev.chrisbanes.haze.rememberHazeState
 import dev.chrisbanes.haze.hazeSource
 import androidx.compose.ui.graphics.Color
@@ -124,7 +124,7 @@ fun AthkarScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = { LargeFlexibleTopAppBar(
             colors = com.pilotothegreat.deencompanion.ui.components.glassBarColors(),
-            modifier = Modifier.glass(header, androidx.compose.ui.graphics.RectangleShape, tint = 0.55f, rim = false),
+            modifier = Modifier.headerFrost(header),
             title = { Text(stringResource(R.string.athkar)) }, scrollBehavior = scrollBehavior) },
         snackbarHost = { SnackbarHost(snackbar, Modifier.padding(bottom = LocalBottomBarPadding.current)) },
     ) { padding ->

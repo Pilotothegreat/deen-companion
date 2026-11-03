@@ -139,3 +139,16 @@ fun Modifier.glass(state: HazeState?, shape: Shape, tint: Float = 0.5f, rim: Boo
     }
     return if (rim) this.then(surface).border(1.dp, edge, shape) else this.then(surface)
 }
+
+/**
+ * A header of graded frost, as leekleak's Traffic Light draws its page titles: what scrolls beneath is
+ * blurred fully along the top edge and less and less toward the bottom, where the header melts into the
+ * page with no line between them.
+ */
+@Composable
+fun Modifier.headerFrost(state: HazeState): Modifier = hazeBlur(
+    input = HazeInput.Sources(state),
+    style = dev.chrisbanes.haze.blur.materials.HazeMaterials.ultraThin(MaterialTheme.colorScheme.background).then {
+        progressive(dev.chrisbanes.haze.HazeProgressive.verticalGradient(startIntensity = 1f, endIntensity = 0f))
+    },
+)
