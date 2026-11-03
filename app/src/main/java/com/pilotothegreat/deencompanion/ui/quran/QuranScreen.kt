@@ -1,5 +1,10 @@
 package com.pilotothegreat.deencompanion.ui.quran
 
+import com.pilotothegreat.deencompanion.ui.components.LocalListTop
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.layout.height
 import com.pilotothegreat.deencompanion.ui.components.HeaderFrost
 import dev.chrisbanes.haze.rememberHazeState
@@ -106,46 +111,51 @@ fun QuranScreen(onOpenReader: (ReaderKey) -> Unit, viewModel: QuranViewModel = k
             )
         },
     ) { padding ->
-        // The page starts under the header and is what it frosts; the header's height is kept as space.
-        Column(Modifier.padding(bottom = padding.calculateBottomPadding()).fillMaxSize().hazeSource(header)) {
-            androidx.compose.foundation.layout.Spacer(Modifier.height(padding.calculateTopPadding()))
-            SearchField(
-                query = query,
-                onQueryChange = viewModel::onQueryChange,
-                placeholder = stringResource(R.string.search_quran_hint),
-                modifier = Modifier.padding(horizontal = Spacing.large, vertical = Spacing.small),
-            )
-            val loaded = quran ?: run {
-                LoadingBox()
-                return@Column
-            }
-            if (query.isNotBlank()) {
-                SearchResults(results, loaded, onOpenReader)
-                return@Column
-            }
-            ConnectedChoice(
-                options = listOf(0, 1, 2),
-                selected = tab,
-                onSelect = { tab = it },
-                label = {
-                    when (it) {
-                        0 -> stringResource(R.string.surahs)
-                        1 -> stringResource(R.string.juz_tab)
-                        else -> stringResource(R.string.bookmarks)
+        // As in Traffic Light: the list runs the full height under the header and the controls, which
+        // float over it on the frost, so its rows slide beneath them and fade instead of being cut off.
+        val density = LocalDensity.current
+        var controlsHeight by remember { mutableIntStateOf(0) }
+        val listTop = padding.calculateTopPadding() + with(density) { controlsHeight.toDp() }
+        val loaded = quran
+        Box(Modifier.padding(bottom = padding.calculateBottomPadding()).fillMaxSize()) {
+            Box(Modifier.fillMaxSize().hazeSource(header)) {
+                CompositionLocalProvider(LocalListTop provides listTop) {
+                    when {
+                        loaded == null -> LoadingBox(Modifier.padding(top = listTop))
+                        query.isNotBlank() -> SearchResults(results, loaded, onOpenReader)
+                        tab == 0 -> SurahList(loaded, lastReadPage, khatma, onOpenReader, viewModel::cancelKhatma) { startingKhatma = true }
+                        tab == 1 -> JuzList(loaded, onOpenReader)
+                        else -> BookmarkList(bookmarks, loaded, onOpenReader, viewModel::removeBookmark)
                     }
-                },
-                // Tighter than a button's usual padding, so a longer label such as Bookmarks fits a third of the row.
-                contentPadding = PaddingValues(horizontal = Spacing.small),
-                modifier = Modifier.padding(horizontal = Spacing.large, vertical = Spacing.small),
-            )
-            when (tab) {
-                0 -> SurahList(loaded, lastReadPage, khatma, onOpenReader, viewModel::cancelKhatma) { startingKhatma = true }
-                1 -> JuzList(loaded, onOpenReader)
-                else -> BookmarkList(bookmarks, loaded, onOpenReader, viewModel::removeBookmark)
+                }
+            }
+            HeaderFrost(header, listTop)
+            Column(Modifier.padding(top = padding.calculateTopPadding()).onSizeChanged { controlsHeight = it.height }) {
+                SearchField(
+                    query = query,
+                    onQueryChange = viewModel::onQueryChange,
+                    placeholder = stringResource(R.string.search_quran_hint),
+                    modifier = Modifier.padding(horizontal = Spacing.large, vertical = Spacing.small),
+                )
+                if (loaded != null && query.isBlank()) {
+                    ConnectedChoice(
+                        options = listOf(0, 1, 2),
+                        selected = tab,
+                        onSelect = { tab = it },
+                        label = {
+                            when (it) {
+                                0 -> stringResource(R.string.surahs)
+                                1 -> stringResource(R.string.juz_tab)
+                                else -> stringResource(R.string.bookmarks)
+                            }
+                        },
+                        // Tighter than a button's usual padding, so a longer label such as Bookmarks fits a third of the row.
+                        contentPadding = PaddingValues(horizontal = Spacing.small),
+                        modifier = Modifier.padding(horizontal = Spacing.large, vertical = Spacing.small),
+                    )
+                }
             }
         }
-        // The frosted header over the page, as in Traffic Light; drawn after the page, under the title.
-        HeaderFrost(header, padding.calculateTopPadding())
     }
 
     if (startingKhatma) {
@@ -171,7 +181,7 @@ private fun SurahList(
 ) {
     val locale = currentLocale()
     LazyColumn(
-        contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = Spacing.medium, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
+        contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = Spacing.medium + LocalListTop.current, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
         verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
     ) {
         if (lastReadPage > 0) {
@@ -235,7 +245,7 @@ private fun JuzList(quran: Quran, onOpenReader: (ReaderKey) -> Unit) {
     val locale = currentLocale()
     val starts = remember { MushafLayout.juzStarts.let { s -> (0 until s.size / 2).map { s[it * 2] to s[it * 2 + 1] } } }
     LazyColumn(
-        contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = Spacing.medium, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
+        contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = Spacing.medium + LocalListTop.current, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
         verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
     ) {
         itemsIndexed(starts, key = { index, _ -> index }) { index, (surah, ayah) ->
@@ -294,7 +304,7 @@ private fun BookmarkList(
     }
     val locale = currentLocale()
     LazyColumn(
-        contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = Spacing.medium, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
+        contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = Spacing.medium + LocalListTop.current, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
         verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
     ) {
         itemsIndexed(bookmarks, key = { _, b -> "${b.surah}:${b.ayah}" }) { index, bookmark ->
@@ -337,7 +347,7 @@ private fun SearchResults(results: QuranSearchResults?, quran: Quran, onOpenRead
                 color = MaterialTheme.colorScheme.onTertiaryContainer,
             )
             LazyColumn(
-                contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
+                contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = LocalListTop.current, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
                 verticalArrangement = Arrangement.spacedBy(Spacing.small),
             ) {
                 // What the query named outright comes first: someone who typed "ayat al kursi" is not

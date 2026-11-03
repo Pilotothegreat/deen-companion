@@ -1,5 +1,9 @@
 package com.pilotothegreat.deencompanion.ui.hadith
 
+import com.pilotothegreat.deencompanion.ui.components.LocalListTop
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.layout.height
 import com.pilotothegreat.deencompanion.ui.components.HeaderFrost
 import dev.chrisbanes.haze.rememberHazeState
@@ -108,45 +112,52 @@ fun HadithScreen(onOpenBook: (String) -> Unit, viewModel: HadithViewModel = koin
         },
         snackbarHost = { SnackbarHost(snackbar, Modifier.padding(bottom = LocalBottomBarPadding.current)) },
     ) { padding ->
-        // The page starts under the header and is what it frosts; the header's height is kept as space.
-        Column(Modifier.padding(bottom = padding.calculateBottomPadding()).fillMaxSize().hazeSource(header)) {
-            androidx.compose.foundation.layout.Spacer(Modifier.height(padding.calculateTopPadding()))
-            SearchField(
-                query = query,
-                onQueryChange = viewModel::onQueryChange,
-                placeholder = stringResource(R.string.search_hadith_hint),
-                modifier = Modifier.padding(horizontal = Spacing.large, vertical = Spacing.small),
-            )
-            val loadedBooks = books ?: run {
-                LoadingBox()
-                return@Column
-            }
-            val bookNames = loadedBooks.associate { it.info.id to it.info.name(locale) }
-            if (query.isNotBlank()) {
-                SearchResults(results, bookNames, loadedBooks.any { !it.isComplete }, favoriteIds, viewModel::setFavorite)
-                return@Column
-            }
-            ConnectedChoice(
-                options = listOf(0, 1),
-                selected = tab,
-                onSelect = { tab = it },
-                label = {
-                    when (it) {
-                        0 -> stringResource(R.string.collections_tab)
-                        else -> stringResource(R.string.favorites_tab)
+        // As in Traffic Light: the list runs the full height under the header and the controls, which
+        // float over it on the frost, so its rows slide beneath them and fade instead of being cut off.
+        val density = LocalDensity.current
+        var controlsHeight by remember { mutableIntStateOf(0) }
+        val listTop = padding.calculateTopPadding() + with(density) { controlsHeight.toDp() }
+        val loadedBooks = books
+        Box(Modifier.padding(bottom = padding.calculateBottomPadding()).fillMaxSize()) {
+            Box(Modifier.fillMaxSize().hazeSource(header)) {
+                CompositionLocalProvider(LocalListTop provides listTop) {
+                    if (loadedBooks == null) {
+                        LoadingBox(Modifier.padding(top = listTop))
+                    } else {
+                        val bookNames = remember(loadedBooks, locale) { loadedBooks.associate { it.info.id to it.info.name(locale) } }
+                        when {
+                            query.isNotBlank() -> SearchResults(results, bookNames, loadedBooks.any { !it.isComplete }, favoriteIds, viewModel::setFavorite)
+                            tab == 0 -> BookList(loadedBooks, downloads, onOpenBook, viewModel::download, viewModel::cancelDownload)
+                            else -> FavoriteList(favorites, bookNames, viewModel::setFavorite)
+                        }
                     }
-                },
-                // Tighter than a button's usual padding, so a longer label such as Bookmarks fits a third of the row.
-                contentPadding = PaddingValues(horizontal = Spacing.small),
-                modifier = Modifier.padding(horizontal = Spacing.large, vertical = Spacing.small),
-            )
-            when (tab) {
-                0 -> BookList(loadedBooks, downloads, onOpenBook, viewModel::download, viewModel::cancelDownload)
-                else -> FavoriteList(favorites, bookNames, viewModel::setFavorite)
+                }
+            }
+            HeaderFrost(header, listTop)
+            Column(Modifier.padding(top = padding.calculateTopPadding()).onSizeChanged { controlsHeight = it.height }) {
+                SearchField(
+                    query = query,
+                    onQueryChange = viewModel::onQueryChange,
+                    placeholder = stringResource(R.string.search_hadith_hint),
+                    modifier = Modifier.padding(horizontal = Spacing.large, vertical = Spacing.small),
+                )
+                if (loadedBooks != null && query.isBlank()) {
+                    ConnectedChoice(
+                        options = listOf(0, 1),
+                        selected = tab,
+                        onSelect = { tab = it },
+                        label = {
+                            when (it) {
+                                0 -> stringResource(R.string.collections_tab)
+                                else -> stringResource(R.string.favorites_tab)
+                            }
+                        },
+                        contentPadding = PaddingValues(horizontal = Spacing.small),
+                        modifier = Modifier.padding(horizontal = Spacing.large, vertical = Spacing.small),
+                    )
+                }
             }
         }
-        // The frosted header over the page, as in Traffic Light; drawn after the page, under the title.
-        HeaderFrost(header, padding.calculateTopPadding())
     }
 }
 
@@ -160,7 +171,7 @@ private fun BookList(
 ) {
     val locale = currentLocale()
     LazyColumn(
-        contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = Spacing.medium, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
+        contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = Spacing.medium + LocalListTop.current, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
         verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
     ) {
         itemsIndexed(books, key = { _, book -> book.info.id }) { index, book ->
@@ -233,7 +244,7 @@ private fun FavoriteList(favorites: List<Hadith>, bookNames: Map<String, String>
         return
     }
     LazyColumn(
-        contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = Spacing.medium, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
+        contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = Spacing.medium + LocalListTop.current, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
         verticalArrangement = Arrangement.spacedBy(Spacing.medium),
     ) {
         items(favorites, key = { it.id }) { hadith ->
@@ -258,7 +269,7 @@ private fun SearchResults(
             body = if (someIncomplete) stringResource(R.string.search_incomplete) else null,
         )
         else -> LazyColumn(
-            contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = Spacing.small, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
+            contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = Spacing.small + LocalListTop.current, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
             verticalArrangement = Arrangement.spacedBy(Spacing.medium),
         ) {
             if (someIncomplete) {

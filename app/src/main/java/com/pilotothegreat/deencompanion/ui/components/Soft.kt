@@ -36,6 +36,12 @@ import kotlin.math.sin
 /** The sky behind the tabs, for frosted surfaces to blur; null where there is none, as on pushed screens. */
 val LocalFrost = staticCompositionLocalOf<HazeState?> { null }
 
+/**
+ * Space a list leaves at its top for the header and any controls floating over it: the list runs up
+ * under them, so its rows slide beneath the frost instead of being cut off at a line.
+ */
+val LocalListTop = androidx.compose.runtime.compositionLocalOf { 0.dp }
+
 /** The sky and the screen over it together, for the floating bar to blur, as a phone's dock blurs its wallpaper. */
 val LocalChrome = staticCompositionLocalOf<HazeState?> { null }
 
@@ -174,7 +180,9 @@ private fun Modifier.headerFrost(state: HazeState, solid: Float): Modifier {
         )
         HazeBlurStyle {
             blurRadius(24.dp)
-            backgroundColor(page)
+            // Clear, not the page's colour: an opaque base under the blur does not fade with the blur,
+            // and ended in a hard line under the header across the sky behind.
+            backgroundColor(Color.Transparent)
             noiseFactor(0.05f)
             colorEffects(listOf(HazeColorEffect.tint(veil)))
             fallbackColorEffect(HazeColorEffect.tint(veil))
