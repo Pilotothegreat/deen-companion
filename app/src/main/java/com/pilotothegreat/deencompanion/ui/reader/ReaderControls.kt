@@ -1,5 +1,7 @@
 package com.pilotothegreat.deencompanion.ui.reader
 
+import androidx.compose.material.icons.rounded.DeleteOutline
+import androidx.compose.material.icons.rounded.Download
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -370,6 +372,87 @@ fun AyahMenu(
                     ) { Text(label) }
                 }
             }
+        }
+    }
+}
+
+/**
+ * How the mushaf is set: the King Fahd Complex's printed page, fetched page by page, or the bundled
+ * font. The whole set can be fetched ahead for reading offline, and removed again.
+ */
+@Composable
+fun MushafSheet(
+    printedPage: Boolean,
+    pageWaiting: Boolean,
+    bulkProgress: Float?,
+    totalBytes: Long,
+    storedBytes: Long,
+    onPrintedPage: (Boolean) -> Unit,
+    onDownloadAll: () -> Unit,
+    onCancelDownload: () -> Unit,
+    onDelete: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val context = LocalContext.current
+    fun size(bytes: Long) = android.text.format.Formatter.formatShortFileSize(context, bytes)
+    ModalBottomSheet(onDismissRequest = onDismiss) {
+        Column(
+            Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(start = Spacing.large, end = Spacing.large, bottom = Spacing.xxlarge),
+            verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
+        ) {
+            Text(
+                stringResource(R.string.mushaf_sheet),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(start = Spacing.small, bottom = Spacing.medium),
+            )
+            val rows = buildList<@Composable (Int, Int) -> Unit> {
+                add { index, count ->
+                    SegmentedListItem(
+                        colors = groupedRowColors(),
+                        onClick = { onPrintedPage(!printedPage) },
+                        shapes = ListItemDefaults.segmentedShapes(index, count),
+                        supportingContent = {
+                            Text(stringResource(if (printedPage && pageWaiting) R.string.printed_page_waiting else R.string.printed_page_desc))
+                        },
+                        trailingContent = { androidx.compose.material3.Switch(checked = printedPage, onCheckedChange = null) },
+                    ) { Text(stringResource(R.string.printed_page)) }
+                }
+                if (printedPage) add { index, count ->
+                    SegmentedListItem(
+                        colors = groupedRowColors(),
+                        onClick = { if (bulkProgress == null) onDownloadAll() else onCancelDownload() },
+                        shapes = ListItemDefaults.segmentedShapes(index, count),
+                        supportingContent = {
+                            if (bulkProgress != null) {
+                                Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
+                                    Text(stringResource(R.string.printed_page_downloading, "${(bulkProgress * 100).toInt()}%"))
+                                    androidx.compose.material3.LinearWavyProgressIndicator(progress = { bulkProgress }, modifier = Modifier.fillMaxWidth())
+                                }
+                            } else {
+                                Text(stringResource(R.string.printed_page_download_desc, size(totalBytes)))
+                            }
+                        },
+                        trailingContent = {
+                            Icon(
+                                if (bulkProgress == null) Icons.Rounded.Download else Icons.Rounded.Close,
+                                contentDescription = if (bulkProgress == null) null else stringResource(R.string.cancel),
+                            )
+                        },
+                    ) { Text(stringResource(R.string.printed_page_download)) }
+                }
+                if (storedBytes > 0) add { index, count ->
+                    SegmentedListItem(
+                        colors = groupedRowColors(),
+                        onClick = onDelete,
+                        shapes = ListItemDefaults.segmentedShapes(index, count),
+                        supportingContent = { Text(stringResource(R.string.printed_page_stored, size(storedBytes))) },
+                        trailingContent = { Icon(Icons.Rounded.DeleteOutline, contentDescription = null) },
+                    ) { Text(stringResource(R.string.printed_page_delete)) }
+                }
+            }
+            rows.forEachIndexed { index, row -> row(index, rows.size) }
         }
     }
 }

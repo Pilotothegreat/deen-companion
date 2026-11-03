@@ -652,4 +652,13 @@
     <string name="update_notification_generic">اضغط لترى الجديد وتحدّث</string>
     <string name="ayah_listen">استمع إلى الآية %1$s</string>
     <string name="ayah_options">الآية %1$s: التفسير والعلامة والمشاركة</string>
+    <string name="mushaf_sheet">المصحف</string>
+    <string name="printed_page">صفحة المصحف المطبوع</string>
+    <string name="printed_page_desc">بخطّ مجمع الملك فهد كما في المصحف المطبوع. تُجلب كل صفحة مرة واحدة، أول ما تفتحها.</string>
+    <string name="printed_page_waiting">الصفحة في طريقها إليك، وحتى تصل تقرؤها بالخط المضمّن في التطبيق.</string>
+    <string name="printed_page_download">نزّل كل الصفحات</string>
+    <string name="printed_page_download_desc">%1$s، لتقرأ في أي مكان دون اتصال</string>
+    <string name="printed_page_downloading">جارٍ تنزيل الصفحات: %1$s</string>
+    <string name="printed_page_stored">%1$s من الصفحات محفوظة على هذا الهاتف</string>
+    <string name="printed_page_delete">احذف الصفحات المنزّلة</string>
 </resources>

@@ -144,7 +144,7 @@ class ReaderRenderTest {
 
     private fun showReader(key: ReaderKey) {
         val koin = GlobalContext.get()
-        val viewModel = ReaderViewModel(key, koin.get(), koin.get(), koin.get(), koin.get())
+        val viewModel = ReaderViewModel(key, koin.get(), koin.get(), koin.get(), koin.get(), koin.get(), koin.get())
         compose.setContent {
             DeenTheme(darkTheme = false, dynamicColor = false, pureBlack = false) {
                 ReaderScreen(key = key, onBack = {}, viewModel = viewModel)

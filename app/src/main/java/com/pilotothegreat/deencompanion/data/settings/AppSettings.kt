@@ -93,6 +93,11 @@ data class SoundSettings(
 data class QuranSettings(
     val repeatMode: RepeatMode = RepeatMode.OFF,
     val repeatCount: Int = 3,
+    /**
+     * The page in the King Fahd Complex's own QCF V2 glyphs, each page's font fetched as it is read;
+     * off, the page is set in the bundled Uthmanic Hafs font, which needs no download at all.
+     */
+    val printedPage: Boolean = true,
 )
 
 enum class ContrastMode(@get:StringRes val labelRes: Int) {

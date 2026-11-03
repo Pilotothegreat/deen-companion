@@ -616,4 +616,13 @@
     <string name="update_notification_generic">Tap to see what changed and update</string>
     <string name="ayah_listen">Listen to ayah %1$s</string>
     <string name="ayah_options">Ayah %1$s: tafsir, bookmark, share</string>
+    <string name="mushaf_sheet">Mushaf</string>
+    <string name="printed_page">The printed page</string>
+    <string name="printed_page_desc">The King Fahd Complex\'s own lettering, as in the printed mushaf. Each page is fetched once, the first time you open it.</string>
+    <string name="printed_page_waiting">This page is on its way. Until it arrives you\'re reading it in the bundled font.</string>
+    <string name="printed_page_download">Download every page</string>
+    <string name="printed_page_download_desc">%1$s, to read anywhere without a connection</string>
+    <string name="printed_page_downloading">Downloading pages: %1$s</string>
+    <string name="printed_page_stored">%1$s of pages kept on this phone</string>
+    <string name="printed_page_delete">Remove downloaded pages</string>
 </resources>

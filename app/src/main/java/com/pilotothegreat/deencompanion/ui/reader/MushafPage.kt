@@ -102,7 +102,7 @@ fun MushafPageLines(
             Column(Modifier.width(lineWidth)) {
                 lines.forEach { line ->
                     when (line.kind) {
-                        LineKind.SURAH_HEADER -> line.surah?.let { SurahBand(quran.surah(it), fontSize, pitch) }
+                        LineKind.SURAH_HEADER -> line.surah?.let { SurahCartouche(quran.surah(it), null, fontSize, pitch) }
                         LineKind.BASMALA -> BasmalaLine(line.surah?.let { quran.surah(it) }, fontSize, pitch)
                         LineKind.BLANK -> Spacer(Modifier.height(pitch))
                         LineKind.AYAH, LineKind.CENTRED -> TextLine(
@@ -340,50 +340,6 @@ private fun BasmalaLine(surah: Surah?, size: TextUnit, height: Dp) {
     }
 }
 
-/**
- * The band the print sets a surah's name in: the name in the mushaf's script inside a framed band, the
- * number of ayahs on one side and where it was revealed on the other, in small medallions. It is
- * Arabic whatever the app's language, as everything on a page of the mushaf is.
- */
-@Composable
-private fun SurahBand(surah: Surah, size: TextUnit, height: Dp) {
-    val colors = MaterialTheme.colorScheme
-    Surface(
-        shape = MaterialTheme.shapes.small,
-        color = colors.surfaceContainerHigh,
-        border = BorderStroke(1.dp, colors.outline),
-        modifier = Modifier.fillMaxWidth().height(height).padding(vertical = 3.dp),
-    ) {
-        Row(Modifier.padding(horizontal = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-            Medallion(Numerals.toArabicIndic(surah.verses.size.toString()), height)
-            Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                Text(
-                    text = SURAH_PREFIX + surah.nameArabic,
-                    fontFamily = UthmanicHafs,
-                    fontSize = size * 0.9f,
-                    color = colors.onSurface,
-                    maxLines = 1,
-                )
-            }
-            Medallion(if (surah.revelation == Revelation.MECCAN) MECCAN else MEDINAN, height)
-        }
-    }
-}
-
-@Composable
-private fun Medallion(label: String, lineHeight: Dp) {
-    Surface(
-        shape = MaterialShapes.Cookie9Sided.toShape(),
-        color = MaterialTheme.colorScheme.secondaryContainer,
-        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-        modifier = Modifier.size(lineHeight * 0.7f),
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            Text(label, style = MaterialTheme.typography.labelSmall, maxLines = 1)
-        }
-    }
-}
-
 private const val LINES = 15
 
 /**
@@ -406,9 +362,7 @@ private const val REFERENCE_SP = 100f
 
 /** Measured for the height of a line: letters with marks above and below. */
 private const val REFERENCE_WORD = "بِسۡمِ ٱللَّهِ"
-private const val SURAH_PREFIX = "سُورَةُ "
-private const val MECCAN = "مكية"
-private const val MEDINAN = "مدنية"
+
 
 /** The colours a laid-out line carries in its spans: ink, ornament, and the bookmarked ornament. */
 @Immutable

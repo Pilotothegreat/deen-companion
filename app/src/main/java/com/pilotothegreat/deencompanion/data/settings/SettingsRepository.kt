@@ -163,6 +163,8 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
         prefs[Keys.DISMISSED_MOMENTS] = (kept + "$id@$onEpochDay").toSet()
     }
 
+    suspend fun setPrintedPage(enabled: Boolean) = edit { it[Keys.PRINTED_PAGE] = enabled }
+
     suspend fun setRepeat(mode: RepeatMode, count: Int) = edit {
         it[Keys.REPEAT_MODE] = mode.name
         it[Keys.REPEAT_COUNT] = count.coerceIn(1, 20)
@@ -286,6 +288,7 @@ internal object Keys {
     // Quran
     val REPEAT_MODE = stringPreferencesKey("quran_repeat_mode")
     val REPEAT_COUNT = intPreferencesKey("quran_repeat_count")
+    val PRINTED_PAGE = booleanPreferencesKey("quran_printed_page")
 
     // Accessibility
     val SIMPLE_MODE = booleanPreferencesKey("simple_mode")
@@ -372,6 +375,7 @@ internal fun Preferences.toAppSettings(): AppSettings = AppSettings(
     quran = QuranSettings(
         repeatMode = enumOrNull<RepeatMode>(this[Keys.REPEAT_MODE]) ?: RepeatMode.OFF,
         repeatCount = (this[Keys.REPEAT_COUNT] ?: 3).coerceIn(1, 20),
+        printedPage = this[Keys.PRINTED_PAGE] ?: true,
     ),
     accessibility = AccessibilitySettings(
         simpleMode = this[Keys.SIMPLE_MODE] ?: false,

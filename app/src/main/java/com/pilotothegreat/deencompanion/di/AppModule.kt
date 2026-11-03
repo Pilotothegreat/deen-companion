@@ -50,6 +50,8 @@ val appModule = module {
     single { AnalyticsRepository(androidContext(), get(), get()) }
     single { KhatmaRepository(get()) }
     single { QuranRepository(androidContext(), get()) }
+    single { com.pilotothegreat.deencompanion.data.quran.MushafQcfRepository(androidContext(), get()) }
+    single { com.pilotothegreat.deencompanion.data.quran.MushafFonts(androidContext()) }
     single { HadithRepository(androidContext(), get()) }
     single { CityIndex { androidContext().assets.open("cities.json").bufferedReader().use { it.readText() } } }
     single { LocationRepository(androidContext(), get(), get()) }
@@ -72,7 +74,7 @@ val appModule = module {
 
     viewModelOf(::HomeViewModel)
     viewModelOf(::QuranViewModel)
-    viewModel { params -> ReaderViewModel(params.get(), get(), get(), get(), get()) }
+    viewModel { params -> ReaderViewModel(params.get(), get(), get(), get(), get(), get(), get()) }
     viewModelOf(::HadithViewModel)
     viewModel { params -> HadithBookViewModel(params.get(), get()) }
     viewModelOf(::QiblaViewModel)

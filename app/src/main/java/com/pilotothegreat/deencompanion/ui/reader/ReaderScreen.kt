@@ -13,6 +13,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.List
+import androidx.compose.material.icons.rounded.AutoStories
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -76,6 +77,8 @@ fun ReaderScreen(
     val bookmarks by viewModel.bookmarks.collectAsStateWithLifecycle()
     val playback by viewModel.playback.collectAsStateWithLifecycle()
     val nightDim by viewModel.nightDim.collectAsStateWithLifecycle()
+    val qcf by viewModel.qcf.collectAsStateWithLifecycle()
+    val fontsReady by viewModel.fontsReady.collectAsStateWithLifecycle()
     val resources = LocalResources.current
     val locale = currentLocale()
     val snackbar = remember { SnackbarHostState() }
@@ -84,6 +87,7 @@ fun ReaderScreen(
     var menuFor by remember { mutableStateOf<Verse?>(null) }
     var jumping by remember { mutableStateOf(false) }
     var choosingReciter by remember { mutableStateOf(false) }
+    var mushafSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(viewModel) {
         viewModel.playbackErrors.collect { error ->
@@ -106,6 +110,10 @@ fun ReaderScreen(
         snapshotFlow { pagerState.settledPage }.collect { viewModel.onPageSettled(it + 1) }
     }
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) { viewModel.savePendingPage() }
+    // The printed page fetches its own font, and its neighbours' on Wi-Fi, wherever the reader rests.
+    LaunchedEffect(pagerState, qcf) {
+        if (qcf != null) snapshotFlow { pagerState.settledPage }.collect { viewModel.fonts.prefetch(it + 1) }
+    }
 
     // The recitation turns the page only for someone still on the page it was reading. 2.0 turned back
     // at every ayah, so a reader who swiped ahead during a recitation was thrown back a few seconds later.
@@ -115,7 +123,7 @@ fun ReaderScreen(
             recitedPage = -1
             return@LaunchedEffect
         }
-        val page = loaded.pageOf(playback.surah, playback.ayah) - 1
+        val page = (qcf?.pageOf(playback.surah, playback.ayah) ?: loaded.pageOf(playback.surah, playback.ayah)) - 1
         val watching = recitedPage == -1 || pagerState.settledPage == recitedPage
         recitedPage = page
         if (watching && pagerState.currentPage != page && !pagerState.isScrollInProgress) {
@@ -157,6 +165,12 @@ fun ReaderScreen(
                     }
                 },
                 actions = {
+                    val mushafLabel = stringResource(R.string.mushaf_sheet)
+                    Labelled(mushafLabel) {
+                        IconButton(onClick = { mushafSheet = true }) {
+                            Icon(Icons.Rounded.AutoStories, contentDescription = mushafLabel)
+                        }
+                    }
                     val jumpLabel = stringResource(R.string.jump_to)
                     Labelled(jumpLabel) {
                         IconButton(onClick = { jumping = true }) {
@@ -199,8 +213,40 @@ fun ReaderScreen(
             ) { index ->
                 CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
                     val page = loaded.pages[index]
-                    Column(Modifier.fillMaxSize().padding(horizontal = Spacing.medium, vertical = Spacing.small)) {
-                        if (page.lines.isEmpty()) {
+                    val printed = qcf?.page(page.number)?.takeIf { it.isNotEmpty() }
+                    // Re-read when a font lands, so the page turns from the bundled font to the print's own.
+                    val typeface = remember(printed, page.number in fontsReady) {
+                        if (printed != null) viewModel.fonts.typeface(page.number) else null
+                    }
+                    val names = remember(fontsReady.contains(0)) { viewModel.fonts.surahNames() }
+                    val colors = MaterialTheme.colorScheme
+                    Column(
+                        Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = Spacing.small, vertical = Spacing.hair)
+                            .mushafFrame(ornament = colors.secondary.copy(alpha = 0.7f), paper = colors.surfaceContainerLowest)
+                            .padding(horizontal = Spacing.medium, vertical = Spacing.small),
+                    ) {
+                        if (printed != null && typeface != null) {
+                            QcfPageLines(
+                                lines = printed,
+                                typeface = typeface,
+                                names = names,
+                                quran = loaded,
+                                highlight = highlight,
+                                bookmarks = bookmarks,
+                                onTap = { verse ->
+                                    haptics.click()
+                                    viewModel.releaseTarget()
+                                    viewModel.cue(verse)
+                                },
+                                onLongPress = { verse ->
+                                    haptics.confirm()
+                                    menuFor = verse
+                                },
+                                modifier = Modifier.weight(1f).fillMaxWidth(),
+                            )
+                        } else if (page.lines.isEmpty()) {
                             FlowingPage(page.verses, Modifier.weight(1f).fillMaxWidth())
                         } else MushafPageLines(
                             lines = page.lines,
@@ -240,6 +286,23 @@ fun ReaderScreen(
                 scope.launch { pagerState.scrollToPage(page - 1) }
             },
             onDismiss = { jumping = false },
+        )
+    }
+
+    if (mushafSheet) {
+        val bulk by viewModel.fonts.bulk.collectAsStateWithLifecycle()
+        val printedOn = qcf != null
+        MushafSheet(
+            printedPage = printedOn,
+            pageWaiting = current.number !in fontsReady,
+            bulkProgress = bulk,
+            totalBytes = viewModel.fonts.totalBytes,
+            storedBytes = remember(fontsReady.size) { viewModel.fonts.storedBytes() },
+            onPrintedPage = viewModel::setPrintedPage,
+            onDownloadAll = viewModel.fonts::downloadAll,
+            onCancelDownload = viewModel.fonts::cancelAll,
+            onDelete = { scope.launch { viewModel.fonts.deleteAll() } },
+            onDismiss = { mushafSheet = false },
         )
     }
 

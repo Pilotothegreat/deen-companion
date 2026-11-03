@@ -38,6 +38,8 @@ class ReaderViewModel(
     private val settings: SettingsRepository,
     private val khatma: KhatmaRepository,
     private val player: QuranPlayer,
+    private val qcfTable: com.pilotothegreat.deencompanion.data.quran.MushafQcfRepository,
+    val fonts: com.pilotothegreat.deencompanion.data.quran.MushafFonts,
 ) : ViewModel() {
 
     val initialPage: Int = args.page.coerceIn(1, 604)
@@ -91,6 +93,23 @@ class ReaderViewModel(
         (isha != null && !now.isBefore(isha)) || (fajr != null && now.isBefore(fajr))
     }.distinctUntilChanged().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
+    /**
+     * The print-exact table, while the reader wants the printed page; null for the bundled font. Each
+     * page still falls back to the bundled font until its own QCF font has arrived.
+     */
+    val qcf: StateFlow<com.pilotothegreat.deencompanion.data.quran.MushafQcf?> = settings.settings
+        .map { it.quran.printedPage }
+        .distinctUntilChanged()
+        .map { wanted -> if (wanted) qcfTable.table() else null }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    /** Pages whose QCF font is on the phone; a page re-reads its font when this changes. */
+    val fontsReady: StateFlow<Set<Int>> = fonts.ready
+
+    fun setPrintedPage(enabled: Boolean) {
+        viewModelScope.launch { settings.setPrintedPage(enabled) }
+    }
+
     val playback: StateFlow<PlaybackState> = player.state
     val playbackErrors: SharedFlow<NetError> = player.errors
 
@@ -110,6 +129,7 @@ class ReaderViewModel(
             if (page != initialPage) releaseTarget()
         }
         settledOnce = true
+        if (qcf.value != null) fonts.prefetch(page)
         unsavedPage = page
         saveJob?.cancel()
         saveJob = viewModelScope.launch {
