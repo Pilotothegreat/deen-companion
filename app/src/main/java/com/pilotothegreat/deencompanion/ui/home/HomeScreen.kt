@@ -1,5 +1,8 @@
 package com.pilotothegreat.deencompanion.ui.home
 
+import com.pilotothegreat.deencompanion.ui.components.glass
+import dev.chrisbanes.haze.rememberHazeState
+import dev.chrisbanes.haze.hazeSource
 import android.Manifest
 import android.content.Context
 import android.os.Build
@@ -166,12 +169,16 @@ fun HomeScreen(
 
     val current = content
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    // The header is glass over the day: the list scrolls under it and shows through, blurred.
+    val header = rememberHazeState()
     Scaffold(
         // The sky behind the tabs shows through; see SkyWash.
         containerColor = androidx.compose.ui.graphics.Color.Transparent,
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            LargeFlexibleTopAppBar(colors = com.pilotothegreat.deencompanion.ui.components.skyBarColors(), 
+            LargeFlexibleTopAppBar(
+                colors = com.pilotothegreat.deencompanion.ui.components.glassBarColors(),
+                modifier = Modifier.glass(header, androidx.compose.ui.graphics.RectangleShape, tint = 0.55f, rim = false),
                 title = {
                     val title = current?.hijri?.let {
                         stringResource(R.string.hijri_date, Numerals.localize(HijriCalendar.format(it, locale), locale))
@@ -228,18 +235,19 @@ fun HomeScreen(
                 else locationPermission.launch(LOCATION_PERMISSIONS)
             },
             state = pullState,
-            modifier = Modifier.padding(padding),
+            // The list runs up under the glass header, so only the bottom inset is padding here.
+            modifier = Modifier.padding(bottom = padding.calculateBottomPadding()),
             indicator = {
                 PullToRefreshDefaults.LoadingIndicator(
                     state = pullState,
                     isRefreshing = isRefreshing,
-                    modifier = Modifier.align(Alignment.TopCenter),
+                    modifier = Modifier.align(Alignment.TopCenter).padding(top = padding.calculateTopPadding()),
                 )
             },
         ) {
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = Spacing.small, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
+                modifier = Modifier.fillMaxSize().hazeSource(header),
+                contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = Spacing.small + padding.calculateTopPadding(), bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
                 verticalArrangement = Arrangement.spacedBy(Spacing.medium),
             ) {
                 // At most one thing to go and fix. A column of permission cards above the prayer

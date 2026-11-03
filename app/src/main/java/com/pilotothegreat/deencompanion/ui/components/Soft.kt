@@ -34,6 +34,9 @@ import kotlin.math.sin
 /** The sky behind the tabs, for frosted surfaces to blur; null where there is none, as on pushed screens. */
 val LocalFrost = staticCompositionLocalOf<HazeState?> { null }
 
+/** The sky and the screen over it together, for the floating bar to blur, as a phone's dock blurs its wallpaper. */
+val LocalChrome = staticCompositionLocalOf<HazeState?> { null }
+
 /**
  * Frosted glass: the sky behind blurred, a pale veil of the page's own colour over it, and a fine light
  * edge along the top, as light catches the rim of a pane. Below Android 12, and anywhere without a sky
@@ -106,3 +109,33 @@ fun Bloom(key: Any?, color: Color, modifier: Modifier = Modifier, play: Boolean 
 
 private const val PETALS = 10
 private const val BLOOM_MS = 720
+
+/**
+ * Glass for the app's chrome — the floating bar, a header — in the manner of a phone's dock: whatever
+ * passes behind is blurred deep and soft, a translucent tint of the page lies over it so labels stay
+ * readable, and a fine rim of light runs round the edge, brightest along the top.
+ */
+@Composable
+fun Modifier.glass(state: HazeState?, shape: Shape, tint: Float = 0.5f, rim: Boolean = true): Modifier {
+    val colors = MaterialTheme.colorScheme
+    val dark = colors.background.luminance() < 0.5f
+    val base = if (dark) colors.surfaceContainerHigh else colors.surfaceContainerLow
+    val edge = Brush.verticalGradient(
+        listOf(Color.White.copy(alpha = if (dark) 0.22f else 0.85f), Color.White.copy(alpha = if (dark) 0.05f else 0.25f)),
+    )
+    val surface = if (state == null) {
+        Modifier.clip(shape).background(base.copy(alpha = 0.95f))
+    } else {
+        val style = remember(base, tint) {
+            HazeBlurStyle {
+                blurRadius(34.dp)
+                backgroundColor(base)
+                noiseFactor(0.08f)
+                colorEffects(listOf(HazeColorEffect.tint(base.copy(alpha = tint))))
+                fallbackColorEffect(HazeColorEffect.tint(base.copy(alpha = 0.94f)))
+            }
+        }
+        Modifier.clip(shape).hazeBlur(input = HazeInput.Backdrop(state), style = style, performanceMode = HazePerformanceMode.Adaptive)
+    }
+    return if (rim) this.then(surface).border(1.dp, edge, shape) else this.then(surface)
+}

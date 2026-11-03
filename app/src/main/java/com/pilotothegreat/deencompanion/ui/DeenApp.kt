@@ -1,5 +1,6 @@
 package com.pilotothegreat.deencompanion.ui
 
+import com.pilotothegreat.deencompanion.ui.components.LocalChrome
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.runtime.produceState
@@ -208,6 +209,7 @@ fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpe
     ) {
         // The sky over the day, behind every tab: what the frosted cards and the floating bar blur.
         val frost = rememberHazeState()
+        val chrome = rememberHazeState()
         val zone = settings.zone
         val config = settings.prayerConfig
         val today by produceState(DaySchedule.forDate(LocalDate.now(zone), config), zone, config) {
@@ -220,6 +222,7 @@ fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpe
         CompositionLocalProvider(
             LocalBottomBarPadding provides if (floatingBar) FloatingBarClearance else 0.dp,
             LocalFrost provides frost,
+            LocalChrome provides chrome,
             LocalSky provides sky,
         ) {
             Box(Modifier.fillMaxSize().nestedScroll(barScroll)) {
@@ -227,7 +230,7 @@ fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpe
                     sky = sky,
                     paper = MaterialTheme.colorScheme.background,
                     dark = MaterialTheme.colorScheme.background.luminance() < 0.5f,
-                    modifier = Modifier.fillMaxSize().hazeSource(frost),
+                    modifier = Modifier.fillMaxSize().hazeSource(frost).hazeSource(chrome),
                 )
                 val entryProvider = entryProvider {
                         entry<HomeKey>(metadata = tabMotion) {
@@ -288,6 +291,8 @@ fun DeenApp(settings: AppSettings, destination: NavKey? = null, onDestinationOpe
                 }
                 val home = entries.getValue(TopLevel.HOME)
                 NavDisplay(
+                    // The screens are what the floating bar blurs as they pass under it.
+                    modifier = Modifier.fillMaxSize().hazeSource(chrome),
                     entries = if (navigator.currentTab == TopLevel.HOME) home else home.take(1) + entries.getValue(navigator.currentTab),
                     onBack = navigator::back,
                     transitionSpec = { sharedAxis(forward = true, rtl = rtl, still = stillMotion) },

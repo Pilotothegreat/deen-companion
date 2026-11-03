@@ -15,6 +15,7 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeDown
+import androidx.compose.ui.test.swipe
 import androidx.compose.ui.test.swipeUp
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -116,7 +117,7 @@ class StoreScreenshotTest {
         val node = compose.onAllNodesWithText(label).onFirst()
         // The floating bar hides after scrolling down; a swipe down brings it back.
         if (runCatching { node.assertIsDisplayed() }.isFailure) {
-            compose.onAllNodes(hasScrollAction()).onFirst().performTouchInput { swipeDown() }
+            compose.onAllNodes(hasScrollAction()).onFirst().performTouchInput { swipe(androidx.compose.ui.geometry.Offset(centerX, height * 0.4f), androidx.compose.ui.geometry.Offset(centerX, height * 0.95f)) }
             settle()
         }
         node.performClick()

@@ -1,5 +1,7 @@
 package com.pilotothegreat.deencompanion.ui.navigation
 
+import com.pilotothegreat.deencompanion.ui.components.LocalChrome
+import com.pilotothegreat.deencompanion.ui.components.glass
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
@@ -55,19 +57,26 @@ fun FloatingNavBar(
     modifier: Modifier = Modifier,
 ) {
     val haptics = rememberHaptics()
+    val pill = androidx.compose.foundation.shape.RoundedCornerShape(percent = 50)
     HorizontalFloatingToolbar(
         expanded = true,
         modifier = modifier,
-        // A pane of frost over the page: the time of day shows faintly through the bar.
-        colors = FloatingToolbarDefaults.standardFloatingToolbarColors(
-            toolbarContainerColor = androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.86f),
-        ),
+        // The bar's own surface is clear: the glass is drawn inside it, so it moves with the bar.
+        colors = FloatingToolbarDefaults.standardFloatingToolbarColors(toolbarContainerColor = androidx.compose.ui.graphics.Color.Transparent),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+        expandedShadowElevation = 0.dp,
         scrollBehavior = scrollBehavior,
     ) {
-        TopLevel.entries.forEach { tab ->
-            NavPill(tab, selected = tab == current, badge = badges[tab]?.takeIf { it > 0 }) {
-                if (tab != current) haptics.tick()
-                onSelect(tab)
+        // Glass like a phone's dock: the screen and the sky passing under it, blurred deep.
+        androidx.compose.foundation.layout.Row(
+            Modifier.glass(LocalChrome.current, pill, tint = 0.42f).padding(8.dp),
+            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+        ) {
+            TopLevel.entries.forEach { tab ->
+                NavPill(tab, selected = tab == current, badge = badges[tab]?.takeIf { it > 0 }) {
+                    if (tab != current) haptics.tick()
+                    onSelect(tab)
+                }
             }
         }
     }

@@ -1,5 +1,8 @@
 package com.pilotothegreat.deencompanion.ui.athkar
 
+import com.pilotothegreat.deencompanion.ui.components.glass
+import dev.chrisbanes.haze.rememberHazeState
+import dev.chrisbanes.haze.hazeSource
 import androidx.compose.ui.graphics.Color
 import com.pilotothegreat.deencompanion.ui.components.frost
 import androidx.compose.animation.AnimatedVisibility
@@ -114,11 +117,15 @@ fun AthkarScreen(
     }
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val header = rememberHazeState()
     Scaffold(
         // The sky behind the tabs shows through; see SkyWash.
         containerColor = androidx.compose.ui.graphics.Color.Transparent,
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = { LargeFlexibleTopAppBar(colors = com.pilotothegreat.deencompanion.ui.components.skyBarColors(), title = { Text(stringResource(R.string.athkar)) }, scrollBehavior = scrollBehavior) },
+        topBar = { LargeFlexibleTopAppBar(
+            colors = com.pilotothegreat.deencompanion.ui.components.glassBarColors(),
+            modifier = Modifier.glass(header, androidx.compose.ui.graphics.RectangleShape, tint = 0.55f, rim = false),
+            title = { Text(stringResource(R.string.athkar)) }, scrollBehavior = scrollBehavior) },
         snackbarHost = { SnackbarHost(snackbar, Modifier.padding(bottom = LocalBottomBarPadding.current)) },
     ) { padding ->
         val home = state ?: run {
@@ -126,8 +133,9 @@ fun AthkarScreen(
             return@Scaffold
         }
         LazyColumn(
-            modifier = Modifier.padding(padding).fillMaxSize(),
-            contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = Spacing.small, bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
+            // Under the glass header: the list starts below it but scrolls up behind it.
+            modifier = Modifier.padding(bottom = padding.calculateBottomPadding()).fillMaxSize().hazeSource(header),
+            contentPadding = PaddingValues(start = Spacing.large, end = Spacing.large, top = Spacing.small + padding.calculateTopPadding(), bottom = Spacing.xxlarge + LocalBottomBarPadding.current),
             verticalArrangement = Arrangement.spacedBy(Spacing.medium),
         ) {
             item(key = "search") {

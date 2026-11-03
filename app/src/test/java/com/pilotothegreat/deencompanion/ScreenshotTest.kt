@@ -201,7 +201,7 @@ class ScreenshotTest {
         val node = compose.onAllNodesWithText(label).onFirst()
         // The floating bar hides after scrolling down; a small swipe down brings it back.
         if (runCatching { node.assertIsDisplayed() }.isFailure) {
-            compose.onAllNodes(hasScrollAction()).onFirst().performTouchInput { swipeDown() }
+            compose.onAllNodes(hasScrollAction()).onFirst().performTouchInput { swipe(androidx.compose.ui.geometry.Offset(centerX, height * 0.4f), androidx.compose.ui.geometry.Offset(centerX, height * 0.95f)) }
             settle()
         }
         node.performClick()
@@ -209,7 +209,7 @@ class ScreenshotTest {
     }
 
     private fun scrollUp() {
-        compose.onAllNodes(hasScrollAction()).onFirst().performTouchInput { swipeDown() }
+        compose.onAllNodes(hasScrollAction()).onFirst().performTouchInput { swipe(androidx.compose.ui.geometry.Offset(centerX, height * 0.4f), androidx.compose.ui.geometry.Offset(centerX, height * 0.95f)) }
         settle()
     }
 

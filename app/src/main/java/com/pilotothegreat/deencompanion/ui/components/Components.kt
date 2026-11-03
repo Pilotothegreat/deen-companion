@@ -247,3 +247,10 @@ fun skyBarColors() = androidx.compose.material3.TopAppBarDefaults.topAppBarColor
     containerColor = androidx.compose.ui.graphics.Color.Transparent,
     scrolledContainerColor = androidx.compose.material3.MaterialTheme.colorScheme.background.copy(alpha = 0.94f),
 )
+
+/** A header that is glass: clear in itself, with the frost drawn by [glass] over what scrolls beneath. */
+@androidx.compose.runtime.Composable
+fun glassBarColors() = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
+    containerColor = androidx.compose.ui.graphics.Color.Transparent,
+    scrolledContainerColor = androidx.compose.ui.graphics.Color.Transparent,
+)
