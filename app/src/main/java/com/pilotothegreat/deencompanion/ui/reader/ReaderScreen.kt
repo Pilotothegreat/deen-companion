@@ -88,6 +88,7 @@ fun ReaderScreen(
     var jumping by remember { mutableStateOf(false) }
     var choosingReciter by remember { mutableStateOf(false) }
     var mushafSheet by remember { mutableStateOf(false) }
+    var tafsirFor by remember { mutableStateOf<Verse?>(null) }
 
     LaunchedEffect(viewModel) {
         viewModel.playbackErrors.collect { error ->
@@ -324,7 +325,12 @@ fun ReaderScreen(
             onRepeat = { viewModel.repeatAyah(verse) },
             onBookmark = { viewModel.setBookmark(verse, !bookmarked) },
             onDismiss = { menuFor = null },
+            onTafsir = { tafsirFor = verse },
         )
+    }
+
+    tafsirFor?.let { verse ->
+        TafsirSheet(quran = loaded, start = verse, onDismiss = { tafsirFor = null })
     }
 }
 

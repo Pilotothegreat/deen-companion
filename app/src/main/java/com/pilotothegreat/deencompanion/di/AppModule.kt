@@ -52,6 +52,7 @@ val appModule = module {
     single { QuranRepository(androidContext(), get()) }
     single { com.pilotothegreat.deencompanion.data.quran.MushafQcfRepository(androidContext(), get()) }
     single { com.pilotothegreat.deencompanion.data.quran.MushafFonts(androidContext()) }
+    single { com.pilotothegreat.deencompanion.data.quran.TafsirRepository(androidContext(), get()) }
     single { HadithRepository(androidContext(), get()) }
     single { CityIndex { androidContext().assets.open("cities.json").bufferedReader().use { it.readText() } } }
     single { LocationRepository(androidContext(), get(), get()) }

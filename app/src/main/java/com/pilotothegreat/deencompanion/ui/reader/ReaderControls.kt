@@ -1,5 +1,14 @@
 package com.pilotothegreat.deencompanion.ui.reader
 
+import androidx.compose.material.icons.automirrored.rounded.MenuBook
+import androidx.compose.ui.text.fromHtml
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import kotlinx.coroutines.launch
+import com.pilotothegreat.deencompanion.ui.theme.Amiri
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.animation.togetherWith
 import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.foundation.layout.Arrangement
@@ -298,6 +307,7 @@ fun AyahMenu(
     onRepeat: () -> Unit,
     onBookmark: () -> Unit,
     onDismiss: () -> Unit,
+    onTafsir: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val locale = currentLocale()
@@ -343,6 +353,10 @@ fun AyahMenu(
             val actions = listOf(
                 Triple(Icons.Rounded.PlayArrow, stringResource(R.string.play_from_here)) {
                     onPlay()
+                    onDismiss()
+                },
+                Triple(Icons.AutoMirrored.Rounded.MenuBook, stringResource(R.string.tafsir)) {
+                    onTafsir()
                     onDismiss()
                 },
                 Triple(
@@ -456,3 +470,196 @@ fun MushafSheet(
         }
     }
 }
+
+/**
+ * The commentary on an ayah, from whichever of the five commentaries the reader picks.
+ *
+ * The ayah sits at the top on a soft card in the mushaf's own font; the commentaries are chips under
+ * it, the one in the app's language first; the passage follows, selectable for copying a line. A
+ * commentary that explains several ayahs together says which. Arrows step to the ayah before or after
+ * without closing the sheet, so a surah can be read through with its commentary.
+ */
+@Composable
+fun TafsirSheet(
+    quran: com.pilotothegreat.deencompanion.data.quran.Quran,
+    start: Verse,
+    onDismiss: () -> Unit,
+) {
+    val repository: com.pilotothegreat.deencompanion.data.quran.TafsirRepository = org.koin.compose.koinInject()
+    val settings: com.pilotothegreat.deencompanion.data.settings.SettingsRepository = org.koin.compose.koinInject()
+    val context = LocalContext.current
+    val locale = currentLocale()
+    val arabicUi = locale.isArabic
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    val chosen by androidx.compose.runtime.produceState<String?>(null) { value = settings.current().quran.tafsir }
+    var picked by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf<String?>(null) }
+    val tafsir = com.pilotothegreat.deencompanion.data.quran.Tafsir.byId(picked ?: chosen)
+        ?: com.pilotothegreat.deencompanion.data.quran.Tafsir.defaultFor(arabicUi)
+    var ayah by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableIntStateOf(start.number) }
+    var attempt by androidx.compose.runtime.remember { androidx.compose.runtime.mutableIntStateOf(0) }
+    val surah = quran.surah(start.surah)
+    val verse = surah.verses[ayah - 1]
+    val result by androidx.compose.runtime.produceState<com.pilotothegreat.deencompanion.data.quran.TafsirResult?>(null, tafsir, ayah, attempt) {
+        value = null
+        value = repository.passage(tafsir, start.surah, ayah)
+    }
+    val ordered = androidx.compose.runtime.remember(arabicUi) {
+        com.pilotothegreat.deencompanion.data.quran.Tafsir.entries.sortedBy { if (it.arabic == arabicUi) 0 else 1 }
+    }
+    val name = tafsir.name(arabicUi)
+    val colors = MaterialTheme.colorScheme
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true),
+    ) {
+        Column(Modifier.fillMaxWidth().padding(bottom = Spacing.large)) {
+            Column(
+                Modifier
+                    .weight(1f, fill = false)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = Spacing.xxlarge),
+                verticalArrangement = Arrangement.spacedBy(Spacing.medium),
+            ) {
+                Text(
+                    verseReference(surah, ayah, locale),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = colors.primary,
+                )
+                androidx.compose.material3.Surface(
+                    shape = MaterialTheme.shapes.extraLarge,
+                    color = colors.secondaryContainer.copy(alpha = 0.45f),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        verse.text + " " + com.pilotothegreat.deencompanion.core.text.Numerals.toArabicIndic(ayah.toString()),
+                        fontFamily = UthmanicHafs,
+                        fontSize = 22.sp,
+                        lineHeight = 44.sp,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        style = MaterialTheme.typography.bodyLarge.copy(textDirection = TextDirection.Rtl),
+                        modifier = Modifier.padding(horizontal = Spacing.large, vertical = Spacing.medium),
+                    )
+                }
+                // Wrapped rather than scrolled: five commentaries, every one of them in sight.
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.small)) {
+                    ordered.forEach { option ->
+                        androidx.compose.material3.FilterChip(
+                            selected = option == tafsir,
+                            onClick = {
+                                picked = option.id
+                                scope.launch { settings.setTafsir(option.id) }
+                            },
+                            label = { Text(option.name(arabicUi)) },
+                        )
+                    }
+                }
+                androidx.compose.animation.AnimatedContent(
+                    targetState = result,
+                    transitionSpec = {
+                        androidx.compose.animation.fadeIn(androidx.compose.animation.core.tween(220)) togetherWith
+                            androidx.compose.animation.fadeOut(androidx.compose.animation.core.tween(120))
+                    },
+                    contentKey = { it?.javaClass },
+                    label = "tafsir",
+                ) { state ->
+                    when (state) {
+                        null -> Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(Spacing.medium),
+                            modifier = Modifier.padding(vertical = Spacing.large),
+                        ) {
+                            androidx.compose.material3.LoadingIndicator(Modifier.size(36.dp))
+                            Text(stringResource(R.string.tafsir_loading, name), color = colors.onSurfaceVariant)
+                        }
+                        is com.pilotothegreat.deencompanion.data.quran.TafsirResult.Ready -> Column(verticalArrangement = Arrangement.spacedBy(Spacing.small)) {
+                            val passage = state.passage
+                            if (passage.fromAyah != passage.toAyah) {
+                                Text(
+                                    stringResource(R.string.tafsir_range, Formatters.number(passage.fromAyah, locale), Formatters.number(passage.toAyah, locale)),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = colors.tertiary,
+                                )
+                            }
+                            val body = androidx.compose.runtime.remember(passage.text, colors.primary) { tafsirBody(passage.text, colors.primary) }
+                            androidx.compose.foundation.text.selection.SelectionContainer {
+                                if (tafsir.arabic) {
+                                    Text(
+                                        body,
+                                        fontFamily = Amiri,
+                                        fontSize = 19.sp,
+                                        lineHeight = 36.sp,
+                                        style = MaterialTheme.typography.bodyLarge.copy(textDirection = TextDirection.Rtl),
+                                    )
+                                } else {
+                                    Text(body, style = MaterialTheme.typography.bodyLarge.copy(textDirection = TextDirection.Ltr, lineHeight = 26.sp))
+                                }
+                            }
+                            Text(
+                                tafsir.name(arabicUi) + " · " + tafsir.authorEn,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = colors.onSurfaceVariant,
+                            )
+                        }
+                        com.pilotothegreat.deencompanion.data.quran.TafsirResult.Empty ->
+                            Text(stringResource(R.string.tafsir_empty, name), color = colors.onSurfaceVariant, modifier = Modifier.padding(vertical = Spacing.large))
+                        is com.pilotothegreat.deencompanion.data.quran.TafsirResult.Failed -> Column(
+                            verticalArrangement = Arrangement.spacedBy(Spacing.small),
+                            modifier = Modifier.padding(vertical = Spacing.medium),
+                        ) {
+                            Text(
+                                stringResource(
+                                    if (state.error == com.pilotothegreat.deencompanion.data.net.NetError.OFFLINE) R.string.tafsir_offline else R.string.tafsir_failed,
+                                    name,
+                                ),
+                                color = colors.onSurfaceVariant,
+                            )
+                            androidx.compose.material3.FilledTonalButton(onClick = { attempt++ }) { Text(stringResource(R.string.retry)) }
+                        }
+                    }
+                }
+            }
+            // The steps between ayahs and what to do with a passage stay in reach however long it is.
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = Spacing.large, vertical = Spacing.small),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                androidx.compose.material3.IconButton(onClick = { if (ayah > 1) ayah-- }, enabled = ayah > 1) {
+                    Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.tafsir_previous))
+                }
+                androidx.compose.material3.IconButton(onClick = { if (ayah < surah.verses.size) ayah++ }, enabled = ayah < surah.verses.size) {
+                    Icon(Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = stringResource(R.string.tafsir_next))
+                }
+                androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
+                val ready = result as? com.pilotothegreat.deencompanion.data.quran.TafsirResult.Ready
+                val shareText = ready?.let {
+                    verseReference(surah, ayah, locale) + "\n" + verse.text + "\n\n" +
+                        tafsirBody(it.passage.text, colors.primary).text + "\n— " + tafsir.name(arabicUi)
+                }
+                androidx.compose.material3.IconButton(onClick = { shareText?.let { context.copyToClipboard(name, it) } }, enabled = shareText != null) {
+                    Icon(Icons.Rounded.ContentCopy, contentDescription = stringResource(R.string.copy))
+                }
+                androidx.compose.material3.IconButton(onClick = { shareText?.let { context.startSafely(SystemIntents.shareText(it)) } }, enabled = shareText != null) {
+                    Icon(Icons.Rounded.Share, contentDescription = stringResource(R.string.share))
+                }
+            }
+        }
+    }
+}
+
+/**
+ * A passage as the commentary writes it, markup and all, made readable: paragraphs and headings kept,
+ * and every quotation of the Quran — between ﴿ ﴾ or { } — set in the mushaf's font and the accent colour.
+ */
+private fun tafsirBody(raw: String, quote: androidx.compose.ui.graphics.Color): androidx.compose.ui.text.AnnotatedString {
+    val html = androidx.compose.ui.text.AnnotatedString.fromHtml(raw.replace("\n", "<br>"))
+    val trimmed = html.subSequence(0, html.text.trimEnd().length)
+    return androidx.compose.ui.text.buildAnnotatedString {
+        append(trimmed)
+        QURAN_QUOTE.findAll(trimmed.text).forEach { match ->
+            addStyle(androidx.compose.ui.text.SpanStyle(fontFamily = UthmanicHafs, color = quote), match.range.first, match.range.last + 1)
+        }
+    }
+}
+
+private val QURAN_QUOTE = Regex("[﴿{][^﴾}]{1,600}[﴾}]")

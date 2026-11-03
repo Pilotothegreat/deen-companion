@@ -165,6 +165,8 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
     suspend fun setPrintedPage(enabled: Boolean) = edit { it[Keys.PRINTED_PAGE] = enabled }
 
+    suspend fun setTafsir(id: String) = edit { it[Keys.TAFSIR] = id }
+
     suspend fun setRepeat(mode: RepeatMode, count: Int) = edit {
         it[Keys.REPEAT_MODE] = mode.name
         it[Keys.REPEAT_COUNT] = count.coerceIn(1, 20)
@@ -289,6 +291,7 @@ internal object Keys {
     val REPEAT_MODE = stringPreferencesKey("quran_repeat_mode")
     val REPEAT_COUNT = intPreferencesKey("quran_repeat_count")
     val PRINTED_PAGE = booleanPreferencesKey("quran_printed_page")
+    val TAFSIR = stringPreferencesKey("quran_tafsir")
 
     // Accessibility
     val SIMPLE_MODE = booleanPreferencesKey("simple_mode")
@@ -376,6 +379,7 @@ internal fun Preferences.toAppSettings(): AppSettings = AppSettings(
         repeatMode = enumOrNull<RepeatMode>(this[Keys.REPEAT_MODE]) ?: RepeatMode.OFF,
         repeatCount = (this[Keys.REPEAT_COUNT] ?: 3).coerceIn(1, 20),
         printedPage = this[Keys.PRINTED_PAGE] ?: true,
+        tafsir = this[Keys.TAFSIR].orEmpty(),
     ),
     accessibility = AccessibilitySettings(
         simpleMode = this[Keys.SIMPLE_MODE] ?: false,

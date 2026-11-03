@@ -39,6 +39,8 @@ These requests go directly from your device to the service named. We do not run 
 | Quran recitation | EveryAyah (everyayah.com) | The recitation file requested | When you play or download a recitation |
 | Printed mushaf pages | Quran.com CDN (static.qurancdn.com) | The page font requested | When you open a page in the printed style, its neighbours on Wi-Fi, or when you tap "Download every page" |
 | Full hadith collections | jsDelivr CDN (cdn.jsdelivr.net) | The collection requested | Only when you tap Download |
+| Tafsir (as-Sa'di, Ibn Kathir) | Quran.com API (api.quran.com) | The commentary and surah requested | The first time you open that commentary on that surah |
+| Tafsir (al-Jalalayn) | jsDelivr CDN (cdn.jsdelivr.net) | The commentary and surah requested | The first time you open that commentary on that surah |
 | App updates | Google Play (Play In-App Updates) | Handled by Google Play under Google's privacy policy | When the app checks for an update |
 
 Links you tap in the app, such as the source code or this policy, open in your browser.

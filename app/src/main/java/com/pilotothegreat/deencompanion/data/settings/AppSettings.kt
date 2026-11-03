@@ -98,6 +98,8 @@ data class QuranSettings(
      * off, the page is set in the bundled Uthmanic Hafs font, which needs no download at all.
      */
     val printedPage: Boolean = true,
+    /** The commentary last opened, by id; empty until one is chosen, when the app's language decides. */
+    val tafsir: String = "",
 )
 
 enum class ContrastMode(@get:StringRes val labelRes: Int) {

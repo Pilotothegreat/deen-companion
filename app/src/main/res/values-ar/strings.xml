@@ -661,4 +661,12 @@
     <string name="printed_page_downloading">جارٍ تنزيل الصفحات: %1$s</string>
     <string name="printed_page_stored">%1$s من الصفحات محفوظة على هذا الهاتف</string>
     <string name="printed_page_delete">احذف الصفحات المنزّلة</string>
+    <string name="tafsir">التفسير</string>
+    <string name="tafsir_loading">جارٍ جلب %1$s…</string>
+    <string name="tafsir_offline">لا اتصال الآن. يُفتح %1$s هنا حين تتصل، ويبقى محفوظًا للمرة القادمة.</string>
+    <string name="tafsir_failed">تعذّر جلب %1$s الآن.</string>
+    <string name="tafsir_empty">لا يُفرد %1$s لهذه الآية شرحًا مستقلًا.</string>
+    <string name="tafsir_range">في الآيات من %1$s إلى %2$s</string>
+    <string name="tafsir_previous">الآية السابقة</string>
+    <string name="tafsir_next">الآية التالية</string>
 </resources>

@@ -625,4 +625,12 @@
     <string name="printed_page_downloading">Downloading pages: %1$s</string>
     <string name="printed_page_stored">%1$s of pages kept on this phone</string>
     <string name="printed_page_delete">Remove downloaded pages</string>
+    <string name="tafsir">Tafsir</string>
+    <string name="tafsir_loading">Fetching %1$s…</string>
+    <string name="tafsir_offline">You\'re offline. %1$s opens here once you\'re connected, and stays for next time.</string>
+    <string name="tafsir_failed">%1$s couldn\'t be fetched just now.</string>
+    <string name="tafsir_empty">%1$s has no separate note on this ayah.</string>
+    <string name="tafsir_range">On ayahs %1$s to %2$s</string>
+    <string name="tafsir_previous">Previous ayah</string>
+    <string name="tafsir_next">Next ayah</string>
 </resources>

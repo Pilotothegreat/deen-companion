@@ -17,6 +17,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.swipeRight
@@ -130,7 +131,15 @@ class ReaderRenderTest {
             .first { it.boundsInRoot.width > 0f && it.boundsInRoot.left >= 0f && it.boundsInRoot.right <= width }
         compose.onRoot().performTouchInput { longClick(onScreen.boundsInRoot.center) }
         waitForText("Repeat this ayah")
+        waitForText("Tafsir")
         shoot("reader-ayah-menu")
+
+        // The tafsir opens on the ayah, and al-Muyassar, bundled, reads with no connection.
+        compose.onAllNodes(hasText("Tafsir"))[0].performClick()
+        waitForText("al-Tafsir al-Muyassar")
+        compose.onAllNodes(hasText("al-Tafsir al-Muyassar"))[0].performClick()
+        waitForText("King Fahd Complex")
+        shoot("reader-tafsir")
     }
 
     @Test fun swipingTheOtherWayGoesBack() {
