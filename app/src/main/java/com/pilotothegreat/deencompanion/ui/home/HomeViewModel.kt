@@ -12,18 +12,12 @@ import com.pilotothegreat.deencompanion.core.prayer.DaySchedule
 import com.pilotothegreat.deencompanion.core.prayer.NextPrayer
 import com.pilotothegreat.deencompanion.core.prayer.Prayer
 import com.pilotothegreat.deencompanion.core.prayer.PrayerSchedule
-import com.pilotothegreat.deencompanion.core.text.DailyVerse
-import com.pilotothegreat.deencompanion.core.text.Inspiration
-import com.pilotothegreat.deencompanion.core.text.Inspirations
 import com.pilotothegreat.deencompanion.core.time.Ticker
 import com.pilotothegreat.deencompanion.data.analytics.Analytics
 import com.pilotothegreat.deencompanion.data.athkar.AthkarRepository
 import com.pilotothegreat.deencompanion.data.location.LocationRepository
 import com.pilotothegreat.deencompanion.data.moment.MomentRepository
 import com.pilotothegreat.deencompanion.data.prayer.PrayerLogRepository
-import com.pilotothegreat.deencompanion.data.quran.QuranRepository
-import com.pilotothegreat.deencompanion.data.quran.Surah
-import com.pilotothegreat.deencompanion.data.quran.Verse
 import com.pilotothegreat.deencompanion.data.settings.AppSettings
 import com.pilotothegreat.deencompanion.data.settings.LocationSource
 import com.pilotothegreat.deencompanion.data.settings.SettingsRepository
@@ -110,7 +104,12 @@ class HomeViewModel(
         }
     }
 
-    val content: StateFlow<HomeContent?> = combine(settings.settings, seconds) { s, _ -> s to LocalDate.now(s.zone) }
+    /**
+     * Rebuilt when something Today shows changes, or the date does. Settings Today never reads — the
+     * page last read, a moment sent away, the reciter — are blanked first, so turning a page in the
+     * mushaf no longer recomposes Today behind it. A minute's resolution is plenty to notice midnight.
+     */
+    val content: StateFlow<HomeContent?> = combine(settings.settings.map { it.forToday() }, minutes) { s, _ -> s to LocalDate.now(s.zone) }
         .distinctUntilChanged()
         .map { (s, date) ->
             HomeContent(
@@ -219,3 +218,13 @@ class HomeViewModel(
     }
 
 }
+
+/** [this] without the settings Today never reads, so a change to one of them is not a change to Today. */
+private fun AppSettings.forToday(): AppSettings = copy(
+    reciter = com.pilotothegreat.deencompanion.data.quran.Reciter.MISHARY,
+    lastReadPage = 0,
+    athkarPlace = "",
+    dismissedMoments = emptySet(),
+    quran = com.pilotothegreat.deencompanion.data.settings.QuranSettings(),
+    lastSeenVersionCode = 0,
+)

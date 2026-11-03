@@ -650,4 +650,6 @@
     <string name="setup_done">متابعة</string>
     <string name="setup_allowed">مسموح</string>
     <string name="update_notification_generic">اضغط لترى الجديد وتحدّث</string>
+    <string name="ayah_listen">استمع إلى الآية %1$s</string>
+    <string name="ayah_options">الآية %1$s: التفسير والعلامة والمشاركة</string>
 </resources>

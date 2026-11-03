@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -31,10 +32,15 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.text
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
@@ -51,6 +57,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.pilotothegreat.deencompanion.R
 import com.pilotothegreat.deencompanion.core.text.Kashida
 import com.pilotothegreat.deencompanion.core.text.Numerals
 import com.pilotothegreat.deencompanion.data.quran.LineKind
@@ -124,7 +131,8 @@ fun MushafPageLines(
  * screen's width, or less where the height is what limits the size. [pitchPx] is the height of each of
  * the fifteen line slots.
  */
-private class PageFit(val emPx: Float, val lineWidthPx: Float, val pitchPx: Float) {
+@Immutable
+private data class PageFit(val emPx: Float, val lineWidthPx: Float, val pitchPx: Float) {
     companion object {
         fun of(widthPx: Float, heightPx: Float, lineBoxEm: Float): PageFit {
             val em = minOf(widthPx / LINE_EM, heightPx / (LINES * lineBoxEm))
@@ -163,15 +171,37 @@ private fun TextLine(
 ) {
     val colors = MaterialTheme.colorScheme
     val density = LocalDensity.current
+    val fontResolver = LocalFontFamilyResolver.current
     val marked = line.words.filter { it.endsAyah && (it.surah to it.ayah) in bookmarks }.map { it.surah to it.ayah }.toSet()
-    val laid = remember(line, fit, justified, marked, colors, density) {
-        layLine(line, fit, justified, marked, colors, measurer, density)
+    val key = LineKey(line, fit.emPx, fit.lineWidthPx, justified, marked, Ink.of(colors), density.density, density.fontScale)
+    val laid = remember(key) {
+        LaidLines.getOrPut(key) {
+            val typeface = fontResolver.resolve(UthmanicHafs).value as? android.graphics.Typeface
+            layLine(line, fit, justified, marked, colors, measurer, density, typeface)
+        }
     }
     val tap by rememberUpdatedState(onTap)
     val longPress by rememberUpdatedState(onLongPress)
+    // A screen reader activates a line at its centre, which reached whichever ayah sat there. Each ayah
+    // on the line gets its own two actions instead, named by its number.
+    val ayahs = remember(line) { line.words.map { it.surah to it.ayah }.distinct() }
+    val listen = stringResource(R.string.ayah_listen, "%s")
+    val options = stringResource(R.string.ayah_options, "%s")
+    val actions = remember(ayahs, quran, listen, options) {
+        ayahs.flatMap { (surah, ayah) ->
+            val ref = "$surah:$ayah"
+            listOf(
+                CustomAccessibilityAction(listen.format(ref)) { quran.verse(surah, ayah)?.let(tap) != null },
+                CustomAccessibilityAction(options.format(ref)) { quran.verse(surah, ayah)?.let(longPress) != null },
+            )
+        }
+    }
     Box(
         modifier
-            .semantics { text = AnnotatedString(laid.text) }
+            .semantics {
+                text = AnnotatedString(laid.text)
+                customActions = actions
+            }
             // A tap brings up the player on this ayah, a long press its menu. detectTapGestures waits for
             // the finger to lift and lets a drag go by, so a swipe to the next page is never taken for
             // either — the pinch detector 2.0 put here swallowed every swipe.
@@ -218,6 +248,7 @@ private fun layLine(
     colors: ColorScheme,
     measurer: TextMeasurer,
     density: Density,
+    typeface: android.graphics.Typeface?,
 ): LaidLine {
     val baseSize = with(density) { fit.emPx.toSp() }
     val display = line.words.map { word -> if (word.endsAyah) word.text + numberOf(word.ayah) else word.text }
@@ -229,9 +260,15 @@ private fun layLine(
         color = colors.onSurface,
         textDirection = TextDirection.Rtl,
     )
+    // Kashida's search tries many widths of each word. A shaping Paint gives the same advance a laid-out
+    // paragraph would, at a fraction of the cost, so a page no longer stalls the swipe that brings it in.
+    val paint = typeface?.let {
+        android.text.TextPaint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { this.typeface = it; textSize = fit.emPx }
+    }
     val widths = HashMap<String, Float>()
     fun widthOf(text: String): Float = widths.getOrPut(text) {
-        measurer.measure(text, styleAt(1f), maxLines = 1, softWrap = false).multiParagraph.intrinsics.maxIntrinsicWidth
+        paint?.measureText(text)
+            ?: measurer.measure(text, styleAt(1f), maxLines = 1, softWrap = false).multiParagraph.intrinsics.maxIntrinsicWidth
     }
 
     val space = SPACE_EM * fit.emPx
@@ -372,3 +409,41 @@ private const val REFERENCE_WORD = "بِسۡمِ ٱللَّهِ"
 private const val SURAH_PREFIX = "سُورَةُ "
 private const val MECCAN = "مكية"
 private const val MEDINAN = "مدنية"
+
+/** The colours a laid-out line carries in its spans: ink, ornament, and the bookmarked ornament. */
+@Immutable
+private data class Ink(val ink: Int, val ornament: Int, val marked: Int) {
+    companion object {
+        fun of(colors: ColorScheme) = Ink(colors.onSurface.toArgb(), colors.secondary.toArgb(), colors.primary.toArgb())
+    }
+}
+
+/**
+ * Everything a line's layout depends on. The line's height on the page is not part of it, so the
+ * player bar docking under the page changes the spacing without laying a single word out again.
+ */
+@Immutable
+private data class LineKey(
+    val line: MushafLine,
+    val emPx: Float,
+    val measurePx: Float,
+    val justified: Boolean,
+    val marked: Set<Pair<Int, Int>>,
+    val ink: Ink,
+    val density: Float,
+    val fontScale: Float,
+)
+
+/**
+ * Lines already laid out, shared by every page and kept across visits, so turning back a page or
+ * returning to the reader costs nothing. About twenty-five pages' worth.
+ */
+private object LaidLines {
+    private const val CAPACITY = 400
+    private val lines = object : LinkedHashMap<LineKey, LaidLine>(CAPACITY, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<LineKey, LaidLine>?) = size > CAPACITY
+    }
+
+    fun getOrPut(key: LineKey, lay: () -> LaidLine): LaidLine =
+        synchronized(lines) { lines[key] } ?: lay().also { laid -> synchronized(lines) { lines[key] = laid } }
+}

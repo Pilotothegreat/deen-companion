@@ -309,8 +309,11 @@ fun AyahMenu(
 
     // Opened to its own height: half open, the share row sat below the fold.
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberBottomSheetState(SheetValue.Hidden, setOf(SheetValue.Hidden, SheetValue.Expanded))) {
+        // Scrolls: 2:282 alone is over 1,200 characters of translation, which pushed every action off a phone.
         Column(
-            Modifier.padding(start = Spacing.xxlarge, end = Spacing.xxlarge, bottom = Spacing.xxlarge),
+            Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(start = Spacing.xxlarge, end = Spacing.xxlarge, bottom = Spacing.xxlarge),
             verticalArrangement = Arrangement.spacedBy(Spacing.medium),
         ) {
             Text(reference, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)

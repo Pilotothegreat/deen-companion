@@ -614,4 +614,6 @@
     <string name="setup_done">Continue</string>
     <string name="setup_allowed">Allowed</string>
     <string name="update_notification_generic">Tap to see what changed and update</string>
+    <string name="ayah_listen">Listen to ayah %1$s</string>
+    <string name="ayah_options">Ayah %1$s: tafsir, bookmark, share</string>
 </resources>

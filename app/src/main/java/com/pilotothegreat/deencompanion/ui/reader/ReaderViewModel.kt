@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -41,8 +42,26 @@ class ReaderViewModel(
 
     val initialPage: Int = args.page.coerceIn(1, 604)
 
-    /** Ayah highlighted when the reader was opened from search or a bookmark. */
-    val targetAyah: Pair<Int, Int>? = if (args.surah > 0 && args.ayah > 0) args.surah to args.ayah else null
+    private val _targetAyah = MutableStateFlow(if (args.surah > 0 && args.ayah > 0) args.surah to args.ayah else null)
+
+    /**
+     * The ayah the reader was opened on from search or a bookmark, lit long enough for the eye to find
+     * it. It lets go after a few seconds or the first page turn; before 2.5 it stayed lit on every page
+     * until a recitation began.
+     */
+    val targetAyah: StateFlow<Pair<Int, Int>?> = _targetAyah
+
+    init {
+        if (_targetAyah.value != null) viewModelScope.launch {
+            delay(TARGET_LIT_MS)
+            _targetAyah.value = null
+        }
+    }
+
+    /** Lets go of the search or bookmark highlight, once the reader has moved on. */
+    fun releaseTarget() {
+        _targetAyah.value = null
+    }
 
     val quran: StateFlow<Quran?> = flow { emit(repository.quran()) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
@@ -77,13 +96,26 @@ class ReaderViewModel(
 
     private var saveJob: Job? = null
     private var unsavedPage: Int? = null
+    private var settledOnce = false
 
+    /**
+     * A page came to rest. It becomes the place to continue from at once (after a short pause, so a fast
+     * flick through ten pages writes once), but it counts toward the khatma only once it has been on
+     * screen long enough to have been read: a jump to page 400 is not 400 pages read. Opening the reader
+     * is not a page turn either.
+     */
     fun onPageSettled(page: Int) {
-        Analytics.record(UsageEvent.READER_PAGE_TURNED)
+        if (settledOnce) {
+            Analytics.record(UsageEvent.READER_PAGE_TURNED)
+            if (page != initialPage) releaseTarget()
+        }
+        settledOnce = true
         unsavedPage = page
         saveJob?.cancel()
         saveJob = viewModelScope.launch {
-            delay(500)
+            delay(SAVE_PAUSE_MS)
+            settings.setLastReadPage(page)
+            delay(READ_DWELL_MS - SAVE_PAUSE_MS)
             savePage(page)
         }
     }
@@ -177,3 +209,12 @@ class ReaderViewModel(
         player.play(quran.surah(state.surah), state.ayah.coerceAtLeast(1), state.reciter)
     }
 }
+
+/** A flick through several pages writes the position once, after this pause. */
+private const val SAVE_PAUSE_MS = 500L
+
+/** A page on screen this long has been read, and counts toward the khatma. */
+private const val READ_DWELL_MS = 2_000L
+
+/** How long the ayah the reader was opened on stays lit. */
+private const val TARGET_LIT_MS = 4_000L

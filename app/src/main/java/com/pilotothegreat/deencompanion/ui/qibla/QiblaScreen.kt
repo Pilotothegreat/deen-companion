@@ -1,12 +1,14 @@
 package com.pilotothegreat.deencompanion.ui.qibla
 
+import kotlinx.coroutines.flow.collectLatest
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.derivedStateOf
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.SpringSpec
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import com.pilotothegreat.deencompanion.ui.components.toComposePath
@@ -139,8 +141,14 @@ fun QiblaScreen(onBack: () -> Unit, viewModel: QiblaViewModel = koinViewModel())
             return@Scaffold
         }
         val compass = rememberCompass(qibla.latitude, qibla.longitude)
-        val heading = compass.heading
-        val aligned = heading != null && QiblaMath.isAligned(heading.toDouble(), qibla.bearing, ALIGNMENT_TOLERANCE_DEGREES)
+        // The screen's words change only when the whole degree does; the dial below follows every reading
+        // in its own layer, without recomposing anything.
+        val heading by remember(compass) { derivedStateOf { compass.heading?.roundToInt()?.toFloat() } }
+        val aligned by remember(compass, qibla.bearing) {
+            derivedStateOf {
+                compass.heading?.let { QiblaMath.isAligned(it.toDouble(), qibla.bearing, ALIGNMENT_TOLERANCE_DEGREES) } == true
+            }
+        }
         LaunchedEffect(aligned) { if (aligned) haptics.confirm() }
         val bearingText = Formatters.number(qibla.bearing.roundToInt(), locale)
 
@@ -163,20 +171,19 @@ fun QiblaScreen(onBack: () -> Unit, viewModel: QiblaViewModel = koinViewModel())
             }
 
             CompassDial(
-                heading = heading ?: 0f,
+                compass = compass,
                 bearing = qibla.bearing.toFloat(),
                 aligned = aligned,
                 readout = heading?.let { stringResource(R.string.degrees, Formatters.number(it.roundToInt(), locale)) },
-                pitch = compass.pitch,
-                roll = compass.roll,
                 modifier = Modifier.widthIn(max = 360.dp).fillMaxWidth().aspectRatio(1f),
             )
 
+            val headingNow = heading
             val guidance = when {
-                heading == null -> stringResource(R.string.qibla_bearing_info, bearingText)
+                headingNow == null -> stringResource(R.string.qibla_bearing_info, bearingText)
                 aligned -> stringResource(R.string.qibla_facing)
                 else -> {
-                    val relative = QiblaMath.normalize(qibla.bearing - heading)
+                    val relative = QiblaMath.normalize(qibla.bearing - headingNow)
                     if (relative <= 180) stringResource(R.string.qibla_turn_right, Formatters.number(relative.roundToInt(), locale))
                     else stringResource(R.string.qibla_turn_left, Formatters.number((360 - relative).roundToInt(), locale))
                 }
@@ -220,26 +227,28 @@ fun QiblaScreen(onBack: () -> Unit, viewModel: QiblaViewModel = koinViewModel())
  */
 @Composable
 private fun CompassDial(
-    heading: Float,
+    compass: CompassReading,
     bearing: Float,
     aligned: Boolean,
     readout: String?,
-    pitch: Float,
-    roll: Float,
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
     val reduced = rememberReducedMotion()
     // On the Qibla the dial locks there, rather than trembling inside the tolerance.
-    val target = -(if (aligned) bearing else heading)
-    val rotation = remember { Animatable(target) }
+    val rotation = remember { Animatable(-(if (aligned) bearing else compass.heading ?: 0f)) }
     val physics: SpringSpec<Float> = when {
         reduced -> spring(Spring.DampingRatioNoBouncy, Spring.StiffnessMedium)
         aligned -> spring(Spring.DampingRatioLowBouncy, Spring.StiffnessMediumLow)
         else -> spring(NEEDLE_DAMPING, Spring.StiffnessLow)
     }
-    // Each reading retargets the running spring, which keeps its velocity: that is the swing.
-    LaunchedEffect(target, physics) { rotation.animateTo(QiblaMath.unwrap(target, rotation.value), physics) }
+    // Each reading retargets the running spring, which keeps its velocity: that is the swing. The
+    // readings are collected here rather than passed in, so they never recompose the dial.
+    LaunchedEffect(compass, aligned, physics) {
+        snapshotFlow { -(if (aligned) bearing else compass.heading ?: 0f) }.collectLatest { target ->
+            rotation.animateTo(QiblaMath.unwrap(target, rotation.value), physics)
+        }
+    }
 
     val pulse = remember { Animatable(1f) }
     LaunchedEffect(aligned) {
@@ -249,8 +258,17 @@ private fun CompassDial(
         }
     }
     val lean = MaterialTheme.motionScheme.slowSpatialSpec<Float>()
-    val tiltX by animateFloatAsState(if (reduced) 0f else (pitch * TILT).coerceIn(-MAX_TILT, MAX_TILT), lean, label = "tiltX")
-    val tiltY by animateFloatAsState(if (reduced) 0f else (-roll * TILT).coerceIn(-MAX_TILT, MAX_TILT), lean, label = "tiltY")
+    // The lean follows the phone's tilt in the layer, like the dial's turn, without recomposing.
+    val tiltX = remember { Animatable(0f) }
+    val tiltY = remember { Animatable(0f) }
+    LaunchedEffect(compass, reduced) {
+        snapshotFlow { if (reduced) 0f else (compass.pitch * TILT).coerceIn(-MAX_TILT, MAX_TILT) }
+            .collectLatest { tiltX.animateTo(it, lean) }
+    }
+    LaunchedEffect(compass, reduced) {
+        snapshotFlow { if (reduced) 0f else (-compass.roll * TILT).coerceIn(-MAX_TILT, MAX_TILT) }
+            .collectLatest { tiltY.animateTo(it, lean) }
+    }
     val rim by animateColorAsState(
         if (aligned) colors.primary else colors.outlineVariant,
         MaterialTheme.motionScheme.defaultEffectsSpec(),
@@ -265,13 +283,19 @@ private fun CompassDial(
         stringResource(R.string.compass_w),
     )
     val labelStyle = MaterialTheme.typography.titleMediumEmphasized
+    // Measured once, not on every frame the dial turns.
+    val cardinalLayouts = remember(cardinals, labelStyle, colors.error, colors.onSurface) {
+        cardinals.mapIndexed { index, label ->
+            textMeasurer.measure(label, labelStyle.copy(color = if (index == 0) colors.error else colors.onSurface))
+        }
+    }
     val markerShape = animatedPolygonShape(if (aligned) MaterialShapes.Sunny else MaterialShapes.Cookie9Sided)
     val description = stringResource(R.string.cd_qibla_compass)
 
     Box(
         modifier.graphicsLayer {
-            rotationX = tiltX
-            rotationY = tiltY
+            rotationX = tiltX.value
+            rotationY = tiltY.value
             cameraDistance = 12f * density
         },
         contentAlignment = Alignment.Center,
@@ -300,9 +324,8 @@ private fun CompassDial(
                     )
                 }
             }
-            cardinals.forEachIndexed { index, label ->
+            cardinalLayouts.forEachIndexed { index, layout ->
                 rotate(index * 90f) {
-                    val layout = textMeasurer.measure(label, labelStyle.copy(color = if (index == 0) colors.error else colors.onSurface))
                     drawText(layout, topLeft = Offset(center.x - layout.size.width / 2f, center.y - radius + 42.dp.toPx()))
                 }
             }

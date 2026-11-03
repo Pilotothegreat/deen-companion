@@ -3,6 +3,8 @@ package com.pilotothegreat.deencompanion.ui.reader
 import androidx.annotation.StringRes
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -34,7 +36,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
@@ -121,11 +123,20 @@ fun ReaderScreen(
         }
     }
 
-    val highlight = if (playback.isActive) playback.surah to playback.ayah else viewModel.targetAyah
+    val target by viewModel.targetAyah.collectAsStateWithLifecycle()
+    val highlight = if (playback.isActive) playback.surah to playback.ayah else target
     val current = loaded.pages[pagerState.currentPage]
     val firstVerse = current.verses.first()
 
+    // A few percent off the screen after Isha, eased in so it is never a visible step: a warm veil over
+    // everything, bar and page, paper and ink alike. Before 2.5 the ink alone faded, which in the light
+    // theme only made the words greyer on a page as bright as ever. Read in the draw phase only.
+    val veil by animateFloatAsState(if (nightDim) NIGHT_VEIL else 0f, label = "nightDim")
     Scaffold(
+        modifier = Modifier.drawWithContent {
+            drawContent()
+            if (veil > 0f) drawRect(NIGHT_VEIL_COLOUR, alpha = veil)
+        },
         topBar = {
             TopAppBar(
                 title = { Text(surahName(loaded.surah(firstVerse.surah), locale)) },
@@ -175,8 +186,6 @@ fun ReaderScreen(
         },
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
-        // A few percent off the page after Isha, eased in so it is never a visible step.
-        val dim by animateFloatAsState(if (nightDim) NIGHT_DIM else 1f, label = "nightDim")
         val layoutDirection = LocalLayoutDirection.current
         // Page 1 is on the right and the next page comes in from the left, as in a printed mushaf.
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
@@ -186,19 +195,21 @@ fun ReaderScreen(
                 key = { it },
                 modifier = Modifier
                     .padding(padding)
-                    .fillMaxSize()
-                    .graphicsLayer { alpha = dim },
+                    .fillMaxSize(),
             ) { index ->
                 CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
                     val page = loaded.pages[index]
                     Column(Modifier.fillMaxSize().padding(horizontal = Spacing.medium, vertical = Spacing.small)) {
-                        MushafPageLines(
+                        if (page.lines.isEmpty()) {
+                            FlowingPage(page.verses, Modifier.weight(1f).fillMaxWidth())
+                        } else MushafPageLines(
                             lines = page.lines,
                             quran = loaded,
                             highlight = highlight,
                             bookmarks = bookmarks,
                             onTap = { verse ->
                                 haptics.click()
+                                viewModel.releaseTarget()
                                 viewModel.cue(verse)
                             },
                             onLongPress = { verse ->
@@ -257,8 +268,11 @@ fun ReaderScreen(
     }
 }
 
-/** After Isha the page comes down to this, and returns to full at Fajr. */
-private const val NIGHT_DIM = 0.88f
+/** After Isha a veil this strong comes over the page, and lifts at Fajr. */
+private const val NIGHT_VEIL = 0.10f
+
+/** A warm near-black, so the night page goes down toward candlelight rather than toward grey. */
+private val NIGHT_VEIL_COLOUR = androidx.compose.ui.graphics.Color(0xFF1C1206)
 
 /** Says what actually went wrong, so "check your connection" isn't the answer to a missing file. */
 @StringRes
@@ -266,4 +280,24 @@ private fun NetError.playbackMessage(): Int = when (this) {
     NetError.OFFLINE -> R.string.playback_error_offline
     NetError.NOT_FOUND -> R.string.playback_error_missing
     NetError.RATE_LIMITED, NetError.FAILED -> R.string.playback_error_failed
+}
+
+/**
+ * A page whose line table could not be read: its ayahs run on as continuous text, each closed by its
+ * rosette, rather than leaving the page blank. Never seen while the bundled table matches the text,
+ * which a unit test and the build script both assert.
+ */
+@Composable
+private fun FlowingPage(verses: List<Verse>, modifier: Modifier = Modifier) {
+    val text = remember(verses) {
+        verses.joinToString(" ") { it.text + "\u00a0" + com.pilotothegreat.deencompanion.core.text.Numerals.toArabicIndic(it.number.toString()) }
+    }
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+        Text(
+            text,
+            fontFamily = com.pilotothegreat.deencompanion.ui.theme.UthmanicHafs,
+            style = MaterialTheme.typography.headlineSmall.copy(textAlign = TextAlign.Justify, lineHeight = MaterialTheme.typography.headlineSmall.fontSize * 2),
+            modifier = modifier.verticalScroll(rememberScrollState()),
+        )
+    }
 }

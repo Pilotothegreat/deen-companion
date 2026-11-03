@@ -82,7 +82,10 @@ object Formatters {
      * remember `withDecimalStyle` — and the four that did were four copies of the same line.
      */
     fun pattern(pattern: String, locale: Locale): DateTimeFormatter =
-        DateTimeFormatter.ofPattern(pattern, locale).withDecimalStyle(DecimalStyle.of(locale))
+        patterns.getOrPut(pattern to locale) { DateTimeFormatter.ofPattern(pattern, locale).withDecimalStyle(DecimalStyle.of(locale)) }
+
+    /** Formatters are immutable and costly to build; Today's countdown asked for a new one every second. */
+    private val patterns = java.util.concurrent.ConcurrentHashMap<Pair<String, Locale>, DateTimeFormatter>()
 
     /** Clock time honoring the device's 12/24-hour preference and the locale's digits. */
     fun time(context: Context, time: LocalTime, locale: Locale): String =
