@@ -219,12 +219,9 @@ fun ReaderScreen(
                         if (printed != null) viewModel.fonts.typeface(page.number) else null
                     }
                     val names = remember(fontsReady.contains(0)) { viewModel.fonts.surahNames() }
-                    val colors = MaterialTheme.colorScheme
                     Column(
                         Modifier
                             .fillMaxSize()
-                            .padding(horizontal = Spacing.small, vertical = Spacing.hair)
-                            .mushafFrame(ornament = colors.secondary.copy(alpha = 0.7f), paper = colors.surfaceContainerLowest)
                             .padding(horizontal = Spacing.medium, vertical = Spacing.small),
                     ) {
                         if (printed != null && typeface != null) {

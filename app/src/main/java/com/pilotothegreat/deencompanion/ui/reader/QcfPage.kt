@@ -257,23 +257,23 @@ private const val MAX_PITCH_EM = 2.2f
 private const val CENTRE_BELOW = 0.78f
 
 /**
- * The ornament the print sets al-Fatihah and the opening of al-Baqarah in: a rounded medallion of two
- * gold rules, with a little air above and below the lines.
+ * Where the print sets al-Fatihah and the opening of al-Baqarah apart: a soft rounded glow of the
+ * ornament's tint behind the lines, with a little air above and below them.
  */
 private fun Modifier.openingMedallion(ornament: androidx.compose.ui.graphics.Color): Modifier = this
     .drawBehind {
         val pad = 14.dp.toPx()
-        val radius = CornerRadius(size.width * 0.18f)
         val outer = androidx.compose.ui.geometry.Rect(-pad * 0.6f, -pad, size.width + pad * 0.6f, size.height + pad)
-        drawRoundRect(ornament.copy(alpha = 0.08f), outer.topLeft, outer.size, radius)
-        drawRoundRect(ornament, outer.topLeft, outer.size, radius, style = androidx.compose.ui.graphics.drawscope.Stroke(1.2.dp.toPx()))
-        val gap = 4.dp.toPx()
         drawRoundRect(
-            ornament.copy(alpha = 0.55f),
-            Offset(outer.left + gap, outer.top + gap),
-            Size(outer.width - 2 * gap, outer.height - 2 * gap),
-            CornerRadius(radius.x - gap),
-            style = androidx.compose.ui.graphics.drawscope.Stroke(0.6.dp.toPx()),
+            brush = androidx.compose.ui.graphics.Brush.radialGradient(
+                0f to ornament.copy(alpha = 0.12f),
+                1f to ornament.copy(alpha = 0.03f),
+                center = outer.center,
+                radius = outer.maxDimension * 0.6f,
+            ),
+            topLeft = outer.topLeft,
+            size = outer.size,
+            cornerRadius = CornerRadius(size.width * 0.18f),
         )
     }
     .padding(vertical = 6.dp)
